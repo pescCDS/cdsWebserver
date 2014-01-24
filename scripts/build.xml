@@ -1,0 +1,50 @@
+<!-- build file for serviceTransactionTI -->
+
+<project name="EdExchange" default="generate">
+
+    <!-- properties -->
+    <property name="app.name" value="EdExchange"/>
+    <property name="dir.java" value="../src"/>
+    <property name="dir.schemas" value="../schemas"/>
+    <property name="dir.cxf" value="/opte/apache-cxf-2.7.0"/>
+
+    <!-- classpath -->
+    <path id="classpath.cds">
+        <fileset dir="${dir.cxf}/lib">
+           <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- clean -->
+    <target name="clean" description="delete the generate classes">
+        <delete dir="${dir.java}/org/pesc"/>
+    </target>
+
+    <!-- generate java files from WSDL -->
+    <target name="generateWSDLfiles">
+      <java classname="org.apache.cxf.tools.wsdlto.WSDLToJava" fork="true">
+         <arg value="-server"/>
+         <arg value="-d"/>
+         <arg value="${dir.java}"/>
+         <arg value="-p"/>
+         <arg value="org.pesc.cds.webservice.v1_0"/>
+         <arg value="${dir.schemas}/CDS_v0.1.wsdl"/>
+         <classpath>
+            <path refid="classpath.cds"/>
+         </classpath>
+      </java>
+    </target>
+
+    <!-- generate java files from schema -->
+    <taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+	<classpath refid="classpath.cds"/>
+    </taskdef>
+    <target name="generateXMLfiles" depends="generateWSDLfiles" description="generate java classes from XML schemas">
+	<xjc extension="yes" source="2.0" destdir="${dir.java}" schema="${dir.schemas}/EdExchangeEnvelope_v1.0.7.xsd" binding="${dir.schemas}/EdExchangeEnvelope_v1.0.7.xjc"/>
+    </target>
+
+    <!-- deploy -->
+    <target name="generate" depends="generateXMLfiles"/>
+
+</project>
+
