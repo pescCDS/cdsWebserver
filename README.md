@@ -12,7 +12,9 @@ The mission of the PESC Common Data Services taskforce is to improve security, r
 Technical Requirements:
 
 Java JVM 1.6 or higher
+
 Apache Ant 1.8 or higher
+
 Apache CXF 1.7 or higher
 
 
