@@ -41,14 +41,14 @@ Technical Requirements:
 
 •	Development Environment
 
-o	Eclipse (free) - preference or 
+  o	Eclipse (free) - preference or 
 
-o	IntellinJ (free – community edition or commercial version)
+  o	IntellinJ (free – community edition or commercial version)
 
 
 •	Source Control
 
-o	GitHub (are components free?)
+  o	GitHub (are components free?)
 
 
 •	Issue Tracking
@@ -62,8 +62,9 @@ o	GitHub (are components free?)
 
 •	Development Methodology
 
-o	Specifications for initial release – as per defined on project site
+  o	Specifications for initial release – as per defined on project site
 
-o	Code review (less important on initial efforts – depends on size of development team and allocation of member’s time)
-o	Bi-weekly review for development progress during regular scheduled CDS meetings
+  o	Code review (less important on initial efforts – depends on size of development team and allocation of member’s time)
+
+  o	Bi-weekly review for development progress during regular scheduled CDS meetings
 
