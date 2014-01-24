@@ -11,10 +11,39 @@ The mission of the PESC CDS taskforce is to improve security, reliability, effic
 
 Technical Requirements:
 
-Java JVM 1.6 or higher
+•	Language – Java
 
-Apache Ant 1.8 or higher
+•	Framework – Apache CXF web services; Spring
 
-Apache CXF 1.7 or higher
+•	Deployment target – Tomcat
 
+•	Configuration of services – Spring
+
+•	Security – Spring
+
+•	Persistence layer – DataNucleus or Hibernate
+
+•	Database schema changes - Liquibase
+
+•	 Build system – Maven
+
+•	Database – MySQL 
+
+•	Development Environment
+o	Eclipse (free) - preference or 
+o	IntellinJ (free – community edition or commercial version)
+
+•	Source Control
+o	GitHub (are components free?)
+
+•	Issue Tracking
+
+•	Wiki
+
+•	Documentation - Wiki 
+
+•	Development Methodology
+o	Specifications for initial release – as per defined on project site
+o	Code review (less important on initial efforts – depends on size of development team and allocation of member’s time)
+o	Bi-weekly review for development progress during regular scheduled CDS meetings
 
