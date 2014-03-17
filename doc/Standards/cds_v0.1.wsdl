@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="submitCDS" targetNamespace="http://webserver.cds.pesc.org" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:cds="http://webserver.cds.pesc.org" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+<wsdl:types>
+ <xsd:schema elementFormDefault="unqualified" targetNamespace="http://webserver.cds.pesc.org" xmlns:cds="http://webserver.cds.pesc.org" version="0.1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+ <xsd:element name="CDSRequestHeader"> 
+  <xsd:complexType>
+   <xsd:all>
+    <xsd:element maxOccurs="1" minOccurs="1" name="CDSRequestRouting" type="cds:CDSRouting"/> 
+    <xsd:element maxOccurs="1" minOccurs="0" name="CDSRequestServiceExpectation" type="xsd:string"/> 
+    <xsd:element maxOccurs="1" minOccurs="1" name="CDSRequestPayloadType" type="xsd:string"/> 
+    <xsd:element maxOccurs="1" minOccurs="0" name="CDSRequestPayloadBytes" type="xsd:string"/>
+   </xsd:all>
+  </xsd:complexType>
+ </xsd:element>
+
+ <xsd:element name="CDSResponseHeader">
+  <xsd:complexType>
+   <xsd:all>
+    <xsd:element name="CDSResponseRouting" type="cds:CDSRouting"/>
+    <xsd:element name="CDSResponseAcknowledgement" type="xsd:string"/>
+    <xsd:element name="CDSResponsePayloadType" type="xsd:string"/>
+    <xsd:element maxOccurs="1" minOccurs="0" name="CDSResponsePayloadBytes" type="xsd:string"/>
+   </xsd:all>
+  </xsd:complexType>
+ </xsd:element>
+
+ <xsd:complexType name="CDSRouting">
+  <xsd:all>
+   <xsd:element maxOccurs="1" minOccurs="1" name="CDSUUID" type="xsd:string"/> 
+   <xsd:element maxOccurs="1" minOccurs="1" name="CDSSourceID" type="xsd:string"/> 
+   <xsd:element maxOccurs="1" minOccurs="0" name="CDSSourceSubCode" type="xsd:string"/> 
+   <xsd:element maxOccurs="1" minOccurs="0" name="CDSRecipientID" type="xsd:string"/> 
+   <xsd:element maxOccurs="1" minOccurs="0" name="CDSRecipientSubCode" type="xsd:string"/>
+  </xsd:all> 
+ </xsd:complexType>
+
+ <xsd:element name="CDSRequest" type="xsd:string"/> 
+ <xsd:element name="CDSResponse" type="xsd:string"/>
+
+ </xsd:schema> 
+</wsdl:types>
+
+<wsdl:message name="CDSRequest">
+ <wsdl:part element="cds:CDSRequest" name="CDSRequest"/>
+</wsdl:message>
+
+<wsdl:message name="CDSResponse">
+ <wsdl:part element="cds:CDSResponse" name="CDSResponse"/> 
+</wsdl:message>
+
+<wsdl:message name="CDSRequestHeader">
+ <wsdl:part element="cds:CDSRequestHeader" name="CDSRequestHeader"/>
+</wsdl:message>
+
+<wsdl:message name="CDSResponseHeader">
+ <wsdl:part element="cds:CDSResponseHeader" name="CDSResponseHeader"/>
+</wsdl:message>
+
+<wsdl:portType name="submitCDSInterface"> 
+ <wsdl:operation name="submitCDS">
+  <wsdl:input message="cds:CDSRequest"/>
+  <wsdl:output message="cds:CDSResponse"/> 
+ </wsdl:operation>
+</wsdl:portType>
+
+<wsdl:binding name="submitCDS" type="cds:submitCDSInterface">
+ <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/> 
+ <wsdl:operation name="submitCDS">
+  <soap:operation soapAction="cds:submitCDS" style="document"/> 
+  <wsdl:input>
+   <soap:body use="literal"/>
+   <soap:header message="cds:CDSRequestHeader" part="CDSRequestHeader" use="literal"/> 
+  </wsdl:input>
+  <wsdl:output>
+   <soap:body use="literal"/>
+   <soap:header message="cds:CDSResponseHeader" part="CDSResponseHeader" use="literal"/>
+  </wsdl:output> 
+ </wsdl:operation>
+</wsdl:binding>
+
+<wsdl:service name="submitCDS">
+ <wsdl:port binding="cds:submitCDS" name="submitCDS">
+  <soap:address location="http://localhost:8880/CDS1.0/webService"/>
+ </wsdl:port> 
+</wsdl:service> 
+
+</wsdl:definitions>

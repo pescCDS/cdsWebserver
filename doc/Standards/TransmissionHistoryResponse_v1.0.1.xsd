@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:core="urn:org:pesc:core:CoreMain:v1.10.0" targetNamespace="urn:org:pesc:sector:EdExchange:v1.0.0" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="v1.0.0">
+	
+	<!--============================================================================-->
+	<!--Name:      TransmissionHistoryReport.xsd                                    -->
+	<!--Version:   1.0.0                                                            -->
+	<!--Date:      17-May-2013                                                      -->
+	<!--                                                                            -->
+	<!--Change Log:                                                                 -->
+	<!--v1.0.0 17-May-2013 Jason Brown initial draft                                -->
+    <!--v1.0.1 17-May-2013 CDS Task Force                                           -->
+	<!--============================================================================-->
+	<!---->
+	
+	<!--=========================================-->
+	<!-- TransmissionHistoryType                 -->
+	<!--=========================================-->
+	<xs:complexType name="TransmissionHistoryType">
+		<xs:annotation>
+			<xs:documentation>A transmission record for an individual document</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="SenderOrganizationName" type="xs:string" minOccurs="1"/>
+            <xs:element name="ReceiverOrganizationName" type="xs:string" minOccurs="1"/>
+			<xs:element name="TransmissionDate" type="xs:date" minOccurs="1"/>
+			<xs:element name="DocumentId" type="xs:string" minOccurs="1"/>
+            <xs:element name="ContentFileName" type="xs:string" minOccurs="1"/>
+            <xs:element name="ContentCode" type="ContentCodeType" minOccurs="1"/>
+            <xs:element name="TransactionReferenceNumber" type="xs:string" minOccurs="1"/>
+		</xs:sequence>
+	</xs:simpleType>
+	
+	<!--=========================================-->
+	<!-- TransmissionHistoryResponse             -->
+	<!--=========================================-->
+	<xs:element name="TransmissionHistoryResponse">
+		<xs:annotation>
+			<xs:documentation>
+				A report of the transmission history for an institution.
+                
+                This is sent in response to a TransmissionHistoryRequest action and the target institution is identified in the authentication of the tranismission history request action.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="TransmissionHistory" type="TransmissionHistoryType" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+</xs:schema>
