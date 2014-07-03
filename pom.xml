@@ -13,6 +13,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	<properties>
 	    <cxf.version>3.0.0</cxf.version>
 	    <cxf.xjc-utils.version>2.6.0</cxf.xjc-utils.version>
+	    
 	</properties>
 	
     <build>
@@ -117,13 +118,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-parent</artifactId>
-                <version>${cxf.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf</artifactId>
                 <version>${cxf.version}</version>
                 <type>pom</type>
                 <scope>import</scope>

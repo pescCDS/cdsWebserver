@@ -1,0 +1,3 @@
+DROP DATABASE IF EXISTS `cdsDirectory`;
+CREATE DATABASE `cdsDirectory` DEFAULT CHARACTER SET utf8;
+USE `cdsDirectory`;
