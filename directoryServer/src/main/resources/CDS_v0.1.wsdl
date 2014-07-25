@@ -1,19 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions 
     name="WebServicesInterfaceService" 
-    targetNamespace="http://webservice.cds.pesc.org/" 
-    xmlns:ns1="http://schemas.xmlsoap.org/soap/http" 
+    targetNamespace="http://webservice.cds.pesc.org/"  
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
     xmlns:cds="http://webservice.cds.pesc.org/" 
+    xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
+    xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
+    xmlns:wsdomain="urn:org:pesc:cds:webservice:domain"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    
     <wsdl:types>
         <xs:schema elementFormDefault="unqualified" 
                       targetNamespace="http://webservice.cds.pesc.org/"
                             xmlns:cds="http://webservice.cds.pesc.org/" 
                              xmlns:xs="http://www.w3.org/2001/XMLSchema"
                               version="1.0">
+            <!-- -->
+            <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/CoreMain_v1.12.0.xsd" />
+            <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/AcademicRecord_v1.7.0.xsd" />
+            <xs:import namespace="urn:org:pesc:EdExchange:v1.0.7" schemaLocation="../../../../EdExchangeCore/src/main/resources/EdExchangeEnvelope_v1.0.7.xsd" />
+            <xs:import namespace="urn:org:pesc:cds:webservice:domain" schemaLocation="domainSchema/domain-elements.xsd" />
             
+            <xs:element name="getOrganizations" type="cds:getOrganizations" />
+            <xs:element name="getOrganizationsResponse" type="cds:getOrganizationsResponse" />
+            
+            <xs:complexType name="getOrganizations"></xs:complexType>
+            <xs:complexType name="getOrganizationsResponse">
+                <xs:sequence>
+                    <xs:element name="organizations" type="wsdomain:Organization" maxOccurs="unbounded" minOccurs="0" />
+                </xs:sequence>
+            </xs:complexType>
+            
+            <xs:element name="ServletException" type="xs:string" />
+            
+            
+            <!-- 
             <xs:element name="getCDSBatch" type="cds:getCDSBatch"/>
             <xs:element name="getCDSBatchResponse" type="cds:getCDSBatchResponse"/>
             <xs:element name="sendCDSBatch" type="cds:sendCDSBatch"/>
@@ -43,10 +65,12 @@
                     <xs:element minOccurs="0" name="getCDSBatch" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
+            -->
+            
         </xs:schema>
     </wsdl:types>
     
-    
+     <!--
     <wsdl:message name="getCDSBatch">
         <wsdl:part element="cds:getCDSBatch" name="parameters"></wsdl:part>
     </wsdl:message>
@@ -59,9 +83,21 @@
     <wsdl:message name="sendCDSBatch">
         <wsdl:part element="cds:sendCDSBatch" name="parameters"></wsdl:part>
     </wsdl:message>
+    -->
+    
+    <wsdl:message name="getOrganizations">
+        <wsdl:part element="cds:getOrganizations" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getOrganizationsResponse">
+        <wsdl:part element="cds:getOrganizationsResponse" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="ServletException">
+        <wsdl:part name="ServletException" element="cds:ServletException"></wsdl:part>
+	</wsdl:message>
     
     
     <wsdl:portType name="WebServicesInterface">
+        <!--
         <wsdl:operation name="sendCDSBatch">
             <wsdl:input message="cds:sendCDSBatch" name="sendCDSBatch"></wsdl:input>
             <wsdl:output message="cds:sendCDSBatchResponse" name="sendCDSBatchResponse"></wsdl:output>
@@ -70,11 +106,21 @@
             <wsdl:input message="cds:getCDSBatch" name="getCDSBatch"></wsdl:input>
             <wsdl:output message="cds:getCDSBatchResponse" name="getCDSBatchResponse"></wsdl:output>
         </wsdl:operation>
+        -->
+         
+        <wsdl:operation name="getOrganizations">
+	        <wsdl:input name="getOrganizationsRequest" message="cds:getOrganizations" />
+	        <wsdl:output name="getOrganizationsResponse" message="cds:getOrganizationsResponse" />
+	        <wsdl:fault name="ServletException" message="cds:ServletException"></wsdl:fault>
+	    </wsdl:operation>
+	    
     </wsdl:portType>
     
     
     <wsdl:binding name="WebServicesInterfaceServiceSoapBinding" type="cds:WebServicesInterface">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        
+        <!--
         <wsdl:operation name="sendCDSBatch">
             <soap:operation soapAction="" style="document"/>
             <wsdl:input name="sendCDSBatch">
@@ -93,18 +139,33 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        -->
+         
+        <wsdl:operation name="getOrganizations">
+	      <soap:operation soapAction="" style="document" />
+	      <wsdl:input name="getOrganizationsRequest">
+	        <soap:body use="literal" />
+	      </wsdl:input>
+	      <wsdl:output name="getOrganizationsResponse">
+	        <soap:body use="literal"/>
+	      </wsdl:output>
+	      <wsdl:fault name="ServletException">
+	        <soap:fault use="literal" name="ServletException"/>
+	      </wsdl:fault>
+	    </wsdl:operation>
+	    
     </wsdl:binding>
     
     
     <wsdl:service name="WebServicesInterfaceService">
         <wsdl:port binding="cds:WebServicesInterfaceServiceSoapBinding" name="WebServicesInterfacePort">
             
-            <!-- public dev server  -->
+            <!-- public dev server  
             <soap:address location="http://pesc.cccnext.net/EdExchange/webServices/cds"/>
-            
-            <!-- for local dev 
-            <soap:address location="http://localhost:8080/EdExchange/webServices/cds"/> 
             -->
+            <!-- for local dev -->
+            <soap:address location="http://localhost:8080/directoryServer/webServices/cds"/> 
+            
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

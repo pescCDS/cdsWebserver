@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+     targetNamespace="urn:org:pesc:cds:webservice:domain"
+     xmlns:tns="urn:org:pesc:cds:webservice:domain"
+attributeFormDefault="unqualified" 
+  elementFormDefault="unqualified"
+             version="v0.1.0">
+    
+    <xs:element name="Organization" type="tns:Organization" />
+    
+    <xs:complexType name="Organization">
+      <xs:sequence>
+          <xs:element name="organization_id" type="xs:int"/>
+          <xs:element name="org_name" type="xs:string" />
+          <xs:element name="org_subcode" type="xs:string" />
+          <xs:element name="description" type="xs:string" />
+          <xs:element name="credential" type="xs:string" />
+          <xs:element name="contact_type" type="xs:string" />
+          <xs:element name="address" type="xs:string" />
+          <xs:element name="email" type="xs:string" />
+          <xs:element name="phone" type="xs:string" />
+          <xs:element name="url" type="xs:string" />
+          <xs:element name="ein" type="xs:string" />
+          <xs:element name="entity_indicator" type="xs:int" />
+          <xs:element name="terms_of_use" type="xs:string" />
+          <xs:element name="privacy_policy" type="xs:string" />
+          <xs:element name="receiving_format" type="xs:string" />
+          
+      </xs:sequence>
+    </xs:complexType>
+</xs:schema>
