@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<project     xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                    http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>EdExchangeCore</artifactId>
+  <parent>
+    <groupId>org.cds.pesc.WebServices</groupId>
+    <artifactId>EdExchange</artifactId>
+    <version>0.1.1</version>
+  </parent>
+  
+  <build>
+    <finalName>${project.artifactId}</finalName>
+    <plugins>
+        <plugin>
+            <!--
+            This plugin creates the java package/classes (files) before
+            everything is compiled.
+            -->
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <inherited>false</inherited>
+            <executions>
+                <execution>
+                    <id>xjc</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <target>2.1</target>
+                <schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
+                <bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
+                <bindingFiles>bindings.xjb</bindingFiles>
+            </configuration>
+        </plugin>
+        
+    </plugins>
+  </build>
+  
+</project>

@@ -4,7 +4,8 @@
        xmlns:xs="http://www.w3.org/2001/XMLSchema" 
       xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" 
      xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-   wsdlLocation="CDS_v0.1.wsdl">
+   wsdlLocation="networkServer.wsdl" 
+   version="2.1">
     <!-- <jaxws:enableAsyncMapping>true</jaxws:enableAsyncMapping> -->
     
     <jaxws:bindings node="wsdl:definitions/wsdl:types/xs:schema">

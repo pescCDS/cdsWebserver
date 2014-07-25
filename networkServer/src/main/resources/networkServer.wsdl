@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="networkServer" 
+                  targetNamespace="http://webservice.ns.pesc.org/" 
+                  xmlns:tns="http://webservice.ns.pesc.org/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+				  xmlns:ns="http://webservice.ns.pesc.org/" 
+                  xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
+                  xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
+                  xmlns:wsdomain="urn:org:pesc:ns:webservice:domain"
+				  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+				  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    
+  <wsdl:types>
+    <xs:schema elementFormDefault="unqualified" 
+                  targetNamespace="http://webservice.ns.pesc.org/"
+                         xmlns:ns="http://webservice.ns.pesc.org/" 
+                         xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                          version="1.0">
+      
+      <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/CoreMain_v1.12.0.xsd" />
+      <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/AcademicRecord_v1.7.0.xsd" />
+      <xs:import namespace="urn:org:pesc:EdExchange:v1.0.7" schemaLocation="../../../../EdExchangeCore/src/main/resources/EdExchangeEnvelope_v1.0.7.xsd" />
+      <xs:import namespace="urn:org:pesc:ns:webservice:domain" schemaLocation="domainSchema/domain-elements.xsd" />
+      
+      <xs:element name="getOrganizations" type="ns:getOrganizations" />
+      <xs:element name="getOrganizationsResponse" type="ns:getOrganizationsResponse" />
+      <xs:complexType name="getOrganizations"></xs:complexType>
+      <xs:complexType name="getOrganizationsResponse">
+          <xs:sequence>
+              <xs:element name="organizations" type="wsdomain:Organization" maxOccurs="unbounded" minOccurs="0" />
+          </xs:sequence>
+      </xs:complexType>
+      <!-- 
+      TODO: complete deliveryLocations
+            deliveryOptions
+            getTransactionHistory
+            SEND 
+      <xs:element name="getDeliveryLocations" type="ns:getDeliveryLocations" />
+      <xs:element name="getDeliveryLocationsResponse" type="ns:getDeliveryLocationsResponse" />
+      <xs:complexType name="getDeliveryLocations"></xs:complexType>
+      <xs:complexType name="getDeliveryLocationsResponse">
+        <xs:sequence>
+            <xs:element name="deliveryLocations" type="" maxOccurs="unbounded" minOccurs="0" />
+        </xs:sequence>
+      </xs:complexType>
+      -->
+      <xs:element name="ServletException" type="xs:string" />
+      
+    </xs:schema>
+  </wsdl:types>
+  
+  
+  <wsdl:message name="getOrganizations">
+       <wsdl:part element="ns:getOrganizations" name="parameters"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getOrganizationsResponse">
+       <wsdl:part element="ns:getOrganizationsResponse" name="parameters"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="ServletException">
+       <wsdl:part element="ns:ServletException" name="ServletException"></wsdl:part>
+   </wsdl:message>
+   
+   <!--  
+   <wsdl:message name="getDeliveryLocations">
+       <wsdl:part element="ns:getDeliveryLocations" name="parameters"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getDeliveryLocationsResponse">
+       <wsdl:part element="ns:getDeliveryLocationsResponse" name="parameters"></wsdl:part>
+   </wsdl:message>
+  -->
+  
+  <wsdl:portType name="WebServicesInterface">
+      <wsdl:operation name="getOrganizations">
+          <wsdl:input name="getOrganizationsRequest" message="ns:getOrganizations" />
+          <wsdl:output name="getOrganizationsResponse" message="ns:getOrganizationsResponse" />
+          <wsdl:fault name="ServletException" message="ns:ServletException"></wsdl:fault>
+      </wsdl:operation>
+      
+      <!--  
+      <wsdl:operation name="getDeliveryLocations">
+        <wsdl:input name="getDeliveryLocationsRequest" message="ns:getDeliveryLocations" />
+        <wsdl:output name="getDeliveryLocationsResponse" message="ns:getDeliveryLocationsResponse" />
+        <wsdl:fault name="ServletException" message="ns:ServletException" />
+      </wsdl:operation>
+      -->
+  </wsdl:portType>
+  
+  
+  <wsdl:binding name="WebServicesInterfaceServiceSoapBinding" type="ns:WebServicesInterface">
+      <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+       
+      <wsdl:operation name="getOrganizations">
+        <soap:operation soapAction="" style="document" />
+        <wsdl:input name="getOrganizationsRequest">
+          <soap:body use="literal" />
+        </wsdl:input>
+        <wsdl:output name="getOrganizationsResponse">
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="ServletException">
+          <soap:fault use="literal" name="ServletException"/>
+        </wsdl:fault>
+      </wsdl:operation>
+      
+      <!--  
+      <wsdl:operation name="getDeliveryLocations">
+        <soap:operation soapAction="" style="document" />
+        <wsdl:input name="getDeliveryLocationsRequest">
+            <soap:body use="literal" />
+        </wsdl:input>
+        <wsdl:output name="getDeliveryLocationsResponse">
+            <soap:body use="literal" />
+        </wsdl:output>
+        <wsdl:fault name="getDeliveryLocationsServletException">
+            <soap:fault use="literal" name="getDeliveryLocationsServletException"/>
+        </wsdl:fault>
+      </wsdl:operation>
+      -->
+  </wsdl:binding>
+  
+  
+  <wsdl:service name="WebServicesInterfaceService">
+      <wsdl:port binding="ns:WebServicesInterfaceServiceSoapBinding" name="WebServicesInterfacePort">
+          <soap:address location="http://localhost:8080/networkServer/webServices/ns"/> 
+      </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

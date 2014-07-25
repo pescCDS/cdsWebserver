@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN" 
+                                   "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.pesc.cds.webservice.domain">
+   <class name="Organization" table="org_directory">
+      <meta attribute="class-description">
+         This class contains the organizations stored in the database.
+      </meta>
+      <id name="organizationId" type="int" column="organization_id">
+         <generator class="native"/>
+      </id>
+      <property name="orgName" column="org_name" type="string" not-null="true" length="64" />
+      <property name="orgSubcode" column="org_subcode" type="string" not-null="false" length="45" />
+      <property name="description" column="description" type="text" not-null="false" />
+      <property name="credential" column="credential" type="string" not-null="true" length="128" />
+      <property name="contactType" column="contact_type" type="string" not-null="true" length="45" />
+      <property name="address" column="address" type="string" not-null="true" length="128" />
+      <property name="email" column="email" type="string" not-null="true" length="100" />
+      <property name="phone" column="phone" type="string" not-null="true" length="20" />
+      <property name="url" column="url" type="string" not-null="true" length="255" />
+      <property name="ein" column="ein" type="string" not-null="true" length="11" />
+      <property name="entityIndicator" column="entity_indicator" type="binary" not-null="true" />
+      <property name="termsOfUse" column="terms_of_use" type="text" not-null="true" />
+      <property name="privacyPolicy" column="privacy_policy" type="text" not-null="true" />
+      <property name="receivingFormat" column="receiving_format" type="string" not-null="true" length="12" />
+   </class>
+</hibernate-mapping>

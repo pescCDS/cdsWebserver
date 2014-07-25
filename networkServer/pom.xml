@@ -1,0 +1,203 @@
+<project     xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                    http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>networkServer</artifactId>
+  <packaging>war</packaging>
+  <name>PESC CDS EdExchange Network Server</name>
+  
+  <parent>
+    <groupId>org.cds.pesc.WebServices</groupId>
+    <artifactId>EdExchange</artifactId>
+    <version>0.1.1</version>
+  </parent>
+  
+  <build>
+    <pluginManagement>
+        <plugins>
+            <!--
+            This is here for convenience to anyone wanting to 
+            deploy from command-line maven to a local tomcat
+            mvn tomcat7:deploy
+            see http://tomcat.apache.org/maven-plugin-2.0/tomcat7-maven-plugin/
+            -->
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <server>local.dev</server>
+                    <url>http://localhost:8080/manager/text</url>
+                    <path>/${project.build.finalName}</path>
+                </configuration>
+            </plugin>
+            
+        </plugins>
+    </pluginManagement>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.tomcat.maven</groupId>
+            <artifactId>tomcat7-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <phase>none</phase>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-codegen-plugin</artifactId>
+            <version>${cxf.version}</version>
+            <executions>
+                <execution>
+                    <id>generate-sources</id>
+                    <phase>generate-sources</phase>
+                    <configuration>
+                        <!--
+                        Use the extraarg elements if you need to generate default constructors
+                        and constructors that populate all the class properties,
+                        then un-comment the defaultOptions element along with the 
+                        jaxb2-value-constructor and jaxb2-basics dependencies below
+                        
+                        <defaultOptions> 
+                            <extraargs>
+                                  <extraarg>-xjc-Xvalue-constructor</extraarg>
+                            </extraargs>
+                        </defaultOptions> 
+                        -->
+                        <defaultOptions>
+                            <extraargs>
+                                <extraarg>-keep</extraarg>
+                                <extraarg>-nexclude</extraarg>
+                                <extraarg>urn:org:pesc:core:CoreMain:v1.12.0=org.pesc.core.coremain.v1_12</extraarg>
+                                <extraarg>-nexclude</extraarg>
+                                <extraarg>urn:org:pesc:sector:AcademicRecord:v1.7.0=org.pesc.sector.academicrecord.v1_7</extraarg>
+                                <extraarg>-nexclude</extraarg>
+                                <extraarg>urn:org:pesc:EdExchange:v1.0.7=org.pesc.edexchange.v1_0</extraarg>
+                            </extraargs>
+                        </defaultOptions>
+                        <wsdlOptions>
+                            <wsdlOption>
+                                <wsdl>src/main/resources/networkServer.wsdl</wsdl>
+                                <frontEnd>jaxws</frontEnd>
+                                
+                                <!--  to generate JAX-WS 2.1 compliant code
+                                <frontEnd>jaxws21</frontEnd> 
+                                -->
+                                <faultSerialVersionUID>1</faultSerialVersionUID>
+                                <bindingFiles>
+                                    <bindingFile>src/main/resources/binding.xjb</bindingFile>
+                                </bindingFiles>
+                            </wsdlOption>
+                        </wsdlOptions>
+                    </configuration>
+                    <goals>
+                        <goal>wsdl2java</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <dependencies>
+                <dependency>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                    <version>1.1.2</version>
+                </dependency>
+                
+                <!-- 
+                <dependency>
+                    <groupId>org.jvnet.jaxb2_commons</groupId>
+                    <artifactId>jaxb2-value-constructor</artifactId>
+                    <version>3.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jvnet.jaxb2_commons</groupId>
+                    <artifactId>jaxb2-basics</artifactId>
+                    <version>0.6.3</version>
+                </dependency>
+                -->
+            </dependencies>
+        </plugin>
+    </plugins>
+  </build>
+  
+  <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-parent</artifactId>
+                <version>${cxf.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.1.2</version>
+            </dependency>
+            <dependency><!-- 4.3.5.Final causes errors with the hibernate-tools plugin for hbm2ddl -->
+               <groupId>org.hibernate</groupId>
+               <artifactId>hibernate-core</artifactId>
+               <version>3.6.9.Final</version>
+            </dependency>
+        </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.5</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+           <groupId>javax.servlet.jsp</groupId>
+           <artifactId>jsp-api</artifactId>
+           <version>2.2</version>
+           <scope>provided</scope>
+       </dependency>
+    <dependency>
+        <groupId>jstl</groupId>
+        <artifactId>jstl</artifactId>
+        <version>1.2</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>taglibs</groupId>
+        <artifactId>standard</artifactId>
+        <version>1.1.2</version>
+        <scope>compile</scope>
+    </dependency>
+    
+    <dependency><!-- 4.3.5.Final causes errors with the hibernate-tools plugin for hbm2ddl -->
+       <groupId>org.hibernate</groupId>
+       <artifactId>hibernate-core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-tools</artifactId>
+        <version>3.2.4.GA</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.cds.pesc.WebServices</groupId>
+        <artifactId>EdExchangeCore</artifactId>
+        <version>${core.version}</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+    </dependency>
+    
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+  </dependencies>
+  
+</project>
