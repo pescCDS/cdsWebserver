@@ -12,7 +12,7 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
     
     <jaxws:endpoint xmlns:service="http://service.cds.pesc.org/" 
                                 id="EdExchangeServiceSoapHTTP" 
-                           address="/cds" 
+                           address="/services" 
                        serviceName="service:WebServicesInterfaceService" 
                       endpointName="service:WebServicesInterfacePort" 
                        implementor="org.pesc.cds.webservice.service.WebServiceImpl">

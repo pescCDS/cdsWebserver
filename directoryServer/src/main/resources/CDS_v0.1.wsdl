@@ -161,10 +161,10 @@
         <wsdl:port binding="cds:WebServicesInterfaceServiceSoapBinding" name="WebServicesInterfacePort">
             
             <!-- public dev server  
-            <soap:address location="http://pesc.cccnext.net/EdExchange/webServices/cds"/>
+            <soap:address location="http://pesc.cccnext.net/EdExchange/soap/services"/>
             -->
             <!-- for local dev -->
-            <soap:address location="http://localhost:8080/directoryServer/webServices/cds"/> 
+            <soap:address location="http://localhost:8080/directoryServer/soap/services"/>
             
         </wsdl:port>
     </wsdl:service>
