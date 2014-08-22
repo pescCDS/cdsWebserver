@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" 
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
- xmlns:jaxws="http://cxf.apache.org/jaxws" 
-  xmlns:soap="http://cxf.apache.org/bindings/soap" 
+<beans       xmlns="http://www.springframework.org/schema/beans" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:jaxws="http://cxf.apache.org/jaxws" 
+        xmlns:soap="http://cxf.apache.org/bindings/soap" 
 xsi:schemaLocation="http://www.springframework.org/schema/beans 
                     http://www.springframework.org/schema/beans/spring-beans.xsd 
                     http://cxf.apache.org/bindings/soap 
@@ -12,7 +12,7 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
     
     <jaxws:endpoint xmlns:service="http://service.cds.pesc.org/" 
                                 id="EdExchangeServiceSoapHTTP" 
-                           address="/cds" 
+                           address="/services" 
                        serviceName="service:WebServicesInterfaceService" 
                       endpointName="service:WebServicesInterfacePort" 
                        implementor="org.pesc.cds.webservice.service.WebServiceImpl">

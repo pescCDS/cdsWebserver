@@ -6,7 +6,7 @@
     xmlns:cds="http://webservice.cds.pesc.org/" 
     xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
     xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
-    xmlns:wsdomain="urn:org:pesc:cds:webservice:domain"
+    xmlns:edex="urn:org:pesc:EdExchange:v1.0.7"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xs="http://www.w3.org/2001/XMLSchema">
     
@@ -20,26 +20,30 @@
             <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/CoreMain_v1.12.0.xsd" />
             <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/AcademicRecord_v1.7.0.xsd" />
             <xs:import namespace="urn:org:pesc:EdExchange:v1.0.7" schemaLocation="../../../../EdExchangeCore/src/main/resources/EdExchangeEnvelope_v1.0.7.xsd" />
-            <xs:import namespace="urn:org:pesc:cds:webservice:domain" schemaLocation="domainSchema/domain-elements.xsd" />
-            
-            <xs:element name="getOrganizations" type="cds:getOrganizations" />
-            <xs:element name="getOrganizationsResponse" type="cds:getOrganizationsResponse" />
-            
-            <xs:complexType name="getOrganizations"></xs:complexType>
-            <xs:complexType name="getOrganizationsResponse">
-                <xs:sequence>
-                    <xs:element name="organizations" type="wsdomain:Organization" maxOccurs="unbounded" minOccurs="0" />
-                </xs:sequence>
-            </xs:complexType>
             
             <xs:element name="ServletException" type="xs:string" />
             
-            
-            <!-- 
+            <!-- customized from EdExchange schema file -->
+			<xs:element name="OrganizationListRequest" type="cds:OrganizationListRequest" />
+			<xs:complexType name="OrganizationListRequest">
+                <xs:sequence>
+                    <xs:element name="OrganizationNameSearchString" type="xs:string" minOccurs="0" />
+                    <!-- <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0"  /> -->
+                </xs:sequence>
+            </xs:complexType>
+		
+			<xs:element name="OrganizationListReport" type="cds:OrganizationListReport" />
+			<xs:complexType name="OrganizationListReport">
+                <xs:sequence>
+                    <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:complexType>
+			
             <xs:element name="getCDSBatch" type="cds:getCDSBatch"/>
             <xs:element name="getCDSBatchResponse" type="cds:getCDSBatchResponse"/>
             <xs:element name="sendCDSBatch" type="cds:sendCDSBatch"/>
             <xs:element name="sendCDSBatchResponse" type="cds:sendCDSBatchResponse"/>
+            
             <xs:complexType name="sendCDSBatch">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="psisCode" type="xs:string"/>
@@ -65,12 +69,48 @@
                     <xs:element minOccurs="0" name="getCDSBatch" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
-            -->
+            
+            <xs:element name="getDeliveryLocation">
+                <xs:complexType></xs:complexType>
+            </xs:element>
+            <xs:element name="getDeliveryLocationResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="deliveryLocation" type="xs:string" minOccurs="0" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            
+            <xs:element name="updateLocalOptions">
+                <xs:complexType></xs:complexType>
+            </xs:element>
+            <xs:element name="updateLocalOptionsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="localOptions" type="xs:string" minOccurs="0" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            
+            <xs:element name="updateOrganization">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="organization" type="AcRec:OrganizationType" minOccurs="1" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="updateOrganizationResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="updateOrganizationReturnValue" type="xs:string" minOccurs="0" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             
         </xs:schema>
     </wsdl:types>
     
-     <!--
+    
     <wsdl:message name="getCDSBatch">
         <wsdl:part element="cds:getCDSBatch" name="parameters"></wsdl:part>
     </wsdl:message>
@@ -83,21 +123,48 @@
     <wsdl:message name="sendCDSBatch">
         <wsdl:part element="cds:sendCDSBatch" name="parameters"></wsdl:part>
     </wsdl:message>
-    -->
     
-    <wsdl:message name="getOrganizations">
-        <wsdl:part element="cds:getOrganizations" name="parameters"></wsdl:part>
-    </wsdl:message>
-    <wsdl:message name="getOrganizationsResponse">
-        <wsdl:part element="cds:getOrganizationsResponse" name="parameters"></wsdl:part>
-    </wsdl:message>
     <wsdl:message name="ServletException">
         <wsdl:part name="ServletException" element="cds:ServletException"></wsdl:part>
 	</wsdl:message>
+	
+	<wsdl:message name="OrganizationListRequest">
+	   <wsdl:part element="cds:OrganizationListRequest" name="parameters"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="OrganizationListReport">
+       <wsdl:part element="cds:OrganizationListReport" name="parameters"></wsdl:part>
+    </wsdl:message>
+    
+    <wsdl:message name="DeliveryOptionRequest">
+       <wsdl:part element="edex:DeliveryOptionRequest" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="DeliveryOptionReport">
+       <wsdl:part element="edex:DeliveryOptionReport" name="parameters"></wsdl:part>
+    </wsdl:message>
+    
+    <wsdl:message name="getDeliveryLocation">
+        <wsdl:part element="cds:getDeliveryLocation" name="parameters" />
+    </wsdl:message>
+    <wsdl:message name="getDeliveryLocationResponse">
+        <wsdl:part element="cds:getDeliveryLocationResponse" name="parameters" />
+    </wsdl:message>
+    
+    <wsdl:message name="updateLocalOptions">
+        <wsdl:part element="cds:updateLocalOptions" name="parameters" />
+    </wsdl:message>
+    <wsdl:message name="updateLocalOptionsResponse">
+        <wsdl:part element="cds:updateLocalOptionsResponse" name="parameters" />
+    </wsdl:message>
+    
+    <wsdl:message name="updateOrganization">
+        <wsdl:part element="cds:updateOrganization" name="parameters" />
+    </wsdl:message>
+    <wsdl:message name="updateOrganizationResponse">
+        <wsdl:part element="cds:updateOrganizationResponse" name="parameters" />
+    </wsdl:message>
     
     
     <wsdl:portType name="WebServicesInterface">
-        <!--
         <wsdl:operation name="sendCDSBatch">
             <wsdl:input message="cds:sendCDSBatch" name="sendCDSBatch"></wsdl:input>
             <wsdl:output message="cds:sendCDSBatchResponse" name="sendCDSBatchResponse"></wsdl:output>
@@ -106,13 +173,36 @@
             <wsdl:input message="cds:getCDSBatch" name="getCDSBatch"></wsdl:input>
             <wsdl:output message="cds:getCDSBatchResponse" name="getCDSBatchResponse"></wsdl:output>
         </wsdl:operation>
-        -->
-         
-        <wsdl:operation name="getOrganizations">
-	        <wsdl:input name="getOrganizationsRequest" message="cds:getOrganizations" />
-	        <wsdl:output name="getOrganizationsResponse" message="cds:getOrganizationsResponse" />
-	        <wsdl:fault name="ServletException" message="cds:ServletException"></wsdl:fault>
+	    
+	    <wsdl:operation name="OrganizationListRequest">
+	       <wsdl:input name="OrganizationListRequest" message="cds:OrganizationListRequest" />
+	       <wsdl:output name="OrganizationListReport" message="cds:OrganizationListReport" />
+	       <wsdl:fault name="ServletException" message="cds:ServletException" />
 	    </wsdl:operation>
+	    
+	    <wsdl:operation name="DeliveryOptionRequest">
+           <wsdl:input name="DeliveryOptionRequest" message="cds:DeliveryOptionRequest" />
+           <wsdl:output name="DeliveryOptionReport" message="cds:DeliveryOptionReport" />
+           <wsdl:fault name="ServletException" message="cds:ServletException" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="getDeliveryLocation">
+           <wsdl:input name="getDeliveryLocation" message="cds:getDeliveryLocation" />
+           <wsdl:output name="getDeliveryLocationResponse" message="cds:getDeliveryLocationResponse" />
+           <wsdl:fault name="ServletException" message="cds:ServletException" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="updateLocalOptions">
+           <wsdl:input name="updateLocalOptions" message="cds:updateLocalOptions" />
+           <wsdl:output name="updateLocalOptionsResponse" message="cds:updateLocalOptionsResponse" />
+           <wsdl:fault name="ServletException" message="cds:ServletException" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="updateOrganization">
+           <wsdl:input name="updateOrganization" message="cds:updateOrganization" />
+           <wsdl:output name="updateOrganizationResponse" message="cds:updateOrganizationResponse" />
+           <wsdl:fault name="ServletException" message="cds:ServletException" />
+        </wsdl:operation>
 	    
     </wsdl:portType>
     
@@ -120,7 +210,6 @@
     <wsdl:binding name="WebServicesInterfaceServiceSoapBinding" type="cds:WebServicesInterface">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         
-        <!--
         <wsdl:operation name="sendCDSBatch">
             <soap:operation soapAction="" style="document"/>
             <wsdl:input name="sendCDSBatch">
@@ -139,21 +228,71 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        -->
-         
-        <wsdl:operation name="getOrganizations">
-	      <soap:operation soapAction="" style="document" />
-	      <wsdl:input name="getOrganizationsRequest">
-	        <soap:body use="literal" />
-	      </wsdl:input>
-	      <wsdl:output name="getOrganizationsResponse">
-	        <soap:body use="literal"/>
-	      </wsdl:output>
-	      <wsdl:fault name="ServletException">
-	        <soap:fault use="literal" name="ServletException"/>
-	      </wsdl:fault>
+	    
+	    <wsdl:operation name="OrganizationListRequest">
+	       <soap:operation soapAction="" style="document" />
+	       <wsdl:input name="OrganizationListRequest">
+	           <soap:body use="literal" />
+	       </wsdl:input>
+	       <wsdl:output name="OrganizationListReport">
+	           <soap:body use="literal" />
+	       </wsdl:output>
+	       <wsdl:fault name="ServletException">
+	           <soap:fault use="literal" name="ServletException" />
+	       </wsdl:fault>
 	    </wsdl:operation>
 	    
+	    <wsdl:operation name="DeliveryOptionRequest">
+           <soap:operation soapAction="" style="document" />
+           <wsdl:input name="DeliveryOptionRequest">
+               <soap:body use="literal" />
+           </wsdl:input>
+           <wsdl:output name="DeliveryOptionReport">
+               <soap:body use="literal" />
+           </wsdl:output>
+           <wsdl:fault name="ServletException">
+               <soap:fault use="literal" name="ServletException" />
+           </wsdl:fault>
+        </wsdl:operation>
+        
+        <wsdl:operation name="getDeliveryLocation">
+           <soap:operation soapAction="" style="document" />
+           <wsdl:input name="getDeliveryLocation">
+               <soap:body use="literal" />
+           </wsdl:input>
+           <wsdl:output name="getDeliveryLocationResponse">
+               <soap:body use="literal" />
+           </wsdl:output>
+           <wsdl:fault name="ServletException">
+               <soap:fault use="literal" name="ServletException" />
+           </wsdl:fault>
+        </wsdl:operation>
+        
+        <wsdl:operation name="updateLocalOptions">
+           <soap:operation soapAction="" style="document" />
+           <wsdl:input name="updateLocalOptions">
+               <soap:body use="literal" />
+           </wsdl:input>
+           <wsdl:output name="updateLocalOptionsResponse">
+               <soap:body use="literal" />
+           </wsdl:output>
+           <wsdl:fault name="ServletException">
+               <soap:fault use="literal" name="ServletException" />
+           </wsdl:fault>
+        </wsdl:operation>
+        
+        <wsdl:operation name="updateOrganization">
+           <soap:operation soapAction="" style="document" />
+           <wsdl:input name="updateOrganization">
+               <soap:body use="literal" />
+           </wsdl:input>
+           <wsdl:output name="updateOrganizationResponse">
+               <soap:body use="literal" />
+           </wsdl:output>
+           <wsdl:fault name="ServletException">
+               <soap:fault use="literal" name="ServletException" />
+           </wsdl:fault>
+        </wsdl:operation>
     </wsdl:binding>
     
     
@@ -161,10 +300,10 @@
         <wsdl:port binding="cds:WebServicesInterfaceServiceSoapBinding" name="WebServicesInterfacePort">
             
             <!-- public dev server  
-            <soap:address location="http://pesc.cccnext.net/EdExchange/webServices/cds"/>
+            <soap:address location="http://pesc.cccnext.net/EdExchange/soap/services"/>
             -->
             <!-- for local dev -->
-            <soap:address location="http://localhost:8080/directoryServer/webServices/cds"/> 
+            <soap:address location="http://localhost:8080/directoryServer/soap/services" />
             
         </wsdl:port>
     </wsdl:service>

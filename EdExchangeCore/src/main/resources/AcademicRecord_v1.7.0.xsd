@@ -169,11 +169,17 @@
 			<xs:element name="NoteMessage" type="core:NoteMessageType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
+	
+	<!--
+     Edit:8/21/2014:Wes Owen
+     Removed maxOccurs="unbounded" on OrganizationName so JAXB doesn't create a List<String> class property.
+     I'm assuming that this property is supposed to be a string.
+     -->
 	<xs:complexType name="OrganizationType">
 		<xs:sequence>
 			<xs:group ref="core:OrganizationIDMultiChoiceGroup"/>
 			<xs:element name="LocalOrganizationID" type="core:LocalOrganizationIDType" minOccurs="0"/>
-			<xs:element name="OrganizationName" minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="OrganizationName" minOccurs="0">
 				<xs:simpleType>
 					<xs:restriction base="core:OrganizationNameType">
 						<xs:maxLength value="60"/>
