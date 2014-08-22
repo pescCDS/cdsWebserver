@@ -321,8 +321,8 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="OrganizationNameSearchString" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-        <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="OrganizationNameSearchString" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0" maxOccurs="unbounded" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
