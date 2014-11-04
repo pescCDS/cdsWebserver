@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/resources :: resourceHead (title=#{title.documentFormats})">
+    <title th:text="#{title.documentFormats}">Document Formats Page</title>
+    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
+    <link rel="stylesheet" href="../../resources/css/jquery.dataTables.min.css" th:href="@{/resources/css/jquery.dataTables.min.css}" />
+</head>
+<body>
+	<div class="container-fluid">
+		<div th:replace="layout/nav :: layoutNav"></div>
+        
+        <div class="page-header">
+        	<h1 th:text="#{title.documentFormats}">Page Title</h1>
+        </div>
+    	
+        <div id="dfView">
+            <table id="dtDocumentFormats" class="table table-condensed table-striped table-bordered"></table>
+        </div>
+    
+    	<div th:replace="layout/footer :: layoutFooter"></div>
+    </div>
+	<th:block th:replace="layout/resources :: resourceScripts"></th:block>
+    <script th:inline="javascript">
+		var dtView, 
+			DFView = Backbone.View.extend({
+				'sb':null,
+				'sbOptions':{
+					'min':0,
+					'max':100,
+					'step':1,
+					'disabled':true
+				},
+				
+				'columnFilters':null,
+				'modalForm':null,
+				'datatable':null,
+				'datatableColumnMeta':[
+					{
+						'data':null, 
+						'name':'editor', 
+						'title':'', 
+						'cfexclude':true,
+						'render':function(data,type,full,meta){
+							return [
+								'<div class="btn-group center-block">',
+									'<button type="button" class="btn btn-default btn-info btn-xs docformat-edit-btn" data-row-id="',full.id,'">',
+										'<span class="glyphicon glyphicon-cog"></span>',
+									'</button>',
+									'<button type="button" class="btn btn-default btn-danger btn-xs docformat-del-btn">',
+										'<span class="glyphicon glyphicon-remove"></span>',
+									'</button>',
+								'</div>'
+							].join('');
+						}
+					},
+					{'data':'formatName', 'name':'formatName', 'title':'Name', 'type':'string', 'cftype':'text'},
+					{'data':'formatDescription', 'name':'formatDescription', 'title':'Description', 'type':'string', 'cftype':'text'},
+					{'data':'formatInuseCount', 'name':'formatInuseCount', 'title':'Inuse Count', 'type':'num', 'cftype':'number'},
+					
+					{'data':'createdTime', 'name':'createdTime', 'title':'Created', 'type':'date', 'cftype':'date'},
+					{'data':'modifiedTime', 'name':'modifiedTime', 'title':'Modified', 'type':'date', 'cftype':'date'}
+				],
+				'datatableConfig':{
+					'exteriorController':this,
+					'searching':false,
+					
+					'dom':/*[[ '&lt;"panel panel-default"&lt;"panel-heading clearfix" &lt;"refresh-datatable-btn-container pull-left"&gt; l&lt;"docformat-add-button-container"&gt;p&gt;&gt;tpi&lt;"clearfix"&gt;' ]]*/ 'ltip',
+					
+					'processing':true,
+					'serverSide':true,
+					'ajax':{
+						'url':/*[[ @{/services/rest/data} ]]*/ '/directoryServer/services/rest/data',
+						'type':'POST',
+						'dataType':'json',
+						'contentType':'application/json'
+					},
+					'order':[[4,'asc']],
+					'columnDefs':[
+						{'targets':0, 'orderable':false, 'width':'35px', 'className':'action-column'},
+						{'targets':1, 'className':'text-center text-nowrap text-capitalize'},
+						{'targets':2, 'className':'notes-column'},
+						{'targets':3, 'className':'text-center'}
+					],
+					
+					'columns':null
+				},
+				
+				'displayInputValidation':function(formKey, isValid) {
+					if($.inArray(formKey,['format_name'])>-1) {
+						$('div.docformat-form-'+formKey,this.modalForm).toggleClass('has-success',isValid).toggleClass('has-error',!isValid);
+						$('div.docformat-form-'+formKey+' span.glyphicon',this.modalForm).removeClass('hidden').toggleClass('glyphicon-ok',isValid).toggleClass('glyphicon-remove',!isValid);
+					}
+				},
+				
+				'resetForm':function() {
+					// don't use form.reset(), there are some hidden inputs need to retain their values
+					$('#id',this.modalForm).val(null);
+					$('#format_name, #format_description, #created_time, #modified_time',this.modalForm).val(null);
+					
+					// reset spinbox
+					this.sb.spinbox('value',0);
+					
+					// clear validation classes
+					for(var i in {'format_name':0}) {
+						$('div.docformat-form-'+i,this.modalForm).removeClass('has-success has-error');
+						$('div.docformat-form-'+i+' span.glyphicon',this.modalForm).removeClass('glyphicon-ok glyphicon-remove').addClass('hidden');
+					}
+				},
+				
+				'getFormData':function() {
+					var formData = {
+						'format_name':$.trim($('#format_name',this.modalForm).val())
+					},
+						docFormatIdVal = $('#id',this.modalForm).val(),
+						descVal = $.trim($('#format_description',this.modalForm).val()),
+						inuseCountVal = this.sb.spinbox('value')*1,
+						editMode = _.isFinite(docFormatIdVal),
+						validation = {
+							'format_name':formData.format_name.length>1
+						},
+						validInputsTotal = 1,
+						validInputCount = 0;
+					
+					if(editMode) {
+						_.extend(formData,{'id':docFormatIdVal*1});
+					}
+					
+					// only include optional data if it's populated
+					if(descVal.length>0) {
+						_.extend(formData,{'format_description':descVal});
+					}
+					
+					// display success/error for required, error-able inputs
+					for(var i in validation) {
+						this.displayInputValidation(i, validation[i]);
+						if(validation[i]) {
+							validInputCount++;
+						}
+					}
+					
+					return (validInputCount===validInputsTotal) ? formData : false;
+				},
+				
+				'setFormData':function(dfData) {
+					$('#id',this.modalForm).val(dfData.id);
+					$('#format_name',this.modalForm).val(dfData.formatName);
+					$('#format_description',this.modalForm).val(dfData.formatDescription);
+					
+					// inuse spinbox
+					this.sb.spinbox('value',dfData.formatInuseCount);
+					
+					// created/modified date text fields
+					$('#created_time',this.modalForm).val(dfData.createdTime);
+					$('#modified_time',this.modalForm).val(dfData.modifiedTime);
+				},
+				
+				'className':'doc-formats-dtview',
+				'events':{
+					// DATATABLE INIT COMPLETE
+					'init.dt .dataTables_wrapper':function(e, settings, json) {
+						// create refresh data table button
+						$('div.refresh-datatable-btn-container',this.$el).append([
+							'<button type="button" class="btn btn-default" title="refresh data">',
+								'<span class="glyphicon glyphicon-refresh"></span>',
+							'</button>'
+						].join(''));
+						
+						// create add docformat button
+						$('div.docformat-add-button-container',this.$el).append('<button type="button" class="btn btn-success pull-left">Add Document Format</button>');
+						
+						this.$el.prepend(this.columnFilters.$el);
+					},
+					
+					// REFRESH DATATABLE
+					'click div.refresh-datatable-btn-container':function(e) {
+						this.datatable.ajax.reload();
+					},
+					
+					// ADD DOCUMENT FORMAT CLICK
+					'click div.docformat-add-button-container button':function(e) {
+						$('h4.modal-title',this.modalForm).html('Create Document Format');
+						$('button.docformat-modal-form-action-button',this.modalForm).html('Create');
+						this.modalForm.modal('show');
+					},
+					
+					// EDIT DOCUMENT FORMAT CLICK
+					'click button.docformat-edit-btn':function(e) {
+						var d = this.datatable.row($(e.currentTarget).parent().parent().parent()[0]).data();
+						if(d) {
+							$('h4.modal-title',this.modalForm).html('Edit Document Format');
+							$('button.docformat-modal-form-action-button',this.modalForm).html('Save');
+							
+							//populate modal form with data and then display it
+							this.setFormData(d);
+							this.modalForm.modal('show');
+						}
+					},
+					
+					// REMOVE DOCUMENT FORMAT CLICK
+					'click button.docformat-del-btn':function(e) {
+						//get the index of the data tables row
+						
+						if(confirm('Are you sure you want to remove this document format?')) {
+							var d = this.datatable.row($(e.currentTarget).parent().parent().parent()[0]).data();
+							// TODO put up modal progress bar and hide it on ajax.always
+							$.ajax({
+								'url': /*[[ @{/services/rest/documentFormats/remove} ]]*/ '/services/rest/documentFormats/remove',
+								type:'POST',
+								contentType:'application/json',
+								dataType:'json',
+								data:JSON.stringify(d),
+								processData:false
+							}).done(function(data,textStatus,jqXHR) {
+								dtView.datatable.ajax.reload();
+							}).fail(function(jqXHR,textStatus,errorThrown) {
+								alert(errorThrown);
+							});
+						}
+					},
+					
+					// MODAL ACTION BUTTON CLICK
+					'click button.docformat-modal-form-action-button':function(e) {
+						var fd = this.getFormData();
+						if(fd) {
+							// ajax to server and update data table
+							$.ajax({
+								'url': /*[[ @{/services/rest/documentFormats/save} ]]*/ '/services/rest/documentFormats/save',
+								type:'POST',
+								contentType:'application/json',
+								dataType:'json',
+								data:JSON.stringify(fd),
+								processData:false
+							}).done(function(data,textStatus,jqXHR) {
+								dtView.datatable.ajax.reload();
+								dtView.modalForm.modal('hide');
+							}).fail(function(jqXHR,textStatus,errorThrown) {
+								alert(errorThrown);
+							});
+						}
+					},
+					
+					// EDIT MODAL HIDE
+					'hidden.bs.modal div.edit-docformat-modal':function() {
+						this.resetForm();
+					}
+				},
+				'template':_.template([
+						'<div class="modal fade edit-docformat-modal">',
+							'<div class="modal-dialog">',
+								'<div class="modal-content">',
+									'<div class="modal-header">',
+										'<button type="button" class="close" data-dismiss="modal">',
+											'<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>',
+										'</button>',
+										'<h4 class="modal-title"></h4>',
+									'</div>',
+									'<div class="modal-body">',
+										_.template($('#addEditForm').html())({}),
+									'</div>',
+									'<div class="modal-footer">',
+										'<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>',
+										'<button type="button" class="btn btn-primary docformat-modal-form-action-button"></button>',
+									'</div>',
+								'</div>',
+							'</div>',
+						'</div>',
+						'<table class="table table-condensed table-striped table-bordered"></table>'
+					].join('')),
+				'initialize':function(options) {
+					this.$el.append(this.template({}));
+					
+					//configure modal
+					this.modalForm = $('div.edit-docformat-modal',this.$el).modal({
+						'backdrop':'static',
+						'keyboard':false,
+						'show':false
+					});
+					
+					//spinbox control
+					$('div.inuse_count.spinbox',this.modalForm).spinbox(this.sbOptions);
+					this.sb = $('div.inuse_count.spinbox',this.modalForm);
+					
+					//create column filters
+					this.columnFilters = new VDataFilters({'table':'documentFormats', 'tableColumns':this.datatableColumnMeta});
+					
+					//set initial data table configuration
+					this.datatableConfig.columns = this.datatableColumnMeta;
+					this.datatableConfig.ajax.data = function(d){
+						if(dtView) {//ev is the EmployeeView
+							var cf = dtView.columnFilters.getCurrentFilter();
+							if(cf) {
+								d.table = cf[0].table;
+								d.columnfilters = cf;
+							} else {
+								d.table = 'documentFormats';
+							}
+						}
+						d.table = 'documentFormats';
+						return JSON.stringify(d);
+					};
+					
+					//create data table
+					this.datatable = $('table.table',this.$el).DataTable(this.datatableConfig);
+					
+				},
+				'render':function() { return this;}
+		});
+		
+		$(document).ready(function(e){
+			dtView = new DFView();
+			$('#dfView').replaceWith(dtView.$el);
+		});
+	</script>
+</body>
+</html>

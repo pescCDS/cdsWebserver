@@ -9,21 +9,28 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     <debug />
     
     <http use-expressions="true" disable-url-rewriting="true">
-        <session-management session-fixation-protection="migrateSession" invalid-session-url="/timeout.jsp" />
+        <session-management session-fixation-protection="migrateSession" invalid-session-url="/login" />
         
         <!-- TODO: enable this later when we are ready for ssl
         <security:intercept-url pattern="/login" requires-channel="https"/>
         -->
         
-        <intercept-url pattern="/soap/**" access="permitAll" />
+        <!-- for dev 
+        <intercept-url pattern="/**" access="permitAll "/>
+        -->
+        
+        <!-- keep the web services path open until we figure out how to secure it -->
+        <intercept-url pattern="/services/**" access="permitAll" />
         
         <intercept-url pattern="/resources/**" access="permitAll" />
         <intercept-url pattern="/login/**" access="permitAll" />
         <intercept-url pattern="/login-error/**" access="permitAll" />
+        
         <intercept-url pattern="/**" access="isAuthenticated()" />
         
+        
         <form-login login-page="/login" authentication-failure-url="/login-error" always-use-default-target="true" />
-        <logout logout-url="/logout" delete-cookies="JSESSIONID" />
+        <logout logout-url="/logout" delete-cookies="JSESSIONID" invalidate-session="true" />
     </http>
     
     <authentication-manager>

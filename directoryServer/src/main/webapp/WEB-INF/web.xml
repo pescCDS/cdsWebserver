@@ -57,7 +57,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     
     <servlet-mapping>
         <servlet-name>cxf</servlet-name>
-        <url-pattern>/soap/*</url-pattern>
+        <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping>
@@ -77,4 +77,11 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
         <error-code>500</error-code>
         <location>/error.html</location>
     </error-page>
+    
+    <resource-ref>
+    	<description>database jndi connection</description>
+    	<res-ref-name>jdbc/pesc</res-ref-name>
+	    <res-type>javax.sql.DataSource</res-type>
+	    <res-auth>Container</res-auth>
+    </resource-ref>
 </web-app>

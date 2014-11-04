@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="org.pesc.sector.academicrecord.v1_7">
+<hibernate-mapping package="org.pesc.edexchange.v1_0">
    
-   <class name="OrganizationType" entity-name="Organizations" table="organizations">
+   <class name="Organization" table="organization_directory" catalog="pesc_edexchange">
     <meta attribute="class-description">
-        This table is derived from the OrganizationType schema complexType defined in AcademicRecord_v1.7.0.xsd
+        This table is derived from the Organization schema defined in EdExchangeEnvelope_v1.0.7.xsd
     </meta>
-    <id type="int" column="id">
+    <id type="int" column="directory_id">
         <generator class="native" />
     </id>
-    <property name="OPEID" column="opeid" type="string" length="8" />
-    <property name="NCHELPID" column="nchelpid" type="string" length="8" />
-    <property name="IPEDS" column="ipeds" type="string" length="6" />
-    <property name="ATP" column="atp" type="string" length="6" />
-    <property name="FICE" column="fice" type="string" length="6" />
-    <property name="ACT" column="act" type="string" length="4" />
-    <property name="CCD" column="ccd" type="string" length="12" />
-    <property name="PSS" column="pss" type="string" length="8" />
-    <property name="CEEBACT" column="ceebact" type="string" length="6" />
-    <property name="CSIS" column="csis" type="string" length="6" />
-    <property name="USIS" column="usis" type="string" length="6" />
-    <property name="ESIS" column="esis" type="string" length="8" />
-    <property name="PSIS" column="psis" type="string" length="8" />
-    <property name="DUNS" column="duns" type="string" length="9" />
-    <property name="MutuallyDefined" column="mutuallyDefined" type="string" length="60" />
-    <property name="OrganizationName" column="organizationName" type="string" length="60" />
-    
-    <!-- TODO: foreign keys and maps -->
+    <property name="organization_id" column="organization_id" not-null="true" type="string" />
+    <property name="organization_id_type" column="organization_id_type" not-null="true" type="string" />
+    <property name="organization_name" column="organization_name" not-null="true" type="string" />
+    <property name="organization_subcode" column="organization_subcode" type="string" />
+    <property name="organization_entity_code" column="organization_entity_code" type="integer" />
+    <property name="organization_ein" column="organization_ein" not-null="true" type="string" />
+    <property name="organization_site_url" column="organization_site_url" not-null="true" type="string" />
+    <property name="description" column="description" type="string" />
+    <property name="terms_of_use" column="terms_of_use" not-null="true" type="string" />
+    <property name="privacy_policy" column="privacy_policy" not-null="true" type="string" />
+    <property name="created_time" column="created_time" not-null="true" type="date" />
+    <property name="modified_time" column="modified_time" not-null="true" type="date" />
     
    </class>
 </hibernate-mapping>

@@ -5,19 +5,40 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-	<nav th:fragment="layoutNav">
-    	<ul th:with="currentView=${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')}">
-            <li><a href="/logout" th:href="@{/logout}">Logout</a></li>
-            <li th:unless="${currentView.equals('/') or #strings.startsWith(currentView,'/home')}">
-            	<a href="/home" th:href="@{/home}">Home</a>
-            </li>
-            <li th:unless="${#strings.startsWith(currentView,'/organizations')}">
-            	<a href="/organizations" th:href="@{/organizations}">Organizations</a>
-            </li>
-            <li th:unless="${#strings.startsWith(currentView,'/contacts')}">
-            	<a href="/contacts" th:href="@{/contacts}">Contacts</a>
-            </li>
-        </ul>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" th:fragment="layoutNav">
+    	<div class="container-fluid">
+        
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a th:with="currentView=${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')}" 
+                   class="navbar-brand" 
+                   href="/home" 
+                   th:href="(${currentView.equals('/') or #strings.startsWith(currentView,'/home')}) ? '#' : @{/home}">
+                    <span class="glyphicon glyphicon-th"></span>
+                </a>
+            </div>
+        
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav" th:with="currentView=${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')}">
+                    <li th:unless="${#strings.startsWith(currentView,'/organizations')}">
+                        <a href="/organizations" th:href="@{/organizations}">Organizations</a>
+                    </li>
+                    <li th:unless="${#strings.startsWith(currentView,'/documentFormats')}">
+                    	<a href="/documentFormats" th:href="@{/documentFormats}">Document Formats</a>
+                    </li>
+                    <li th:unless="${#strings.startsWith(currentView,'/contacts')}">
+                        <a href="/contacts" th:href="@{/contacts}">Contacts</a>
+                    </li>
+                </ul>
+            	<p class="navbar-text navbar-right"><a href="/logout" th:href="@{/logout}">Logout</a></p>
+            </div>
+       </div>
     </nav>
 </body>
 </html>

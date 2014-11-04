@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.pesc.edexchange.v1_0">
+   
+   <class name="OrganizationContact" table="organization_contact" catalog="pesc_edexchange">
+    <meta attribute="class-description">
+        This table is derived from the OrganizationContact schema defined in EdExchangeEnvelope_v1.0.7.xsd
+    </meta>
+    <id type="int" column="contact_id">
+        <generator class="native" />
+    </id>
+    <property name="contact_name" column="contact_name" not-null="true" type="string" />
+    <property name="contact_title" column="contact_title" not-null="true" type="string" />
+    <property name="contact_type" column="contact_type" not-null="true" type="string" />
+    <property name="email" column="email" not-null="true" type="string" />
+    <property name="phone_1" column="phone_1" not-null="true" type="string" />
+    <property name="phone_2" column="phone_2" type="string" />
+    <property name="street_address_1" column="street_address_1" not-null="true" type="string" />
+    <property name="street_address_2" column="street_address_2" not-null="true" type="string" />
+    <property name="street_address_3" column="street_address_3" type="string" />
+    <property name="street_address_4" column="street_address_4" type="string" />
+    <property name="city" column="city" not-null="true" type="string" />
+    <property name="state" column="state" not-null="true" type="string" />
+    <property name="zip" column="zip" not-null="true" type="string" />
+    <property name="country" column="country" not-null="true" type="string" />
+    <many-to-one name="directory" column="directory_id" class="Organization" not-null="true" lazy="false" />
+    
+    <property name="created_time" column="created_time" not-null="true" type="date" />
+    <property name="modified_time" column="modified_time" not-null="true" type="date" />
+    
+   </class>
+</hibernate-mapping>

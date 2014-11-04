@@ -3,25 +3,32 @@
 <head th:replace="layout/resources :: resourceHead (title=#{title.home})">
     <title>Home Page</title>
     <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
 </head>
 <body>
-	
-	<div th:replace="layout/nav :: layoutNav"></div>
-	
-    <h2>you are now logged in</h2>
+	<div class="container-fluid">
+		<div th:replace="layout/nav :: layoutNav"></div>
+        
+        <div class="page-header">
+        	<h1 th:text="#{title.home}">Page Title</h1>
+        </div>
+    	
+        <h3>TODO: Create CRUD UI Pages For:</h3>
+        <ul>
+            <li>Organization</li>
+            <li>Contacts</li>
+            <li>Address</li>
+            <li>Email</li>
+            <li>Phone</li>
+            <li>URL</li>
+            <li>Accreditation</li>
+        </ul>
     
-    <h3>TODO: Create CRUD UI Pages For:</h3>
-    <ul>
-    	<li>Organization</li>
-        <li>Contacts</li>
-        <li>Address</li>
-        <li>Email</li>
-        <li>Phone</li>
-        <li>URL</li>
-        <li>Accreditation</li>
-    </ul>
-    
-    <div th:replace="layout/footer :: layoutFooter"></div>
+    	<div th:replace="layout/footer :: layoutFooter"></div>
+    </div>
 	<th:block th:replace="layout/resources :: resourceScripts"></th:block>
 </body>
 </html>

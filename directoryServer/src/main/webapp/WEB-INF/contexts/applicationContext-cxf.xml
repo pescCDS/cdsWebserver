@@ -2,22 +2,60 @@
 <beans       xmlns="http://www.springframework.org/schema/beans" 
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
        xmlns:jaxws="http://cxf.apache.org/jaxws" 
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+        xmlns:util="http://www.springframework.org/schema/util"
         xmlns:soap="http://cxf.apache.org/bindings/soap" 
-xsi:schemaLocation="http://www.springframework.org/schema/beans 
-                    http://www.springframework.org/schema/beans/spring-beans.xsd 
-                    http://cxf.apache.org/bindings/soap 
-                    http://cxf.apache.org/schemas/configuration/soap.xsd 
-                    http://cxf.apache.org/jaxws 
-                    http://cxf.apache.org/schemas/jaxws.xsd">
+xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+                    http://cxf.apache.org/bindings/soap http://cxf.apache.org/schemas/configuration/soap.xsd 
+                    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+                    http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+                    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
     
+    <!-- JAX-RS (REST) -->
+    <jaxrs:server id="EdExchangeServiceRestHttp" address="/rest">
+		<jaxrs:serviceBeans>
+			<bean class="org.pesc.cds.webservice.service.RestWebServiceImpl" />
+		</jaxrs:serviceBeans>
+
+		<jaxrs:providers>
+		    <ref bean="jacksonJsonProvider" />
+			<ref bean="wadlProvider" />
+		</jaxrs:providers>
+	</jaxrs:server>
+    
+    
+    <!-- JAX-WS (SOAP) -->
     <jaxws:endpoint xmlns:service="http://service.cds.pesc.org/" 
-                                id="EdExchangeServiceSoapHTTP" 
-                           address="/services" 
-                       serviceName="service:WebServicesInterfaceService" 
-                      endpointName="service:WebServicesInterfacePort" 
-                       implementor="org.pesc.cds.webservice.service.WebServiceImpl">
-        <!--jaxws:properties>
-            <entry key="schema-validation-enabled" value="true" />
-        </jaxws:properties-->
-    </jaxws:endpoint>
+                               id="EdExchangeServiceSoapHTTP" 
+                          address="/soap" 
+                      serviceName="service:WebServicesInterfaceService" 
+                     endpointName="service:WebServicesInterfacePort" 
+                      implementor="org.pesc.cds.webservice.service.WebServiceImpl" />
+    
+<!--     <bean id="jaxrs-data-binding" class="org.apache.cxf.jaxrs.provider.JAXRSDataBinding"> -->
+<!--         <property name="provider" ref="jaxbProvider" /> -->
+<!--     </bean> -->
+    
+    
+    <util:map id="propertiesMap">
+        <entry key="jaxb.formatted.output">
+            <value type="java.lang.Boolean">true</value>
+        </entry>
+    </util:map>
+    
+    
+    <!-- Providers -->
+    <bean id="wadlProvider" class="org.apache.cxf.jaxrs.model.wadl.WadlGenerator">
+        <property name="applicationTitle" value="EdExchange Directory Server RDBMS Rest Service" />
+    </bean>
+	<bean id="jaxbProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider">
+	   <property name="marshallerProperties" ref="propertiesMap" />
+	</bean>
+	<bean id="jacksonJsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
+		<property name="mapper" ref="jacksonMapper" />
+	</bean>
+	
+	<!-- JSON Mappers -->
+	<bean id="jacksonMapper" class="org.pesc.cds.directoryserver.view.JSONMapper" />
+	
 </beans>

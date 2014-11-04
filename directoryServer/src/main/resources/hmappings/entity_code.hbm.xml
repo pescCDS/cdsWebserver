@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.pesc.edexchange.v1_0">
+   
+   <class name="EntityCode" table="organization_entity_code" catalog="pesc_edexchange">
+    <meta attribute="class-description">
+        This table is derived from the EntityCode schema defined in EdExchangeEnvelope_v1.0.7.xsd
+    </meta>
+    <id type="int" column="entity_code">
+        <generator class="native" />
+    </id>
+    <property name="description" column="description" not-null="true" type="string" />
+    <property name="created_time" column="created_time" not-null="true" type="date" />
+    <property name="modified_time" column="modified_time" not-null="true" type="date" />
+    
+   </class>
+</hibernate-mapping>

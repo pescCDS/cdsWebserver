@@ -1,17 +1,22 @@
 <?xml version="1.0"?>
-<jxb:bindings version="1.0" 
-       xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-      xmlns:jxb="http://java.sun.com/xml/ns/jaxb">
+<bindings  version="2.1"
+             xmlns="http://java.sun.com/xml/ns/jaxb"
+        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
+         xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+xsi:schemaLocation=" http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd">
     
-    <jxb:globalBindings>
-        <jxb:javaType name="java.util.Date" 
-                   xmlType="xs:dateTime" 
-               parseMethod="org.apache.cxf.xjc.runtime.DataTypeAdapter.parseDateTime" 
-               printMethod="org.apache.cxf.xjc.runtime.DataTypeAdapter.printDateTime" />
-        
-        <jxb:javaType name="java.util.Date" 
-                   xmlType="xs:date" 
-               parseMethod="org.apache.cxf.xjc.runtime.DataTypeAdapter.parseDate" 
-               printMethod="org.apache.cxf.xjc.runtime.DataTypeAdapter.printDate" />
-    </jxb:globalBindings>
-</jxb:bindings>
+    <jaxb:bindings schemaLocation="EdExchangeEnvelope_v1.0.7.xsd">
+    	<jaxb:globalBindings>
+	        <jaxb:javaType name="java.util.Date" xmlType="xs:dateTime" 
+	               parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseDate" 
+	               printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printDate" />
+	        
+	        <jaxb:javaType name="java.util.Date" xmlType="xs:date" 
+	               parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseDate" 
+	               printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printDate" />
+    	</jaxb:globalBindings>
+	</jaxb:bindings>
+</bindings>

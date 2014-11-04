@@ -5,8 +5,16 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-	<footer th:fragment="layoutFooter">
-    	PESC CDS Ed Exchange Directory Server <span th:text="${#dates.year(#dates.createToday())}">2014</span>
+	<footer class="row active" th:fragment="layoutFooter">
+    	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        	<span th:text="${#locale}">en_US</span>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-center">
+            PESC CDS Ed Exchange Directory Server <span th:text="${#dates.year(#dates.createToday())}">2014</span>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        	
+        </div>
     </footer>
 </body>
 </html>

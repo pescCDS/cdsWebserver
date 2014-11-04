@@ -9,12 +9,15 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     
     <mvc:resources location="/images" mapping="/images/**" />
     <mvc:resources location="/css/" mapping="/css/**" />
+    <mvc:resources location="/resources/" mapping="/resources/**"/>
     
     <mvc:annotation-driven />
     <context:component-scan base-package="org.pesc.cds.directoryserver.controller" />
     
-    <mvc:resources location="/resources/" mapping="/resources/**"/>
+    <bean id="restServices" class="org.pesc.cds.webservice.service.RestWebServiceImpl" />
+    <bean id="soapServices" class="org.pesc.cds.webservice.service.WebServiceImpl" />
     
-    <bean id="coreDomainService" class="org.pesc.cds.webservice.service.WebServiceImpl" />
+    <!--  -->
+    <bean id="documentFormats" class="org.pesc.edexchange.v1_0.dao.DocumentFormatsDao" />
     
 </beans>

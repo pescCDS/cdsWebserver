@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="antmaven-test" default="help" basedir=".">
+<project name="antmaven-test" default="help" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>
 		
 	</description>
@@ -11,10 +11,14 @@
 	
 	<property name="scripts.path" value="${basedir}/scripts" />
 	<property name="dirServer.path" value="${scripts.path}/directoryServer" />
+	<property name="dirServer.target.path" value="${basedir}\directoryServer\target" />
 	<property name="netServer.path" value="/networkServer" />
 	<property name="cfg.source.path" value="${scripts.path}/config_source" />
 	<property name="cfg.jdbc.path" value="${cfg.source.path}/jdbc" />
 	<property file="${scripts.path}/build.properties" />
+	
+	<property name="tomcat.path" value="D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42" />
+	<property name="target.finalName" value="directoryServer-0.1.1-SNAPSHOT" />
 	
 	<!--
     build-directory-db
@@ -31,19 +35,114 @@
             <transaction src="${dirServer.path}/db/1-directoryServerSchema.sql" />
         	<transaction src="${dirServer.path}/db/2-orgDirectoryTable.sql" />
         </sql>
-        
     </target>
+	
+	<!-- debug output -->
+	<target name="show-paths">
+		<echo message="tomcat.path: ${tomcat.path}" />
+		<echo message="dirServer.target.path: ${dirServer.target.path}" />
+		<echo message="target.finalName: ${target.finalName}" />
+	</target>
+	
+	<!-- tasks that can be called individually for the redeploy process -->
+	<target name="tomcat-stop">
+		<exec executable="cmd" dir="${tomcat.path}\bin">
+			<arg value="/c" />
+			<arg value="shutdown.bat" />
+		</exec>
+	</target>
+	<target name="tomcat-start">
+		<exec executable="cmd" dir="${tomcat.path}\bin">
+			<arg value="/c" />
+			<arg value="startup.bat" />
+		</exec>
+	</target>
+	<target name="webapp-remove">
+		<echo message="removing file ${tomcat.path}\webapps\${target.finalName}.war" />
+		<echo message="removing directory ${tomcat.path}\webapps\${target.finalName}" />
+		<delete file="${tomcat.path}\webapps\${target.finalName}.war" />
+		<delete dir="${tomcat.path}\webapps\${target.finalName}" />
+	</target>
+	<target name="webapp-compile">
+		<artifact:mvn mavenHome="D:\installs\apache-maven-3.1.0">
+			<arg value="clean" />
+			<arg value="package" />
+		</artifact:mvn>
+	</target>
+	<target name="webapp-deploy">
+		<copy file="${dirServer.target.path}\${target.finalName}.war" 
+			  todir="${tomcat.path}\webapps" />
+	</target>
+	
+	<!--
+	re-deploy directory server web application
+	 1) stop tomcat
+	 2) delete directoryServer.war and directory in tomacat's webapp directory
+	 3) run maven command 'mvn clean install
+	 4) copy directoryServer/target/directoryServer.war to <tomcat-webapps>/
+	 5) start tomcat
+	-->
+	<target name="redeploy" depends="start-tomcat">
+		<echo message="directoryServer redeployed" />
+	</target>
+	
+	<target name="stop-tomcat">
+		<exec executable="cmd" dir="${tomcat.path}\bin">
+			<arg value="/c" />
+			<arg value="shutdown.bat" />
+		</exec>
+	</target>
+	
+	<target name="remove-webapp" depends="stop-tomcat">
+		<echo message="removing file ${tomcat.path}\webapps\${target.finalName}.war" />
+		<echo message="removing directory ${tomcat.path}\webapps\${target.finalName}" />
+		<delete file="${tomcat.path}\webapps\${target.finalName}.war" />
+		<delete dir="${tomcat.path}\webapps\${target.finalName}" />
+	</target>
+	
+	<target name="clean-install" depends="remove-webapp">
+		<artifact:mvn mavenHome="D:\installs\apache-maven-3.1.0">
+			<arg value="clean" />
+			<arg value="package" />
+		</artifact:mvn>
+	</target>
+	
+	<target name="deploy" depends="clean-install">
+		<copy file="${dirServer.target.path}\${target.finalName}.war" 
+			  todir="${tomcat.path}\webapps" />
+	</target>
+	
+	<target name="start-tomcat" depends="deploy">
+		<exec executable="cmd" dir="${tomcat.path}\bin">
+			<arg value="/c" />
+			<arg value="startup.bat" />
+		</exec>
+	</target>
+	
+	
 	
 	<!-- Help Target -->
     <target name="help">
         <echo message="" />
         <echo message="EdExchange Setup Scripts" />
-        <echo message="Targets: build-directory-db, Help" />
+        <echo message="Targets: build-directory-db, redeploy, show-paths, Help" />
         <echo message="" />
         <echo message="build-directory-db" />
         <echo message="Drops and recreates the cds directory server database and tables" />
         <echo message="" />
-        <echo message="" />
+		<echo message="redeploy" />
+		<echo message="stops tomcat, deletes the web app in tomcat's directory, redeploys, then starts tomcat" />
+		<echo message="" />
+		<echo message="show-paths" />
+		<echo message="displays the property values used as directory paths in the ant script" />
+		<echo message="" />
+		<echo message="[tasks for individual steps in the redeploy process]" />
+		<echo message="tomcat-stop" />
+		<echo message="tomcat-start" />
+		<echo message="webapp-remove" />
+		<echo message="webapp-compile (you can also use 'mvn clean package')" />
+		<echo message="webapp-deploy" />
+		<echo message="" />
         <echo message="Help" />
         <echo message="This message information" />
     </target>

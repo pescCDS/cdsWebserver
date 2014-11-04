@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>DocumentFormat Form Fragment</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/dataTables.bootstrap.css" th:href="@{/resources/css/dataTables.bootstrap.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker.css" th:href="@{/resources/css/datepicker.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker3.css" th:href="@{/resources/css/datepicker3.css}" />
+    <link rel="stylesheet" href="../../../resources/css/fuelux.min.css" th:href="@{/resources/css/fuelux.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
+</head>
+<body>
+    <div class="container-fluid" th:fragment="form">
+    <form class="form-horizontal" role="form">
+		<input type="hidden" id="id" name="id" value="" />
+        <div class="form-group docformat-form-format_name has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="format_name" class="control-label">Name</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="format_name" autocomplete="off" maxlength="10" size="15" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <div class="form-group docformat-form-format_description">
+			<label for="format_description" class="col-sm-2 control-label">Description</label>
+            <div class="col-sm-10">
+        		<textarea id="format_description" cols="35" rows="3" autocomplete="off" class="form-control"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-group emp-form-format_inuse_count">
+        	<label for="supervisor" class="col-sm-2 control-label">Inuse Count</label>
+            <div class="col-sm-10 fuelux">
+                <div class="inuse_count spinbox digits-5">
+                    <input type="text" id="format_inuse_count" class="form-control input-mini spinbox-input" autocomplete="off" />
+                    <div class="spinbox-buttons btn-group btn-group-vertical">
+                        <button type="button" class="btn btn-default spinbox-up btn-xs">
+                        	<span class="glyphicon glyphicon-chevron-up"></span><span class="sr-only">Increase</span>
+                        </button>
+                        <button type="button" class="btn btn-default spinbox-down btn-xs">
+                        	<span class="glyphicon glyphicon-chevron-down"></span><span class="sr-only">Decrease</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+        	<label for="created_time" class="col-sm-2 control-label">Created</label>
+            <div class="col-sm-4">
+            	<input type="text" id="created_time" autocomplete="off" class="form-control disabled" disabled="disabled" />
+            </div>
+            <label for="modified_time" class="col-sm-2 control-label">Modified</label>
+            <div class="col-sm-4">
+            	<input type="text" id="modified_time" autocomplete="off" class="form-control disabled" disabled="disabled" />
+            </div>
+        </div>
+	</form>
+    </div>
+    <script src="../../../resources/js/jquery-2.1.1.min.js" th:src="@{/resources/js/jquery-2.1.1.min.js}"></script>
+	<script src="../../../resources/js/underscore-min.js" th:src="@{/resources/js/underscore-min.js}"></script>
+    <script src="../../../resources/js/backbone-min.js" th:src="@{/resources/js/backbone-min.js}"></script>
+    <script src="../../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
+    <script src="../../../resources/js/typeahead.bundle.js" th:src="@{/resources/js/typeahead.bundle.js}"></script>
+    <script src="../../../resources/js/jquery.dataTables.min.js" th:src="@{/resources/js/jquery.dataTables.min.js}"></script>
+    <script src="../../../resources/js/dataTables.bootstrap.js" th:src="@{/resources/js/dataTables.bootstrap.js}"></script>
+    <script src="../../../resources/js/bootstrap-datepicker.js" th:src="@{/resources/js/bootstrap-datepicker.js}"></script>
+    <script src="../../../resources/js/spinbox.js" th:src="@{/resources/js/spinbox.js}"></script>
+
+</body>
+</html>
