@@ -84,9 +84,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 
 									<!-- to generate JAX-WS 2.1 compliant code <frontEnd>jaxws21</frontEnd> -->
 									<faultSerialVersionUID>1</faultSerialVersionUID>
-									<!-- <bindingFiles>
-										<bindingFile>../EdExchangeCore/src/main/resources/bindings.xjb</bindingFile>
-									</bindingFiles>-->
 								</wsdlOption>
 							</wsdlOptions>
 						</configuration>
@@ -102,9 +99,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 						<version>1.1.2</version>
 					</dependency>
 
-					<!-- <dependency> <groupId>org.jvnet.jaxb2_commons</groupId> <artifactId>jaxb2-value-constructor</artifactId> 
-						<version>3.0</version> </dependency> <dependency> <groupId>org.jvnet.jaxb2_commons</groupId> 
-						<artifactId>jaxb2-basics</artifactId> <version>0.6.3</version> </dependency> -->
 				</dependencies>
 			</plugin>
 		</plugins>
@@ -188,10 +182,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		
 
 		<!-- hibernate -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -309,7 +299,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 			<artifactId>joda-time</artifactId>
 			<version>2.5</version>
 		</dependency>
-        
+		
 	</dependencies>
 	
 </project>
