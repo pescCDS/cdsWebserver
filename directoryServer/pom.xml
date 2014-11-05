@@ -30,6 +30,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	</repositories>
 
 	<build>
+	
+		<finalName>EdExchange</finalName>
+	
 		<resources>
 			<resource>
 				<directory>${project.build.directory}/generated-sources</directory>
