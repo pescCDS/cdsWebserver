@@ -51,6 +51,7 @@
    <xs:element name="EntityCode" type="EdEx:EntityCode" />
    <xs:complexType name="EntityCode">
    	<xs:sequence>
+   		<xs:element name="id" type="xs:unsignedShort" />
    		<xs:element name="entity_code" type="xs:int" />
    		<xs:element name="description" type="xs:string" />
    		<xs:element name="created_time" type="xs:dateTime" />

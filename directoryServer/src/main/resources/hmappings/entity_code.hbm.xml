@@ -3,16 +3,16 @@
 
 <hibernate-mapping package="org.pesc.edexchange.v1_0">
    
-   <class name="EntityCode" table="organization_entity_code" catalog="pesc_edexchange">
-    <meta attribute="class-description">
-        This table is derived from the EntityCode schema defined in EdExchangeEnvelope_v1.0.7.xsd
-    </meta>
-    <id type="int" column="entity_code">
-        <generator class="native" />
-    </id>
-    <property name="description" column="description" not-null="true" type="string" />
-    <property name="created_time" column="created_time" not-null="true" type="date" />
-    <property name="modified_time" column="modified_time" not-null="true" type="date" />
-    
-   </class>
+	<class name="EntityCode" table="organization_entity_code" catalog="pesc_edexchange">
+		<meta attribute="class-description">
+			This table is derived from the EntityCode schema defined in EdExchangeEnvelope_v1.0.7.xsd
+		</meta>
+		<id name="id" column="id" type="integer">
+			<generator class="identity" />
+		</id>
+		<property name="entityCode" column="entity_code" type="integer" not-null="true" />
+		<property name="description" column="description" not-null="true" type="string" />
+		<property name="createdTime" column="created_time" type="timestamp" update="false" insert="false" generated="always" />
+		<property name="modifiedTime" column="modified_time" type="timestamp" update="false" insert="false" generated="always" />
+	</class>
 </hibernate-mapping>

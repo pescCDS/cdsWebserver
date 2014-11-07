@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>Entity Code Modal Fragment</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/dataTables.bootstrap.css" th:href="@{/resources/css/dataTables.bootstrap.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker.css" th:href="@{/resources/css/datepicker.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker3.css" th:href="@{/resources/css/datepicker3.css}" />
+    <link rel="stylesheet" href="../../../resources/css/fuelux.min.css" th:href="@{/resources/css/fuelux.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
+</head>
+<body>
+<div th:fragment="content">
+	<div class="modal fade edit-docformat-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                	<div class="panel action-progress-panel">
+                    	<div class="panel-heading">
+                        	<div class="progress">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" 
+                                     aria-valuenow="100" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100" 
+                                     style="width:100%">
+                                    <span>Saving Document Format</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body text-danger">Processing errors</div>
+                    </div>
+                    <div th:replace="content/docformat/form :: form"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary docformat-modal-form-action-button"></button>
+               </div>
+            </div>
+        </div>
+    </div>
+    <table class="table table-condensed table-striped table-bordered"></table>
+</div>
+
+<script src="../../../resources/js/jquery-2.1.1.min.js" th:src="@{/resources/js/jquery-2.1.1.min.js}"></script>
+<script src="../../../resources/js/underscore-min.js" th:src="@{/resources/js/underscore-min.js}"></script>
+<script src="../../../resources/js/backbone-min.js" th:src="@{/resources/js/backbone-min.js}"></script>
+<script src="../../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
+<script src="../../../resources/js/typeahead.bundle.js" th:src="@{/resources/js/typeahead.bundle.js}"></script>
+<script src="../../../resources/js/jquery.dataTables.min.js" th:src="@{/resources/js/jquery.dataTables.min.js}"></script>
+<script src="../../../resources/js/dataTables.bootstrap.js" th:src="@{/resources/js/dataTables.bootstrap.js}"></script>
+<script src="../../../resources/js/bootstrap-datepicker.js" th:src="@{/resources/js/bootstrap-datepicker.js}"></script>
+<script src="../../../resources/js/spinbox.js" th:src="@{/resources/js/spinbox.js}"></script>
+</body>
+</html>

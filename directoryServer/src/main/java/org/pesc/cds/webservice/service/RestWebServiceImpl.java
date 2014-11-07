@@ -37,8 +37,11 @@ import org.pesc.cds.datatables.TableClassMap;
 import org.pesc.cds.datatables.Column_Type;
 import org.pesc.cds.datatables.Filter_Type;
 import org.pesc.cds.directoryserver.view.DocumentFormatJson;
+import org.pesc.cds.directoryserver.view.EntityCodeJson;
 import org.pesc.edexchange.v1_0.DocumentFormat;
+import org.pesc.edexchange.v1_0.EntityCode;
 import org.pesc.edexchange.v1_0.dao.DocumentFormatsDao;
+import org.pesc.edexchange.v1_0.dao.EntityCodesDao;
 
 public class RestWebServiceImpl {
 	
@@ -54,7 +57,7 @@ public class RestWebServiceImpl {
 		log.debug(jsDocFormat);
 		
 		//save document format object to persistence layer
-		DocumentFormat df = DocumentFormatsDao.saveDocumentFormat(jsDocFormat);
+		DocumentFormat df = DocumentFormatsDao.save(jsDocFormat);
 		log.debug(df);
 		return df;
 	}
@@ -67,7 +70,32 @@ public class RestWebServiceImpl {
 		log.debug(jsDocFormat);
 		
 		//remove document format object from persistence layer
-		DocumentFormatsDao.removeDocumentFormat(jsDocFormat);
+		DocumentFormatsDao.remove(jsDocFormat);
+	}
+	
+	@Path("/entityCodes/save/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public EntityCode saveEntityCode(@JsonProperty EntityCodeJson jsEntityCode) {
+		// TODO validate document format object
+		log.debug(jsEntityCode);
+		
+		//save document format object to persistence layer
+		EntityCode df = EntityCodesDao.save(jsEntityCode);
+		log.debug(df);
+		return df;
+	}
+	
+	@Path("/entityCodes/remove/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeEntityCode(@JsonProperty EntityCodeJson jsEntityCode) {
+		log.debug(jsEntityCode);
+		
+		//remove document format object from persistence layer
+		EntityCodesDao.remove(jsEntityCode);
 	}
 	
 	

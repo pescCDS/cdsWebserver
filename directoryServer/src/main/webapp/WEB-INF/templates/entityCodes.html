@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/resources :: resourceHead (title=#{title.documentFormats})">
-    <title th:text="#{title.documentFormats}">Document Formats Page</title>
+<head th:replace="layout/resources :: resourceHead (title=#{title.entityCodes})">
+    <title th:text="#{title.entityCodes}">Document Formats Page</title>
     <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,7 +14,7 @@
 		<div th:replace="layout/nav :: layoutNav"></div>
         
         <div class="page-header">
-        	<h1 th:text="#{title.documentFormats}">Page Title</h1>
+        	<h1 th:text="#{title.entityCodes}">Page Title</h1>
         </div>
     	
         <div id="dfView"></div>
@@ -25,18 +25,17 @@
     <script th:inline="javascript">
 		var dtView, 
 			DFView = Backbone.View.extend({
-			'sb':null,
-			'sbOptions':{
-				'min':0,
-				'max':100,
-				'step':1,
-				'disabled':true
-			},
 			
 			'columnFilters':null,
 			'modalForm':null,
 			'actionProgressPanel':null,
 			'progressBar':null,
+			'sb':null,
+			'sbOptions':{
+				'min':0,
+				'max':100,
+				'step':1
+			},
 			'datatable':null,
 			'datatableColumnMeta':[
 				{
@@ -47,19 +46,18 @@
 					'render':function(data,type,full,meta){
 						return [
 							'<div class="btn-group center-block">',
-								'<button type="button" class="btn btn-default btn-info btn-xs docformat-edit-btn" data-row-id="',full.id,'">',
+								'<button type="button" class="btn btn-default btn-info btn-xs entcode-edit-btn" data-row-id="',full.id,'">',
 									'<span class="glyphicon glyphicon-cog"></span>',
 								'</button>',
-								'<button type="button" class="btn btn-default btn-danger btn-xs docformat-del-btn">',
+								'<button type="button" class="btn btn-default btn-danger btn-xs entcode-del-btn">',
 									'<span class="glyphicon glyphicon-remove"></span>',
 								'</button>',
 							'</div>'
 						].join('');
 					}
 				},
-				{'data':'formatName', 'name':'formatName', 'title':'Name', 'type':'string', 'cftype':'text'},
-				{'data':'formatDescription', 'name':'formatDescription', 'title':'Description', 'type':'string', 'cftype':'text'},
-				{'data':'formatInuseCount', 'name':'formatInuseCount', 'title':'Inuse Count', 'type':'num', 'cftype':'number'},
+				{'data':'entityCode', 'name':'entityCode', 'title':'Code', 'type':'num', 'cftype':'number'},
+				{'data':'description', 'name':'description', 'title':'Description', 'type':'string', 'cftype':'text'},
 				
 				{'data':'createdTime', 'name':'createdTime', 'title':'Created', 'type':'date', 'cftype':'date'},
 				{'data':'modifiedTime', 'name':'modifiedTime', 'title':'Modified', 'type':'date', 'cftype':'date'}
@@ -124,12 +122,12 @@
 			},
 			
 			'displayInputValidation':function(formKey, isValid) {
-				if($.inArray(formKey,['format_name'])>-1) {
-					var formGroup = $('div.docformat-form-'+formKey,this.modalForm);
-					$('div.docformat-form-'+formKey,this.modalForm).toggleClass('has-success',isValid).toggleClass('has-error',!isValid);
+				if($.inArray(formKey,['entity_code','description'])>-1) {
+					var formGroup = $('div.entcode-form-'+formKey,this.modalForm);
+					$('div.entcode-form-'+formKey,this.modalForm).toggleClass('has-success',isValid).toggleClass('has-error',!isValid);
 					// some input contolls won't have the feedback visual element
 					if($('span.glyphicon.form-control-feedback',formGroup).length) {
-						$('div.docformat-form-'+formKey+' span.glyphicon.form-control-feedback',this.modalForm)
+						$('div.entcode-form-'+formKey+' span.glyphicon.form-control-feedback',this.modalForm)
 							.removeClass('hidden')
 							.toggleClass('glyphicon-ok',isValid)
 							.toggleClass('glyphicon-remove',!isValid);
@@ -139,39 +137,36 @@
 			
 			'resetForm':function() {
 				// don't use form.reset(), there are some hidden inputs need to retain their values
-				$('#id, #format_name, #format_description, #created_time, #modified_time',this.modalForm).val(null);
+				$('#id, #entity_code, #description, #created_time, #modified_time',this.modalForm).val(null);
 				
 				// reset spinbox
 				this.sb.spinbox('value',0);
 				
 				// clear validation classes
-				for(var i in {'format_name':0}) {
-					$('div.docformat-form-'+i,this.modalForm).removeClass('has-success has-error');
-					$('div.docformat-form-'+i+' span.glyphicon',this.modalForm).removeClass('glyphicon-ok glyphicon-remove').addClass('hidden');
+				for(var i in {'entity_code':1,'description':2}) {
+					$('div.entcode-form-'+i,this.modalForm).removeClass('has-success has-error');
+					$('div.entcode-form-'+i+' span.glyphicon.form-control-feedback',this.modalForm)
+						.removeClass('glyphicon-ok glyphicon-remove')
+						.addClass('hidden');
 				}
 			},
 			
 			'getFormData':function() {
 				var formData = {
-					'format_name':$.trim($('#format_name',this.modalForm).val())
+					'entity_code':this.sb.spinbox('value')*1,
+					'description':$.trim($('#description',this.modalForm).val())
 				},
-					docFormatIdVal = $('#id',this.modalForm).val(),
-					descVal = $.trim($('#format_description',this.modalForm).val()),
-					inuseCountVal = this.sb.spinbox('value')*1,
-					editMode = _.isFinite(docFormatIdVal),
+					dataIdVal = $('#id',this.modalForm).val(),
+					editMode = _.isFinite(dataIdVal),
 					validation = {
-						'format_name':formData.format_name.length>1
+						'entity_code':_.isFinite(formData.entity_code),
+						'description':formData.description.length>1
 					},
-					validInputsTotal = 1,
+					validInputsTotal = 2,
 					validInputCount = 0;
 				
 				if(editMode) {
-					_.extend(formData,{'id':docFormatIdVal*1});
-				}
-				
-				// only include optional data if it's populated
-				if(descVal.length>0) {
-					_.extend(formData,{'format_description':descVal});
+					_.extend(formData,{'id':dataIdVal*1});
 				}
 				
 				// display success/error for required, error-able inputs
@@ -187,18 +182,17 @@
 			
 			'setFormData':function(dfData) {
 				$('#id',this.modalForm).val(dfData.id);
-				$('#format_name',this.modalForm).val(dfData.formatName);
-				$('#format_description',this.modalForm).val(dfData.formatDescription);
+				$('#description',this.modalForm).val(dfData.description);
 				
 				// inuse spinbox
-				this.sb.spinbox('value',dfData.formatInuseCount);
+				this.sb.spinbox('value',dfData.entityCode);
 				
 				// created/modified date text fields
 				$('#created_time',this.modalForm).val(dfData.createdTime);
 				$('#modified_time',this.modalForm).val(dfData.modifiedTime);
 			},
 			
-			'className':'doc-formats-dtview',
+			'className':'entcode-dtview',
 			'events':{
 				// DATATABLE INIT COMPLETE
 				'init.dt .dataTables_wrapper':function(e, settings, json) {
@@ -209,8 +203,8 @@
 						'</button>'
 					].join(''));
 					
-					// create add docformat button
-					$('div.add-button-container',this.$el).append('<button type="button" class="btn btn-success pull-left">Add Document Format</button>');
+					// create add entcode button
+					$('div.add-button-container',this.$el).append('<button type="button" class="btn btn-success pull-left">Add Entity Code</button>');
 					
 					this.$el.prepend(this.columnFilters.$el);
 				},
@@ -220,19 +214,19 @@
 					this.datatable.ajax.reload();
 				},
 				
-				// ADD DOCUMENT FORMAT CLICK
+				// ADD ENTITY CODE CLICK
 				'click div.add-button-container button':function(e) {
-					$('h4.modal-title',this.modalForm).html('Create Document Format');
-					$('button.docformat-modal-form-action-button',this.modalForm).html('Create');
+					$('h4.modal-title',this.modalForm).html('Create Entity Code');
+					$('button.entcode-modal-form-action-button',this.modalForm).html('Create');
 					this.modalForm.modal('show');
 				},
 				
-				// EDIT DOCUMENT FORMAT CLICK
-				'click button.docformat-edit-btn':function(e) {
+				// EDIT ENTITY CODE CLICK
+				'click button.entcode-edit-btn':function(e) {
 					var d = this.datatable.row($(e.currentTarget).parent().parent().parent()[0]).data();
 					if(d) {
-						$('h4.modal-title',this.modalForm).html('Edit Document Format');
-						$('button.docformat-modal-form-action-button',this.modalForm).html('Save');
+						$('h4.modal-title',this.modalForm).html('Edit Entity Code');
+						$('button.entcode-modal-form-action-button',this.modalForm).html('Save');
 						
 						//populate modal form with data and then display it
 						this.setFormData(d);
@@ -240,14 +234,14 @@
 					}
 				},
 				
-				// REMOVE DOCUMENT FORMAT CLICK
-				'click button.docformat-del-btn':function(e) {
+				// REMOVE ENTITY CODE CLICK
+				'click button.entcode-del-btn':function(e) {
 					//get the index of the data tables row
 					
-					if(confirm('Are you sure you want to remove this document format?')) {
+					if(confirm('Are you sure you want to remove this Entity Code?')) {
 						var d = this.datatable.row($(e.currentTarget).parent().parent().parent()[0]).data();
 						$.ajax({
-							'url': /*[[ @{/services/rest/documentFormats/remove} ]]*/ '/services/rest/documentFormats/remove',
+							'url': /*[[ @{/services/rest/entityCodes/remove} ]]*/ '/services/rest/entityCodes/remove',
 							type:'POST',
 							contentType:'application/json',
 							dataType:'json',
@@ -262,19 +256,22 @@
 				},
 				
 				// MODAL ACTION BUTTON CLICK
-				'click button.docformat-modal-form-action-button':function(e) {
+				'click button.entcode-modal-form-action-button':function(e) {
+					//console.log('modal action button click');
 					var fd = this.getFormData();
+					//console.log(fd);
 					if(fd) {
 						this.showProgress();
 						// ajax to server and update data table
 						$.ajax({
-							'url': /*[[ @{/services/rest/documentFormats/save} ]]*/ '/services/rest/documentFormats/save',
+							'url': /*[[ @{/services/rest/entityCodes/save} ]]*/ '/services/rest/entityCodes/save',
 							type:'POST',
 							contentType:'application/json',
 							dataType:'json',
 							data:JSON.stringify(fd),
 							processData:false
 						}).done(function(data,textStatus,jqXHR) {
+							//successful process
 							dtView.datatable.ajax.reload();
 							dtView.modalForm.modal('hide');
 						}).fail(function(jqXHR,textStatus,errorThrown) {
@@ -283,7 +280,7 @@
 							$('div.action-progress-panel .progress-bar',this.modalForm).addClass('progress-bar-danger');
 							
 							// display error message in modal progress panel body 
-							$('div.edit-docformat-modal div.action-progress-panel div.panel-body').empty().append(
+							$('div.edit-entcode-modal div.action-progress-panel div.panel-body').empty().append(
 								[
 									'<p>',errorThrown,'</p>',
 									'<div class="pull-right clearfix">',
@@ -301,8 +298,9 @@
 				},
 				
 				// EDIT MODAL HIDE
-				'hidden.bs.modal div.edit-docformat-modal':function() {
+				'hidden.bs.modal div.edit-entcode-modal':function() {
 					this.resetForm();
+					this.hideProgress();
 				}
 			},
 			
@@ -312,7 +310,7 @@
 				this.$el.append(this.template({}));
 				
 				//configure modal
-				this.modalForm = $('div.edit-docformat-modal',this.$el).modal({
+				this.modalForm = $('div.edit-entcode-modal',this.$el).modal({
 					'backdrop':'static',
 					'keyboard':false,
 					'show':false
@@ -324,11 +322,11 @@
 				this.progressBar = $('div.progress',this.actionProgressPanel);
 				
 				//spinbox control
-				$('div.inuse_count.spinbox',this.modalForm).spinbox(this.sbOptions);
-				this.sb = $('div.inuse_count.spinbox',this.modalForm);
+				$('div.entity_code.spinbox',this.modalForm).spinbox(this.sbOptions);
+				this.sb = $('div.entity_code.spinbox',this.modalForm);
 				
 				//create column filters
-				this.columnFilters = new VDataFilters({'table':'documentFormats', 'tableColumns':this.datatableColumnMeta});
+				this.columnFilters = new VDataFilters({'table':'entityCodes', 'tableColumns':this.datatableColumnMeta});
 				
 				//set initial data table configuration
 				this.datatableConfig.columns = this.datatableColumnMeta;
@@ -339,16 +337,15 @@
 							d.table = cf[0].table;
 							d.columnfilters = cf;
 						} else {
-							d.table = 'documentFormats';
+							d.table = 'entityCodes';
 						}
 					}
-					d.table = 'documentFormats';
+					d.table = 'entityCodes';
 					return JSON.stringify(d);
 				};
 				
 				//create data table
 				this.datatable = $('table.table',this.$el).DataTable(this.datatableConfig);
-				
 			},
 			
 			'render':function() { return this;}

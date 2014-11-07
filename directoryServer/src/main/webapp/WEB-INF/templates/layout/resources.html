@@ -21,7 +21,8 @@
     <link rel="stylesheet" href="../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
     
     <th:block th:switch="${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')}">
-		<script th:case="'/documentFormats'" id="addEditForm" type="text/template" th:include="forms/docformat :: form"></script>
+		<script th:case="'/documentFormats'" id="pageContent" type="text/template" th:include="content/docformat/page :: content"></script>
+        <script th:case="'/entityCodes'" id="pageContent" type="text/template" th:include="content/entcode/page :: content"></script>
     </th:block>
 </head>
 

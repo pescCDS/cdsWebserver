@@ -767,7 +767,7 @@ var VDataFiltersContainer = Backbone.View.extend({
 	},
 	
 	updateFilter:function(filter) {
-		console.log(filter);
+		//console.log(filter);
 		var fALink = $('div.tab-content div.list-group a.list-group-item[data-filter-cid="'+filter.cid+'"]', this.$el),
 			fa = filter.attributes,
 			fv = filter.attributes.filterValue;
@@ -887,7 +887,7 @@ var VCommonValueFilterControl = Backbone.View.extend({
 				//enables = this.collection.where({'type':col.get('type')}),
 				disables = this.collection.difference(this.collection.where({'type':col.get('type')}));
 			col.set('selected',newSelectedStatus);
-			console.log(col);//wondering if enum type should be excluded if their enum values are different
+			//console.log(col);//wondering if enum type should be excluded if their enum values are different
 			
 			this.selectedColumns = this.collection.where({'type':col.get('type'),'selected':true});
 			this.selectedCount = this.selectedColumns.length;
@@ -1071,8 +1071,8 @@ var VDataFilters = Backbone.View.extend({
 	// columnData: {label: string, name: could be a string or an array, type: string }
 	// 
 	commonValueColumnSelectionChange:function(columnData) {
-		console.log(columnData);
-		console.log(this.commonValueControl.selectedCount);
+		//console.log(columnData);
+		//console.log(this.commonValueControl.selectedCount);
 		if(this.commonValueControl.selectedCount) {// columns are selected
 			//tell the filter factory to show this data type (if it isn't already)
 			if(this.filterFactory.activeFilter().type !== columnData.type) {
@@ -1210,7 +1210,7 @@ var VDataFilters = Backbone.View.extend({
 			return this.filters.length ? this.filters.toJSON() : false ;
 		} else {
 			// TODO look at currentWorkingFilterSet and currentFilterCategory and currentColumnFilter
-			console.log(this.currentColumnFilter);
+			//console.log(this.currentColumnFilter);
 		}
 	},
 	
@@ -1711,7 +1711,7 @@ var VFilterWidgetTypeNumberEq = VFilterWidgetType.extend({
 	),
 	initialize:function(options) {
 		this.$el.addClass('fuelux');
-		// TODO make this a spinner (FuelUX, JQueryUI)
+		// make this a spinner (FuelUX, JQueryUI)
 		this.$el.html(this.template({}));
 		$('.spinbox',this.$el).spinbox(this.sbOptions);
 		this.sb = $('.spinbox',this.$el);
@@ -2504,7 +2504,7 @@ var VFilterWidgetTypeEnumIn = VFilterWidgetType.extend({
 	},
 	setValue:function(filterValue) {
 		//TODO check if we need to set the enum group
-		console.log(filterValue);
+		//console.log(filterValue);
 		
 		
 		//set the checkboxes to the values in valueList

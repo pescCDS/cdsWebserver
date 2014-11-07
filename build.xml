@@ -18,7 +18,7 @@
 	<property file="${scripts.path}/build.properties" />
 	
 	<property name="tomcat.path" value="D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42" />
-	<property name="target.finalName" value="directoryServer-0.1.1-SNAPSHOT" />
+	<property name="target.finalName" value="EdExchange" />
 	
 	<!--
     build-directory-db

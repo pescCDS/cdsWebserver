@@ -29,9 +29,9 @@
        
 	
 	   <!-- List of XML mapping files -->
-<!-- 	   <mapping resource="hmappings/organization.hbm.xml" /> -->
-<!-- 	   <mapping resource="hmappings/entity_code.hbm.xml" /> -->
 	   <mapping resource="hmappings/document_format.hbm.xml" />
+	   <mapping resource="hmappings/entity_code.hbm.xml" />
+<!-- 	   <mapping resource="hmappings/organization.hbm.xml" /> -->
 <!-- 	   <mapping resource="hmappings/organization_contact.hbm.xml" /> -->
 <!-- 	   <mapping resource="hmappings/organization_credential.hbm.xml" /> -->
 	   

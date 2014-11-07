@@ -17,7 +17,8 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     <bean id="restServices" class="org.pesc.cds.webservice.service.RestWebServiceImpl" />
     <bean id="soapServices" class="org.pesc.cds.webservice.service.WebServiceImpl" />
     
-    <!--  -->
+    <!-- dao objects for ajax CRUD control -->
     <bean id="documentFormats" class="org.pesc.edexchange.v1_0.dao.DocumentFormatsDao" />
+    <bean id="entityCodes" class="org.pesc.edexchange.v1_0.dao.EntityCodesDao" />
     
 </beans>
