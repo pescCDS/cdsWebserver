@@ -73,6 +73,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
 				<inherited>false</inherited>
+				<version>1.5</version>
 				<executions>
 					<execution>
 						<id>xjc</id>
