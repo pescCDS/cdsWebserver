@@ -40,24 +40,26 @@ import org.pesc.cds.directoryserver.view.DocumentFormatJson;
 import org.pesc.cds.directoryserver.view.EntityCodeJson;
 import org.pesc.edexchange.v1_0.DocumentFormat;
 import org.pesc.edexchange.v1_0.EntityCode;
+import org.pesc.edexchange.v1_0.Organization;
 import org.pesc.edexchange.v1_0.dao.DocumentFormatsDao;
 import org.pesc.edexchange.v1_0.dao.EntityCodesDao;
+import org.pesc.edexchange.v1_0.dao.OrganizationsDao;
 
 public class RestWebServiceImpl {
 	
 	private static final Log log = LogFactory.getLog(RestWebServiceImpl.class);
 	
-	
+	// Document Formats
 	@Path("/documentFormats/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public DocumentFormat saveDocumentFormat(@JsonProperty DocumentFormatJson jsDocFormat) {
+	public DocumentFormat saveDocumentFormat(@JsonProperty DocumentFormat docFormat) {
 		// TODO validate document format object
-		log.debug(jsDocFormat);
+		log.debug(docFormat);
 		
 		//save document format object to persistence layer
-		DocumentFormat df = DocumentFormatsDao.save(jsDocFormat);
+		DocumentFormat df = DocumentFormatsDao.save(docFormat);
 		log.debug(df);
 		return df;
 	}
@@ -66,23 +68,25 @@ public class RestWebServiceImpl {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeDocumentFormat(@JsonProperty DocumentFormatJson jsDocFormat) {
-		log.debug(jsDocFormat);
+	public void removeDocumentFormat(@JsonProperty DocumentFormat docFormat) {
+		log.debug(docFormat);
 		
 		//remove document format object from persistence layer
-		DocumentFormatsDao.remove(jsDocFormat);
+		DocumentFormatsDao.remove(docFormat);
 	}
 	
+	
+	// Entity Codes
 	@Path("/entityCodes/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public EntityCode saveEntityCode(@JsonProperty EntityCodeJson jsEntityCode) {
+	public EntityCode saveEntityCode(@JsonProperty EntityCode entityCode) {
 		// TODO validate document format object
-		log.debug(jsEntityCode);
+		log.debug(entityCode);
 		
 		//save document format object to persistence layer
-		EntityCode df = EntityCodesDao.save(jsEntityCode);
+		EntityCode df = EntityCodesDao.save(entityCode);
 		log.debug(df);
 		return df;
 	}
@@ -91,11 +95,52 @@ public class RestWebServiceImpl {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void removeEntityCode(@JsonProperty EntityCodeJson jsEntityCode) {
-		log.debug(jsEntityCode);
+	public void removeEntityCode(@JsonProperty EntityCode entityCode) {
+		log.debug(entityCode);
 		
 		//remove document format object from persistence layer
-		EntityCodesDao.remove(jsEntityCode);
+		EntityCodesDao.remove(entityCode);
+	}
+	
+	
+	// Organizations
+	@Path("/organizations/save/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Organization saveOrganization(@JsonProperty Organization org) {
+		// TODO validate organization object
+		log.debug(org);
+		log.debug(String.format(
+			"Organization {%n  directoryId:%s,%n  Id:%s,%n  Name:%s,%n  IdType:%s,%n  SubCode:%s,%n  EIN:%s,%n  EntityCode:%s,%n  SiteUrl:%s,%n  Description:%s,%n  termsOfUser:%s,%n  privacyPolicy:%s",
+			org.getDirectoryId(),
+			org.getOrganizationId(),
+			org.getOrganizationName(),
+			org.getOrganizationIdType(),
+			org.getOrganizationSubcode(),
+			org.getOrganizationEin(),
+			org.getOrganizationEntityCode(),
+			org.getOrganizationSiteUrl(),
+			org.getDescription(),
+			org.getTermsOfUse(),
+			org.getPrivacyPolicy()
+		));
+		
+		//save organization object to persistence layer
+		Organization retOrg = OrganizationsDao.save(org);
+		log.debug(retOrg);
+		return retOrg;
+	}
+	
+	@Path("/organizations/remove/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeOrganization(@JsonProperty Organization org) {
+		log.debug(org);
+		
+		//remove organization object from persistence layer
+		OrganizationsDao.remove(org);
 	}
 	
 	

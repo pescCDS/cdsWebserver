@@ -17,28 +17,40 @@
         	<h1 th:text="#{title.organizations}">Page Title</h1>
         </div>
     	
-        <div id="orgView">
-            <table id="dtOrganizations" class="table table-condensed table-striped table-bordered"></table>
-        </div>
+        <div id="orgView"></div>
     
     	<div th:replace="layout/footer :: layoutFooter"></div>
     </div>
 	<th:block th:replace="layout/resources :: resourceScripts"></th:block>
     <script th:inline="javascript">
-		
-		var dtView, EmpView = Backbone.View.extend({
-			
-			className:'',
-			events:{},
-			template:_.template([].join('')),
-			initialize:function(options) {
-				this.$el.append(this.template({}));
-			},
-			render:function() { return this;}
-		});
+		// create a new DataTableView populated with organization meta data
+		var dtView;
 		
 		$(document).ready(function(e){
-			dtView = new OrgView();
+			dtView = new DataTableView({
+				'dataClass':'Organization',
+				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
+				'table':{
+					'name':'organizations',
+					'primaryKey':'directoryId',
+					'defaultColumnOrder':[[1,'asc']],
+					'columns':[
+						{'id':'directoryId', 'name':'directoryId', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
+						{'id':'organizationId', 'name':'organizationId', 'type':'varchar', 'title':'Id', 'controlType':'text'},
+						{'id':'organizationIdType', 'name':'organizationIdType', 'type':'varchar', 'title':'Id Type', 'controlType':'text'},
+						{'id':'organizationName', 'name':'organizationName', 'type':'varchar', 'title':'Name', 'controlType':'text'},
+						{'id':'organizationSubcode', 'name':'organizationSubcode', 'type':'varchar', 'title':'Sub Code', 'required':false, 'controlType':'text'},
+						{'id':'organizationEntityCode', 'name':'organizationEntityCode', 'type':'tinyint', 'title':'Entity Code', 'required':false, 'controlType':'spinbox'},
+						{'id':'organizationEin', 'name':'organizationEin', 'type':'varchar', 'title':'EIN', 'controlType':'text'},
+						{'id':'organizationSiteUrl', 'name':'organizationSiteUrl', 'type':'varchar', 'title':'Site URL', 'controlType':'text'},
+						{'id':'description', 'name':'description', 'type':'text', 'title':'Description', 'visible':false, 'required':false, 'controlType':'textarea'},
+						{'id':'termsOfUse', 'name':'termsOfUse', 'type':'text', 'title':'Terms of Use', 'visible':false, 'controlType':'textarea'},
+						{'id':'privacyPolicy', 'name':'privacyPolicy', 'type':'text', 'title':'Privacy Policy', 'visible':false, 'controlType':'textarea'},
+						{'id':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 'disabled':true, 'required':false, 'controlType':'text'},
+						{'id':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 'disabled':true, 'required':false, 'controlType':'text'}
+					]
+				}
+			});
 			$('#orgView').replaceWith(dtView.$el);
 		});
 	</script>

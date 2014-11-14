@@ -31,27 +31,26 @@
   <xs:element name="Organization" type="EdEx:Organization" />
   <xs:complexType name="Organization">
      <xs:sequence>
-         <xs:element name="directory_id" type="xs:int"/>
+         <xs:element name="directory_id" type="xs:positiveInteger"/>
          <xs:element name="organization_id" type="xs:string" />
          <xs:element name="organization_id_type" type="xs:string" />
          <xs:element name="organization_name" type="xs:string" />
          <xs:element name="organization_subcode" type="xs:string" />
-         <xs:element name="organization_entity_code" type="xs:string" />
-         <xs:element name="organization_ein" type="xs:int" />
+         <xs:element name="organization_entity_code" type="xs:int" />
+         <xs:element name="organization_ein" type="xs:string" />
          <xs:element name="organization_site_url" type="xs:string" />
          <xs:element name="description" type="xs:string" />
          <xs:element name="terms_of_use" type="xs:string" />
          <xs:element name="privacy_policy" type="xs:string" />
          <xs:element name="created_time" type="xs:dateTime" />
          <xs:element name="modified_time" type="xs:dateTime" />
-         
      </xs:sequence>
    </xs:complexType>
    
    <xs:element name="EntityCode" type="EdEx:EntityCode" />
    <xs:complexType name="EntityCode">
    	<xs:sequence>
-   		<xs:element name="id" type="xs:unsignedShort" />
+   		<xs:element name="id" type="xs:positiveInteger" />
    		<xs:element name="entity_code" type="xs:int" />
    		<xs:element name="description" type="xs:string" />
    		<xs:element name="created_time" type="xs:dateTime" />
@@ -62,7 +61,7 @@
    <xs:element name="DocumentFormat" type="EdEx:DocumentFormat" />
    <xs:complexType name="DocumentFormat">
    	<xs:sequence>
-   		<xs:element name="id" type="xs:unsignedShort" />
+   		<xs:element name="id" type="xs:positiveInteger" />
    		<xs:element name="format_name" type="xs:string" />
    		<xs:element name="format_description" type="xs:string" />
    		<xs:element name="format_inuse_count" type="xs:int" />
@@ -88,7 +87,7 @@
    <xs:element name="OrganizationContact" type="EdEx:OrganizationContact" />
    <xs:complexType name="OrganizationContact">
    	<xs:sequence>
-   		<xs:element name="contact_id" type="xs:int" />
+   		<xs:element name="contact_id" type="xs:positiveInteger" />
    		<xs:element name="contact_name" type="xs:string" />
    		<xs:element name="contact_title" type="xs:string" />
    		<xs:element name="contact_type" type="xs:string" />

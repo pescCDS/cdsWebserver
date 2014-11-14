@@ -18,6 +18,9 @@ public class EntityCodesDao {
 	public EntityCodesDao() {
 		entityCodes = new ArrayList<EntityCode>();
 		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
@@ -30,26 +33,21 @@ public class EntityCodesDao {
 	}
 	
 	// save Entity Code
-	public static EntityCode save(EntityCodeJson jsEntityCode) {
+	public static EntityCode save(EntityCode entityCode) {
 		EntityCode retEc = null;
 		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
-			// create new EntityCode to save
-			EntityCode ec = new EntityCode();
-			if(jsEntityCode.getId()!=null) {
-				ec.setId(jsEntityCode.getId());
-			}
-			ec.setEntityCode(jsEntityCode.getEntity_code());
-			ec.setDescription(jsEntityCode.getDescription());
-			
 			// save EntityCode to persistence layer
-			session.saveOrUpdate(ec);;
-			log.debug(String.format("Saved %s",jsEntityCode.toString()));
+			session.saveOrUpdate(entityCode);
+			log.debug(String.format("Saved %s",entityCode.toString()));
 			
 			// get the saved EntityCode and load it into the return variable
-			retEc = (EntityCode)session.load(EntityCode.class.getName(), ec.getId());
+			retEc = (EntityCode)session.load(EntityCode.class, entityCode.getId());
 			
 			// TODO re-populate the local List
 			
@@ -63,13 +61,16 @@ public class EntityCodesDao {
 	}
 	
 	// remove Entity Code
-	public static void remove(EntityCodeJson jsEntityCode) {
+	public static void remove(EntityCode entityCode) {
 		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
 			// load the EntityCode from the persistence layer and then delete it
-			EntityCode ec = (EntityCode)session.load(EntityCode.class, jsEntityCode.getId());
+			EntityCode ec = (EntityCode)session.load(EntityCode.class, entityCode.getId());
 			session.delete(ec);
 			
 			// TODO re-populate local List
@@ -81,6 +82,6 @@ public class EntityCodesDao {
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
 		}
 	}
-
+	
 	public static List<EntityCode> getEntityCodes() { return entityCodes; }
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<title>Entity Code Modal Fragment</title>
+	<title>DataTable Modal Fragment</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" href="../../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
     <link rel="stylesheet" href="../../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
@@ -12,8 +12,9 @@
     <link rel="stylesheet" href="../../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
 </head>
 <body>
-<div th:fragment="content">
-    <div class="modal fade edit-entcode-modal">
+<!-- DataTable Page View Template -->
+<div th:fragment="content (page)">
+	<div class="modal fade edit-dtview-modal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -31,18 +32,18 @@
                                      aria-valuemin="0" 
                                      aria-valuemax="100" 
                                      style="width:100%">
-                                    <span>Saving Entity Code</span>
+                                    <span>Saving</span>
                                 </div>
                             </div>
                         </div>
                         <div class="panel-body text-danger">Processing errors</div>
                     </div>
-                    <div th:replace="content/entcode/form :: form"></div>
+                    <div th:replace="${#strings.concat('content', page, '/form')} :: form"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary entcode-modal-form-action-button"></button>
-                </div>
+                    <button type="button" class="btn btn-primary dtview-modal-form-action-button"></button>
+               </div>
             </div>
         </div>
     </div>

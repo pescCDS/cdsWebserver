@@ -235,18 +235,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
             <artifactId>thymeleaf-spring3</artifactId>
             <version>2.1.2.RELEASE</version>
         </dependency>
-        
-<!--         <dependency> -->
-<!--             <groupId>org.codehaus.jackson</groupId> -->
-<!--             <artifactId>jackson-mapper-asl</artifactId> -->
-<!--             <version>1.9.2</version> -->
-<!--         </dependency> -->
-        
-
-<!-- 		<dependency> -->
-<!-- 			<groupId>mysql</groupId> -->
-<!-- 			<artifactId>mysql-connector-java</artifactId> -->
-<!-- 		</dependency> -->
 
 		<dependency>
            	<groupId>org.mariadb.jdbc</groupId>
@@ -258,7 +246,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 			<artifactId>junit</artifactId>
 		</dependency>
 
-		<!-- These need version properties -->
+		<!-- These need version properties in the parent pom -->
 		<dependency>
 			<groupId>javassist</groupId>
 			<artifactId>javassist</artifactId>

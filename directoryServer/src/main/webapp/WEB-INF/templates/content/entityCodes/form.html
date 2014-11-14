@@ -15,16 +15,17 @@
 
 <div class="container-fluid" th:fragment="form">
     <form class="form-horizontal" role="form">
-		<input type="hidden" id="id" name="id" value="" />
+		
+        <input type="hidden" id="id" name="id" value="" />
         
-        <div class="form-group entcode-form-entity_code has-feedback">
+        <div class="form-group dtview-form-entityCode has-feedback">
         	<div class="col-sm-2 text-right">
-            	<label for="entity_code" class="col-sm-2 control-label">Code</label>
+            	<label for="entityCode" class="col-sm-2 control-label">Code</label>
             	<span class="help-text text-danger"><em>required</em></span>
             </div>
             <div class="col-sm-10 fuelux">
-                <div class="entity_code spinbox digits-5">
-                    <input type="text" id="entity_code" class="form-control input-mini spinbox-input" autocomplete="off" />
+                <div class="entityCode spinbox digits-5">
+                    <input type="text" id="entityCode" class="form-control input-mini spinbox-input" autocomplete="off" />
                     <div class="spinbox-buttons btn-group btn-group-vertical">
                         <button type="button" class="btn btn-default spinbox-up btn-xs">
                         	<span class="glyphicon glyphicon-chevron-up"></span><span class="sr-only">Increase</span>
@@ -37,7 +38,7 @@
             </div>
         </div>
         
-        <div class="form-group entcode-form-description has-feedback">
+        <div class="form-group dtview-form-description has-feedback">
         	<div class="col-sm-2 text-right">
 				<label for="description" class="col-sm-2 control-label">Description</label>
                 <span class="help-text text-danger"><em>required</em></span>

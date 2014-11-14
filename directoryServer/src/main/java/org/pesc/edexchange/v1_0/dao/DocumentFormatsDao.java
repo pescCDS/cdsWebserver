@@ -21,6 +21,9 @@ public class DocumentFormatsDao {
 		
 		// load the local List from the persistence layer 
 		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
@@ -48,10 +51,13 @@ public class DocumentFormatsDao {
 		if(df == null) {
 			log.debug("didn't find document format in class list, checking persistence ...");
 			try {
+				if(HibernateUtil.getSessionFactory().isClosed()) {
+					HibernateUtil.getSessionFactory().openSession();
+				}
 				Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 				session.beginTransaction();
 				
-				df = (DocumentFormat)session.load(DocumentFormat.class.getName(), formatId);
+				df = (DocumentFormat)session.load(DocumentFormat.class, formatId);
 				
 				session.getTransaction().commit();
 				
@@ -63,26 +69,21 @@ public class DocumentFormatsDao {
 	}
 	
 	// save DocumentFormat
-	public static DocumentFormat save(DocumentFormatJson jsDocFormat) {
+	public static DocumentFormat save(DocumentFormat docFormat) {
 		DocumentFormat retDf = null;
 		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
-			// create a new DocumentFormat object to save
-			DocumentFormat df = new DocumentFormat();
-			if(jsDocFormat.getId()!=null) {
-				df.setId(jsDocFormat.getId());
-			}
-			df.setFormatName(jsDocFormat.getFormat_name());
-			df.setFormatDescription(jsDocFormat.getFormat_description());
-			
 			// save to persistence layer
-			session.saveOrUpdate(df);
-			log.debug(String.format("Saved %s",df.toString()));
+			session.saveOrUpdate(docFormat);
+			log.debug(String.format("Saved %s",docFormat.toString()));
 			
 			// get the saved DocumentFormat object and put it into the return variable
-			retDf = (DocumentFormat)session.load(DocumentFormat.class.getName(), df.getId());
+			retDf = (DocumentFormat)session.load(DocumentFormat.class, docFormat.getId());
 			
 			// TODO re-populate the local List
 			
@@ -95,13 +96,16 @@ public class DocumentFormatsDao {
 		return retDf;
 	}
 	// remove DocumentFormat
-	public static void remove(DocumentFormatJson jsDocFormat) {
+	public static void remove(DocumentFormat docFormat) {
 		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
 			// get the Entity Code object from the persistence layer and delete it
-			DocumentFormat df = (DocumentFormat)session.load(DocumentFormat.class, jsDocFormat.getId());
+			DocumentFormat df = (DocumentFormat)session.load(DocumentFormat.class, docFormat.getId());
 			session.delete(df);
 			
 			// TODO re-populate the local List

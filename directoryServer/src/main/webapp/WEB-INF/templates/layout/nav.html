@@ -26,6 +26,9 @@
         
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav" th:with="currentView=${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')}">
+                    <li th:unless="${#strings.startsWith(currentView,'/organizations')}">
+                    	<a href="/organizations" th:href="@{/organizations}">Organization</a>
+                    </li>
                     <li th:unless="${#strings.startsWith(currentView,'/entityCodes')}">
                         <a href="/contacts" th:href="@{/entityCodes}">Entity Codes</a>
                     </li>

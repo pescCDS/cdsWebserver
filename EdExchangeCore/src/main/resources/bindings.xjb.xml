@@ -17,6 +17,13 @@ xsi:schemaLocation=" http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/
 	        <jaxb:javaType name="java.util.Date" xmlType="xs:date" 
 	               parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseDate" 
 	               printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printDate" />
+	       
+	       <jaxb:javaType name="java.lang.Integer" xmlType="xs:positiveInteger"
+	        	parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseInteger" />
+	        
     	</jaxb:globalBindings>
+    	
+    	
 	</jaxb:bindings>
+	
 </bindings>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>Organizations Form Fragment</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/dataTables.bootstrap.css" th:href="@{/resources/css/dataTables.bootstrap.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker.css" th:href="@{/resources/css/datepicker.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker3.css" th:href="@{/resources/css/datepicker3.css}" />
+    <link rel="stylesheet" href="../../../resources/css/fuelux.min.css" th:href="@{/resources/css/fuelux.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
+</head>
+<body>
+
+<div class="container-fluid" th:fragment="form">
+    <form class="form-horizontal" role="form">
+		<input type="hidden" id="directoryId" name="directory_id" value="" />
+        
+        <!-- organizationId -->
+        <div class="form-group dtview-form-organizationId has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="organizationId" class="control-label text-nowrap">Id</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="organizationId" autocomplete="off" maxlength="35" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- organizationIdType -->
+        <div class="form-group dtview-form-organizationIdType has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="organizationIdType" class="control-label text-nowrap">Id Type</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="organizationIdType" autocomplete="off" maxlength="10" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- organizationName -->
+        <div class="form-group dtview-form-organizationName has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="organizationName" class="control-label text-nowrap">Name</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="organizationName" autocomplete="off" maxlength="60" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- organizationSubcode -->
+        <div class="form-group dtview-form-organizationSubcode has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="organizationSubcode" class="control-label text-nowrap">Sub Code</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="organizationSubcode" autocomplete="off" maxlength="50" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- organizationEntityCode -->
+        <div class="form-group dtview-form-organizationEntityCode has-feedback">
+            <label for="organizationEntityCode" class="col-sm-2 control-label text-nowrap">Entity Code</label>
+            <div class="col-sm-10 fuelux">
+                <div class="spinbox digits-5">
+                    <input type="text" id="organizationEntityCode" class="form-control input-mini spinbox-input" autocomplete="off" />
+                    <div class="spinbox-buttons btn-group btn-group-vertical">
+                        <button type="button" class="btn btn-default spinbox-up btn-xs">
+                        	<span class="glyphicon glyphicon-chevron-up"></span><span class="sr-only">Increase</span>
+                        </button>
+                        <button type="button" class="btn btn-default spinbox-down btn-xs">
+                        	<span class="glyphicon glyphicon-chevron-down"></span><span class="sr-only">Decrease</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- organizationEin -->
+        <div class="form-group dtview-form-organizationEin has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="organizationEin" class="control-label text-nowrap">EIN</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="organizationEin" autocomplete="off" maxlength="11" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- organizationSiteUrl -->
+        <div class="form-group dtview-form-organizationSiteUrl has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="organizationSiteUrl" class="control-label text-nowrap">Site URL</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="organizationSiteUrl" autocomplete="off" maxlength="255" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- description -->
+        <div class="form-group dtview-form-description">
+			<label for="description" class="col-sm-2 control-label text-nowrap">Description</label>
+            <div class="col-sm-10">
+        		<textarea id="description" cols="35" rows="3" autocomplete="off" class="form-control"></textarea>
+            </div>
+        </div>
+        
+        <!-- termsOfUse -->
+        <div class="form-group dtview-form-termsOfUse has-feedback">
+        	<div class="col-sm-2 text-right">
+				<label for="termsOfUse" class="control-label text-nowrap">Terms of Use</label>
+                <span class="help-text text-danger"><em>required</em></span>
+    	    </div>
+            <div class="col-sm-10">
+        		<textarea id="termsOfUse" cols="35" rows="3" autocomplete="off" class="form-control"></textarea>
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- privacyPolicy -->
+        <div class="form-group dtview-form-privacyPolicy has-feedback">
+        	<div class="col-sm-2 text-right">
+				<label for="privacyPolicy" class="control-label text-nowrap">Privacy Policy</label>
+                <span class="help-text text-danger"><em>required</em></span>
+    	    </div>
+            <div class="col-sm-10">
+        		<textarea id="privacyPolicy" cols="35" rows="3" autocomplete="off" class="form-control"></textarea>
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+        <!-- created/modified -->
+        <div class="form-group">
+        	<label for="createdTime" class="col-sm-2 control-label text-nowrap">Created</label>
+            <div class="col-sm-4">
+            	<input type="text" id="createdTime" autocomplete="off" class="form-control disabled" disabled="disabled" />
+            </div>
+            <label for="modifiedTime" class="col-sm-2 control-label text-nowrap">Modified</label>
+            <div class="col-sm-4">
+            	<input type="text" id="modifiedTime" autocomplete="off" class="form-control disabled" disabled="disabled" />
+            </div>
+        </div>
+        
+	</form>
+</div>
+
+<script src="../../../resources/js/jquery-2.1.1.min.js" th:src="@{/resources/js/jquery-2.1.1.min.js}"></script>
+<script src="../../../resources/js/underscore-min.js" th:src="@{/resources/js/underscore-min.js}"></script>
+<script src="../../../resources/js/backbone-min.js" th:src="@{/resources/js/backbone-min.js}"></script>
+<script src="../../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
+<script src="../../../resources/js/typeahead.bundle.js" th:src="@{/resources/js/typeahead.bundle.js}"></script>
+<script src="../../../resources/js/jquery.dataTables.min.js" th:src="@{/resources/js/jquery.dataTables.min.js}"></script>
+<script src="../../../resources/js/dataTables.bootstrap.js" th:src="@{/resources/js/dataTables.bootstrap.js}"></script>
+<script src="../../../resources/js/bootstrap-datepicker.js" th:src="@{/resources/js/bootstrap-datepicker.js}"></script>
+<script src="../../../resources/js/spinbox.js" th:src="@{/resources/js/spinbox.js}"></script>
+</body>
+</html>

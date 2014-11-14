@@ -62,6 +62,7 @@
 		<echo message="removing directory ${tomcat.path}\webapps\${target.finalName}" />
 		<delete file="${tomcat.path}\webapps\${target.finalName}.war" />
 		<delete dir="${tomcat.path}\webapps\${target.finalName}" />
+		<delete dir="${tomcat.path}\work\Catalina\localhost\EdExchange" />
 	</target>
 	<target name="webapp-compile">
 		<artifact:mvn mavenHome="D:\installs\apache-maven-3.1.0">
@@ -98,6 +99,7 @@
 		<echo message="removing directory ${tomcat.path}\webapps\${target.finalName}" />
 		<delete file="${tomcat.path}\webapps\${target.finalName}.war" />
 		<delete dir="${tomcat.path}\webapps\${target.finalName}" />
+		<delete dir="${tomcat.path}\work\Catalina\localhost\EdExchange" />
 	</target>
 	
 	<target name="clean-install" depends="remove-webapp">

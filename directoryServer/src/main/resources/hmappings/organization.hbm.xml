@@ -2,26 +2,25 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.pesc.edexchange.v1_0">
-   
-   <class name="Organization" table="organization_directory" catalog="pesc_edexchange">
-    <meta attribute="class-description">
-        This table is derived from the Organization schema defined in EdExchangeEnvelope_v1.0.7.xsd
-    </meta>
-    <id type="int" column="directory_id">
-        <generator class="native" />
-    </id>
-    <property name="organization_id" column="organization_id" not-null="true" type="string" />
-    <property name="organization_id_type" column="organization_id_type" not-null="true" type="string" />
-    <property name="organization_name" column="organization_name" not-null="true" type="string" />
-    <property name="organization_subcode" column="organization_subcode" type="string" />
-    <property name="organization_entity_code" column="organization_entity_code" type="integer" />
-    <property name="organization_ein" column="organization_ein" not-null="true" type="string" />
-    <property name="organization_site_url" column="organization_site_url" not-null="true" type="string" />
-    <property name="description" column="description" type="string" />
-    <property name="terms_of_use" column="terms_of_use" not-null="true" type="string" />
-    <property name="privacy_policy" column="privacy_policy" not-null="true" type="string" />
-    <property name="created_time" column="created_time" not-null="true" type="date" />
-    <property name="modified_time" column="modified_time" not-null="true" type="date" />
-    
-   </class>
+	
+	<class name="Organization" table="organization_directory" catalog="pesc_edexchange">
+		<meta attribute="class-description">
+			This table is derived from the Organization schema defined in EdExchangeEnvelope_v1.0.7.xsd
+		</meta>
+		<id name="directoryId" type="java.lang.Integer" column="directory_id">
+			<generator class="native" />
+		</id>
+		<property name="organizationId" column="organization_id" not-null="true" type="string" />
+		<property name="organizationIdType" column="organization_id_type" not-null="true" type="string" />
+		<property name="organizationName" column="organization_name" not-null="true" type="string" />
+		<property name="organizationSubcode" column="organization_subcode" type="string" />
+		<property name="organizationEntityCode" column="organization_entity_code" type="integer" />
+		<property name="organizationEin" column="organization_ein" not-null="true" type="string" />
+		<property name="organizationSiteUrl" column="organization_site_url" not-null="true" type="string" />
+		<property name="description" column="description" type="string" />
+		<property name="termsOfUse" column="terms_of_use" not-null="true" type="string" />
+		<property name="privacyPolicy" column="privacy_policy" not-null="true" type="string" />
+		<property name="createdTime" column="created_time" type="timestamp" update="false" insert="false" generated="always" />
+		<property name="modifiedTime" column="modified_time" type="timestamp" update="false" insert="false" generated="always" />
+	</class>
 </hibernate-mapping>

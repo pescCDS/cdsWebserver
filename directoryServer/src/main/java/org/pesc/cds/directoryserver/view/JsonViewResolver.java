@@ -2,12 +2,16 @@ package org.pesc.cds.directoryserver.view;
 
 import java.util.Locale;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 
 public class JsonViewResolver implements ViewResolver {
+	private static final Log log = LogFactory.getLog(JsonViewResolver.class);
+	
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		MappingJacksonJsonView view = new MappingJacksonJsonView();
 		view.setPrettyPrint(true);
