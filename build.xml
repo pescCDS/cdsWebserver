@@ -11,7 +11,6 @@
 	VM/Remote (CentOS):
 	maven.home = /opt/apache-maven-3.2.3
 	tomcat.path = /var/lib/tomcat6
-	tomcat.bin.path = /usr/share/tomcat6
 	
 	Local Dev (Windows 8.1)
 	maven.home = D:\installs\apache-maven-3.1.0
@@ -26,9 +25,12 @@
 	<property name="webapp.path" value="${basedir}/${webapp}" />
 	<property name="webapp.target.path" value="${basedir}\${webapp}\target" />
 	
-	<property name="maven.home" value="D:\installs\apache-maven-3.1.0" />
-	<property name="tomcat.path" value="D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42" />
-	<property name="tomcat.bin.path" value="/usr/share/tomcat6" />
+	<condition property="maven.home" value="D:\installs\apache-maven-3.1.0" else="/opt/apache-maven-3.2.3">
+		<os family="windows" />
+	</condition>
+	<condition property="tomcat.path" value="D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42" else="/var/lib/tomcat6">
+		<os family="windows" />
+	</condition>
 	<property name="target.finalName" value="EdExchange" />
 	
 	<property file="${basedir}/scripts/build.properties" />
@@ -73,10 +75,9 @@
 		</exec>
 	</target>
 	<target name="-tomcatLinuxStop" unless="is-windows">
-		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
-			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
-			<arg line="stop" />
-		</java>
+		<exec dir="." executable="sh" os="Linux">
+			<arg line="-c 'sudo service tomcat6 stop'" />
+		</exec>
 	</target>
 	
 	<target name="tomcat-start" depends="-tomcatWindowsStart, -tomcatLinuxStart">
@@ -89,9 +90,9 @@
 		</exec>
 	</target>
 	<target name="-tomcatLinuxStart" unless="is-windows">
-		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
-			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
-		</java>
+		<exec dir="." executable="sh" os="Linux">
+			<arg line="-c 'sudo service tomcat6 start'" />
+		</exec>
 	</target>
 	
 	<target name="webapp-remove">
@@ -134,10 +135,9 @@
 		</exec>
 	</target>
 	<target name="-stopTomcatLinux" unless="is-windows">
-		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
-			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
-			<arg line="stop" />
-		</java>
+		<exec dir="." executable="sh" os="Linux">
+			<arg line="-c 'sudo service tomcat6 stop'" />
+		</exec>
 	</target>
 	
 	<target name="-remove-webapp" depends="-stop-tomcat">
@@ -170,9 +170,9 @@
 		</exec>
 	</target>
 	<target name="-startTomcatLinux" unless="is-windows">
-		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
-			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
-		</java>
+		<exec dir="." executable="sh" os="Linux">
+			<arg line="-c 'sudo service tomcat6 start'" />
+		</exec>
 	</target>
 	
 	
