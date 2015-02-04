@@ -43,6 +43,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					<value></value>
 				</property>
 			</activation>
+			<repositories>
+				<repository>
+				    <id>java.net</id>
+				    <url>http://download.java.net/maven/2/</url>
+				</repository>
+			</repositories>
 			<build>
 				<filters>
 					<filter>${basedir}/src/main/filters/filter.ci.properties</filter>
@@ -73,6 +79,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					<value></value>
 				</property>
 			</activation>
+			<repositories>
+				<repository>
+				    <id>java.net</id>
+				    <url>http://download.java.net/maven/2/</url>
+				</repository>
+			</repositories>
 			<build>
 				<filters>
 					<filter>${basedir}/src/main/filters/filter.prod.properties</filter>
