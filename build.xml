@@ -5,6 +5,11 @@
 		In a shell/command/terminal go to the directory that this file is in and run this comman:
 		ant info
 		Information about what targets will display
+		
+		!! NOTE !! Some targets require the Maven Ant Tasks (http://maven.apache.org/ant-tasks/download.cgi)
+		So make sure to put the maven-ant-tasks-2.1.3.jar in /opt/apache-ant-1.9.4/lib
+		Also note that the error reported from a artifact:mvn action tag DOES NOT mean the process failed,
+		just take it as ouput noise.
 	</description>
 	
 	<!--
