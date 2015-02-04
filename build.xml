@@ -11,6 +11,7 @@
 	VM/Remote (CentOS):
 	maven.home = /opt/apache-maven-3.2.3
 	tomcat.path = /var/lib/tomcat6
+	tomcat.bin.path = /usr/share/tomcat6
 	
 	Local Dev (Windows 8.1)
 	maven.home = D:\installs\apache-maven-3.1.0
@@ -27,6 +28,7 @@
 	
 	<property name="maven.home" value="D:\installs\apache-maven-3.1.0" />
 	<property name="tomcat.path" value="D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42" />
+	<property name="tomcat.bin.path" value="/usr/share/tomcat6" />
 	<property name="target.finalName" value="EdExchange" />
 	
 	<property file="${basedir}/scripts/build.properties" />
@@ -71,7 +73,7 @@
 		</exec>
 	</target>
 	<target name="-tomcatLinuxStop" unless="is-windows">
-		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
 			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
 			<arg line="stop" />
 		</java>
@@ -87,7 +89,7 @@
 		</exec>
 	</target>
 	<target name="-tomcatLinuxStart" unless="is-windows">
-		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
 			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
 		</java>
 	</target>
@@ -132,7 +134,7 @@
 		</exec>
 	</target>
 	<target name="-stopTomcatLinux" unless="is-windows">
-		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
 			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
 			<arg line="stop" />
 		</java>
@@ -168,7 +170,7 @@
 		</exec>
 	</target>
 	<target name="-startTomcatLinux" unless="is-windows">
-		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+		<java jar="${tomcat.bin.path}/bin/bootstrap.jar" fork="true">
 			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
 		</java>
 	</target>
