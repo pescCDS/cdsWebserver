@@ -1,8 +1,9 @@
 # if you change the database jar, make sure you put the jar in scripts/config_source/jdbc/ 
-# TODO put this file in .gitignore, but keep build.properties.dev
+# set these values as to what your environment requires and copy this file 
+# to the same directory as build.properties
 jdbc.driver=org.mariadb.jdbc.Driver
 jdbc.jar=mariadb-java-client-1.1.2.jar
 
 db.url=jdbc:mariadb://localhost:3306/
-db.user=root
-db.pass=admin123
+db.user=your-db-user-name
+db.pass=your-db-user-password

@@ -17,6 +17,9 @@ public class JSONMapper extends ObjectMapper {
 		this.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 		this.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, true);
 		
-		this.setDateFormat(DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.MEDIUM));
+		this.enable(SerializationConfig.Feature.INDENT_OUTPUT);
+		this.enable(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS);
+		
+		this.setDateFormat(null);
 	}
 }

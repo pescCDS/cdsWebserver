@@ -17,9 +17,9 @@
                          xmlns:xs="http://www.w3.org/2001/XMLSchema"
                           version="1.0">
       
-      <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/CoreMain_v1.12.0.xsd" />
-      <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/AcademicRecord_v1.7.0.xsd" />
-      <xs:import namespace="urn:org:pesc:EdExchange:v1.0.7" schemaLocation="../../../../EdExchangeCore/src/main/resources/EdExchangeEnvelope_v1.0.7.xsd" />
+      <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/CoreMain_v1.12.0.xsd" />
+      <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/AcademicRecord_v1.7.0.xsd" />
+      <xs:import namespace="urn:org:pesc:EdExchange:v1.0.7" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/EdExchangeEnvelope_v1.0.7.xsd" />
       <xs:import namespace="urn:org:pesc:ns:webservice:domain" schemaLocation="domainSchema/domain-elements.xsd" />
       
       <xs:element name="getOrganizations" type="ns:getOrganizations" />

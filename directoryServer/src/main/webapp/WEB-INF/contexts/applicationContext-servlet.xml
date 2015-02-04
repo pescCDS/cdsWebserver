@@ -18,11 +18,16 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     </bean>
     <bean id="templateEngine" class="org.thymeleaf.spring3.SpringTemplateEngine">
         <property name="templateResolver" ref="templateResolver" />
+        <property name="additionalDialects">
+        	<set>
+        		<bean class="org.thymeleaf.extras.springsecurity3.dialect.SpringSecurityDialect" />
+        	</set>
+        </property>
     </bean>
     
     <!-- workaround for having thymeleaf and JSON output -->
     <bean id="cnManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-        <property name="favorPathExtension" value="true" />
+        <property name="favorPathExtension" value="false" />
         <property name="ignoreAcceptHeader" value="true" />
         <property name="defaultContentType" value="text/html" />
         <property name="mediaTypes">

@@ -3,18 +3,83 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
                     http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  
-  <modelVersion>4.0.0</modelVersion>
-  <artifactId>EdExchangeCore</artifactId>
-  <description>
-  
-  </description>
-  
-  <parent>
-    <groupId>org.cds.pesc.WebServices</groupId>
-    <artifactId>EdExchange</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
-  </parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>EdExchangeCore</artifactId>
+	<name>Core assets for the EdExchange system</name>
+	<description>
+  		PESC EdExchange Core resources for the directory and network server
+	</description>
+
+	<parent>
+		<groupId>org.cds.pesc.WebServices</groupId>
+		<artifactId>EdExchange</artifactId>
+		<version>0.1.1-SNAPSHOT</version>
+	</parent>
+	
+	<profiles>
+		<profile>
+			<!-- local tomcat, local database -->
+			<id>dev.profile</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>dev</value>
+				</property>
+			</activation>
+			<build>
+				<filters>
+					<filter>${basedir}/src/main/filters/filter.dev.properties</filter>
+				</filters>
+			</build>
+		</profile>
+		<profile>
+			<!-- local or VM tomcat, VM database (release testing) -->
+			<id>ci.profile</id>
+			<activation>
+				<property>
+					<name>env</name>
+					<value></value>
+				</property>
+			</activation>
+			<build>
+				<filters>
+					<filter>${basedir}/src/main/filters/filter.ci.properties</filter>
+				</filters>
+			</build>
+		</profile>
+		<profile>
+			<!-- Remote VM tomcat, Remote VM database (for users to test) -->
+			<id>qa.profile</id>
+			<activation>
+				<property>
+					<name>env</name>
+					<value></value>
+				</property>
+			</activation>
+			<build>
+				<filters>
+					<filter>${basedir}/src/main/filters/filter.qa.properties</filter>
+				</filters>
+			</build>
+		</profile>
+		<profile>
+			<!-- remote tomcat, remote database (live production) -->
+			<id>prod.profile</id>
+			<activation>
+				<property>
+					<name>env</name>
+					<value></value>
+				</property>
+			</activation>
+			<build>
+				<filters>
+					<filter>${basedir}/src/main/filters/filter.prod.properties</filter>
+				</filters>
+			</build>
+		</profile>
+	</profiles>
 
 	<build>
 		<resources>
@@ -28,8 +93,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		</resources>
 
 		<plugins>
-			<!-- This plugin reads properties from a file for use in the maven build 
-				process -->
+			<!-- This plugin reads properties from a file for use in the maven build process -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
@@ -50,8 +114,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 				</executions>
 			</plugin>
 
-			<!-- This plugin filters what files are included/excluded in the final 
-				.jar -->
+			<!-- This plugin filters what files are included/excluded in the final .jar -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -59,21 +122,18 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 				<configuration>
 					<excludes>
 						<exclude>/application.properties</exclude>
-						<exclude>/hibernate.properties</exclude>
-						<exclude>/reveng.xml</exclude>
 						<exclude>generated-sources/org/**/*.java</exclude>
 						<exclude>org/**/*.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
 
-			<!-- This plugin creates the java package/classes (files) before everything 
-				is compiled. -->
+			<!-- This plugin creates the java package/classes (files) before everything is compiled. -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>${jaxb2.plugin.version}</version>
 				<inherited>false</inherited>
-				<version>1.5</version>
 				<executions>
 					<execution>
 						<id>xjc</id>
@@ -84,11 +144,41 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					</execution>
 				</executions>
 				<configuration>
+					<arguments>-Xannotate</arguments>
+					<arguments>-Xinheritance</arguments>
+				    <extension>true</extension>
 					<outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-					<schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
-					<bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
+					<schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
+					<bindingDirectory>${basedir}/src/main/resources/xsd</bindingDirectory>
 					<bindingFiles>bindings.xjb.xml</bindingFiles>
 				</configuration>
+				<dependencies>
+					<dependency>
+			            <groupId>org.jvnet.jaxb2_commons</groupId>
+			            <artifactId>jaxb2-basics-annotate</artifactId>
+			            <version>${jaxb2-basics-annotate.version}</version>
+			        </dependency>
+			        <dependency>
+			            <groupId>com.sun.codemodel</groupId>
+			            <artifactId>codemodel</artifactId>
+			            <version>${codemodel.version}</version>
+			        </dependency>
+			        <dependency>
+			        	<groupId>org.hibernate</groupId>
+			        	<artifactId>hibernate-search</artifactId>
+			        	<version>${hibernate.search.version}</version>
+			        </dependency>
+			        <dependency>
+			        	<groupId>org.jvnet.jaxb2_commons</groupId>
+			        	<artifactId>jaxb2-basics</artifactId>
+			        	<version>${jaxb2-basics.version}</version>
+			        </dependency>
+			        <dependency>
+			            <groupId>org.apache.commons</groupId>
+			            <artifactId>commons-lang3</artifactId>
+			            <version>${commons-lang3.version}</version>
+			        </dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -147,6 +237,66 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-annotations</artifactId>
+		</dependency>
+		<dependency>
+        	<groupId>org.hibernate</groupId>
+        	<artifactId>hibernate-search</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-commons-annotations</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-tools</artifactId>
+        </dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>log4j</groupId> -->
+<!-- 			<artifactId>log4j</artifactId> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.slf4j</groupId> -->
+<!-- 			<artifactId>slf4j-simple</artifactId> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>commons-logging</groupId> -->
+<!-- 			<artifactId>commons-logging</artifactId> -->
+<!-- 		</dependency> -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+        
+        <!-- Joda Time -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${joda-time.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jvnet.jaxb2_commons</groupId>
+			<artifactId>jaxb2-basics-runtime</artifactId>
+			<version>${jaxb2-basics.version}</version>
 		</dependency>
 	</dependencies>
   

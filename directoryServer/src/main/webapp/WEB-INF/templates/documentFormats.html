@@ -29,17 +29,18 @@
 			dtView = new DataTableView({
 				'dataClass':'DocumentFormat',
 				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
+				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
 				'table':{
 					'name':'documentFormats',
 					'primaryKey':'id',
 					'defaultColumnOrder':[[4,'asc']],
 					'columns':[
-						{'id':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
-						{'id':'formatName', 'name':'formatName', 'title':'Name', 'type':'varchar', 'controlType':'text'},
-						{'id':'formatDescription', 'name':'formatDescription', 'type':'text', 'title':'Description', 'visible':false, 'required':false, 'controlType':'textarea'},
-						{'id':'formatInuseCount', 'name':'formatInuseCount', 'type':'tinyint', 'title':'Inuse Count', 'controlType':'spinbox'},
-						{'id':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 'disabled':true, 'required':false, 'controlType':'text'},
-						{'id':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 'disabled':true, 'required':false, 'controlType':'text'}
+						{'data':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
+						{'data':'formatName', 'name':'formatName', 'title':'Name', 'type':'varchar', 'controlType':'text'},
+						{'data':'formatDescription', 'name':'formatDescription', 'type':'text', 'title':'Description', 'visible':false, 'required':false, 'controlType':'textarea'},
+						{'data':'formatInuseCount', 'name':'formatInuseCount', 'type':'tinyint', 'title':'Inuse Count', 'controlType':'spinbox'},
+						{'data':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}},
+						{'data':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}}
 					]
 				}
 			});

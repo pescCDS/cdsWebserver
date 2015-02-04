@@ -1,4 +1,4 @@
-package org.pesc.cds.datatables;
+package org.pesc.cds.webservice.service;
 
 import java.util.HashMap;
 import java.util.Map;

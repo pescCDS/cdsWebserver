@@ -14,15 +14,7 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     <mvc:annotation-driven />
     <context:component-scan base-package="org.pesc.cds.directoryserver.controller" />
     
-    <bean id="restServices" class="org.pesc.cds.webservice.service.RestWebServiceImpl" />
-    <bean id="soapServices" class="org.pesc.cds.webservice.service.WebServiceImpl" />
-    
-    <!-- hibernate session utility, does this need to be initialized in application scope? -->
-    <bean id="hibernateUtilService" class="org.pesc.cds.webservice.service.HibernateUtil" />
-    
-    <!-- dao objects for ajax CRUD control -->
-    <bean id="documentFormats" class="org.pesc.edexchange.v1_0.dao.DocumentFormatsDao" />
-    <bean id="entityCodes" class="org.pesc.edexchange.v1_0.dao.EntityCodesDao" />
-    <bean id="organizations" class="org.pesc.edexchange.v1_0.dao.OrganizationsDao" />
+    <!-- auxiliary data from database -->
+    <bean id="datasourceManager" class="org.pesc.cds.webservice.service.DatasourceManagerUtil" />
     
 </beans>

@@ -21,13 +21,10 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
         
         <!-- keep the web services path open until we figure out how to secure it -->
         <intercept-url pattern="/services/**" access="permitAll" />
-        
         <intercept-url pattern="/resources/**" access="permitAll" />
         <intercept-url pattern="/login/**" access="permitAll" />
         <intercept-url pattern="/login-error/**" access="permitAll" />
-        
         <intercept-url pattern="/**" access="isAuthenticated()" />
-        
         
         <form-login login-page="/login" authentication-failure-url="/login-error" always-use-default-target="true" />
         <logout logout-url="/logout" delete-cookies="JSESSIONID" invalidate-session="true" />

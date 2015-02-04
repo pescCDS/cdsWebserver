@@ -14,7 +14,7 @@
 <body>
 
 <div class="container-fluid" th:fragment="form">
-    <form class="form-horizontal" role="form">
+    <form class="form-horizontal" role="form" accept-charset="utf-8">
 		<input type="hidden" id="directoryId" name="directory_id" value="" />
         
         <!-- organizationId -->
@@ -140,13 +140,19 @@
         </div>
         
         <!-- created/modified -->
-        <div class="form-group">
-        	<label for="createdTime" class="col-sm-2 control-label text-nowrap">Created</label>
-            <div class="col-sm-4">
+        <div class="form-group dtview-form-createdTime">
+        	<div class="col-sm-2 text-right">
+            	<label for="createdTime" class="col-sm-2 control-label text-nowrap">Created</label>
+            </div>
+        	<div class="col-sm-10">
             	<input type="text" id="createdTime" autocomplete="off" class="form-control disabled" disabled="disabled" />
             </div>
-            <label for="modifiedTime" class="col-sm-2 control-label text-nowrap">Modified</label>
-            <div class="col-sm-4">
+        </div>
+        <div class="form-group dtview-form-modifiedTime">
+            <div class="col-sm-2 text-right">
+            	<label for="modifiedTime" class="col-sm-2 control-label text-nowrap">Modified</label>
+            </div>
+            <div class="col-sm-10">
             	<input type="text" id="modifiedTime" autocomplete="off" class="form-control disabled" disabled="disabled" />
             </div>
         </div>

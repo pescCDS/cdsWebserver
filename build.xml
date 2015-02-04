@@ -1,24 +1,47 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="antmaven-test" default="help" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>
-		
+		Compile and deploy ant script for the EdExchange web application
+		In a shell/command/terminal go to the directory that this file is in and run this comman:
+		ant info
+		Information about what targets will display
 	</description>
 	
+	<!--
+	VM/Remote (CentOS):
+	maven.home = /opt/apache-maven-3.2.3
+	tomcat.path = /var/lib/tomcat6
+	
+	Local Dev (Windows 8.1)
+	maven.home = D:\installs\apache-maven-3.1.0
+	tomcat.path = D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42
+	-->
 	
 	<condition property="is-windows">
         <os family="windows" />
     </condition>
 	
-	<property name="scripts.path" value="${basedir}/scripts" />
-	<property name="dirServer.path" value="${scripts.path}/directoryServer" />
-	<property name="dirServer.target.path" value="${basedir}\directoryServer\target" />
-	<property name="netServer.path" value="/networkServer" />
-	<property name="cfg.source.path" value="${scripts.path}/config_source" />
-	<property name="cfg.jdbc.path" value="${cfg.source.path}/jdbc" />
-	<property file="${scripts.path}/build.properties" />
+	<property name="webapp" value="directoryServer" />
+	<property name="webapp.path" value="${basedir}/${webapp}" />
+	<property name="webapp.target.path" value="${basedir}\${webapp}\target" />
 	
+	<property name="maven.home" value="D:\installs\apache-maven-3.1.0" />
 	<property name="tomcat.path" value="D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42" />
 	<property name="target.finalName" value="EdExchange" />
+	
+	<property file="${basedir}/scripts/build.properties" />
+	<property name="cfg.jdbc.path" value="${basedir}/scripts/config_source/jdbc" />
+	<property name="scripts.db.dirServer.path" value="${basedir}/scripts/directoryServer" />
+	<property name="scripts.db.netServer.path" value="${basedir}/scripts/networkServer" />
+	
+	<property name="dirServer.target.path" value="${basedir}/directoryServer/target" />
+	
+	<!-- debug output -->
+	<target name="show-paths">
+		<echo message="tomcat.path: ${tomcat.path}" />
+		<echo message="webapp.target.path: ${webapp.target.path}" />
+		<echo message="target.finalName: ${target.finalName}" />
+	</target>
 	
 	<!--
     build-directory-db
@@ -37,41 +60,53 @@
         </sql>
     </target>
 	
-	<!-- debug output -->
-	<target name="show-paths">
-		<echo message="tomcat.path: ${tomcat.path}" />
-		<echo message="dirServer.target.path: ${dirServer.target.path}" />
-		<echo message="target.finalName: ${target.finalName}" />
-	</target>
-	
 	<!-- tasks that can be called individually for the redeploy process -->
-	<target name="tomcat-stop">
+	<target name="tomcat-stop" depends="-tomcatWindowsStop, -tomcatLinuxStop">
+		<echo message="Stopping Tomcat ..." />
+	</target>
+	<target name="-tomcatWindowsStop" if="is-windows">
 		<exec executable="cmd" dir="${tomcat.path}\bin">
 			<arg value="/c" />
 			<arg value="shutdown.bat" />
 		</exec>
 	</target>
-	<target name="tomcat-start">
+	<target name="-tomcatLinuxStop" unless="is-windows">
+		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
+			<arg line="stop" />
+		</java>
+	</target>
+	
+	<target name="tomcat-start" depends="-tomcatWindowsStart, -tomcatLinuxStart">
+		<echo message="Starting Tomcat ..." />
+	</target>
+	<target name="-tomcatWindowsStart" if="is-windows">
 		<exec executable="cmd" dir="${tomcat.path}\bin">
 			<arg value="/c" />
 			<arg value="startup.bat" />
 		</exec>
 	</target>
+	<target name="-tomcatLinuxStart" unless="is-windows">
+		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
+		</java>
+	</target>
+	
 	<target name="webapp-remove">
 		<echo message="removing file ${tomcat.path}\webapps\${target.finalName}.war" />
 		<echo message="removing directory ${tomcat.path}\webapps\${target.finalName}" />
 		<delete file="${tomcat.path}\webapps\${target.finalName}.war" />
 		<delete dir="${tomcat.path}\webapps\${target.finalName}" />
-		<delete dir="${tomcat.path}\work\Catalina\localhost\EdExchange" />
+		<delete dir="${tomcat.path}\work\Catalina\localhost\${target.finalName}" />
 	</target>
 	<target name="webapp-compile">
-		<artifact:mvn mavenHome="D:\installs\apache-maven-3.1.0">
+		<artifact:mvn mavenHome="${maven.home}">
 			<arg value="clean" />
 			<arg value="package" />
 		</artifact:mvn>
 	</target>
 	<target name="webapp-deploy">
-		<copy file="${dirServer.target.path}\${target.finalName}.war" 
+		<copy file="${webapp.target.path}\${target.finalName}.war" 
 			  todir="${tomcat.path}\webapps" />
 	</target>
 	
@@ -83,54 +118,66 @@
 	 4) copy directoryServer/target/directoryServer.war to <tomcat-webapps>/
 	 5) start tomcat
 	-->
-	<target name="redeploy" depends="start-tomcat">
+	<target name="redeploy" depends="-start-tomcat">
 		<echo message="directoryServer redeployed" />
 	</target>
 	
-	<target name="stop-tomcat">
+	<target name="-stop-tomcat" depends="-stopTomcatWindows, -stopTomcatLinux">
+		<echo message="Stopping Tomcat ..." />
+	</target>
+	<target name="-stopTomcatWindows" if="is-windows">
 		<exec executable="cmd" dir="${tomcat.path}\bin">
 			<arg value="/c" />
 			<arg value="shutdown.bat" />
 		</exec>
 	</target>
+	<target name="-stopTomcatLinux" unless="is-windows">
+		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
+			<arg line="stop" />
+		</java>
+	</target>
 	
-	<target name="remove-webapp" depends="stop-tomcat">
+	<target name="-remove-webapp" depends="-stop-tomcat">
 		<echo message="removing file ${tomcat.path}\webapps\${target.finalName}.war" />
 		<echo message="removing directory ${tomcat.path}\webapps\${target.finalName}" />
 		<delete file="${tomcat.path}\webapps\${target.finalName}.war" />
 		<delete dir="${tomcat.path}\webapps\${target.finalName}" />
-		<delete dir="${tomcat.path}\work\Catalina\localhost\EdExchange" />
+		<delete dir="${tomcat.path}\work\Catalina\localhost\${target.finalName}" />
 	</target>
 	
-	<target name="clean-install" depends="remove-webapp">
-		<artifact:mvn mavenHome="D:\installs\apache-maven-3.1.0">
+	<target name="-clean-package" depends="-remove-webapp">
+		<artifact:mvn mavenHome="${maven.home}">
 			<arg value="clean" />
 			<arg value="package" />
 		</artifact:mvn>
 	</target>
 	
-	<target name="deploy" depends="clean-install">
-		<copy file="${dirServer.target.path}\${target.finalName}.war" 
+	<target name="-deploy" depends="-clean-package">
+		<copy file="${webapp.target.path}\${target.finalName}.war" 
 			  todir="${tomcat.path}\webapps" />
 	</target>
 	
-	<target name="start-tomcat" depends="deploy">
+	<target name="-start-tomcat" depends="-deploy, -startTomcatWindows, -startTomcatLinux">
+		<echo message="Starting Tomcat ..." />
+	</target>
+	<target name="-startTomcatWindows" if="is-windows">
 		<exec executable="cmd" dir="${tomcat.path}\bin">
 			<arg value="/c" />
 			<arg value="startup.bat" />
 		</exec>
 	</target>
-	
+	<target name="-startTomcatLinux" unless="is-windows">
+		<java jar="${tomcat.path}/bin/bootstrap.jar" fork="true">
+			<jvmarg value="-Dcatalina.home=${tomcat.path}" />
+		</java>
+	</target>
 	
 	
 	<!-- Help Target -->
     <target name="help">
         <echo message="" />
-        <echo message="EdExchange Setup Scripts" />
-        <echo message="Targets: build-directory-db, redeploy, show-paths, Help" />
-        <echo message="" />
-        <echo message="build-directory-db" />
-        <echo message="Drops and recreates the cds directory server database and tables" />
+        <echo message="${webapp} Setup Scripts" />
         <echo message="" />
 		<echo message="redeploy" />
 		<echo message="stops tomcat, deletes the web app in tomcat's directory, redeploys, then starts tomcat" />

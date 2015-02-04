@@ -32,7 +32,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.pesc.cds.datatables.Column_Type;
 import org.pesc.cds.datatables.DataTablesRequest;
 import org.pesc.cds.datatables.Filter_Type;
-import org.pesc.cds.datatables.TableClassMap;
 import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.cds.webservice.WebServicesInterface;
 import org.pesc.cds.webservice.ServletException;

@@ -29,16 +29,17 @@
 			dtView = new DataTableView({
 				'dataClass':'EntityCode',
 				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
+				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
 				'table':{
 					'name':'entityCodes',
 					'primaryKey':'id',
 					'defaultColumnOrder':[[4,'asc']],
 					'columns':[
-						{'id':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
-						{'id':'entityCode', 'name':'entityCode', 'title':'Code', 'type':'tinyint', 'controlType':'spinbox'},
-						{'id':'description', 'name':'description', 'type':'text', 'title':'Description', 'visible':false, 'required':false, 'controlType':'textarea'},
-						{'id':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 'disabled':true, 'required':false, 'controlType':'text'},
-						{'id':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 'disabled':true, 'required':false, 'controlType':'text'}
+						{'data':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
+						{'data':'entityCode', 'name':'entityCode', 'title':'Code', 'type':'tinyint', 'controlType':'spinbox'},
+						{'data':'description', 'name':'description', 'type':'text', 'title':'Description', 'visible':false, 'required':false, 'controlType':'textarea'},
+						{'data':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}},
+						{'data':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}}
 					]
 				}
 			});

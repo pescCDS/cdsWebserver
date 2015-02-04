@@ -7,19 +7,52 @@ import java.util.ListIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
-import org.pesc.cds.directoryserver.view.DocumentFormatJson;
 import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.edexchange.v1_0.DocumentFormat;
 
-public class DocumentFormatsDao {
+public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 	private static final Log log = LogFactory.getLog(DocumentFormatsDao.class);
-	private static List<DocumentFormat> documentFormats;
 	
-	// Constructor
-	public DocumentFormatsDao() {
-		documentFormats = new ArrayList<DocumentFormat>();
-		
-		// load the local List from the persistence layer 
+	/**
+	 * Default no-arg constructor
+	 */
+	public DocumentFormatsDao() { }
+	
+	
+	/**
+	 * This instances <code>all()</code> method as required from the <code>DBDataSourceDao</code> interface
+	 * 
+	 * @return <code>List&lt;DocumentFormat&gt;</code>
+	 */
+	public List<DocumentFormat> all() {
+		List<DocumentFormat> retList = new ArrayList<DocumentFormat>();
+		try{
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			retList = session.createCriteria(DocumentFormat.class).list();
+			
+			session.getTransaction().commit();
+			
+		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
+			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+		return retList;
+	}
+	
+	
+	/**
+	 * The <code>byId()</code> method as defined in the <code>DBDataSourceDao</code> interface.
+	 * @param id <code>Integer</code> identifier value for the document_format record
+	 * @return <code>DocumentFormat</code>
+	 */
+	public DocumentFormat byId(Integer id) {
+		DocumentFormat retDF = null;
 		try {
 			if(HibernateUtil.getSessionFactory().isClosed()) {
 				HibernateUtil.getSessionFactory().openSession();
@@ -27,49 +60,21 @@ public class DocumentFormatsDao {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
-			this.documentFormats = session.createQuery("FROM DocumentFormat").list();
+			retDF = (DocumentFormat)session.get(DocumentFormat.class, id);
 			
 			session.getTransaction().commit();
+			
 		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
-		} 
+		}
+		return retDF;
 	}
 	
-	// returns a single DocumentFormat object that matches the given format id (get document format by id)
-	public static DocumentFormat get(Integer formatId) {
-		DocumentFormat df = null;
-		// search through the local List
-		for(ListIterator<DocumentFormat> iter = documentFormats.listIterator(); iter.hasNext();) {
-			DocumentFormat d = iter.next();
-			if(formatId.equals(d.getId())) {
-				df = d;
-				break;
-			}
-		}
-		
-		// if a DocumentFormat object wasn't found in the local List, then search the persistence layer
-		if(df == null) {
-			log.debug("didn't find document format in class list, checking persistence ...");
-			try {
-				if(HibernateUtil.getSessionFactory().isClosed()) {
-					HibernateUtil.getSessionFactory().openSession();
-				}
-				Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-				session.beginTransaction();
-				
-				df = (DocumentFormat)session.load(DocumentFormat.class, formatId);
-				
-				session.getTransaction().commit();
-				
-			} catch(Exception ex) {
-				HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
-			}
-		}
-		return df;
-	}
 	
 	// save DocumentFormat
-	public static DocumentFormat save(DocumentFormat docFormat) {
+	public DocumentFormat save(DocumentFormat docFormat) {
 		DocumentFormat retDf = null;
 		try {
 			if(HibernateUtil.getSessionFactory().isClosed()) {
@@ -95,8 +100,10 @@ public class DocumentFormatsDao {
 		}
 		return retDf;
 	}
+	
+	
 	// remove DocumentFormat
-	public static void remove(DocumentFormat docFormat) {
+	public DocumentFormat remove(DocumentFormat docFormat) {
 		try {
 			if(HibernateUtil.getSessionFactory().isClosed()) {
 				HibernateUtil.getSessionFactory().openSession();
@@ -116,7 +123,6 @@ public class DocumentFormatsDao {
 			log.debug(ex.getMessage());
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
 		}
+		return docFormat;
 	}
-	
-	public List<DocumentFormat> getDocumentFormats() { return documentFormats; }
 }

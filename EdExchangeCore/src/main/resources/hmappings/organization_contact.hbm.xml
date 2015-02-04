@@ -3,7 +3,7 @@
 
 <hibernate-mapping package="org.pesc.edexchange.v1_0">
    
-   <class name="OrganizationContact" table="organization_contact" catalog="pesc_edexchange">
+   <class name="OrganizationContact" table="organization_contact" catalog="${hibernate.catalog}">
     <meta attribute="class-description">
         This table is derived from the OrganizationContact schema defined in EdExchangeEnvelope_v1.0.7.xsd
     </meta>

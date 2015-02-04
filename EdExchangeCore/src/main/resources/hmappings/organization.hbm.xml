@@ -3,7 +3,7 @@
 
 <hibernate-mapping package="org.pesc.edexchange.v1_0">
 	
-	<class name="Organization" table="organization_directory" catalog="pesc_edexchange">
+	<class name="Organization" table="organization_directory" catalog="${hibernate.catalog}">
 		<meta attribute="class-description">
 			This table is derived from the Organization schema defined in EdExchangeEnvelope_v1.0.7.xsd
 		</meta>

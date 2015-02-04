@@ -1,12 +1,13 @@
 package org.pesc.cds.datatables;
 
 public enum Column_Type {
-	TEXT (0, "TEXT", "Text Column Type"),
-	NUMBER (1, "NUMBER", "Number Column Type"),
-	DATE (2, "DATE", "Date Column Type"),
-	BOOLEAN (3, "BOOLEAN", "Boolean Column Type"),
-	ENUM (4, "ENUM", "Enum Column Type");
-	// TODO biglist, foreignkey
+	TEXT	(0, "TEXT",		"Text Column Type"		),
+	NUMBER	(1, "NUMBER",	"Number Column Type"	),
+	DATE	(2, "DATE",		"Date Column Type"		),
+	BOOLEAN	(3, "BOOLEAN",	"Boolean Column Type"	),
+	ENUM	(4, "ENUM",		"Enum Column Type"		),
+	BIGLIST	(5, "BIGLIST",	"BigList Column Type"	);
+	// TODO foreignkey
 	
 	private Integer code;
 	private String label;
@@ -29,15 +30,17 @@ public enum Column_Type {
 		case 2: return Column_Type.DATE;
 		case 3: return Column_Type.BOOLEAN;
 		case 4: return Column_Type.ENUM;
+		case 5: return Column_Type.BIGLIST;
 		default: throw new Exception("Unkown Datatables Type");
 		}
 	}
 	public static Column_Type getType(String v) throws Exception {
-		if(v.equalsIgnoreCase("text")) { return Column_Type.TEXT; }
-		else if(v.equalsIgnoreCase("number")) { return Column_Type.NUMBER; }
-		else if(v.equalsIgnoreCase("date")) { return Column_Type.DATE; }
-		else if(v.equalsIgnoreCase("boolean")) { return Column_Type.BOOLEAN; }
-		else if(v.equalsIgnoreCase("enum")) { return Column_Type.ENUM; }
+		if(v.equalsIgnoreCase("text")			) { return Column_Type.TEXT;	}
+		else if(v.equalsIgnoreCase("number")	) { return Column_Type.NUMBER;	}
+		else if(v.equalsIgnoreCase("date")		) { return Column_Type.DATE;	}
+		else if(v.equalsIgnoreCase("boolean")	) { return Column_Type.BOOLEAN;	}
+		else if(v.equalsIgnoreCase("enum")		) { return Column_Type.ENUM;	}
+		else if(v.equalsIgnoreCase("biglist")	) { return Column_Type.BIGLIST;	}
 		else { throw new Exception("Unknown Datatables Type"); }
 	}
 	
