@@ -25,6 +25,9 @@
 	<condition property="is-windows">
         <os family="windows" />
     </condition>
+	<condition property="env" value="${env}" else="dev">
+		<isset property="env" />
+	</condition>
 	
 	<property name="webapp" value="directoryServer" />
 	<property name="webapp.path" value="${basedir}/${webapp}" />
@@ -109,6 +112,7 @@
 	</target>
 	<target name="webapp-compile">
 		<artifact:mvn mavenHome="${maven.home}">
+			<arg value="-Denv=${env}" />
 			<arg value="clean" />
 			<arg value="package" />
 		</artifact:mvn>
