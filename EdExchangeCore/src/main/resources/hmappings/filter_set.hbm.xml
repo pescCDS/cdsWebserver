@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.pesc.cds.datatables">
+    
+	<class name="FilterSet" table="filter_sets">
+	    <id name="id" type="java.lang.Integer" column="id">
+	        <generator class="identity" />
+	    </id>
+	    <property name="credentialId" column="credential_id" type="java.lang.Integer" not-null="true" />
+	    <property name="category" column="category" type="string" length="45" not-null="true" />
+	    <property name="name" column="[name]" type="string" length="45" not-null="true" />
+	    <property name="description" column="description" type="string" length="256" />
+	    <property name="table" column="[table]" type="string" length="45" not-null="true" />
+	    <property name="filtersJson" column="filters_json" type="string" length="65535" not-null="true" />
+	</class>
+</hibernate-mapping>

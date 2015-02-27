@@ -2,10 +2,14 @@ package org.pesc.edexchange.v1_0.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.edexchange.v1_0.Organization;
 
@@ -17,6 +21,38 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 	 * Default no-arg constructor
 	 */
 	public OrganizationsDao() { }
+	
+	
+	// 
+	public List<Organization> filterByName(String query) {
+		List<Organization> retList = new ArrayList<Organization>();
+		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			Criteria ct = session.createCriteria(Organization.class);
+			
+			// tokenize string by whitespace and use each token as
+			// a LIKE clause for the organizationName column 
+			StringTokenizer tokens = new StringTokenizer(query);
+			while(tokens.hasMoreElements()) {
+				String token = tokens.nextToken();
+				ct.add( Restrictions.like("organizationName", token, MatchMode.ANYWHERE) );
+			}
+			
+			retList = ct.list();
+			
+			session.getTransaction().commit();
+		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
+			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+		return retList;
+	}
 	
 	
 	/**
@@ -91,6 +127,7 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 			
 		} catch(Exception ex) {
 			log.debug(ex.getMessage());
+			ex.printStackTrace();
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
 		}
 		return retOrg;
@@ -113,6 +150,7 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 			
 		} catch(Exception ex) {
 			log.debug(ex.getMessage());
+			ex.printStackTrace();
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
 		}
 		return org;

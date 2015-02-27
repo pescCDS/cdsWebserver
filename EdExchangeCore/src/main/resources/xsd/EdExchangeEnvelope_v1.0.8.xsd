@@ -2,15 +2,15 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
            xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
-           targetNamespace="urn:org:pesc:EdExchange:v1.0.7" 
-           xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.7" 
-           elementFormDefault="unqualified" attributeFormDefault="unqualified" version="v1.0.7">
+           targetNamespace="urn:org:pesc:EdExchange:v1.0.8" 
+           xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.8" 
+           elementFormDefault="unqualified" attributeFormDefault="unqualified" version="v1.0.8">
   <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="CoreMain_v1.12.0.xsd"/>
   <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="AcademicRecord_v1.7.0.xsd"/>
   <!--==============================================================================================================================-->
   <!--Name:      EdExchangeEnvelope.xsd                                                                                             -->
-  <!--Version:   1.0.7                                                                                                              -->
-  <!--Date:      12-Jul-2013                                                                                                        -->
+  <!--Version:   1.0.8                                                                                                              -->
+  <!--Date:      05-Feb-2015                                                                                                        -->
   <!--                                                                                                                              -->
   <!--Change Log:                                                                                                                   -->
   <!--v1.0.0 18-Jan-2013 CDS technical workgroup                                                                                    -->
@@ -21,31 +21,41 @@
   <!--v1.0.5 14-Jun-2013 Added Transction History Report & Transction History Request                                               -->
   <!--v1.0.6 28-Jun-2013 Change "Organization Name" to Destination Organization in Delivery Option Request and Delivery Option Type -->
   <!--v1.0.7 12-Jul-2013 Added Organization List Request & Organization List Report                                                 -->
+  <!--v1.0.8 05-Feb-2015 Modified Organization List Report/Request                                                                  -->
+  <!--                   Added Timestamp                                                                                            -->
+  <!--                   Added Organization                                                                                         -->
+  <!--                   Added EntityCode                                                                                           -->
+  <!--                   Added DocumentFormat                                                                                       -->
+  <!--                   Added OrganizationCredential                                                                               -->
+  <!--                   Added OrganizationContact                                                                                  -->
+  <!--                   Added DeliveryMethod                                                                                       -->
+  <!--                   Added DeliveryOption                                                                                       -->
   <!--==============================================================================================================================-->
-  
-  
-  <!--=========================================-->
-  <!-- Added By Wes Owen                       -->
-  <!--=========================================-->
   
   <!--
     To add inheritance to a class generated from xml add this:
     <xs:annotation>
 		<xs:appinfo>
 			<inheritance:implements>
-				org.pesc.cds.<Interface>
+				org.pesc.cds.YourInterface
 			</inheritance:implements>
 		</xs:appinfo>
 	</xs:annotation>
-    -->
+  -->
 	
-	<!-- The Timestamp for Created/Modified fields -->
-	<xs:element name="Timestamp" type="EdEx:Timestamp" />
+	<!--===============================================-->
+  	<!-- The Timestamp for Created/Modified fields     -->
+  	<!--===============================================-->
 	<xs:simpleType name="Timestamp">
 		<xs:restriction base="xs:dateTime"></xs:restriction>
 	</xs:simpleType>
-
-	<xs:element name="Organization" type="EdEx:Organization" />
+	<xs:element name="Timestamp" type="EdEx:Timestamp" />
+	
+	
+	<!--====================================================-->
+  	<!-- Directory Organization                             -->
+  	<!-- matches `organization_directory` database table    -->
+  	<!--====================================================-->
 	<xs:complexType name="Organization">
 		<xs:sequence>
 			<xs:element name="directory_id" type="xs:positiveInteger" />
@@ -53,7 +63,7 @@
 			<xs:element name="organization_id_type" type="xs:string" />
 			<xs:element name="organization_name" type="xs:string" />
 			<xs:element name="organization_subcode" type="xs:string" />
-			<xs:element name="organization_entity_code" type="xs:int" />
+			<xs:element name="entity" type="EdEx:EntityCode" />
 			<xs:element name="organization_ein" type="xs:string" />
 			<xs:element name="organization_site_url" type="xs:string" />
 			<xs:element name="description" type="xs:string" />
@@ -63,19 +73,29 @@
 			<xs:element name="modified_time" type="EdEx:Timestamp" />
 		</xs:sequence>
 	</xs:complexType>
-
-	<xs:element name="EntityCode" type="EdEx:EntityCode" />
+	<xs:element name="Organization" type="EdEx:Organization" />
+	
+	
+	<!--======================================================-->
+  	<!-- Entity Code                                          -->
+  	<!-- matches `organization_entity_code` database table    -->
+  	<!--======================================================-->
 	<xs:complexType name="EntityCode">
 		<xs:sequence>
 			<xs:element name="id" type="xs:positiveInteger" />
-			<xs:element name="entity_code" type="xs:int" />
+			<xs:element name="code" type="xs:int" />
 			<xs:element name="description" type="xs:string" />
 			<xs:element name="created_time" type="EdEx:Timestamp" />
 			<xs:element name="modified_time" type="EdEx:Timestamp" />
 		</xs:sequence>
 	</xs:complexType>
-
-	<xs:element name="DocumentFormat" type="EdEx:DocumentFormat" />
+	<xs:element name="EntityCode" type="EdEx:EntityCode" />
+	
+	
+	<!--================================================-->
+  	<!-- Document Format                                -->
+  	<!-- matches `document_format` database table       -->
+  	<!--================================================-->
 	<xs:complexType name="DocumentFormat">
 		<xs:sequence>
 			<xs:element name="id" type="xs:positiveInteger" />
@@ -86,22 +106,35 @@
 			<xs:element name="modified_time" type="EdEx:Timestamp" />
 		</xs:sequence>
 	</xs:complexType>
-
-	<xs:element name="OrganizationCredential" type="EdEx:OrganizationCredential" />
+	<xs:element name="DocumentFormat" type="EdEx:DocumentFormat" />
+	
+	
+	<!--=====================================================================-->
+  	<!-- Organization Credential (a security principal, or user account)     -->
+  	<!-- matches `organization_credential` database table                    -->
+  	<!-- TBD if this will be used or not                                     -->
+  	<!--=====================================================================-->
 	<xs:complexType name="OrganizationCredential">
 		<xs:sequence>
-			<xs:element name="authentication_id" type="xs:string" />
+			<xs:element name="authentication_id" type="xs:positiveInteger" />
+			<xs:element name="username" type="xs:string" />
 			<xs:element name="password" type="xs:string" />
+			<xs:element name="enabeld" type="xs:boolean" />
 			<xs:element name="public_key" type="xs:string" />
 			<xs:element name="digital_signature" type="xs:string" />
 			<xs:element name="authentication_type" type="xs:string" />
-			<xs:element ref="EdEx:Organization" />
+			<xs:element name="directory" type="EdEx:Organization" />
 			<xs:element name="created_time" type="EdEx:Timestamp" />
 			<xs:element name="modified_time" type="EdEx:Timestamp" />
 		</xs:sequence>
 	</xs:complexType>
-
-	<xs:element name="OrganizationContact" type="EdEx:OrganizationContact" />
+	<xs:element name="OrganizationCredential" type="EdEx:OrganizationCredential" />
+	
+	
+	<!--===========================================================-->
+  	<!-- Organization Contact (an organization's contact person)   -->
+  	<!-- matches `organization_contact` database table             -->
+  	<!--===========================================================-->
 	<xs:complexType name="OrganizationContact">
 		<xs:sequence>
 			<xs:element name="contact_id" type="xs:positiveInteger" />
@@ -119,15 +152,55 @@
 			<xs:element name="state" type="xs:string" />
 			<xs:element name="zip" type="xs:string" />
 			<xs:element name="country" type="xs:string" />
-			<xs:element ref="EdEx:Organization" />
+			<xs:element name="directory" type="EdEx:Organization" />
 			<xs:element name="created_time" type="EdEx:Timestamp" />
 			<xs:element name="modified_time" type="EdEx:Timestamp" />
 		</xs:sequence>
 	</xs:complexType>
+	<xs:element name="OrganizationContact" type="EdEx:OrganizationContact" />
+	
+	
+	<!--============================================-->
+    <!-- Delivery Method (the type of delivery)     -->
+    <!-- matches `delivery_methods` database table  -->
+    <!--============================================-->
+	<xs:complexType name="DeliveryMethod">
+		<xs:sequence>
+			<xs:element name="id" type="xs:positiveInteger" />
+			<xs:element name="method" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DeliveryMethod" type="EdEx:DeliveryMethod" />
+	
+	
+	<!--===================================================================-->
+    <!-- Deliery Option (a possible delivery option for an organization)   -->
+    <!-- matches the `delivery_options` database table                     -->
+    <!--===================================================================-->
+	<xs:complexType name="DeliveryOption">
+		<xs:annotation>
+	      <xs:documentation>
+	        Type for Delivery Options for those Vendors and Institutions interested in providing a
+	        service to send a payload (transcripts or other data) from one Institution/Vendor
+	        to another Institution/Vendor..
+	      </xs:documentation>
+	    </xs:annotation>
+		<xs:sequence>
+			<xs:element name="id" type="xs:positiveInteger" />
+			<xs:element name="member" type="EdEx:Organization" />
+			<xs:element name="format" type="EdEx:DocumentFormat" />
+			<xs:element name="webservice_url" type="xs:string" />
+			<xs:element name="deliveryMethod" type="EdEx:DeliveryMethod" />
+			<xs:element name="deliveryConfirm" type="xs:int" />
+			<xs:element name="error" type="xs:int" />
+			<xs:element name="operationalStatus" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DeliveryOption" type="EdEx:DeliveryOption" />
   
   
   <!--=========================================-->
-  <!--Content Description                      -->
+  <!-- Content Description                      -->
   <!--=========================================-->
   <xs:simpleType name="ContentDescriptionType">
     <xs:annotation>
@@ -146,7 +219,7 @@
   </xs:simpleType>
 
   <!--===============================================-->
-  <!--ContentType Type (type of what's being sent)   -->
+  <!-- ContentType Type (type of what's being sent)   -->
   <!--===============================================-->
   <xs:complexType name="ContentTypeType">
     <xs:annotation>
@@ -164,7 +237,7 @@
   </xs:complexType>
 
   <!--==============================================================================-->
-  <!--ContentCode Type (identifies the differnet types of files that can be sent)   -->
+  <!-- ContentCode Type (identifies the differnet types of files that can be sent)   -->
   <!--==============================================================================-->
   <xs:simpleType name="ContentCodeType">
     <xs:annotation>
@@ -186,12 +259,12 @@
   </xs:simpleType>
 
   <!--=========================================-->
-  <!--Content file name (including extention)  -->
+  <!-- Content file name (including extention)  -->
   <!--=========================================-->
   <xs:simpleType name="ContentFileNameType">
     <xs:annotation>
       <xs:documentation>
-        ContentFileNameType is used to provide the name of the file containg the
+        ContentFileNameType is used to provide the name of the file containing the
         content to be sent/received including the file extension.
       </xs:documentation>
     </xs:annotation>
@@ -201,7 +274,7 @@
   </xs:simpleType>
 
   <!--=========================================-->
-  <!--ContentType (actual content being sent)  -->
+  <!-- ContentType (actual content being sent)  -->
   <!--=========================================-->
   <xs:complexType name="ContentType">
     <xs:annotation>
@@ -268,7 +341,7 @@
 
 
   <!--=========================================-->
-  <!--Ed Exchange envelop                      -->
+  <!-- Ed Exchange envelop                      -->
   <!--=========================================-->
   <xs:element name="EdExchangeEnvelope">
     <xs:annotation>
@@ -299,6 +372,7 @@
 
   <!--=========================================-->
   <!-- DeliveryOptions                         -->
+  <!-- deprecated, replaced by DeliveryOption  -->
   <!--=========================================-->
   <xs:complexType name="DeliveryOptionType">
     <xs:annotation>
@@ -332,7 +406,7 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="DeliveryOption" type="EdEx:DeliveryOptionType" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="DeliveryOption" type="EdEx:DeliveryOption" minOccurs="1" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -369,7 +443,7 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="DeliveryOption" type="EdEx:DeliveryOptionType" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="DeliveryOption" type="EdEx:DeliveryOption" minOccurs="1" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -425,8 +499,8 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="OrganizationNameSearchString" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
-        <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="OrganizationNameSearchString" type="xs:string" minOccurs="0" />
+        <!-- <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0" maxOccurs="unbounded" />-->
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -435,18 +509,18 @@
   <!--=========================================-->
   <!-- Organization List Report                -->
   <!--=========================================-->
-  <xs:element name="OrganizationListReport">
+  <xs:element name="OrganizationListReport" type="EdEx:OrganizationListReport">
     <xs:annotation>
       <xs:documentation>
          Report of organizations based on request selection criteria.
       </xs:documentation>
     </xs:annotation>
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0" maxOccurs="unbounded"/>
-      </xs:sequence>
-    </xs:complexType>
   </xs:element>
+  <xs:complexType name="OrganizationListReport">
+  	<xs:sequence>
+  		<xs:element name="organizationNameSearchString" type="EdEx:Organization" minOccurs="0" maxOccurs="unbounded" />
+  	</xs:sequence>
+  </xs:complexType>
 
 </xs:schema>
   

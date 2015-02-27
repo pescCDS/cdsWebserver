@@ -22,7 +22,11 @@
 	<th:block th:replace="layout/resources :: resourceScripts"></th:block>
     <script th:inline="javascript">
 		// create a new DataTableView populated with organization meta data
-		var dtView,
+		var entities = /*[[ ${@datasourceManager.byName("entities").all()} ]]*/ [],
+			entityDisplayFunc = function(e) {
+				return [e.code,e.description].join(' ');
+			},
+			dtView,
 			tsConfig = {'format':'mm/dd/yyyy '};
 		
 		$(document).ready(function(e){
@@ -41,7 +45,22 @@
 						{'data':'organizationIdType', 'name':'organizationIdType', 'type':'varchar', 'title':'Id Type', 'controlType':'text'},
 						{'data':'organizationName', 'name':'organizationName', 'type':'varchar', 'title':'Name', 'controlType':'text'},
 						{'data':'organizationSubcode', 'name':'organizationSubcode', 'type':'varchar', 'title':'Sub Code', 'required':false, 'controlType':'text'},
-						{'data':'organizationEntityCode', 'name':'organizationEntityCode', 'type':'tinyint', 'title':'Entity Code', 'required':false, 'controlType':'spinbox'},
+						{
+							'data':'entity', 
+							'name':'entity.id',
+							'type':'object',
+							'displayKey':entityDisplayFunc,
+							'valueKey':'id',
+							'table':'organization_entity_code',
+							'title':'Entity Code',
+							'required':false, 
+							'controlType':'dropdown',
+							'cftype':'enum',
+							'cfenumsource':entities,
+							'cfenumvaluekey':'id',
+							'cfenumlabelkey':'code'
+						},
+						
 						{'data':'organizationEin', 'name':'organizationEin', 'type':'varchar', 'title':'EIN', 'controlType':'text'},
 						{'data':'organizationSiteUrl', 'name':'organizationSiteUrl', 'type':'varchar', 'title':'Site URL', 'controlType':'text'},
 						{'data':'description', 'name':'description', 'type':'text', 'title':'Description', 'visible':false, 'required':false, 'controlType':'textarea'},
@@ -55,7 +74,7 @@
 							'disabled':true, 
 							'required':false, 
 							'controlType':'timestamp',
-							'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}
+							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
 						},
 						{
 							'data':'modifiedTime', 
@@ -65,7 +84,7 @@
 							'disabled':true, 
 							'required':false, 
 							'controlType':'timestamp',
-							'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}
+							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
 						}
 					]
 				}

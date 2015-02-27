@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.DefaultMapEntry;
 import org.apache.commons.collections.MapUtils;
+import org.pesc.edexchange.v1_0.DeliveryMethod;
+import org.pesc.edexchange.v1_0.DeliveryOption;
 import org.pesc.edexchange.v1_0.DocumentFormat;
 import org.pesc.edexchange.v1_0.EntityCode;
 import org.pesc.edexchange.v1_0.Organization;
@@ -19,7 +21,9 @@ public class TableClassMap {
 			new DefaultMapEntry("entityCodes", EntityCode.class),
 			new DefaultMapEntry("documentFormats", DocumentFormat.class),
 			new DefaultMapEntry("users", OrganizationCredential.class),
-			new DefaultMapEntry("contacts", OrganizationContact.class)
+			new DefaultMapEntry("contacts", OrganizationContact.class),
+			new DefaultMapEntry("deliveryMethods", DeliveryMethod.class),
+			new DefaultMapEntry("deliveryOptions", DeliveryOption.class)
 		}
 	);
 	

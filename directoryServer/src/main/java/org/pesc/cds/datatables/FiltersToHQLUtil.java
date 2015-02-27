@@ -2,6 +2,7 @@ package org.pesc.cds.datatables;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,20 +37,6 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	private static HashMap<String, String> buildColumnAliasMap() {
 		HashMap<String, String> retMap = new HashMap<String, String>();
 		//retMap.put("authorizedHours", "authorized_hours");
-		//retMap.put("phoneCellPrimary", "phone_cell_primary");
-		//retMap.put("phoneCellSecondary", "phone_cell_secondary");
-		//retMap.put("phoneHomePrimary", "phone_home_primary");
-		//retMap.put("phoneHomeSecondary", "phone_home_secondary");
-		//retMap.put("serviceCoordinator", "service_coordinator");
-		retMap.put("authExpires", "auth_expires");
-		retMap.put("lastReport", "last_report");
-		retMap.put("endDate", "end_date");
-		retMap.put("intakeDate", "intake_date");
-		retMap.put("initialEval", "initial_eval");
-		retMap.put("serviceDate",  "service_date");
-		retMap.put("serviceDate|A", "completed");
-		retMap.put("dateEntered",  "date_entered");
-		retMap.put("dateEntered|A", "entered");
 		return retMap;
 	}
 	
@@ -83,6 +70,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	
 	// adds the filter as a restriction to the criteria
 	public static Criterion addRestriction(Criteria ct, Map<String, ? extends Object> filter) {
+		log.debug(filter);
 		Criterion retC = null;
 		try {
 			Map<String, ? extends Object> filterValue = (Map<String, ? extends Object>)filter.get("filterValue");
@@ -113,6 +101,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 				}
 				break;
 			case DATE:
+				log.debug("filter is a date");
 				if(isMultiColumn) {
 					ct.add(retC = processDateFilter(filterTable, (ArrayList<String>)filter.get("column"), filterValue));
 				} else {
@@ -229,10 +218,15 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		return d;
 	}
 	
-	
+	// The Date type can be one of many chronological types (Date, Timestamp, Calendar, ...)
+	// So we need a way to know what to convert the DateTime to the appropriate class
+	// luckily the only other date types are Timestamps and they only belong to 
+	// createdTime and modifiedTime columns in this system
 	private static Criterion processDateFilter(String table, String column, Map<String, ? extends Object> filterValue) throws Throwable {
 		Criterion r = null;
 		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Boolean isTimestamp = (column.equalsIgnoreCase("createdTime") || column.equalsIgnoreCase("modifiedTime"));
+		
 		switch(type) {
 		case YEAR:
 			log.debug(String.format("processing YEAR date filter for: table:%s column:%s, sqlColumn:%s", table, column, createSqlColumn(column,table)));
@@ -245,33 +239,37 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 			break;
 		case EQUALS:
 			DateTime dt = dateFormat.parseDateTime(filterValue.get("value").toString());
-			r = Restrictions.eq(column, (Calendar)dt.toGregorianCalendar());
+			r = Restrictions.eq(column, isTimestamp ? dt.toDate() : (Calendar)dt.toGregorianCalendar());
 			break;
 		case BEFORE:
 			DateTime dtb4 = dateFormat.parseDateTime(filterValue.get("value").toString());
-			r = Restrictions.lt(column, (Calendar)dtb4.toGregorianCalendar());
+			r = Restrictions.lt(column, isTimestamp ? dtb4.toDate() : (Calendar)dtb4.toGregorianCalendar());
 			break;
 		case AFTER:
 			DateTime dtAfter = dateFormat.parseDateTime(filterValue.get("value").toString());
-			r = Restrictions.gt(column, (Calendar)dtAfter.toGregorianCalendar());
+			r = Restrictions.gt(column, isTimestamp ? dtAfter.toDate() : (Calendar)dtAfter.toGregorianCalendar());
 			break;
 		case BETWEEN:
 			DateTime fromDate = dateFormat.parseDateTime(filterValue.get("fromDate").toString());
 			DateTime toDate = dateFormat.parseDateTime(filterValue.get("toDate").toString());
-			r = Restrictions.between(column, (Calendar)fromDate.toGregorianCalendar(), (Calendar)toDate.toGregorianCalendar());
+			log.debug(String.format("Column: %s,%nisTimestamp: %s", column, isTimestamp));
+			r = Restrictions.between(column, 
+					isTimestamp ? fromDate.toDate() : (Calendar)fromDate.toGregorianCalendar(), 
+					isTimestamp ? toDate.toDate() : (Calendar)toDate.toGregorianCalendar()
+			);
 			break;
 		case SELECT:
 			// the select widget will save the list of dates as an array of {date:<Date>, timestamp:<Long>} objects
 			// so we need to convert to a list of Dates or Calendars
-			ArrayList<Calendar> fvalues = new ArrayList<Calendar>();
+			ArrayList fvalues = new ArrayList();
 			List<HashMap<String, ? extends Object>> datesList = (ArrayList<HashMap<String, ? extends Object>>)filterValue.get("value");
 			for(ListIterator<HashMap<String, ? extends Object>> dIter = datesList.listIterator(); dIter.hasNext();) {
 				HashMap<String, ? extends Object> dateHash = dIter.next();
 				Calendar cal = Calendar.getInstance();
-				cal.setTimeInMillis((Long)dateHash.get("timestamp"));
-				fvalues.add((Calendar)cal.clone());
+				Long selTimestamp = (Long)dateHash.get("timestamp");
+				cal.setTimeInMillis(selTimestamp);
+				fvalues.add( isTimestamp ? new Date(selTimestamp) : (Calendar)cal.clone() );
 			}
-			
 			r = Restrictions.in(column, fvalues);
 			break;
 		case CYCLE:
@@ -316,6 +314,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		// TODO finish processDateFilter() for multi-column
 		Disjunction d = Restrictions.disjunction();
 		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		
 		switch(type) {
 		case YEAR:
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
@@ -327,21 +326,24 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 			DateTime dt = dateFormat.parseDateTime(filterValue.get("value").toString());
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				d.add(Restrictions.eq(col, (Calendar)dt.toGregorianCalendar()));
+				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
+				d.add(Restrictions.eq(col, isTimestamp ? dt.toDate() : (Calendar)dt.toGregorianCalendar()));
 			}
 			break;
 		case BEFORE:
 			DateTime dtB4 = dateFormat.parseDateTime(filterValue.get("value").toString());
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				d.add(Restrictions.lt(col, (Calendar)dtB4.toGregorianCalendar()));
+				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
+				d.add(Restrictions.lt(col, isTimestamp ? dtB4.toDate() : (Calendar)dtB4.toGregorianCalendar()));
 			}
 			break;
 		case AFTER:
 			DateTime dtAfter = dateFormat.parseDateTime(filterValue.get("value").toString());
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				d.add(Restrictions.gt(col, (Calendar)dtAfter.toGregorianCalendar()));
+				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
+				d.add(Restrictions.gt(col, isTimestamp ? dtAfter.toDate() : (Calendar)dtAfter.toGregorianCalendar()));
 			}
 			break;
 		case BETWEEN:
@@ -349,7 +351,11 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 			DateTime toDate = dateFormat.parseDateTime(filterValue.get("toDate").toString());
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				d.add( Restrictions.between(col, (Calendar)fromDate.toGregorianCalendar(), (Calendar)toDate.toGregorianCalendar()) );
+				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
+				d.add( Restrictions.between(col, 
+					isTimestamp ? fromDate.toDate() : (Calendar)fromDate.toGregorianCalendar(), 
+					isTimestamp ? toDate.toDate() : (Calendar)toDate.toGregorianCalendar())
+				);
 			}
 			break;
 		case SELECT:
@@ -358,13 +364,26 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 			for(ListIterator<HashMap<String, ? extends Object>> dIter = datesList.listIterator(); dIter.hasNext();) {
 				HashMap<String, ? extends Object> dateHash = dIter.next();
 				Calendar cal = Calendar.getInstance();
-				cal.setTimeInMillis((Long)dateHash.get("timestamp"));
-				fvalues.add((Calendar)cal.clone());
+				Long selTimestamp = (Long)dateHash.get("timestamp");
+				cal.setTimeInMillis(selTimestamp);
+				fvalues.add( (Calendar)cal.clone() );
 			}
 			
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				d.add( Restrictions.in(col, fvalues) );
+				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
+				if(isTimestamp) {
+					// need a List of Date no Calendar
+					ArrayList<Date> changeList = new ArrayList<Date>();
+					for(ListIterator<Calendar> calIter = fvalues.listIterator(); calIter.hasNext();) {
+						Calendar c = calIter.next();
+						changeList.add(c.getTime());
+					}
+					d.add( Restrictions.in(col, changeList) );
+					
+				} else {
+					d.add( Restrictions.in(col, fvalues) );
+				}
 			}
 			break;
 		case CYCLE:

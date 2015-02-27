@@ -10,7 +10,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 public class FilterSet {
 	private Integer id;
-	private Integer userId;
+	private Integer credentialId;
 	private String category;
 	private String name;
 	private String description;
@@ -28,9 +28,9 @@ public class FilterSet {
 	// Constructor for populating properties with fields from a database row
 	// the database table stores the filters as text so the List filters property
 	// will need to be processed after the String jsonFilters property has been set
-	public FilterSet(Integer id, Integer userId, String category, String name, String description, String table, String filtersJson) {
+	public FilterSet(Integer id, Integer credentialId, String category, String name, String description, String table, String filtersJson) {
 		setId(id);
-		setUserId(userId);
+		setCredentialId(credentialId);
 		setCategory(category);
 		setName(name);
 		setDescription(description);
@@ -79,9 +79,9 @@ public class FilterSet {
 	
 	public String toString() {
 		return String.format(
-			"FilterSet {%n  id: %s,%n  userId: %s,%n  category: %s,%n  name: %s,%n  description: %s,%n  table: %s,%n  filtersJson: %s,%n  filters: [%s]%n}",
+			"FilterSet {%n  id: %s,%n  credentialId: %s,%n  category: %s,%n  name: %s,%n  description: %s,%n  table: %s,%n  filtersJson: %s,%n  filters: [%s]%n}",
 			getId(),
-			getUserId(),
+			getCredentialId(),
 			getCategory(),
 			getName(),
 			getDescription(),
@@ -93,8 +93,8 @@ public class FilterSet {
 	
 	public Integer getId() { return id; }
 	public void setId(Integer id) { this.id = id; }
-	public Integer getUserId() { return userId; }
-	public void setUserId(Integer userId) { this.userId = userId; }
+	public Integer getCredentialId() { return credentialId; }
+	public void setCredentialId(Integer credentialId) { this.credentialId = credentialId; }
 	public String getCategory() { return category; }
 	public void setCategory(String category) { this.category = category; }
 	public String getName() { return name; }

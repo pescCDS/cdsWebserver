@@ -14,12 +14,14 @@
 		<property name="organizationIdType" column="organization_id_type" not-null="true" type="string" />
 		<property name="organizationName" column="organization_name" not-null="true" type="string" />
 		<property name="organizationSubcode" column="organization_subcode" type="string" />
-		<property name="organizationEntityCode" column="organization_entity_code" type="integer" />
 		<property name="organizationEin" column="organization_ein" not-null="true" type="string" />
 		<property name="organizationSiteUrl" column="organization_site_url" not-null="true" type="string" />
 		<property name="description" column="description" type="string" />
 		<property name="termsOfUse" column="terms_of_use" not-null="true" type="string" />
 		<property name="privacyPolicy" column="privacy_policy" not-null="true" type="string" />
+		
+		<many-to-one name="entity" column="entity_id" class="EntityCode" not-null="true" lazy="false" />
+		
 		<property name="createdTime" column="created_time" type="timestamp" update="false" insert="false" generated="always" />
 		<property name="modifiedTime" column="modified_time" type="timestamp" update="false" insert="false" generated="always" />
 	</class>

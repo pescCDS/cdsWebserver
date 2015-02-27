@@ -40,12 +40,6 @@
 		<os family="windows" />
 	</condition>
 	<property name="target.finalName" value="EdExchange" />
-	
-	<property file="${basedir}/scripts/build.properties" />
-	<property name="cfg.jdbc.path" value="${basedir}/scripts/config_source/jdbc" />
-	<property name="scripts.db.dirServer.path" value="${basedir}/scripts/directoryServer" />
-	<property name="scripts.db.netServer.path" value="${basedir}/scripts/networkServer" />
-	
 	<property name="dirServer.target.path" value="${basedir}/directoryServer/target" />
 	
 	<!-- debug output -->
@@ -54,23 +48,6 @@
 		<echo message="webapp.target.path: ${webapp.target.path}" />
 		<echo message="target.finalName: ${target.finalName}" />
 	</target>
-	
-	<!--
-    build-directory-db
-    1) drop cds schema
-    2) rebuild cds schema
-    3) rebuild org_directory table
-    -->
-    <target name="build-directory-db">
-        <sql driver="${jdbc.driver}" 
-          classpath="${cfg.jdbc.path}/${jdbc.jar}"  
-        	    url="${db.url}" 
-        	 userid="${db.user}" 
-           password="${db.pass}">
-            <transaction src="${dirServer.path}/db/1-directoryServerSchema.sql" />
-        	<transaction src="${dirServer.path}/db/2-orgDirectoryTable.sql" />
-        </sql>
-    </target>
 	
 	<!-- tasks that can be called individually for the redeploy process -->
 	<target name="tomcat-stop" depends="-tomcatWindowsStop, -tomcatLinuxStop">
@@ -187,8 +164,6 @@
 	
 	<!-- Help Target -->
     <target name="help">
-        <echo message="" />
-        <echo message="${webapp} Setup Scripts" />
         <echo message="" />
 		<echo message="redeploy" />
 		<echo message="stops tomcat, deletes the web app in tomcat's directory, redeploys, then starts tomcat" />

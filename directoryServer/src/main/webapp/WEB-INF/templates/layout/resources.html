@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
     
     <!-- TODO we only need one page template, so just have /templates/content/page.html -->
-    <th:block th:with="page=${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')},isDatatablePage=${#arrays.contains(new String[]{'/documentFormats','/entityCodes','/organizations'}, page )}">
+    <th:block th:with="page=${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')},isDatatablePage=${#arrays.contains(new String[]{'/documentFormats','/entityCodes','/organizations','/contacts','/deliveryMethods','/deliveryOptions'}, page )}">
     	<script id="pageTemplate" type="text/template" th:include="content/datatablePage :: content (page=${page})" th:if="*{isDatatablePage}"></script>
     </th:block>
 </head>

@@ -10,7 +10,7 @@
 		<id name="id" column="id" type="integer">
 			<generator class="identity" />
 		</id>
-		<property name="entityCode" column="entity_code" type="integer" not-null="true" />
+		<property name="code" column="entity_code" type="integer" not-null="true" />
 		<property name="description" column="description" not-null="true" type="string" />
 		<property name="createdTime" column="created_time" type="timestamp" update="false" insert="false" generated="always" />
 		<property name="modifiedTime" column="modified_time" type="timestamp" update="false" insert="false" generated="always" />

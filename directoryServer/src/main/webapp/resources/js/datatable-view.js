@@ -62,6 +62,7 @@ var DataTableView = Backbone.View.extend({
 	'datatableConfig':{},
 	
 	'formInputs':[],
+	'requiredInputNames':[],
 	
 	'templates':{
 		'columnVisListItem':_.template([
@@ -147,7 +148,7 @@ var DataTableView = Backbone.View.extend({
 	'displayInputValidation':function(finput, isValid) {
 		//var formGroup = $('div.dtview-form-'+formKey,this.modalForm);
 		finput.input.formGroup.toggleClass('has-success',isValid).toggleClass('has-error',!isValid);
-		// some input contolls won't have the feedback visual element
+		// some input contols won't have the feedback visual element
 		if($('span.glyphicon.form-control-feedback',finput.input.formGroup).length) {
 			$('span.glyphicon.form-control-feedback',finput.input.formGroup)
 				.removeClass('hidden')
@@ -184,6 +185,8 @@ var DataTableView = Backbone.View.extend({
 			} else if(inpt.type==='typeahead') {
 				$('input:text',inpt.input.formGroup).typeahead('val',null);
 				inpt.value = null;
+			} else if(inpt.type==='custom') {
+				inpt.input.formInput.reset();
 			}
 			
 			if(inpt.required) {
@@ -248,7 +251,7 @@ var DataTableView = Backbone.View.extend({
 			idValue = $('#'+this.sourceData.primaryKey,this.modalForm).val(),
 			editMode = _.isFinite(idValue),
 			requiredInputs = _.where(this.formInputs, {'required':true}),
-			optionalInputs = _.where(this.formInputs, {'required':false,'disabled':false}),
+			optionalInputs = _.where(this.formInputs, {'required':false, 'disabled':false}),
 			validInputsTotal = requiredInputs.length,
 			validInputCount = 0
 		;
@@ -259,19 +262,49 @@ var DataTableView = Backbone.View.extend({
 		
 		// required inputs
 		for(var i in requiredInputs) {
-			var inputValue = this.getFormInputValue(requiredInputs[i]);
-			if(inputValue!==false) {
-				validInputCount++;
-				returnData[requiredInputs[i].name] = inputValue;
+			if(requiredInputs[i].type==='custom') {
+				// should add input properties and values to form data object
+				// the .get() function will trigger validation display
+				var custData = requiredInputs[i].input.formInput.get(),
+					custValidInptCount = 0,
+					custInptCount = custData.length;
+				for(var cidx in custData) {
+					for(var cKey in custData[cidx]) {
+						if(custData[cidx][cKey]!==false) {
+							custValidInptCount++;
+							returnData[cKey] = custData[cidx][cKey];
+						}
+					}
+				}
+				if(custValidInptCount===custInptCount) {
+					validInputCount++;
+				}
+				
+			} else {
+				var inputValue = this.getFormInputValue(requiredInputs[i]);
+				if(inputValue!==false) {
+					validInputCount++;
+					returnData[requiredInputs[i].name] = inputValue;
+				}
+				this.displayInputValidation(requiredInputs[i], inputValue!==false);
 			}
-			this.displayInputValidation(requiredInputs[i], inputValue!==false);
 		}
 		
 		//optional inputs
 		for(var j in optionalInputs) {
-			var inputValue = this.getFormInputValue(optionalInputs[j]);
-			if(inputValue!==false) {
-				returnData[optionalInputs[j].name] = inputValue;
+			if(optionalInputs[j].type==='custom') {
+				var custData = optionalInputs[j].input.formInput.get();
+				for(var cidx in custData) {
+					if(custData[cidx]!==false) {
+						returnData[cidx] = custData[cidx];
+					}
+				}
+				
+			} else {
+				var inputValue = this.getFormInputValue(optionalInputs[j]);
+				if(inputValue!==false) {
+					returnData[optionalInputs[j].name] = inputValue;
+				}
 			}
 		}
 		
@@ -299,7 +332,7 @@ var DataTableView = Backbone.View.extend({
 			} else if(inpt.type==='datepicker' && _.isFinite(dtData[inpt.name])) {
 				inpt.input.formInput.datepicker('setDate', new Date(dtData[inpt.name]));
 			} else if(inpt.type==='timestamp' && _.isFinite(dtData[inpt.name])) {
-				inpt.input.formInput.val( moment(dtData[inpt.name]).format("d/M/YYYY h:mm:ss a") );
+				inpt.input.formInput.val( moment(dtData[inpt.name]).format("M/D/YYYY h:mm:ss a") );
 			} else if(inpt.type==='radioset') {
 				$('label.btn', inpt.input.formGroup).removeClass('active');
 				$(['label.btn[data-',inpt.valueKey,'="',dtData[inpt.name][inpt.valueKey],'"]'].join(''), inpt.input.formGroup).addClass('active');
@@ -321,6 +354,8 @@ var DataTableView = Backbone.View.extend({
 				} else {
 					$('input:text',inpt.input.formGroup).typeahead('val', inpt.displayKey(inpt.value));
 				}
+			} else if(inpt.type==='custom') {
+				inpt.input.formInput.set(dtData);
 			}
 		}
 		
@@ -331,6 +366,7 @@ var DataTableView = Backbone.View.extend({
 	
 	'className':'data-table-view',
 	'events':{
+
 		// DATATABLE INIT COMPLETE
 		'init.dt':function(e, settings, json) {
 			var dt = $(this.datatable.table().container());
@@ -358,6 +394,11 @@ var DataTableView = Backbone.View.extend({
 			// create add row data table button
 			$('div.add-button-container',dt).append(
 				['<button type="button" class="btn btn-success pull-left">Add ','</button>'].join(this.dataTypeName.LONG)
+			);
+			
+			// check for extra UI
+			$('div.custom-ui', dt).append(
+				this.model.get('extraUI')?this.model.get('extraUI'):null
 			);
 			
 			this.$el.prepend(this.columnFilters.$el);
@@ -481,7 +522,7 @@ var DataTableView = Backbone.View.extend({
 		},
 		
 		// DROPDOWN MENU ITEM CLICK (MODAL FORM DROPDOWN INPUT TYPE)
-		'click div.edit-dtview-modal div.modal-body form.form-horizontal ul.dropdown-menu li':function(e) {
+		'click div.edit-dtview-modal div.modal-body form.form-horizontal .input-group ul.dropdown-menu li':function(e) {
 			// put the label data into the display input and the value data into the hidden input
 			var ct = $(e.currentTarget),
 				d_id = ct.data('id'),
@@ -492,7 +533,9 @@ var DataTableView = Backbone.View.extend({
 			$('input:text', formGroup).val(d_label);
 		},
 		
-		'typeahead:selected div.edit-dtview-modal div.modal-body form.form-horizontal':function(jqEvent, suggestion, datasetName) {
+		// TYPEAHEAD SUGGESTION SELECT
+		'typeahead:selected div.edit-dtview-modal div.modal-body form.form-horizontal .ta-form-input-ctrl':function(jqEvent, suggestion, datasetName) {
+			console.log(datasetName);
 			//put the suggestion in the formInput
 			var input = _.findWhere(this.formInputs, {'name':datasetName});
 			if(input) {
@@ -503,6 +546,13 @@ var DataTableView = Backbone.View.extend({
 	'initialize':function(options) {
 		// ASSERTION: options has these required properties: table, webServiceUrl
 		// ASSERTION: table will have at least these: name, primaryKey, columns
+		
+		// TODO put all variables into this view's model
+		this.model = new Backbone.Model({
+			'sourceData':null,
+			'webServiceUrl':null,
+			'customUI':null
+		});
 		
 		this.sourceData = options.table;
 		this.webServiceUrl = options.webServiceUrl;
@@ -771,104 +821,116 @@ var DataTableView = Backbone.View.extend({
 				
 				// TODO create formInputs and requiredInputNames
 				// TODO create a Backbone View to handle the form
-				var inpt = {
-					'name':col.data,
-					'input':{
-						'formGroup':$('div.form-group.dtview-form-'+col.data,this.modalForm),
-						'formInput':null
-					}, 
-					'required':true, 
-					'type':col.controlType, 
-					'disabled':false
-				};
-				
-				if(_.has(col,'required') && _.isBoolean(col.required)) {
-					inpt.required = col.required;
-					if(col.required) {
-						this.requiredInputNames.push(col.data);
+				if(!_.has(col, 'inputExclude') || (_.has(col, 'inputExclude') && !col.inputExclude)) {
+					var inpt = {
+						'name':col.data,
+						'input':{
+							'formGroup':$('div.form-group.dtview-form-'+col.data,this.modalForm),
+							'formInput':null
+						}, 
+						'required':true,
+						'type':col.controlType,
+						'disabled':false
+					};
+					
+					if(_.has(col,'required') && _.isBoolean(col.required)) {
+						inpt.required = col.required;
+						if(col.required) {
+							this.requiredInputNames.push(col.data);
+						}
 					}
-				}
-				if(_.has(col,'disabled') && _.isBoolean(col.disabled)) {
-					inpt.disabled = col.disabled;
-				}
-				
-				switch(inpt.type) {
-					case 'text':
-					case 'timestamp':
-						_.extend(inpt.input, {'formInput':$('input',inpt.input.formGroup)});
-						break;
-					case 'textarea':
-						_.extend(inpt.input, {'formInput':$('textarea',inpt.input.formGroup)});
-						//inpt.input.formInput = $('textarea',inpt.input.formGroup);
-						break;
-					case 'boolean':
-						_.extend(inpt.input, {'formInput':$('label.btn', inpt.input.formGroup)});
-						break;
-					case 'spinbox':
-						// spinbox number control
-						inpt.input.formInput = $('div.spinbox',inpt.input.formGroup);
-						inpt.input.formInput.spinbox(_.has(col,'config')?col.config:defaultSpinboxOpts);
-						break;
-					case 'datepicker':
-						inpt.input.formInput = $('input',inpt.input.formGroup);
-						inpt.input.formInput.datepicker(_.has(col,'config')?col.config:defaultDatepickerOpts);
-						// assign any event handlers
-						if(_.has(col,'events')) {
-							for(var evt in col.events) {
-								inpt.input.formInput.on(evt, col.events[evt]);
+					if(_.has(col,'disabled') && _.isBoolean(col.disabled)) {
+						inpt.disabled = col.disabled;
+					}
+					
+					switch(inpt.type) {
+						case 'text':
+						case 'timestamp':
+							_.extend(inpt.input, {'formInput':$('input',inpt.input.formGroup)});
+							break;
+						case 'textarea':
+							_.extend(inpt.input, {'formInput':$('textarea',inpt.input.formGroup)});
+							//inpt.input.formInput = $('textarea',inpt.input.formGroup);
+							break;
+						case 'boolean':
+							_.extend(inpt.input, {'formInput':$('label.btn', inpt.input.formGroup)});
+							break;
+						case 'spinbox':
+							// spinbox number control
+							inpt.input.formInput = $('div.spinbox',inpt.input.formGroup);
+							inpt.input.formInput.spinbox(_.has(col,'config')?col.config:defaultSpinboxOpts);
+							break;
+						case 'datepicker':
+							inpt.input.formInput = $('input',inpt.input.formGroup);
+							inpt.input.formInput.datepicker(_.has(col,'config')?col.config:defaultDatepickerOpts);
+							// assign any event handlers
+							if(_.has(col,'events')) {
+								for(var evt in col.events) {
+									inpt.input.formInput.on(evt, col.events[evt]);
+								}
 							}
-						}
-						break;
-					case 'radioset':
-						// for small set enum or boolean types
-						// is a radioset button group
-						for(var j in col.cfenumsource) {
-							var enumDataItem = col.cfenumsource[j],
-								isFirst = j==0;
-							$('div.btn-group',inpt.input.formGroup).append([
-								'<label class="btn btn-sm btn-primary',isFirst?' active':'','" data-id="',enumDataItem[col.valueKey],'">',
-									'<input type="radio" value="',enumDataItem[col.valueKey],'"',isFirst?' checked="checked" ':' ','/> ',
-									'<span>',typeof(col.displayKey)==='string'?enumDataItem[col.displayKey]:col.displayKey(enumDataItem),'</span>',
-								'</label>'
-							].join(''));
-						}
-						_.extend(inpt, {'displayKey':col.cfenumlabelkey, 'valueKey':col.valueKey, 'datasource':col.cfenumsource});
-						inpt.input.formInput = $('label.btn',inpt.input.formGroup);//will be more than 1
-						break;
-					case 'dropdown':
-						// for enum types
-						// ASSERTION: type==object or has(cfenumsource), then has(valueKey) and has(displayKey)
-						_.extend(inpt, {'displayKey':col.displayKey, 'valueKey':col.valueKey, 'datasource':col.cfenumsource});
-						inpt.input.formInput = $('input',inpt.input.formGroup);//will be more than 1 (hidden and text)
-						//loop through cfenumsource array
-						for(var j in col.cfenumsource) {
-							var enumDataItem = col.cfenumsource[j];
-							$('ul.dropdown-menu',inpt.input.formGroup).append([
-								'<li class="dropdown-menu-item-faux-a" data-id="',enumDataItem[col.valueKey],
-								'" data-key="',col.data,
-								'" data-label="',typeof(col.displayKey)==='string'?enumDataItem[col.displayKey]:col.displayKey(enumDataItem),'">',
-								'<a>',
-								typeof(col.displayKey)==='string'?enumDataItem[col.displayKey]:col.displayKey(enumDataItem),
-								'</a></li>'
-							].join(''));
-						}
-						break;
-					case 'typeahead':
-						// typeahead input element
-						_.extend(inpt, {'value':null, 'displayKey':col.displayKey, 'valueKey':col.valueKey});
-						inpt.input.formInput = $('input:text.typeahead',inpt.input.formGroup);
-						inpt.input.formInput.typeahead(
-							{highlight:false, hint:false, minLength:3},
-							{
-								'name':inpt.name,
-								'displayKey':col.displayKey,
-								'source':col.datasource.ttAdapter()
+							break;
+						case 'radioset':
+							// for small set enum or boolean types
+							// is a radioset button group
+							for(var j in col.cfenumsource) {
+								var enumDataItem = col.cfenumsource[j],
+									isFirst = j==0;
+								$('div.btn-group',inpt.input.formGroup).append([
+									'<label class="btn btn-sm btn-primary',isFirst?' active':'','" data-id="',enumDataItem[col.valueKey],'">',
+										'<input type="radio" value="',enumDataItem[col.valueKey],'"',isFirst?' checked="checked" ':' ','/> ',
+										'<span>',typeof(col.displayKey)==='string'?enumDataItem[col.displayKey]:col.displayKey(enumDataItem),'</span>',
+									'</label>'
+								].join(''));
 							}
-						);
-						break;
+							_.extend(inpt, {'displayKey':col.cfenumlabelkey, 'valueKey':col.valueKey, 'datasource':col.cfenumsource});
+							inpt.input.formInput = $('label.btn',inpt.input.formGroup);//will be more than 1
+							break;
+						case 'dropdown':
+							// for enum types
+							// ASSERTION: type==object or has(cfenumsource), then has(valueKey) and has(displayKey)
+							_.extend(inpt, {'displayKey':col.displayKey, 'valueKey':col.valueKey, 'datasource':col.cfenumsource});
+							inpt.input.formInput = $('input',inpt.input.formGroup);//will be more than 1 (hidden and text)
+							//loop through cfenumsource array
+							for(var j in col.cfenumsource) {
+								var enumDataItem = col.cfenumsource[j];
+								$('ul.dropdown-menu',inpt.input.formGroup).append([
+									'<li class="dropdown-menu-item-faux-a" data-id="',enumDataItem[col.valueKey],
+									'" data-key="',col.data,
+									'" data-label="',typeof(col.displayKey)==='string'?enumDataItem[col.displayKey]:col.displayKey(enumDataItem),'">',
+									'<a>',
+									typeof(col.displayKey)==='string'?enumDataItem[col.displayKey]:col.displayKey(enumDataItem),
+									'</a></li>'
+								].join(''));
+							}
+							break;
+						case 'typeahead':
+							// typeahead input element
+							_.extend(inpt, {'value':null, 'displayKey':col.displayKey, 'valueKey':col.valueKey});
+							inpt.input.formInput = $('input:text.typeahead',inpt.input.formGroup);
+							inpt.input.formInput.typeahead(
+								{'highlight':false, 'hint':false, 'minLength':3},
+								{
+									'name':inpt.name,
+									'displayKey':col.displayKey,
+									'source':col.datasource.ttAdapter()
+								}
+							);
+							break;
+						case 'custom':
+							// inpt.input.formInput -> a Backbone.view with these external functions:
+							//   .set( data from datatable row)
+							//   .get() { returns data from input control }
+							//      data will be in this format:
+							//        [{<propertyKey>:<propertyValue>},...]
+							//   .reset() { resets the form elements to their initial value }
+							inpt.input.formInput = col.customInputControl;
+							inpt.input.formGroup.append(inpt.input.formInput.render());
+							break;
+					}
+					
+					this.formInputs.push(inpt);
 				}
-				
-				this.formInputs.push(inpt);
 			}
 		}
 		
@@ -886,6 +948,7 @@ var DataTableView = Backbone.View.extend({
 							'l',// the number of results per page drop down
 							'<"column-visibility-container">',// 
 							'<"add-button-container">',// the add row button
+							'<"custom-ui">',
 							'p',// the pagination control
 					'>',
 				'>',
@@ -927,6 +990,9 @@ var DataTableView = Backbone.View.extend({
 		}
 		if(_.has(options,'filterCategories')) {
 			_.extend(cfOptions,{'filterCategories':options.filterCategories});
+		}
+		if(_.has(options,'extraUI')) {
+			this.model.set('extraUI', options.extraUI);
 		}
 		if(_.has(options,'filters')) {
 			_.extend(cfOptions,{'filters':options.filters});

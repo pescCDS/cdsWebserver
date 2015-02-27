@@ -69,7 +69,7 @@ public class ColumnFiltersController {
 	@RequestMapping(value="/columnfilters", method=RequestMethod.GET)
 	@ResponseBody
 	public List<FilterSet> bbSyncFetch(@RequestParam("table") String table) {
-		log.debug(String.format("passed parameter 'table': %s", table));
+		//log.debug(String.format("passed parameter 'table': %s", table));
 		List<FilterSet> retList = new ArrayList<FilterSet>();
 		if(table==null) {
 			// this will still limit the results to the logged in user id
@@ -99,7 +99,7 @@ public class ColumnFiltersController {
 	@RequestMapping(value="/columnfilters", method=RequestMethod.POST)
 	@ResponseBody
 	public FilterSet bbSyncCreate(@RequestBody FilterSet fs) {
-		log.debug(fs.toString());
+		//log.debug(fs.toString());
 		return ((FilterSetsDao)DatasourceManagerUtil.getFilterSets()).save(fs);
 	}
 	
@@ -208,7 +208,7 @@ public class ColumnFiltersController {
 	@RequestMapping("/columnfilters/data")
 	@ResponseBody
 	public Map<String, ?> getDataTableData(Model model, @RequestBody DataTablesRequest dtr) {
-		
+		//log.debug(dtr);
 		Integer draw = dtr.getDraw();
 		int start = dtr.getStart();
 		int length = dtr.getLength();
@@ -265,13 +265,16 @@ public class ColumnFiltersController {
 					 }
 				 */
 				HashMap<String, ? extends Object> cf = (HashMap<String, ? extends Object>)iter.next();
-				try {
+				//try {
 					Map<String, ? extends Object> filterValue = (Map<String, ? extends Object>)cf.get("filterValue");
+					log.debug(filterValue);
 					FiltersToHQLUtil.addRestriction(ct, cf);
 					
-				} catch(Exception ex) {
-					log.error(ex.getMessage());
-				}
+				//} catch(Exception ex) {
+				//	log.error(ex.getMessage());
+				//	ex.printStackTrace();
+				//	throw(ex);
+				//}
 			}
 			
 			//orders (orders[i].column == zero-based index of the columns array
@@ -312,6 +315,7 @@ public class ColumnFiltersController {
 			
 		} catch(Exception ex) {
 			log.error(ex.getMessage());
+			ex.printStackTrace();
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
 			retHash.put("error", ex.getMessage());
 		}

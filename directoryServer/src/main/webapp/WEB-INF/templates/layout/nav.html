@@ -35,7 +35,15 @@
                     <li th:unless="${#strings.startsWith(currentView,'/documentFormats')}">
                     	<a href="/documentFormats" th:href="@{/documentFormats}">Document Formats</a>
                     </li>
-                    
+                    <li th:unless="${#strings.startsWith(currentView,'/contacts')}">
+                    	<a href="/contacts" th:href="@{/contacts}">Contacts</a>
+                    </li>
+                    <li th:unless="${#strings.startsWith(currentView,'/deliveryOptions')}">
+                    	<a href="/deliveryOptions" th:href="@{/deliveryOptions}">Delivery Options</a>
+                    </li>
+                    <li th:unless="${#strings.startsWith(currentView,'/deliveryMethods')}">
+                    	<a href="/deliveryMethods" th:href="@{/deliveryMethods}">Delivery Methods</a>
+                    </li>
                 </ul>
             	<p class="navbar-text navbar-right"><a href="/logout" th:href="@{/logout}">Logout</a></p>
             </div>

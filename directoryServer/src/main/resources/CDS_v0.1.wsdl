@@ -6,7 +6,7 @@
     xmlns:cds="http://webservice.cds.pesc.org/" 
     xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
     xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
-    xmlns:edex="urn:org:pesc:EdExchange:v1.0.7"
+    xmlns:edex="urn:org:pesc:EdExchange:v1.0.8"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xs="http://www.w3.org/2001/XMLSchema">
     
@@ -19,31 +19,25 @@
             <!-- -->
             <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/CoreMain_v1.12.0.xsd" />
             <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/AcademicRecord_v1.7.0.xsd" />
-            <xs:import namespace="urn:org:pesc:EdExchange:v1.0.7" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/EdExchangeEnvelope_v1.0.7.xsd" />
+            <xs:import namespace="urn:org:pesc:EdExchange:v1.0.8" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/EdExchangeEnvelope_v1.0.8.xsd" />
             
             <xs:element name="ServletException" type="xs:string" />
             
-            <!-- customized from EdExchange schema file -->
-			<xs:element name="OrganizationListRequest" type="cds:OrganizationListRequest" />
-			<xs:complexType name="OrganizationListRequest">
-                <xs:sequence>
-                    <xs:element name="OrganizationNameSearchString" type="xs:string" minOccurs="0" />
-                    <!-- <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0"  /> -->
-                </xs:sequence>
-            </xs:complexType>
-		
-			<xs:element name="OrganizationListReport" type="cds:OrganizationListReport" />
-			<xs:complexType name="OrganizationListReport">
-                <xs:sequence>
-                    <xs:element name="Organization" type="AcRec:SourceDestinationType" minOccurs="0" maxOccurs="unbounded" />
-                </xs:sequence>
-            </xs:complexType>
-			
-            <xs:element name="getCDSBatch" type="cds:getCDSBatch"/>
-            <xs:element name="getCDSBatchResponse" type="cds:getCDSBatchResponse"/>
-            <xs:element name="sendCDSBatch" type="cds:sendCDSBatch"/>
-            <xs:element name="sendCDSBatchResponse" type="cds:sendCDSBatchResponse"/>
-            
+            <!--==============================================================-->
+            <!-- SOAP service call elements defined in this wsdl schema:      -->
+            <!-- TODO move these to the EdExchangeEnvelope_vx.x.x.xsd file    -->
+            <!-- sendCDSBatch                                                 -->
+            <!-- sendCDSBatchResponse                                         -->
+            <!-- getCDSBatch                                                  -->
+            <!-- getCDSBatchResponse                                          -->
+            <!-- getDeliveryLocation                                          -->
+            <!-- getDeliveryLocationResponse                                  -->
+            <!-- updateLocalOptions                                           -->
+            <!-- updateLocalOptionsResponse                                   -->
+            <!-- updateOrganization                                           -->
+            <!-- updateOrganizationResponse                                   -->
+            <!--==============================================================-->
+            <!--
             <xs:complexType name="sendCDSBatch">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="psisCode" type="xs:string"/>
@@ -52,11 +46,17 @@
                     <xs:element minOccurs="0" name="CDSBatchXML" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
+            <xs:element name="sendCDSBatch" type="cds:sendCDSBatch"/>
+            
+            
             <xs:complexType name="sendCDSBatchResponse">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="sendCDSBatch" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
+            <xs:element name="sendCDSBatchResponse" type="cds:sendCDSBatchResponse"/>
+            
+            
             <xs:complexType name="getCDSBatch">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="psisCode" type="xs:string"/>
@@ -64,11 +64,16 @@
                     <xs:element minOccurs="0" name="password" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
+            <xs:element name="getCDSBatch" type="cds:getCDSBatch"/>
+            
+            
             <xs:complexType name="getCDSBatchResponse">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="getCDSBatch" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
+            <xs:element name="getCDSBatchResponse" type="cds:getCDSBatchResponse"/>
+            
             
             <xs:element name="getDeliveryLocation">
                 <xs:complexType></xs:complexType>
@@ -106,11 +111,23 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            -->
             
         </xs:schema>
     </wsdl:types>
     
-    <!--  -->
+    
+    <wsdl:message name="ServletException">
+        <wsdl:part name="ServletException" element="cds:ServletException"></wsdl:part>
+	</wsdl:message>
+    
+    <wsdl:message name="OrganizationListRequest">
+	   <wsdl:part element="edex:OrganizationListRequest" name="parameters"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="OrganizationListReport">
+       <wsdl:part element="edex:OrganizationListReport" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <!-- 
     <wsdl:message name="getCDSBatch">
         <wsdl:part element="cds:getCDSBatch" name="parameters"></wsdl:part>
     </wsdl:message>
@@ -122,17 +139,6 @@
     </wsdl:message>
     <wsdl:message name="sendCDSBatch">
         <wsdl:part element="cds:sendCDSBatch" name="parameters"></wsdl:part>
-    </wsdl:message>
-    
-    <wsdl:message name="ServletException">
-        <wsdl:part name="ServletException" element="cds:ServletException"></wsdl:part>
-	</wsdl:message>
-	
-	<wsdl:message name="OrganizationListRequest">
-	   <wsdl:part element="cds:OrganizationListRequest" name="parameters"></wsdl:part>
-	</wsdl:message>
-	<wsdl:message name="OrganizationListReport">
-       <wsdl:part element="cds:OrganizationListReport" name="parameters"></wsdl:part>
     </wsdl:message>
     
     <wsdl:message name="DeliveryOptionRequest">
@@ -162,10 +168,18 @@
     <wsdl:message name="updateOrganizationResponse">
         <wsdl:part element="cds:updateOrganizationResponse" name="parameters" />
     </wsdl:message>
-   
+    
+   -->
     
     <wsdl:portType name="WebServicesInterface">
-    <!-- -->
+    	
+    	<wsdl:operation name="OrganizationListRequest">
+	       <wsdl:input name="OrganizationListRequest" message="cds:OrganizationListRequest" />
+	       <wsdl:output name="OrganizationListReport" message="cds:OrganizationListReport" />
+	       <wsdl:fault name="ServletException" message="cds:ServletException" />
+	    </wsdl:operation>
+    	
+    	<!-- 
         <wsdl:operation name="sendCDSBatch">
             <wsdl:input message="cds:sendCDSBatch" name="sendCDSBatch"></wsdl:input>
             <wsdl:output message="cds:sendCDSBatchResponse" name="sendCDSBatchResponse"></wsdl:output>
@@ -174,12 +188,6 @@
             <wsdl:input message="cds:getCDSBatch" name="getCDSBatch"></wsdl:input>
             <wsdl:output message="cds:getCDSBatchResponse" name="getCDSBatchResponse"></wsdl:output>
         </wsdl:operation>
-	    
-	    <wsdl:operation name="OrganizationListRequest">
-	       <wsdl:input name="OrganizationListRequest" message="cds:OrganizationListRequest" />
-	       <wsdl:output name="OrganizationListReport" message="cds:OrganizationListReport" />
-	       <wsdl:fault name="ServletException" message="cds:ServletException" />
-	    </wsdl:operation>
 	    
 	    <wsdl:operation name="DeliveryOptionRequest">
            <wsdl:input name="DeliveryOptionRequest" message="cds:DeliveryOptionRequest" />
@@ -204,33 +212,14 @@
            <wsdl:output name="updateOrganizationResponse" message="cds:updateOrganizationResponse" />
            <wsdl:fault name="ServletException" message="cds:ServletException" />
         </wsdl:operation>
-	    
+	    -->
     </wsdl:portType>
     
     
     <wsdl:binding name="WebServicesInterfaceServiceSoapBinding" type="cds:WebServicesInterface">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-        <!-- -->
-        <wsdl:operation name="sendCDSBatch">
-            <soap:operation soapAction="" style="document"/>
-            <wsdl:input name="sendCDSBatch">
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output name="sendCDSBatchResponse">
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getCDSBatch">
-            <soap:operation soapAction="" style="document"/>
-            <wsdl:input name="getCDSBatch">
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output name="getCDSBatchResponse">
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-	    
-	    <wsdl:operation name="OrganizationListRequest">
+        
+        <wsdl:operation name="OrganizationListRequest">
 	       <soap:operation soapAction="" style="document" />
 	       <wsdl:input name="OrganizationListRequest">
 	           <soap:body use="literal" />
@@ -242,6 +231,27 @@
 	           <soap:fault use="literal" name="ServletException" />
 	       </wsdl:fault>
 	    </wsdl:operation>
+        
+        <!-- 
+        <wsdl:operation name="sendCDSBatch">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input name="sendCDSBatch">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="sendCDSBatchResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        
+        <wsdl:operation name="getCDSBatch">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input name="getCDSBatch">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="getCDSBatchResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
 	    
 	    <wsdl:operation name="DeliveryOptionRequest">
            <soap:operation soapAction="" style="document" />
@@ -294,7 +304,7 @@
                <soap:fault use="literal" name="ServletException" />
            </wsdl:fault>
         </wsdl:operation>
-        
+        -->
     </wsdl:binding>
     
     
@@ -305,7 +315,7 @@
             <soap:address location="http://pesc.cccnext.net/EdExchange/services/soap"/>
             -->
             <!-- for local dev -->
-            <soap:address location="http://localhost:8080/directoryServer/services/soap" />
+            <soap:address location="http://localhost:8080/EdExchange/services/soap" />
             
         </wsdl:port>
     </wsdl:service>

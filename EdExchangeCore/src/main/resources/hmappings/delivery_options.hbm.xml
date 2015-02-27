@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.pesc.edexchange.v1_0">
+   
+   <class name="DeliveryOption" table="delivery_options" catalog="${hibernate.catalog}">
+    <meta attribute="class-description">
+        This table is derived from the DeliveryOption schema defined in EdExchangeEnvelope_v1.0.8.xsd
+    </meta>
+    <id type="int" column="id">
+        <generator class="native" />
+    </id>
+    
+    <property name="webserviceUrl" column="webservice_url" type="string" />
+    <property name="deliveryConfirm" column="delivery_confirm" type="boolean" />
+    <property name="error" column="error" type="boolean" />
+    <property name="operationalStatus" column="operational_status" type="string" />
+    
+    <many-to-one name="member" column="member_id" class="Organization" not-null="true" lazy="false" />
+    <many-to-one name="format" column="format_id" class="DocumentFormat" not-null="true" lazy="false" />
+    <many-to-one name="deliveryMethod" column="delivery_method_id" class="DeliveryMethod" not-null="true" lazy="false" />
+    
+   </class>
+</hibernate-mapping>

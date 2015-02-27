@@ -65,20 +65,23 @@
             </div>
         </div>
         
-        <!-- organizationEntityCode -->
-        <div class="form-group dtview-form-organizationEntityCode has-feedback">
-            <label for="organizationEntityCode" class="col-sm-2 control-label text-nowrap">Entity Code</label>
-            <div class="col-sm-10 fuelux">
-                <div class="spinbox digits-5">
-                    <input type="text" id="organizationEntityCode" class="form-control input-mini spinbox-input" autocomplete="off" />
-                    <div class="spinbox-buttons btn-group btn-group-vertical">
-                        <button type="button" class="btn btn-default spinbox-up btn-xs">
-                        	<span class="glyphicon glyphicon-chevron-up"></span><span class="sr-only">Increase</span>
+        <!-- entity -->
+        <div class="form-group dtview-form-entity">
+        	<div class="col-sm-2 text-right">
+        		<label for="entity" class="control-label text-nowrap">Entity Code</label>
+            </div>
+            <div class="col-sm-10">
+            	<div class="input-group">
+                	<div class="input-group-btn">
+                    	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        	Entity Code <span class="caret"></span>
                         </button>
-                        <button type="button" class="btn btn-default spinbox-down btn-xs">
-                        	<span class="glyphicon glyphicon-chevron-down"></span><span class="sr-only">Decrease</span>
-                        </button>
+                        <ul class="dropdown-menu scroll-list" role="menu"></ul>
                     </div>
+                    <!-- set this value to the js datasource[0][dropdownSourceValueKey] -->
+                    <input type="hidden" id="dropdown-value-program" value="" />
+                    <!-- set this value to the js datasource[0][dropdownSourceDisplayKey] -->
+                    <input type="text" id="display-value-program" class="form-control disabled" value="" disabled="disabled" />
                 </div>
             </div>
         </div>

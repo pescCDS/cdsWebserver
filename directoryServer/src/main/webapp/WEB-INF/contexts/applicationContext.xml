@@ -16,5 +16,6 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     
     <!-- auxiliary data from database -->
     <bean id="datasourceManager" class="org.pesc.cds.webservice.service.DatasourceManagerUtil" />
+	
     
 </beans>

@@ -7,11 +7,11 @@
          xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
        xmlns:annox="http://annox.dev.java.net"
-        xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.7"
-xsi:schemaLocation="EdExchangeEnvelope_v1.0.7.xsd 
+        xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.8"
+xsi:schemaLocation="EdExchangeEnvelope_v1.0.8.xsd 
 					http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd">
     
-    <jaxb:bindings schemaLocation="EdExchangeEnvelope_v1.0.7.xsd">
+    <jaxb:bindings schemaLocation="EdExchangeEnvelope_v1.0.8.xsd">
     	
     	<jaxb:globalBindings>
     		
@@ -23,10 +23,9 @@ xsi:schemaLocation="EdExchangeEnvelope_v1.0.7.xsd
 				parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseDateTime" 
 				printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printDateTime" />
 	        
-	        <jaxb:javaType name="java.sql.Timestamp" xmlType="EdEx:Timestamp"
-	        	parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseTimestamp"
-	        	printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printTimestamp" />
-	        
+	        <jaxb:javaType name="java.sql.Timestamp" xmlType="EdEx:Timestamp" 
+	        	printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printTimestamp"
+	        	parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseTimestamp" />
 	        
 	        <jaxb:javaType name="java.lang.Integer" xmlType="xs:positiveInteger"
 	        	parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseInteger" />

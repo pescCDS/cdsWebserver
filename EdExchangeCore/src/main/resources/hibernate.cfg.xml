@@ -18,11 +18,14 @@
 		
 		<property name="catalog">${hibernate.catalog}</property>
 		
-		<mapping resource="hmappings/document_format.hbm.xml" />
 		<mapping resource="hmappings/entity_code.hbm.xml" />
-		<mapping resource="hmappings/organization.hbm.xml" />
-		<!-- <mapping resource="hmappings/organization_contact.hbm.xml" /> -->
-		<!-- <mapping resource="hmappings/organization_credential.hbm.xml" /> -->
+		<mapping resource="hmappings/directory.hbm.xml" />
+		<!--<mapping resource="hmappings/credential.hbm.xml" />-->
+		<mapping resource="hmappings/contact.hbm.xml" />
+		<!--<mapping resource="hmappings/filter_set.hbm.xml" />-->
+		<mapping resource="hmappings/document_format.hbm.xml" />
+		<mapping resource="hmappings/delivery_methods.hbm.xml" />
+		<mapping resource="hmappings/delivery_options.hbm.xml" />
 		
 	</session-factory>
 </hibernate-configuration>

@@ -8,17 +8,24 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.pesc.edexchange.v1_0.DeliveryMethod;
+import org.pesc.edexchange.v1_0.DeliveryOption;
 import org.pesc.edexchange.v1_0.DocumentFormat;
 import org.pesc.edexchange.v1_0.EntityCode;
 import org.pesc.edexchange.v1_0.Organization;
+import org.pesc.edexchange.v1_0.OrganizationContact;
 import org.pesc.edexchange.v1_0.dao.DocumentFormatsDao;
 import org.pesc.edexchange.v1_0.dao.EntityCodesDao;
 import org.pesc.edexchange.v1_0.dao.OrganizationsDao;
+import org.pesc.edexchange.v1_0.dao.ContactsDao;
+import org.pesc.edexchange.v1_0.dao.DeliveryMethodsDao;
+import org.pesc.edexchange.v1_0.dao.DeliveryOptionsDao;
 
 /**
  * REST web service class
@@ -37,7 +44,130 @@ public class RestWebServiceImpl {
 	 * web services agreed upon by the PESC EdExchange group
 	 ***********************************************************************************/
 	
+	//////////////////////////////////////////////
+	// OrganizationContact
+	//////////////////////////////////////////////
+	
+	@Path("/contacts")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<OrganizationContact> getContacts(@QueryParam("query") String query) {
+		if(query!=null) {
+			return ((ContactsDao)DatasourceManagerUtil.getContacts()).filterByName(query);
+		} else {
+			return DatasourceManagerUtil.getContacts().all();
+		}
+	}
+	
+	@Path("/contacts/{contactId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public OrganizationContact getContact(@PathParam("contactId") Integer id) {
+		return DatasourceManagerUtil.getContacts().byId(id);
+	}
+	
+	@Path("/contacts/save/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public OrganizationContact saveContact(@JsonProperty OrganizationContact contact) {
+		log.debug(contact);
+		
+		return ((ContactsDao)DatasourceManagerUtil.getContacts()).save(contact);
+	}
+	
+	@Path("/contacts/remove/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public OrganizationContact removeContact(@JsonProperty OrganizationContact contact) {
+		log.debug(contact);
+		
+		return ((ContactsDao)DatasourceManagerUtil.getContacts()).remove(contact);
+	}
+	
+	
+	//////////////////////////////////////////////
+	// Delivery Methods
+	//////////////////////////////////////////////
+	
+	@Path("/deliveryMethods")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DeliveryMethod> getDeliveryMethods() {
+		return DatasourceManagerUtil.getDeliveryMethods().all();
+	}
+	
+	@Path("/deliveryMethods/{id}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public DeliveryMethod getDeliveryMethod(@PathParam("id") Integer id) {
+		return DatasourceManagerUtil.getDeliveryMethods().byId(id);
+	}
+	
+	@Path("/deliveryMethods/save/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public DeliveryMethod saveDeliveryMethod(@JsonProperty DeliveryMethod method) {
+		log.debug(method);
+		
+		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).save(method);
+	}
+	
+	@Path("/deliveryMethods/remove/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public DeliveryMethod removeDeliveryMethod(@JsonProperty DeliveryMethod method) {
+		log.debug(method);
+		
+		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).remove(method);
+	}
+	
+	
+	//////////////////////////////////////////////
+	// Delivery Options
+	//////////////////////////////////////////////
+	
+	@Path("/deliveryOptions")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DeliveryOption> getDeliveryOptions() {
+		return DatasourceManagerUtil.getDeliveryOptions().all();
+	}
+	
+	@Path("/deliveryMethods/{id}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public DeliveryOption getDeliveryOptions(@PathParam("id") Integer id) {
+		return DatasourceManagerUtil.getDeliveryOptions().byId(id);
+	}
+	
+	@Path("/deliveryMethods/save/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public DeliveryOption saveDeliveryOptions(@JsonProperty DeliveryOption option) {
+		log.debug(option);
+		
+		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).save(option);
+	}
+	
+	@Path("/deliveryMethods/remove/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public DeliveryOption removeDeliveryOptions(@JsonProperty DeliveryOption option) {
+		log.debug(option);
+		
+		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).remove(option);
+	}
+	
+	
+	//////////////////////////////////////////////
 	// Document Formats
+	//////////////////////////////////////////////
 	
 	/**
 	 * Returns all DocumentFormat objects in the persistence layer
@@ -82,7 +212,9 @@ public class RestWebServiceImpl {
 	}
 	
 	
+	//////////////////////////////////////////////
 	// Entity Codes
+	//////////////////////////////////////////////
 	
 	@Path("/entityCodes")
 	@GET
@@ -124,13 +256,19 @@ public class RestWebServiceImpl {
 	}
 	
 	
+	//////////////////////////////////////////////
 	// Organizations
+	//////////////////////////////////////////////
 	
 	@Path("/organizations")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Organization> getOrganizations() {
-		return DatasourceManagerUtil.getOrganizations().all();
+	public List<Organization> getOrganizations(@QueryParam("query") String query) {
+		if(query!=null) {
+			return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).filterByName(query);
+		} else {
+			return DatasourceManagerUtil.getOrganizations().all();
+		}
 	}
 	
 	@Path("/organizations/{id}")
@@ -146,21 +284,21 @@ public class RestWebServiceImpl {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Organization saveOrganization(@JsonProperty Organization org) {
 		// TODO validate organization object
-		log.debug(org);
-		log.debug(String.format(
-			"Organization {%n  directoryId:%s,%n  Id:%s,%n  Name:%s,%n  IdType:%s,%n  SubCode:%s,%n  EIN:%s,%n  EntityCode:%s,%n  SiteUrl:%s,%n  Description:%s,%n  termsOfUser:%s,%n  privacyPolicy:%s",
-			org.getDirectoryId(),
-			org.getOrganizationId(),
-			org.getOrganizationName(),
-			org.getOrganizationIdType(),
-			org.getOrganizationSubcode(),
-			org.getOrganizationEin(),
-			org.getOrganizationEntityCode(),
-			org.getOrganizationSiteUrl(),
-			org.getDescription(),
-			org.getTermsOfUse(),
-			org.getPrivacyPolicy()
-		));
+		log.debug("Organization {");
+		log.debug(String.format("  directoryId:%s,", org.getDirectoryId()));
+		log.debug(String.format("  Id:%s,", org.getOrganizationId()));
+		log.debug(String.format("  Name:%s,", org.getOrganizationName()));
+		log.debug(String.format("  IdType:%s,", org.getOrganizationIdType()));
+		log.debug(String.format("  SubCode:%s,", org.getOrganizationSubcode()));
+		log.debug(String.format("  EIN:%s,", org.getOrganizationEin()));
+		log.debug(String.format("  EntityCode:%s,", org.getEntity().getCode()));
+		log.debug(String.format("  SiteUrl:%s,", org.getOrganizationSiteUrl()));
+		log.debug(String.format("  Description:%s,", org.getDescription()));
+		log.debug(String.format("  termsOfUser:%s,", org.getTermsOfUse()));
+		log.debug(String.format("  privacyPolicy:%s,", org.getPrivacyPolicy()));
+		log.debug(String.format("  createdTime:%s,", org.getCreatedTime()));
+		log.debug(String.format("  modifiedTime:%s", org.getModifiedTime()));
+		log.debug("}");
 		
 		//save organization object to persistence layer
 		Organization retOrg = ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).save(org);
