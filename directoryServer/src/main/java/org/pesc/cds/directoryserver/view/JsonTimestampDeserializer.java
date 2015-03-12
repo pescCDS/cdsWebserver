@@ -21,22 +21,11 @@ public class JsonTimestampDeserializer extends JsonDeserializer<Timestamp> {
 
 	@Override
 	public Timestamp deserialize(JsonParser jparser, DeserializationContext ctx) throws IOException, JsonProcessingException {
-		log.debug("deserializing Timestamp");
-		
-		log.debug(jparser.getCurrentName());
 		
 		ObjectCodec oc = jparser.getCodec();
-		
 		JsonNode node = oc.readTree(jparser);
 		
-		for(ListIterator<Entry<String, JsonNode>> rootIter = (ListIterator<Entry<String, JsonNode>>)node.getFields(); rootIter.hasNext();) {
-			Entry<String, JsonNode> cit = rootIter.next();
-			log.debug( String.format("%s, %s", cit.getKey(), cit.toString()) );
-			//cit.getValue().
-		}
-		
-		log.debug(node.get("time"));
-		return new Timestamp(node.get("time").asLong());
+		return new Timestamp(node.asLong());
 	}
 
 }

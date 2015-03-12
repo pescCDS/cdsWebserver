@@ -9,10 +9,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.edexchange.v1_0.DeliveryMethod;
 import org.pesc.edexchange.v1_0.DeliveryOption;
@@ -32,22 +35,27 @@ import org.pesc.edexchange.v1_0.dao.DeliveryOptionsDao;
  * @author owenwe
  *
  */
+
 public class RestWebServiceImpl {
 	
 	private static final Log log = LogFactory.getLog(RestWebServiceImpl.class);
 	
+	@Context
+	private HttpHeaders headers;
 	
 	/***********************************************************************************
 	 * These are for AJAX web services
 	 * The only data served out should be auxilary tables where the total row count
 	 * is under 300 or so. Bigger tables will need to go through the SOAP or REST
 	 * web services agreed upon by the PESC EdExchange group
+	 * 
 	 ***********************************************************************************/
 	
 	//////////////////////////////////////////////
 	// OrganizationContact
 	//////////////////////////////////////////////
 	
+	@CrossOriginResourceSharing(allowOrigins = {"http://local.pesc.dev:8080"}, maxAge = 1)
 	@Path("/contacts")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -71,7 +79,26 @@ public class RestWebServiceImpl {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public OrganizationContact saveContact(@JsonProperty OrganizationContact contact) {
-		log.debug(contact);
+		log.debug("saving Contact {");
+		log.debug(String.format(" id: %s", contact.getContactId()));
+		log.debug(String.format(" name: %s", contact.getContactName()));
+		log.debug(String.format(" title: %s", contact.getContactTitle()));
+		log.debug(String.format(" type: %s", contact.getContactType()));
+		log.debug(String.format(" email: %s", contact.getEmail()));
+		log.debug(String.format(" phone1: %s", contact.getPhone1()));
+		log.debug(String.format(" phone2: %s", contact.getPhone2()));
+		log.debug(String.format(" streetAddress1: %s", contact.getStreetAddress1()));
+		log.debug(String.format(" streetAddress2: %s", contact.getStreetAddress2()));
+		log.debug(String.format(" streetAddress3: %s", contact.getStreetAddress3()));
+		log.debug(String.format(" streetAddress4: %s", contact.getStreetAddress4()));
+		log.debug(String.format(" city: %s", contact.getCity()));
+		log.debug(String.format(" zip: %s", contact.getZip()));
+		log.debug(String.format(" state: %s", contact.getState()));
+		log.debug(String.format(" country: %s", contact.getCountry()));
+		log.debug(String.format(" createdTime: %s", contact.getCreatedTime()));
+		log.debug(String.format(" modifiedTime: %s", contact.getModifiedTime()));
+		
+		log.debug("}");
 		
 		return ((ContactsDao)DatasourceManagerUtil.getContacts()).save(contact);
 	}
@@ -91,6 +118,7 @@ public class RestWebServiceImpl {
 	// Delivery Methods
 	//////////////////////////////////////////////
 	
+	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
 	@Path("/deliveryMethods")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -110,7 +138,7 @@ public class RestWebServiceImpl {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public DeliveryMethod saveDeliveryMethod(@JsonProperty DeliveryMethod method) {
-		log.debug(method);
+		log.debug(String.format("saving DeliveryMethod { id: %s, method: %s }", method.getId(), method.getMethod()));
 		
 		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).save(method);
 	}
@@ -130,6 +158,7 @@ public class RestWebServiceImpl {
 	// Delivery Options
 	//////////////////////////////////////////////
 	
+	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
 	@Path("/deliveryOptions")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -137,24 +166,33 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getDeliveryOptions().all();
 	}
 	
-	@Path("/deliveryMethods/{id}")
+	@Path("/deliveryOptions/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public DeliveryOption getDeliveryOptions(@PathParam("id") Integer id) {
 		return DatasourceManagerUtil.getDeliveryOptions().byId(id);
 	}
 	
-	@Path("/deliveryMethods/save/")
+	@Path("/deliveryOptions/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public DeliveryOption saveDeliveryOptions(@JsonProperty DeliveryOption option) {
-		log.debug(option);
+		log.debug(String.format(
+			"saving DeliveryOption {%n id: %s,%n member: %s,%n format: %s,%n deliveryMethod: %s,%n deliveryConfirm: %s,%n error: %s,%n operationalStatus: %s%n}", 
+			option.getId(),
+			option.getMember().getOrganizationName(),
+			option.getFormat().getFormatName(),
+			option.getDeliveryMethod().getMethod(),
+			option.isDeliveryConfirm(),
+			option.isError(),
+			option.getOperationalStatus()
+		));
 		
 		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).save(option);
 	}
 	
-	@Path("/deliveryMethods/remove/")
+	@Path("/deliveryOptions/remove/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -173,11 +211,16 @@ public class RestWebServiceImpl {
 	 * Returns all DocumentFormat objects in the persistence layer
 	 * @return <code>List&lt;DocumentFormat&gt;</code>
 	 */
+	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
 	@Path("/documentFormats")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DocumentFormat> getDocumentFormats() {
-		return DatasourceManagerUtil.getDocumentFormats().all();
+	public List<DocumentFormat> getDocumentFormats(@QueryParam("query") String query) {
+		if(query!=null) {
+			return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).filterByName(query);
+		} else {
+			return DatasourceManagerUtil.getDocumentFormats().all();
+		}
 	}
 	
 	@Path("/documentFormats/{id}")
@@ -216,6 +259,7 @@ public class RestWebServiceImpl {
 	// Entity Codes
 	//////////////////////////////////////////////
 	
+	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
 	@Path("/entityCodes")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -260,6 +304,7 @@ public class RestWebServiceImpl {
 	// Organizations
 	//////////////////////////////////////////////
 	
+	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
 	@Path("/organizations")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)

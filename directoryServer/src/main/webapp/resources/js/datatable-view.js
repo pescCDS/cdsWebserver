@@ -205,7 +205,7 @@ var DataTableView = Backbone.View.extend({
 				break;
 			case 'boolean':
 				var bVal = $('label.active input',fi.input.formGroup).val()*1;
-				retVal = bVal ? 1 : 0;
+				retVal = bVal ? (fi.useInteger?1:true) : (fi.useInteger?0:false);
 				break;
 			case 'datepicker':
 				var idate = fi.input.formInput.datepicker('getDate');
@@ -222,6 +222,9 @@ var DataTableView = Backbone.View.extend({
 					activeValue = $('label.active input', fi.input.formGroup).val();
 				findObj[fi.valueKey] = typeof(fi.datasource[0][fi.valueKey])==='number' ? activeValue*1 : activeValue;
 				retVal = _.findWhere(fi.datasource, findObj);
+				if(retVal && fi.useValueOnly) {
+					retVal = retVal[fi.valueKey];
+				}
 				break;
 			case 'dropdown':
 				var findObj = {},
@@ -246,6 +249,10 @@ var DataTableView = Backbone.View.extend({
 		return retVal;
 	},
 	
+	/**
+	 * Goes through the form inputs and will compile the values from each one
+	 * and return the result
+	 */
 	'getFormData':function() {
 		var returnData = {},
 			idValue = $('#'+this.sourceData.primaryKey,this.modalForm).val(),
@@ -256,6 +263,7 @@ var DataTableView = Backbone.View.extend({
 			validInputCount = 0
 		;
 		
+		// adds the id key/value to the return data
 		if(editMode) {
 			returnData[this.sourceData.primaryKey] = idValue*1;
 		}
@@ -265,18 +273,9 @@ var DataTableView = Backbone.View.extend({
 			if(requiredInputs[i].type==='custom') {
 				// should add input properties and values to form data object
 				// the .get() function will trigger validation display
-				var custData = requiredInputs[i].input.formInput.get(),
-					custValidInptCount = 0,
-					custInptCount = custData.length;
-				for(var cidx in custData) {
-					for(var cKey in custData[cidx]) {
-						if(custData[cidx][cKey]!==false) {
-							custValidInptCount++;
-							returnData[cKey] = custData[cidx][cKey];
-						}
-					}
-				}
-				if(custValidInptCount===custInptCount) {
+				var custData = requiredInputs[i].input.formInput.get();// the custom object with .get()/.set()
+				if( requiredInputs[i].validate(custData) ) {
+					returnData[requiredInputs[i].name] = custData;
 					validInputCount++;
 				}
 				
@@ -294,12 +293,9 @@ var DataTableView = Backbone.View.extend({
 		for(var j in optionalInputs) {
 			if(optionalInputs[j].type==='custom') {
 				var custData = optionalInputs[j].input.formInput.get();
-				for(var cidx in custData) {
-					if(custData[cidx]!==false) {
-						returnData[cidx] = custData[cidx];
-					}
+				if( optionalInputs[j].validate(custData) ) {
+					returnData[optionalInputs[j].name] = custData;
 				}
-				
 			} else {
 				var inputValue = this.getFormInputValue(optionalInputs[j]);
 				if(inputValue!==false) {
@@ -335,7 +331,14 @@ var DataTableView = Backbone.View.extend({
 				inpt.input.formInput.val( moment(dtData[inpt.name]).format("M/D/YYYY h:mm:ss a") );
 			} else if(inpt.type==='radioset') {
 				$('label.btn', inpt.input.formGroup).removeClass('active');
-				$(['label.btn[data-',inpt.valueKey,'="',dtData[inpt.name][inpt.valueKey],'"]'].join(''), inpt.input.formGroup).addClass('active');
+				var cssSelect = [
+					'label.btn[data-',
+					inpt.valueKey,
+					'="',
+					inpt.useValueOnly ? dtData[inpt.name] : dtData[inpt.name][inpt.valueKey],
+					'"]'
+				].join('');
+				$(cssSelect, inpt.input.formGroup).addClass('active');
 			} else if(inpt.type==='dropdown') {
 				try {
 					$('input:hidden',inpt.input.formGroup).val(dtData[inpt.name][inpt.valueKey]);
@@ -487,6 +490,7 @@ var DataTableView = Backbone.View.extend({
 		},
 		
 		// MODAL ACTION BUTTON CLICK
+		// when the "create" or "edit" button in the modal is clicked
 		'click button.dtview-modal-form-action-button':function(e) {
 			var fd = this.getFormData();
 			if(fd) {
@@ -853,7 +857,10 @@ var DataTableView = Backbone.View.extend({
 							//inpt.input.formInput = $('textarea',inpt.input.formGroup);
 							break;
 						case 'boolean':
-							_.extend(inpt.input, {'formInput':$('label.btn', inpt.input.formGroup)});
+							_.extend(inpt.input, {
+								'formInput':$('label.btn', inpt.input.formGroup),
+								'useInteger': _.has(col, 'useInteger') ? col.useInteger : true
+							});
 							break;
 						case 'spinbox':
 							// spinbox number control
@@ -871,7 +878,7 @@ var DataTableView = Backbone.View.extend({
 							}
 							break;
 						case 'radioset':
-							// for small set enum or boolean types
+							// for small set enum or boolean types backed by an array of key/value objects
 							// is a radioset button group
 							for(var j in col.cfenumsource) {
 								var enumDataItem = col.cfenumsource[j],
@@ -883,11 +890,17 @@ var DataTableView = Backbone.View.extend({
 									'</label>'
 								].join(''));
 							}
-							_.extend(inpt, {'displayKey':col.cfenumlabelkey, 'valueKey':col.valueKey, 'datasource':col.cfenumsource});
+							_.extend(inpt, {
+								'displayKey':col.cfenumlabelkey, 
+								'valueKey':col.valueKey, 
+								'datasource':col.cfenumsource,
+								'useValueOnly':_.has(col, 'useValueOnly') ? col.useValueOnly : false
+							});
 							inpt.input.formInput = $('label.btn',inpt.input.formGroup);//will be more than 1
 							break;
 						case 'dropdown':
-							// for enum types
+							// for enum or boolean types backed by an array of key/value objects
+							// ASSERTION: any value in datasource cannot be null
 							// ASSERTION: type==object or has(cfenumsource), then has(valueKey) and has(displayKey)
 							_.extend(inpt, {'displayKey':col.displayKey, 'valueKey':col.valueKey, 'datasource':col.cfenumsource});
 							inpt.input.formInput = $('input',inpt.input.formGroup);//will be more than 1 (hidden and text)
@@ -926,6 +939,7 @@ var DataTableView = Backbone.View.extend({
 							//   .reset() { resets the form elements to their initial value }
 							inpt.input.formInput = col.customInputControl;
 							inpt.input.formGroup.append(inpt.input.formInput.render());
+							_.extend(inpt, {'validate':col.validate});
 							break;
 					}
 					

@@ -16,9 +16,7 @@ import org.pesc.edexchange.v1_0.OrganizationContact;
 public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 	private static final Log log = LogFactory.getLog(ContactsDao.class);
 	
-	public ContactsDao() {
-		
-	}
+	public ContactsDao() { }
 	
 	// 
 	public List<OrganizationContact> filterByName(String query) {
@@ -60,7 +58,7 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
-			retContact = (OrganizationContact)session.load(OrganizationContact.class, id);
+			retContact = (OrganizationContact)session.get(OrganizationContact.class, id);
 			
 			session.getTransaction().commit();
 		} catch(Exception ex) {
@@ -101,7 +99,8 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			session.beginTransaction();
 			
 			session.saveOrUpdate(contact);
-			retContact = (OrganizationContact)session.load(OrganizationContact.class, contact.getContactId());
+			// using .get now instead of .load
+			retContact = (OrganizationContact)session.get(OrganizationContact.class, contact.getContactId());
 			
 			session.getTransaction().commit();
 		} catch(Exception ex) {
@@ -120,7 +119,8 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
-			OrganizationContact remContact = (OrganizationContact)session.load(OrganizationContact.class, contact.getContactId());
+			// using .get instead of .load
+			OrganizationContact remContact = (OrganizationContact)session.get(OrganizationContact.class, contact.getContactId());
 			session.delete(remContact);
 			
 			session.getTransaction().commit();

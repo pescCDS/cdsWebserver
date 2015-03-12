@@ -121,7 +121,7 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 			session.saveOrUpdate(org);
 			
 			// load the saved organization into the return variable
-			retOrg = (Organization)session.load(Organization.class, org.getDirectoryId());
+			retOrg = (Organization)session.get(Organization.class, org.getDirectoryId());
 			
 			session.getTransaction().commit();
 			
@@ -143,7 +143,7 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 			session.beginTransaction();
 			
 			// load the Organization from the persistence layer and then delete it
-			Organization remOrg = (Organization)session.load(Organization.class, org.getDirectoryId());
+			Organization remOrg = (Organization)session.get(Organization.class, org.getDirectoryId());
 			session.delete(remOrg);
 			
 			session.getTransaction().commit();

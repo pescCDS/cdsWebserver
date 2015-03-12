@@ -9,7 +9,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	<packaging>war</packaging>
 	<name>PESC CDS EdExchange Directory Server</name>
 	<description>
-		TODO 
+		This web application acts as an info hub for EdExchange network servers.
 	</description>
   
 	<parent>
@@ -292,6 +292,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-extension-providers</artifactId>
 			<version>3.0.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-security-cors</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 		
 		<!-- <dependency>

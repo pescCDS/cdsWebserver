@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>Delivery Methods Form Fragment</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/dataTables.bootstrap.css" th:href="@{/resources/css/dataTables.bootstrap.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker.css" th:href="@{/resources/css/datepicker.css}" />
+    <link rel="stylesheet" href="../../../resources/css/datepicker3.css" th:href="@{/resources/css/datepicker3.css}" />
+    <link rel="stylesheet" href="../../../resources/css/fuelux.min.css" th:href="@{/resources/css/fuelux.min.css}" />
+    <link rel="stylesheet" href="../../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
+</head>
+<body>
+
+<div class="container-fluid" th:fragment="form">
+    <form class="form-horizontal" role="form" accept-charset="utf-8">
+		<input type="hidden" id="id" name="id" value="" />
+        
+        <!-- method -->
+        <div class="form-group dtview-form-method has-feedback">
+        	<div class="col-sm-2 text-right">
+       			<label for="method" class="control-label text-nowrap">Method</label><br />
+            	<span class="help-text text-danger"><em>required</em></span>
+            </div>
+            <div class="col-sm-10">
+        		<input type="text" id="method" autocomplete="off" maxlength="50" class="form-control" required="required" />
+                <span class="glyphicon form-control-feedback hidden"></span>
+            </div>
+        </div>
+        
+    </form>
+</div>
+<script src="../../../resources/js/jquery-2.1.1.min.js" th:src="@{/resources/js/jquery-2.1.1.min.js}"></script>
+<script src="../../../resources/js/underscore-min.js" th:src="@{/resources/js/underscore-min.js}"></script>
+<script src="../../../resources/js/backbone-min.js" th:src="@{/resources/js/backbone-min.js}"></script>
+<script src="../../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
+<script src="../../../resources/js/typeahead.bundle.js" th:src="@{/resources/js/typeahead.bundle.js}"></script>
+<script src="../../../resources/js/jquery.dataTables.min.js" th:src="@{/resources/js/jquery.dataTables.min.js}"></script>
+<script src="../../../resources/js/dataTables.bootstrap.js" th:src="@{/resources/js/dataTables.bootstrap.js}"></script>
+<script src="../../../resources/js/bootstrap-datepicker.js" th:src="@{/resources/js/bootstrap-datepicker.js}"></script>
+<script src="../../../resources/js/spinbox.js" th:src="@{/resources/js/spinbox.js}"></script>
+</body>
+</html>

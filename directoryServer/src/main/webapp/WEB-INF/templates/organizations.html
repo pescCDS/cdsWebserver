@@ -22,7 +22,7 @@
 	<th:block th:replace="layout/resources :: resourceScripts"></th:block>
     <script th:inline="javascript">
 		// create a new DataTableView populated with organization meta data
-		var entities = /*[[ ${@datasourceManager.byName("entities").all()} ]]*/ [],
+		var entities = /*[[ ${@datasourceManager.byName("entities").forJson()} ]]*/ [],
 			entityDisplayFunc = function(e) {
 				return [e.code,e.description].join(' ');
 			},

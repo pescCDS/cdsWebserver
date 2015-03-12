@@ -66,7 +66,7 @@ public class DeliveryOptionsDao implements DBDataSourceDao<DeliveryOption> {
 			session.beginTransaction();
 			
 			session.saveOrUpdate(option);
-			retOption = (DeliveryOption)session.load(DeliveryOption.class, option.getId());
+			retOption = (DeliveryOption)session.get(DeliveryOption.class, option.getId());
 			
 			session.getTransaction().commit();
 		} catch(Exception ex) {
@@ -85,7 +85,7 @@ public class DeliveryOptionsDao implements DBDataSourceDao<DeliveryOption> {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
-			DeliveryOption remOpt = (DeliveryOption)session.load(DeliveryOption.class, option.getId());
+			DeliveryOption remOpt = (DeliveryOption)session.get(DeliveryOption.class, option.getId());
 			session.delete(remOpt);
 			
 			session.getTransaction().commit();

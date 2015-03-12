@@ -191,8 +191,8 @@
 			<xs:element name="format" type="EdEx:DocumentFormat" />
 			<xs:element name="webservice_url" type="xs:string" />
 			<xs:element name="deliveryMethod" type="EdEx:DeliveryMethod" />
-			<xs:element name="deliveryConfirm" type="xs:int" />
-			<xs:element name="error" type="xs:int" />
+			<xs:element name="deliveryConfirm" type="xs:boolean" />
+			<xs:element name="error" type="xs:boolean" />
 			<xs:element name="operationalStatus" type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>

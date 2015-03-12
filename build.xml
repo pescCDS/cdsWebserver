@@ -2,7 +2,7 @@
 <project name="antmaven-test" default="help" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>
 		Compile and deploy ant script for the EdExchange web application
-		In a shell/command/terminal go to the directory that this file is in and run this comman:
+		In a shell/command/terminal go to the directory that this file is in and run this command:
 		ant info
 		Information about what targets will display
 		
@@ -31,7 +31,7 @@
 	
 	<property name="webapp" value="directoryServer" />
 	<property name="webapp.path" value="${basedir}/${webapp}" />
-	<property name="webapp.target.path" value="${basedir}\${webapp}\target" />
+	<property name="webapp.target.path" value="${basedir}/${webapp}/target" />
 	
 	<condition property="maven.home" value="D:\installs\apache-maven-3.1.0" else="/opt/apache-maven-3.2.3">
 		<os family="windows" />

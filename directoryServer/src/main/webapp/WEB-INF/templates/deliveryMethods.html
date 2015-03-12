@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/resources :: resourceHead (title=#{title.deliveryMethods})">
+    <title th:text="#{title.deliveryMethods}">Delivery Methods Page</title>
+    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
+    <link rel="stylesheet" href="../../resources/css/jquery.dataTables.min.css" th:href="@{/resources/css/jquery.dataTables.min.css}" />
+</head>
+<body>
+	<div class="container-fluid">
+		<div th:replace="layout/nav :: layoutNav"></div>
+        
+        <div class="page-header">
+        	<h1 th:text="#{title.deliveryMethods}">Page Title</h1>
+        </div>
+    	
+        <div id="ecView"></div>
+    
+    	<div th:replace="layout/footer :: layoutFooter"></div>
+    </div>
+    <th:block th:replace="layout/resources :: resourceScripts"></th:block>
+    <script th:inline="javascript">
+		var dtView;
+		
+		$(document).ready(function(e){
+			dtView = new DataTableView({
+				'dataClass':'DeliveryMethod',
+				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
+				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
+				'table':{
+					'name':'deliveryMethods',
+					'primaryKey':'id',
+					'defaultColumnOrder':[[1,'asc']],
+					'columns':[
+						{'data':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
+						{'data':'method', 'name':'method', 'type':'varchar', 'title':'Name', 'required':true, 'controlType':'text'}
+					]
+				}
+			});
+			$('#ecView').replaceWith(dtView.$el);
+		});
+	</script>
+</body>
+</html>

@@ -63,6 +63,7 @@
 						{'data':'state', 'name':'state', 'type':'text', 'title':'State', 'required':true, 'controlType':'text'},
 						{'data':'zip', 'name':'zip', 'type':'text', 'title':'Zip', 'required':true, 'controlType':'text'},
 						{'data':'country', 'name':'country', 'type':'text', 'title':'Country', 'required':true, 'controlType':'text'},
+						
 						{
 							'data':'directory',
 							'name':'directory',
@@ -77,8 +78,16 @@
 							'cftype':'biglist'
 						},
 						
-						{'data':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}},
-						{'data':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}}
+						{
+							'data':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 
+							'disabled':true, 'required':false, 'controlType':'timestamp', 
+							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						},
+						{
+							'data':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 
+							'disabled':true, 'required':false, 'controlType':'timestamp', 
+							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						}
 					]
 				}
 			});

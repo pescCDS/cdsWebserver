@@ -3,10 +3,14 @@ package org.pesc.edexchange.v1_0.dao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.edexchange.v1_0.DocumentFormat;
 
@@ -17,6 +21,37 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 	 * Default no-arg constructor
 	 */
 	public DocumentFormatsDao() { }
+	
+	
+	
+	public List<DocumentFormat> filterByName(String query) {
+		List<DocumentFormat> retList = new ArrayList<DocumentFormat>();
+		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			Criteria ct = session.createCriteria(DocumentFormat.class);
+			
+			StringTokenizer tokens = new StringTokenizer(query);
+			while(tokens.hasMoreElements()) {
+				String token = tokens.nextToken();
+				ct.add( Restrictions.like("formatName", token, MatchMode.ANYWHERE) );
+			}
+			
+			retList = ct.list();
+			
+			session.getTransaction().commit();
+			
+		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
+			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+		return retList;
+	}
 	
 	
 	/**
@@ -88,7 +123,7 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 			log.debug(String.format("Saved %s",docFormat.toString()));
 			
 			// get the saved DocumentFormat object and put it into the return variable
-			retDf = (DocumentFormat)session.load(DocumentFormat.class, docFormat.getId());
+			retDf = (DocumentFormat)session.get(DocumentFormat.class, docFormat.getId());
 			
 			// TODO re-populate the local List
 			
@@ -112,7 +147,7 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 			session.beginTransaction();
 			
 			// get the Entity Code object from the persistence layer and delete it
-			DocumentFormat df = (DocumentFormat)session.load(DocumentFormat.class, docFormat.getId());
+			DocumentFormat df = (DocumentFormat)session.get(DocumentFormat.class, docFormat.getId());
 			session.delete(df);
 			
 			// TODO re-populate the local List

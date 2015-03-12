@@ -30,7 +30,8 @@ xsi:schemaLocation="EdExchangeEnvelope_v1.0.8.xsd
 	        <jaxb:javaType name="java.lang.Integer" xmlType="xs:positiveInteger"
 	        	parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseInteger" />
 	        
-	        <jaxb:javaType name="java.lang.Integer" xmlType="xs:boolean" 
+	         
+	        <jaxb:javaType name="java.lang.Boolean" xmlType="xs:boolean" 
 				parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseBoolean"
 				printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printBoolean" />
 	        

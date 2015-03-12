@@ -7,7 +7,7 @@
     <meta attribute="class-description">
         This table is derived from the OrganizationContact schema defined in EdExchangeEnvelope_v1.0.7.xsd
     </meta>
-    <id type="int" column="contact_id">
+    <id name="contactId" type="int" column="contact_id">
         <generator class="native" />
     </id>
     <property name="contactName" column="contact_name" not-null="true" type="string" />

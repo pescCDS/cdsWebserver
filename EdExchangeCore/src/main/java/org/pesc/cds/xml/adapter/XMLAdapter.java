@@ -42,6 +42,15 @@ public class XMLAdapter {
 		return Integer.parseInt(bigIntString);
 	}
 	
+	
+	public static Boolean parseBoolean(String boolString) {
+		Boolean b = DatatypeConverter.parseBoolean(boolString);
+		return boolString==null ? null : Boolean.valueOf(boolString);
+	}
+	public static String printBoolean(Boolean b) {
+		return b.toString();
+	}
+	/*
 	public static Integer parseBoolean(String boolString) {
 		Boolean b = DatatypeConverter.parseBoolean(boolString);
 		return new Integer(b?1:0);
@@ -49,4 +58,5 @@ public class XMLAdapter {
 	public static String printBoolean(Integer i) {
 		return i.toString();
 	}
+	*/
 }

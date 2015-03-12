@@ -1,6 +1,7 @@
 package org.pesc.edexchange.v1_0.dao;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -17,6 +18,26 @@ public class EntityCodesDao implements DBDataSourceDao<EntityCode> {
 	 * Default no-arg constructor
 	 */
 	public EntityCodesDao() { }
+	
+	
+	
+	public List<HashMap<String, Object>> forJson() {
+		List<HashMap<String, Object>> retList = new ArrayList<HashMap<String, Object>>();
+		
+		List<EntityCode> allECodes = all();
+		
+		for(EntityCode e : allECodes) {
+			HashMap<String, Object> eobj = new HashMap<String, Object>();
+			eobj.put("id", e.getId());
+			eobj.put("code", e.getCode());
+			eobj.put("description", e.getDescription());
+			eobj.put("createdTime", e.getCreatedTime().getTime());
+			eobj.put("modifiedTime", e.getModifiedTime().getTime());
+			retList.add(eobj);
+		}
+		return retList;
+	}
+	
 	
 	/**
 	 * The <code>all()</code> method implemented from the <code>DBDataSourceDao</code> interface.

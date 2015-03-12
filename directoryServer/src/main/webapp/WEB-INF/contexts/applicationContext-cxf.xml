@@ -11,13 +11,17 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
                     http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
                     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
     
+    <!-- Filters -->
+    <bean id="cors-filter" class="org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter" />
+    
     <!-- JAX-RS (REST) -->
     <jaxrs:server id="EdExchangeServiceRestHttp" address="/rest">
 		<jaxrs:serviceBeans>
-			<bean class="org.pesc.cds.webservice.service.RestWebServiceImpl" />
+			<bean scope="prototype" class="org.pesc.cds.webservice.service.RestWebServiceImpl" />
 		</jaxrs:serviceBeans>
 
 		<jaxrs:providers>
+			<ref bean="cors-filter" />
 		    <ref bean="jacksonJsonProvider" />
 			<ref bean="wadlProvider" />
 		</jaxrs:providers>

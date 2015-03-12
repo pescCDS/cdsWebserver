@@ -7,7 +7,7 @@
     <meta attribute="class-description">
         This table is derived from the DeliveryMethod schema defined in EdExchangeEnvelope_v1.0.8.xsd
     </meta>
-    <id type="int" column="id">
+    <id name="id" type="int" column="id">
         <generator class="native" />
     </id>
     <property name="method" column="method" not-null="true" type="string" />
