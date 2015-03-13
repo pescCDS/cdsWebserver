@@ -52,7 +52,7 @@ $(document).ready(function() {
 	$('.btn').click(function(e) {
 		var type = $(e.currentTarget).data('get-type');
 		$.ajax(
-			'http://localhost:8080/EdExchange/services/rest/'+type
+			'http://local.pesc.dev/EdExchange/services/rest/'+type
 		).done(function(data,textStatus,jqXHR){
 			console.log(data);
 		}).error(function(jqXHR, textStatus, errorThrown) {

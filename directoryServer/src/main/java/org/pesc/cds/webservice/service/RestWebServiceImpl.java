@@ -35,7 +35,12 @@ import org.pesc.edexchange.v1_0.dao.DeliveryOptionsDao;
  * @author owenwe
  *
  */
-
+@CrossOriginResourceSharing(
+		allowAllOrigins = false,
+		allowCredentials = false,
+		allowOrigins = {"http://local.pesc.dev:8080"}, 
+		maxAge = 1
+)
 public class RestWebServiceImpl {
 	
 	private static final Log log = LogFactory.getLog(RestWebServiceImpl.class);
