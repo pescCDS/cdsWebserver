@@ -21,19 +21,32 @@
     <link rel="stylesheet" href="resources/css/datepicker3.css" />
     <link rel="stylesheet" href="resources/css/fuelux.min.css" />
     <link rel="stylesheet" href="resources/css/typeahead-ext.css" />
+    <style>
+	ul.extra-space li {
+		padding:5px;
+	}
+	.full-width {
+		width:100%;
+	}
+	</style>
 </head>
 <body>
 	<div class="container">  
 		<h2>Network Server</h2>
-		<ul class="list-unstyled">
-			<li><button type="button" class="btn btn-default" data-get-type="deliveryOptions">Get Delivery Options</button></li>
-            <li><button type="button" class="btn btn-default" data-get-type="organizations">Get Organizations</button></li>
-            <li><button type="button" class="btn btn-default" data-get-type="contacts">Get Contacts</button></li>
-            <li><button type="button" class="btn btn-default" data-get-type="deliveryMethods">Get Delivery Methods</button></li>
-            <li><button type="button" class="btn btn-default" data-get-type="documentFormats">Get Document Formats</button></li>
-            <li><button type="button" class="btn btn-default" data-get-type="entityCodes">Get Entity Codes</button></li>
-		</ul>
-        
+        <div class="row">
+        	<div class="col-lg-6 col-md-6 col-sm-6">
+                <ul class="list-unstyled extra-space">
+                    <li><button type="button" class="btn btn-default" data-get-type="deliveryOptions">Get Delivery Options</button></li>
+                    <li><button type="button" class="btn btn-default" data-get-type="organizations">Get Organizations</button></li>
+                    <li><button type="button" class="btn btn-default" data-get-type="contacts">Get Contacts</button></li>
+                    <li><button type="button" class="btn btn-default" data-get-type="deliveryMethods">Get Delivery Methods</button></li>
+                    <li><button type="button" class="btn btn-default" data-get-type="documentFormats">Get Document Formats</button></li>
+                    <li><button type="button" class="btn btn-default" data-get-type="entityCodes">Get Entity Codes</button></li>
+                </ul>
+            </div>
+           	<div class="col-lg-6 col-md-6 col-sm-6">
+        		<textarea rows="5" autocomplete="off" class="full-width"></textarea>
+            </div>
 	</div>
     
     <script src="resources/js/jquery-2.1.1.min.js"></script>
@@ -47,12 +60,15 @@
     <script src="resources/js/bootstrap-datepicker.js"></script>
     <script src="resources/js/spinbox.js"></script>
 <script>
+
+// http://localhost:8080
+// http://pesc.cccnext.net
+var directoryServer = 'http://local.pesc.dev';
 $(document).ready(function() {
-	
 	$('.btn').click(function(e) {
 		var type = $(e.currentTarget).data('get-type');
 		$.ajax(
-			'http://local.pesc.dev/EdExchange/services/rest/'+type
+			[directoryServer,'EdExchange/services/rest',type].join('/')
 		).done(function(data,textStatus,jqXHR){
 			console.log(data);
 		}).error(function(jqXHR, textStatus, errorThrown) {
