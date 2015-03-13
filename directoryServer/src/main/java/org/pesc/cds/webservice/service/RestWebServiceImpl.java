@@ -60,7 +60,7 @@ public class RestWebServiceImpl {
 	// OrganizationContact
 	//////////////////////////////////////////////
 	
-	@CrossOriginResourceSharing(allowOrigins = {"http://local.pesc.dev:8080"}, maxAge = 1)
+	
 	@Path("/contacts")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -123,7 +123,7 @@ public class RestWebServiceImpl {
 	// Delivery Methods
 	//////////////////////////////////////////////
 	
-	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryMethods")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -163,7 +163,7 @@ public class RestWebServiceImpl {
 	// Delivery Options
 	//////////////////////////////////////////////
 	
-	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryOptions")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -216,7 +216,7 @@ public class RestWebServiceImpl {
 	 * Returns all DocumentFormat objects in the persistence layer
 	 * @return <code>List&lt;DocumentFormat&gt;</code>
 	 */
-	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/documentFormats")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -264,7 +264,7 @@ public class RestWebServiceImpl {
 	// Entity Codes
 	//////////////////////////////////////////////
 	
-	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/entityCodes")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -309,7 +309,7 @@ public class RestWebServiceImpl {
 	// Organizations
 	//////////////////////////////////////////////
 	
-	@CrossOriginResourceSharing(allowOrigins = {"http://localhost:8080"}, maxAge = 1)
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/organizations")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
