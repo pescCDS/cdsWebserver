@@ -84,10 +84,11 @@ public class homeController {
 	@RequestMapping(value="/getCompleted", method=RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
-	public HashMap<String, Object> getCompleted() {
-		HashMap<String, Object> retMap = new HashMap<String, Object>();
-		
-		return retMap;
+	public List<Transaction> getCompleted() {
+		// defaults to status=complete, from/to=all
+		List<Transaction> retList = new ArrayList<Transaction>();
+		retList = DatasourceManagerUtil.getTransactions().byFields(1, true, null, null, -1l);
+		return retList;
 	}
 	
 	
@@ -104,10 +105,16 @@ public class homeController {
 	@RequestMapping(value="/monitor/listFiles", method=RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
-	public HashMap<String, Object> listFiles() {
-		HashMap<String, Object> retMap = new HashMap<String, Object>();
-		
-		return retMap;
+	public List<String> listFiles() {
+		List<String> retList = new ArrayList<String>();
+		File directory = new File("/usr/share/tomcat6/temp");
+		File[] fList = directory.listFiles();
+		for (File file : fList) {
+			if (file.isFile()){
+				retList.add(file.getName());
+			}
+		}
+		return retList;
 	}
 	
 	
@@ -140,6 +147,8 @@ public class homeController {
             	 *     save a file to a directory (can be within the webapp for demo)
             	 *     write action to database and put the created Transaction into the model
             	 */
+            	
+            	//file.getOriginalFilename()
             	
                 // save file to local directory
             	byte[] bytes = file.getBytes();

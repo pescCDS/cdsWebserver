@@ -2,6 +2,7 @@ package org.pesc.cds.networkserver.domain;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -17,6 +18,16 @@ public class TransactionsDao {
 	public TransactionsDao() {}
 	
 	
+	
+	/**
+	 * 
+	 * @param senderId <b>required</b>
+	 * @param status
+	 * @param from
+	 * @param to
+	 * @param fetchSize <b>required</b>
+	 * @return <code>List&lt;Transaction&gt;</code>
+	 */
 	public List<Transaction> byFields(Integer senderId, Boolean status, Long from, Long to, Long fetchSize) {
 		List<Transaction> retList = new ArrayList<Transaction>();
 		try {
@@ -28,10 +39,23 @@ public class TransactionsDao {
 			
 			Criteria ct = session.createCriteria(Transaction.class);
 			ct.add(Restrictions.eq("senderId", senderId));
-			ct.add(Restrictions.between("sent", new Timestamp(from), new Timestamp(to)));
+			
 			if(status!=null) {
 				ct.add(Restrictions.eqOrIsNull("status", status));
 			}
+			
+			// TODO we can get a little bit fancier with this
+			if(from!=null) {
+				if(to==null) {
+					// set "to" to present time and make sure "from" isn't greater than it
+					to = Calendar.getInstance().getTimeInMillis();
+					if(from>to) {
+						from = to;
+					}
+				}
+				ct.add(Restrictions.between("sent", new Timestamp(from), new Timestamp(to)));
+			}
+			
 			ct.setMaxResults(fetchSize.intValue());
 			
 			log.debug(String.format("Criteria Query: %s", ct.toString()));
@@ -47,6 +71,8 @@ public class TransactionsDao {
 		}
 		return retList;
 	}
+	
+	
 	
 	public List<Transaction> all() {
 		List<Transaction> retList = new ArrayList<Transaction>();
@@ -68,6 +94,7 @@ public class TransactionsDao {
 		}
 		return retList;
 	}
+	
 	
 	
 	public Transaction save(Transaction tx) {
