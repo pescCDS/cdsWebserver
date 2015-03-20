@@ -4,8 +4,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -38,13 +40,44 @@ public class homeController {
 	}
 	
 	
+	/**
+	 * 
+	 * @param senderId <code>Integer</code> The id of the sending organization
+	 * @param status <code>Boolean</code> If the transaction was completed or not
+	 * @param from <code>Long</code> 
+	 * @param to <code>Long</code> 
+	 * @param fetchSize <code></code> 
+	 * @return <code>List&lt;Transaction%gt;</code> Transactions matching the passed parameters.
+	 */
 	@RequestMapping(value="/getTransactions", method=RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
-	public HashMap<String, Object> getTransactions() {
-		HashMap<String, Object> retMap = new HashMap<String, Object>();
+	public List<Transaction> getTransactions(
+			@RequestParam(value="senderId", defaultValue="1", required=false) Integer senderId,
+			@RequestParam(value="status", required=false) Boolean status,
+			@RequestParam(value="from", required=false) Long from,
+			@RequestParam(value="to", required=false) Long to,
+			@RequestParam(value="fetchSize", defaultValue="1000", required=false) Long fetchSize
+		) {
+		List<Transaction> retList = new ArrayList<Transaction>();
 		
-		return retMap;
+		log.debug(String.format("incoming parameters: {%n  senderId: %s,%n  status: %s,%n  from: %s,%n  to: %s,%n  fetchSize: %s%n}", senderId, status, from, to, fetchSize));
+		
+		Long toTimestamp = Calendar.getInstance().getTimeInMillis();// this should be present time
+		Calendar fromCal = (Calendar)Calendar.getInstance().clone();
+		if(from==null) {
+			fromCal.add(Calendar.MONTH, -1);
+			log.debug(String.format("From Date: %s", fromCal.getTimeInMillis()));
+		} else {
+			fromCal.setTimeInMillis(from);
+		}
+		if(to!=null && to>fromCal.getTimeInMillis()) {
+			toTimestamp = to;
+		}
+		log.debug(String.format("To Date: %s", toTimestamp));
+		retList = DatasourceManagerUtil.getTransactions().byFields(senderId, status, fromCal.getTimeInMillis(), toTimestamp, fetchSize);
+		log.debug(String.format("Number of Transactions returned: %s", retList.size()));
+		return retList;
 	}
 	
 	

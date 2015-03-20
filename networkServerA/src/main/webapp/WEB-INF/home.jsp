@@ -35,15 +35,6 @@
 	<div class="container">  
 		<h2>Network Server</h2>
         
-        <!--
-        @RequestParam(value="recipientId", required=true) Integer recipientId, 
-        @RequestParam(value="file", required=true) MultipartFile file,
-        @RequestParam(value="networkServerId", required=true) Integer networkServerId,
-        @RequestParam(value="senderId") Integer senderId,
-        @RequestParam(value="fileFormat") String fileFormat,
-        @RequestParam(value="fileSize", defaultValue="0") Float fileSize
-        -->
-        
         <form action="sendFile" method="post" enctype="multipart/form-data" accept-charset="utf-8">
             <h3>Send A Transcript File</h3>
             <c:if test="${error}">
@@ -128,20 +119,34 @@
         </table>
         
         <br /><hr />
+        <h3>Transaction History API</h3>
+        <div class="row">
+        	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+        		status [boolean/radio]<br />
+        		from/to [timestamp/datepicker range]
+        		fetchSize [long/number input, defaults to 1000]
+        		<button type="button" class="btn btn-default">Get Transactions</button>
+        	</div>
+        	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+        		
+        	</div>
+        </div>
+        
+        <br /><hr />
         <h3>Directory Server Communication</h3>
         <div class="row">
         	<div class="col-lg-6 col-md-6 col-sm-6">
                 <ul class="list-unstyled extra-space">
-                    <li><button type="button" class="btn btn-default" data-get-type="deliveryOptions">Get Delivery Options</button></li>
-                    <li><button type="button" class="btn btn-default" data-get-type="organizations">Get Organizations</button></li>
-                    <li><button type="button" class="btn btn-default" data-get-type="contacts">Get Contacts</button></li>
-                    <li><button type="button" class="btn btn-default" data-get-type="deliveryMethods">Get Delivery Methods</button></li>
-                    <li><button type="button" class="btn btn-default" data-get-type="documentFormats">Get Document Formats</button></li>
-                    <li><button type="button" class="btn btn-default" data-get-type="entityCodes">Get Entity Codes</button></li>
+                    <li><button type="button" class="btn btn-default dirServerButton" data-get-type="deliveryOptions">Get Delivery Options</button></li>
+                    <li><button type="button" class="btn btn-default dirServerButton" data-get-type="organizations">Get Organizations</button></li>
+                    <li><button type="button" class="btn btn-default dirServerButton" data-get-type="contacts">Get Contacts</button></li>
+                    <li><button type="button" class="btn btn-default dirServerButton" data-get-type="deliveryMethods">Get Delivery Methods</button></li>
+                    <li><button type="button" class="btn btn-default dirServerButton" data-get-type="documentFormats">Get Document Formats</button></li>
+                    <li><button type="button" class="btn btn-default dirServerButton" data-get-type="entityCodes">Get Entity Codes</button></li>
                 </ul>
             </div>
            	<div class="col-lg-6 col-md-6 col-sm-6">
-        		<textarea rows="10" autocomplete="off" class="full-width"></textarea>
+        		<textarea rows="10" autocomplete="off" class="full-width dirServerResponse"></textarea>
             </div>
 		</div>
 	</div>
@@ -158,37 +163,27 @@
     <script src="resources/js/spinbox.js"></script>
 <script>
 
-/*
-
-http://localhost:8080/networkServerA/sendFile?
-file=<multipart file>
-recipientId=<destination identifier> Will use the recipientId to send to end point
-fileFormat=<compliant file format>
-networkServerId=<id of sending network server>
-senderId=<id of sending organization>
-fileSize=<float>
-
-*/
-
 // http://localhost:8080
 // http://pesc.cccnext.net
 var directoryServer = 'http://pesc.cccnext.net';
 $(document).ready(function() {
-	$('.btn').click(function(e) {
+	$('button.dirServerButton').click(function(e) {
 		var type = $(e.currentTarget).data('get-type');
-		$('textarea').val(null);
+		$('textarea.dirServerResponse').val(null);
 		$.ajax(
 			[directoryServer,'EdExchange/services/rest',type].join('/')
 		).done(function(data,textStatus,jqXHR){
 			console.log(data);
-			$('textarea').val(JSON.stringify(data));
+			$('textarea.dirServerResponse').val(JSON.stringify(data));
 		}).error(function(jqXHR, textStatus, errorThrown) {
 			console.error(errorThrown);
 			console.error(textStatus);
-			$('textarea').val(errorThrown);
+			$('textarea.dirServerResponse').val(errorThrown);
 		});
 	});
 });
+
+
 </script>
 </body>
 </html>
