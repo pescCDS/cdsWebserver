@@ -36,9 +36,9 @@ import org.pesc.edexchange.v1_0.dao.DeliveryOptionsDao;
  *
  */
 @CrossOriginResourceSharing(
-		allowAllOrigins = false,
-		allowCredentials = false,
-		allowOrigins = {"http://local.pesc.dev:8080"}, 
+		allowAllOrigins = true,
+		allowCredentials = true,
+		allowOrigins = {"http://pesc.cccnext.net:8080"}, 
 		maxAge = 1
 )
 public class RestWebServiceImpl {
@@ -56,11 +56,13 @@ public class RestWebServiceImpl {
 	 * 
 	 ***********************************************************************************/
 	
+	// TODO add /<object>/search/{}
+	
 	//////////////////////////////////////////////
 	// OrganizationContact
 	//////////////////////////////////////////////
 	
-	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/contacts")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -72,6 +74,7 @@ public class RestWebServiceImpl {
 		}
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/contacts/{contactId}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -79,6 +82,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getContacts().byId(id);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/contacts/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -108,6 +112,7 @@ public class RestWebServiceImpl {
 		return ((ContactsDao)DatasourceManagerUtil.getContacts()).save(contact);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/contacts/remove/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -131,6 +136,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getDeliveryMethods().all();
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryMethods/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -138,6 +144,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getDeliveryMethods().byId(id);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryMethods/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -148,6 +155,7 @@ public class RestWebServiceImpl {
 		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).save(method);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryMethods/remove/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -171,6 +179,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getDeliveryOptions().all();
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryOptions/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -178,6 +187,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getDeliveryOptions().byId(id);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryOptions/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -197,6 +207,7 @@ public class RestWebServiceImpl {
 		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).save(option);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryOptions/remove/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -228,6 +239,7 @@ public class RestWebServiceImpl {
 		}
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/documentFormats/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -236,6 +248,7 @@ public class RestWebServiceImpl {
 	}
 	
 	// Document Formats
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/documentFormats/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -248,6 +261,7 @@ public class RestWebServiceImpl {
 		return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).save(docFormat);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/documentFormats/remove/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -272,6 +286,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getEntityCodes().all();
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/entityCodes/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -279,6 +294,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getEntityCodes().byId(id);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/entityCodes/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -293,6 +309,7 @@ public class RestWebServiceImpl {
 		return df;
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/entityCodes/remove/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -321,6 +338,7 @@ public class RestWebServiceImpl {
 		}
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/organizations/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -328,6 +346,7 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getOrganizations().byId(id);
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/organizations/save/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -356,6 +375,7 @@ public class RestWebServiceImpl {
 		return retOrg;
 	}
 	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/organizations/remove/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)

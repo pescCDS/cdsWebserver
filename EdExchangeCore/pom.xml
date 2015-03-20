@@ -27,12 +27,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 					<value>dev</value>
 				</property>
 			</activation>
-			<properties>
-				<filter.properties.file>${basedir}/src/main/filters/filter.dev.properties</filter.properties.file>
-			</properties>
 			<build>
 				<filters>
-					<filter>${filter.properties.file}</filter>
+					<filter>${basedir}/src/main/filters/filter.dev.properties</filter>
 				</filters>
 			</build>
 		</profile>
@@ -42,12 +39,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<activation>
 				<property>
 					<name>env</name>
-					<value></value>
+					<value>ci</value>
 				</property>
 			</activation>
-			<properties>
-				<filter.properties.file>${basedir}/src/main/filters/filter.ci.properties</filter.properties.file>
-			</properties>
 			<repositories>
 				<repository>
 				    <id>java.net</id>
@@ -56,7 +50,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			</repositories>
 			<build>
 				<filters>
-					<filter>${filter.properties.file}</filter>
+					<filter>${basedir}/src/main/filters/filter.ci.properties</filter>
 				</filters>
 			</build>
 		</profile>
@@ -66,15 +60,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<activation>
 				<property>
 					<name>env</name>
-					<value></value>
+					<value>qa</value>
 				</property>
 			</activation>
-			<properties>
-				<filter.properties.file>${basedir}/src/main/filters/filter.qa.properties</filter.properties.file>
-			</properties>
 			<build>
 				<filters>
-					<filter>${filter.properties.file}</filter>
+					<filter>${basedir}/src/main/filters/filter.qa.properties</filter>
 				</filters>
 			</build>
 		</profile>
@@ -84,15 +75,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<activation>
 				<property>
 					<name>env</name>
-					<value></value>
+					<value>prod</value>
 				</property>
 			</activation>
-			<properties>
-				<filter.properties.file>${basedir}/src/main/filters/filter.prod.properties</filter.properties.file>
-			</properties>
 			<build>
 				<filters>
-					<filter>${filter.properties.file}</filter>
+					<filter>${basedir}/src/main/filters/filter.prod.properties</filter>
 				</filters>
 			</build>
 		</profile>

@@ -1,7 +1,7 @@
 // Dev-Only: templates and template global variable will be included in one file
 var CFTEMPLATES = {
 	'DATEPICKER_DATE_FORMATS':{
-		'en_us':'mm/dd/yyyy',
+		'en_us':'m/d/yyyy',
 		'en_gb':'dd-mm-yyyy',
 		'zh_cn':'yyyy.mm.dd',
 		'month_year':'MM, yyyy',
@@ -24,7 +24,7 @@ var CFTEMPLATES = {
 	
 	'datepicker':[
 		'<div class="input-group date<% _.isString(datepicker.name)?print(" "+datepicker.name):"" %>">',
-			'<input type="text" class="form-control date" value="" readonly="readonly" />',
+			'<input type="text" class="form-control date" value="" />',
 			'<span class="input-group-addon">',
 				'<span class="glyphicon glyphicon-calendar"></span>',
 			'</span>',
@@ -33,9 +33,9 @@ var CFTEMPLATES = {
 	
 	'datepickerBetween':[
 		'<div class="input-daterange input-group date<% _.isString(datepicker.name)?print(" "+datepicker.name):"" %>">',
-			'<input type="text" class="form-control" name="start" readonly="readonly" />',
+			'<input type="text" class="form-control" name="start" />',
 			'<span class="input-group-addon">to</span>',
-			'<input type="text" class="form-control" name="end" readonly="readonly" />',
+			'<input type="text" class="form-control" name="end" />',
 		'</div>'
 	].join('')
 	
@@ -999,7 +999,7 @@ var VCommonValueFilterControl = Backbone.View.extend({
  * 
 */
 var VDataFilters = Backbone.View.extend({
-	
+	'version':'0.0.1b',
 	/*
 	Default: Column/Type-Based
 	these should translate to AND clauses being appended to WHERE
@@ -1018,6 +1018,10 @@ var VDataFilters = Backbone.View.extend({
 	
 	// Enum of the different interactive modes this control can be put into
 	// the dataFiltersControl (DataFiltersControlBar/VDataFiltersControlBar) has a version of this
+	// DEFAULT: the controls for saving and creating filter sets are not available
+	// CATEGORY_SETS: controls for creating/saving filter sets are available
+	// NO_TYPES: the "Data Filters"/"Common Value" toggle buttons and the controls for creating/saving filter sets are not available
+	// CATEGORIES_NO_TYPES: the controls for creating/saving filter sets are available, but not the "Data Filters"/"Common Value" toggle buttons
 	'MODES':{ 'DEFAULT':0, 'CATEGORY_SETS':1, 'NO_TYPES':2, 'CATEGORIES_NO_TYPES':3 },
 	
 	'defaultConfig':{
@@ -1070,7 +1074,7 @@ var VDataFilters = Backbone.View.extend({
 	// the user will have to mouse out of the alert div in order to start the hide timer again.
 	'notification':{
 		'timeoutID':null,
-		'displayDelay':1777,//1777
+		'displayDelay':1777,
 		'templates':{
 			'warning':_.template([
 				'<div class="alert alert-warning alert-dismissable cf-notification fade in" role="alert">',
@@ -1344,6 +1348,7 @@ var VDataFilters = Backbone.View.extend({
 		'click button.cf-add-filter-button':function(e) {
 			var af = this.filterFactory.activeFilter(),
 				fVal = af?this.filterFactory.getFilterValue():false;
+			//console.log(fVal);
 			if(fVal) {
 				var f = new MDataFilter({
 					'table':this.table,
@@ -1491,6 +1496,8 @@ var VDataFilters = Backbone.View.extend({
 					new VFilterWidgetTypeDateBtwn(),
 					new VFilterWidgetTypeDateSel(),
 					new VFilterWidgetTypeDateCycle(),
+					new VFilterWidgetTypeDateM(),
+					new VFilterWidgetTypeDateMY(),
 					new VFilterWidgetTypeDateYr()
 				])}),
 				new VDataColumnFilterWidget({'type':'boolean', 'collection':new Backbone.Collection([
@@ -1617,17 +1624,21 @@ var VDataFilters = Backbone.View.extend({
 			}
 		}
 		
+		// check for custom UI to add
+		// options.customUI is assumed to be anyting $.append() would expect
+		if(_.has(options, 'customUI')) {
+			$('div.cf-custom-ui-container', this.$el).append(options.customUI);
+		}
+		
 		// the MODES.NO_TYPES is a custom mode where custom UI buttons can be added to the panel header
 		switch(this.mode) {
 			case this.MODES.NO_TYPES:
 			case this.MODES.CATEGORIES_NO_TYPES:
 				//console.log('setting up column filters for custom mode');
 				$('div.cf-data-filter-type-selection',this.$el).hide();
-			
-				// options.customUI is assumed to be anyting $.append() would expect
-				if(_.has(options, 'customUI')) {
-					$('div.cf-custom-ui-container', this.$el).append(options.customUI);
-				}
+				break;
+			case this.MODES.ALL:
+				
 				break;
 		}
 		
@@ -2747,7 +2758,7 @@ var VFilterWidgetTypeNumberSel = VFilterWidgetType.extend({
 
 // Filter Widget Type Implementation Class for Date (Equals)
 var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
-	'version':'1.0.2',
+	'version':'1.0.3',
 	'type':'equals',
 	'dp':null,
 	'dpConfig':{
@@ -2760,6 +2771,7 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 		var d = this.dp.datepicker('getDate');
 		return !isNaN(d.getTime());
 	},
+	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
@@ -2768,13 +2780,15 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A date must be selected.');
 		return false;
 	},
+	
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			return 'is equal to ' + this.dp.datepicker('getDate').toLocaleDateString();
+			return 'is equal to ' + moment(this.dp.datepicker('getDate')).format('M/D/YYYY');
 		} else {
 			return false;
 		}
 	},
+	
 	'getValue':function() {
 		if(this.validate()) {
 			return {
@@ -2785,39 +2799,34 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 		}
 		return false;
 	},
+	
 	'setValue':function(filterValue) {
-		// deprecated method
-		// date should be a date
-		//if(_.isDate(filterValue.value)) {
-		//	this.dp.datepicker('setUTCDate',filterValue.value);
-		//}
-		
 		// new way with moment
 		if(filterValue.value) {
 			this.dp.datepicker('setUTCDate', moment(filterValue.value).toDate());
 		}
 	},
+	
 	'reset':function() {
 		this.dp.datepicker('update',null);
 	},
 	
-	
-	//template:_.template(CFTEMPLATES.datepicker3,{variable:'datepicker'}),
 	'template':_.template([
 		'<div class="row">',
 			'<div class="col-lg-5 col-md-7 col-sm-12 col-xs-8">',
 				CFTEMPLATES.datepicker,
 			'</div>',
 		'</div>'
-	].join(''),
-	{variable:'datepicker'}),
+	].join(''), {variable:'datepicker'}),
+	
 	'events':{
-		// why was this here?
-		/*'changeDate div.dpeq':function(e) {
+		/* for testing
+		'changeDate div.dpeq':function(e) {
+			console.log(e);
 			return false;
-			
 		}*/
 	},
+	
 	'initialize':function(options) {
 		/*
 		template datepicker3 wants: 
@@ -2836,7 +2845,7 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 
 // Filter Widget Type Implementation Class for Date (Before)
 var VFilterWidgetTypeDateB4 = VFilterWidgetType.extend({
-	'version':'1.0.a',
+	'version':'1.0.1',
 	'type':'before',
 	'dp':null,
 	'dpConfig':{
@@ -2859,7 +2868,7 @@ var VFilterWidgetTypeDateB4 = VFilterWidgetType.extend({
 	},
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			return 'is before ' + this.dp.datepicker('getDate').toLocaleDateString();
+			return 'is before ' + moment(this.dp.datepicker('getDate')).format('M/D/YYYY');
 		} else {
 			return false;
 		}
@@ -2903,7 +2912,7 @@ var VFilterWidgetTypeDateB4 = VFilterWidgetType.extend({
 
 // Filter Widget Type Implementation Class for Date (After)
 var VFilterWidgetTypeDateAfter = VFilterWidgetType.extend({
-	'version':'1.0.a',
+	'version':'1.0.1',
 	'type':'after',
 	'dp':null,
 	'dpConfig':{
@@ -2926,7 +2935,7 @@ var VFilterWidgetTypeDateAfter = VFilterWidgetType.extend({
 	},
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			return 'is after ' + this.dp.datepicker('getDate').toLocaleDateString();
+			return 'is after ' + moment(this.dp.datepicker('getDate')).format('M/D/YYYY');
 		} else {
 			return false;
 		}
@@ -2975,7 +2984,7 @@ var VFilterWidgetTypeDateAfter = VFilterWidgetType.extend({
  * 		moment.js (http://momentjs.com/)
  */
 var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
-	'version':'1.0.3',
+	'version':'1.0.4',
 	'type':'between',
 	'dpFrom':null,
 	'dpStartDate':null,
@@ -2987,7 +2996,7 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 	},
 	
 	'isValid':function() {
-		return !isNaN(this.dpFrom.datepicker('getDate').getTime()) && !isNaN(this.dpTo.datepicker('getDate').getTime());
+		return !isNaN(this.model.get('dpFrom').datepicker('getDate').getTime()) && !isNaN(this.model.get('dpTo').datepicker('getDate').getTime());
 	},
 	
 	'validate':function() {
@@ -3003,9 +3012,9 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 		if(this.isValid()) {
 			return [
 				'is between ',
-				this.dpFrom.datepicker('getDate').toLocaleDateString(),
+				moment(this.model.get('dpFrom').datepicker('getDate')).format('M/D/YYYY'),
 				' and ',
-				this.dpTo.datepicker('getDate').toLocaleDateString()
+				moment(this.model.get('dpTo').datepicker('getDate')).format('M/D/YYYY')
 			].join('');
 		} else {
 			return false;
@@ -3016,8 +3025,8 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 		if(this.validate()) {
 			return {
 				'type':this.type,
-				'fromDate':this.dpFrom.datepicker('getDate'),
-				'toDate':this.dpTo.datepicker('getDate'),
+				'fromDate':this.model.get('dpFrom').datepicker('getDate'),
+				'toDate':this.model.get('dpTo').datepicker('getDate'),
 				'description':this.getValueDescription()
 			};
 		}
@@ -3029,13 +3038,13 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 		this.dpStartDate = moment(filterValue.fromDate).toDate();
 		this.dpEndDate = moment(filterValue.toDate).toDate();
 		
-		this.dpFrom.datepicker('setUTCDate', this.dpStartDate);
-		this.dpTo.datepicker('setUTCDate', this.dpEndDate);
-		this.dpFrom.datepicker('setEndDate',this.dpEndDate);
-		this.dpTo.datepicker('setStartDate',this.dpStartDate);
+		this.model.get('dpFrom').datepicker('setUTCDate', this.dpStartDate);
+		this.model.get('dpTo').datepicker('setUTCDate', this.dpEndDate);
+		this.model.get('dpFrom').datepicker('setEndDate',this.dpEndDate);
+		this.model.get('dpTo').datepicker('setStartDate',this.dpStartDate);
 	},
 	
-	// TODO unless we need to modify this, then remove it
+	// TODO unless we need to modify this, remove it
 	'processDate':function(dateObj) {
 		switch(typeof(dateObj)) {
 			case 'object':
@@ -3054,70 +3063,76 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 	'reset':function() {
 		this.dpStartDate = null;
 		this.dpEndDate = null;
-		this.dpFrom.datepicker('update',null);
-		this.dpTo.datepicker('update',null);
-		this.dpFrom.datepicker('setEndDate',null);
-		this.dpTo.datepicker('setStartDate',null);
+		this.model.get('dpFrom').datepicker('update',null);
+		this.model.get('dpTo').datepicker('update',null);
+		this.model.get('dpFrom').datepicker('setEndDate',null);
+		this.model.get('dpTo').datepicker('setStartDate',null);
 	},
 	
 	
 	'template':_.template(CFTEMPLATES.datepickerBetween,{variable:'datepicker'}),
 	'events':{
 		// these are supposed to cap the start/end of the other datepicker
-		'changeDate .dpbtw input:first-child':function(e) {
-			//this.dpFrom.datepicker('setEndDate',e.date);
+		// when the from date changes
+		/*'changeDate .dpbtw input:first-child':function(e) {
 			if(e.date) {
 				//date is valid
 				// add a day to the dpStartDate
-				this.dpStartDate = new Date(e.date.valueOf()+86400000);
+				this.dpStartDate = new Date(e.timeStamp);
 				//limit the to datepicker so it can't pick a date before this selected date
-				this.dpTo.datepicker('setStartDate',this.dpStartDate);
+				this.model.get('dpTo').datepicker('setStartDate', this.dpStartDate);
 			} else {
 				//cleared date, clear dpTo.startDate
-				this.dpTo.datepicker('setStartDate',this.dpStartDate = null);
+				this.model.get('dpTo').datepicker('setStartDate', this.dpStartDate = null);
 			}
-		},
-		'hide .dpbtw input:first-child':function(e) {
+		},*/
+		//'hide .dpbtw input:first-child':function(e) {
 			//show the to-date datepicker if it doesn't have a selected date
-			if(isNaN(this.dpTo.datepicker('getDate').getTime())) {
-				this.dpTo.datepicker('show');
-			}
-		},
+			//if( this.model.get('dpTo').datepicker('getDate') && isNaN(this.model.get('dpTo').datepicker('getDate').getTime()) ) {
+			//	this.model.get('dpTo').datepicker('show');
+			//}
+		//},
 		
-		'changeDate .dpbtw input:last-child':function(e) {
-			// limit 
-			//this.dpTo.datepicker('setStartDate',e.date);
+		// when the to date changes
+		/*'changeDate .dpbtw input:last-child':function(e) {
+			// limit
+			console.log('dpTo:changeDate');
 			if(e.date) {
+				console.log('date is something: '+moment(e.timeStamp).format('M/D/YYYY'));
 				// subtract a day from the dpEndDate
-				this.dpEndDate = new Date(e.date.valueOf()-86400000);
+				this.dpEndDate = new Date(e.timeStamp);
 				// limit the from datepicker so it can't pick a date after this selected date
-				this.dpFrom.datepicker('setEndDate',this.dpEndDate);
+				this.model.get('dpFrom').datepicker('setEndDate', this.dpEndDate);
 				//this.dpTo.datepicker('hide');
 			} else {
+				console.log('date is falsy');
 				//cleared date, clear dpFrom.endDate
-				this.dpFrom.datepicker('setEndDate',this.dpEndDate = null);
+				this.model.get('dpFrom').datepicker('setEndDate', this.dpEndDate = null);
 			}
-		},
-		'hide .dpbtw input:last-child':function(e) {
+		}*/
+		//'hide .dpbtw input:last-child':function(e) {
 			//if there is a from date, then just close, otherwise show from datepicker
-			if(isNaN(this.dpFrom.datepicker('getDate').getTime())) {
-				this.dpFrom.datepicker('show');
-			}
-		},
+			//if( this.model.get('dpFrom').datepicker('getDate') && isNaN(this.model.get('dpFrom').datepicker('getDate').getTime()) ) {
+				//this.model.get('dpFrom').datepicker('show');
+			//}
+		//}
 	},
 	
 	'initialize':function(options) {
 		this.$el.html(this.template({name:'dpbtw'}));
 		$('.dpbtw',this.$el).datepicker(this.dpConfig);
-		this.dpFrom = $('.dpbtw input:first-child',this.$el);
-		this.dpTo = $('.dpbtw input:last-child',this.$el);
+		
+		this.model = new Backbone.Model({
+			'dpFrom':$('.dpbtw input:first-child',this.$el),
+			'dpTo':$('.dpbtw input:last-child',this.$el)
+		});
 	}
 });
 
 
 // Filter Widget Type Implementation Class for Number (Select)
 var VFilterWidgetTypeDateSel = VFilterWidgetType.extend({
-	'version':'1.0.3',
+	'version':'1.0.4',
 	'type':'select',
 	'dp':null,
 	'dpConfig':{
@@ -3145,7 +3160,7 @@ var VFilterWidgetTypeDateSel = VFilterWidgetType.extend({
 			return [
 				'is one of these: (',
 				$.map(this.collection.models,function(md) {
-					return md.get('date').toLocaleDateString();
+					return moment(md.get('date')).format('M/D/YYYY');
 				}),
 				')'
 			].join('');
@@ -3217,7 +3232,7 @@ var VFilterWidgetTypeDateSel = VFilterWidgetType.extend({
 	'listTemplate':_.template([
 			'<li class="list-group-item" data-cid="<%= dm.cid %>">',
 				'<button class="close" data-cid="<%= dm.cid %>"><span class="glyphicon glyphicon-remove btn-sm"></span></button>',
-				'<p class="list-group-item-heading"><%= dm.get("date").toLocaleDateString() %></p>',
+				'<p class="list-group-item-heading"><%= moment(dm.get("date")).format("M/D/YYYY") %></p>',
 			'</li>'
 		].join(''),
 		{'variable':'dm'}
@@ -3385,6 +3400,208 @@ var VFilterWidgetTypeDateCycle = VFilterWidgetType.extend({
 	}
 });
 
+
+// Filter Widget Type Implementation Class for Date (Month)
+var VFilterWidgetTypeDateM = VFilterWidgetType.extend({
+	'version':'1.0.1',
+	'type':'month',
+	
+	'isValid':function() {
+		// a month and year is selected
+		var retM = $('select', this.$el).val()*1
+		return (retM>-1);
+	},
+	
+	'validate':function() {
+		if(this.isValid()) {
+			return true;
+		}
+		
+		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A month must be selected.');
+		return false;
+	},
+	
+	'getValueDescription':function() {
+		if(this.isValid()) {
+			return [
+				'is in ', 
+				moment({'month':$('select', this.$el).val()*1}).format('MMMM')
+			].join('');
+		} else {
+			return false;
+		}
+	},
+	
+	'getValue':function() {
+		if(this.validate()) {
+			return {
+				'type':this.type,
+				'month':$('select', this.$el).val()*1,
+				'description':this.getValueDescription()
+			};
+		}
+		return false;
+	},
+	
+	'setValue':function(filterValue) {
+		// filterValue = {month:<int>}
+		if(filterValue.month) {
+			$('select', this.$el).val(filterValue.month);
+		}
+	},
+	
+	'reset':function() {
+		$('select', this.$el).val(0);
+	},
+	
+	'template':_.template([
+		'<div class="row">',
+			'<div class="col-lg-8 col-md-8 col-sm-12 col-xs-8">',
+				'<label class="control-label">Month: </label>',
+				'<select class="form-control">',
+					'<option value="-1"></option>',
+				'<% for(var i in months) { %>',
+					'<option value="<%= ((i*1)+1) %>"><%= months[i] %></option>',
+				'<% } %>',
+				'</select>',
+			'</div>',
+		'</div>'
+	].join('')),
+	
+	'events':{
+		/* for testing
+		'changeDate div.dpeq':function(e) {
+			console.log(e);
+			return false;
+		}*/
+	},
+	
+	'initialize':function(options) {
+		this.model = new Backbone.Model({
+			'months':[
+				'January', 'February', 'March', 'April',
+				'May', 'June', 'July', 'August',
+				'September', 'October', 'November', 'December' 
+			]
+		});
+		
+		// render this view's elements
+		this.$el.html( this.template({'months':this.model.get('months')}) );
+	}
+});
+
+// Filter Widget Type Implementation Class for Date (Month Year)
+var VFilterWidgetTypeDateMY = VFilterWidgetType.extend({
+	'version':'1.0.3',
+	'type':'monthyear',
+	
+	'isValid':function() {
+		// a month and year is selected
+		var retM = $('select', this.$el).val()*1,
+			retY = this.model.get('dp').datepicker('getDate');
+		return ( (retM>-1) && (retY));
+	},
+	
+	'validate':function() {
+		if(this.isValid()) {
+			return true;
+		}
+		
+		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A month and year must be selected.');
+		return false;
+	},
+	
+	'getValueDescription':function() {
+		if(this.isValid()) {
+			return [
+				'is in ', 
+				moment({'month':$('select', this.$el).val()*1}).format('MMMM'),
+				' of year ',
+				moment(this.model.get('dp').datepicker('getDate')).format('YYYY')
+			].join('');
+		} else {
+			return false;
+		}
+	},
+	
+	'getValue':function() {
+		if(this.validate()) {
+			return {
+				'type':this.type,
+				'month':$('select', this.$el).val()*1,
+				'year':this.model.get('dp').datepicker('getDate').getFullYear(),
+				'description':this.getValueDescription()
+			};
+		}
+		return false;
+	},
+	
+	'setValue':function(filterValue) {
+		// filterValue = {month:<int>, year:<int>}
+		if(filterValue.month && filterValue.year) {
+			$('select', this.$el).val(filterValue.month);
+			this.model.get('dp').datepicker('update', moment({'year':filterValue.year}).toDate());
+		}
+	},
+	
+	'reset':function() {
+		$('select', this.$el).val(0);
+		this.model.get('dp').datepicker('update',null);
+	},
+	
+	'template':_.template([
+		'<div class="row">',
+			'<div class="col-lg-5 col-md-6 col-sm-12 col-xs-8">',
+				'<label class="control-label">Month: </label>',
+				'<select class="form-control">',
+					'<option value="-1"></option>',
+				'<% for(var i in months) { %>',
+					'<option value="<%= ((i*1)+1) %>"><%= months[i] %></option>',
+				'<% } %>',
+				'</select>',
+			'</div>',
+			'<div class="col-lg-5 col-md-6 col-sm-12 col-xs-8">',
+				'<label class="control-label">Year: </label>',
+				CFTEMPLATES.datepicker,
+			'</div>',
+		'</div>'
+	].join('')),
+	
+	'events':{
+		/* for testing
+		'changeDate div.dpeq':function(e) {
+			console.log(e);
+			return false;
+		}*/
+	},
+	
+	'initialize':function(options) {
+		this.model = new Backbone.Model({
+			'dp':null,
+			'dpConfig':{
+				'autoclose':true,
+				'name':'dpmy',
+				'format':'yyyy',
+				'defaultViewDate':'year',
+				'minViewMode':'years'
+			},
+			'months':[
+				'January', 'February', 'March', 'April',
+				'May', 'June', 'July', 'August',
+				'September', 'October', 'November', 'December' 
+			]
+		});
+		
+		// render this view's elements
+		this.$el.html( this.template({'datepicker':this.model.get('dpConfig'), 'months':this.model.get('months')}) );
+		
+		// create the datepicker
+		$('.dpmy', this.$el).datepicker(this.model.get('dpConfig'));
+		
+		// set the model's dp property now that the datepicker has been created
+		this.model.set('dp', $('.dpmy', this.$el));
+	}
+});
 
 // Filter Widget Type Implementation Class for Date Year List (Equals)
 var VFilterWidgetTypeDateYr = VFilterWidgetType.extend({
