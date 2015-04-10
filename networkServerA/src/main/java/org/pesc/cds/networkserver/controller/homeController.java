@@ -41,6 +41,8 @@ public class homeController {
 	
 	
 	/**
+	 * Get Transactions REST endpoint<p>
+	 * 
 	 * 
 	 * @param senderId <code>Integer</code> The id of the sending organization
 	 * @param status <code>Boolean</code> If the transaction was completed or not
@@ -75,33 +77,34 @@ public class homeController {
 			toTimestamp = to;
 		}
 		log.debug(String.format("To Date: %s", toTimestamp));
-		retList = DatasourceManagerUtil.getTransactions().byFields(senderId, status, fromCal.getTimeInMillis(), toTimestamp, fetchSize);
+		retList = DatasourceManagerUtil.getTransactions().bySenderStatusDate(senderId, status, fromCal.getTimeInMillis(), toTimestamp, fetchSize);
 		log.debug(String.format("Number of Transactions returned: %s", retList.size()));
 		return retList;
 	}
 	
 	
+	/**
+	 * Get Completed endpoint<p>
+	 * This is just a shortcut method for the "getTransactions" endpoint with the status set to 1
+	 * @return <code>List&lt;Transaction&gt;</code> Transactions with their status set to 1
+	 */
 	@RequestMapping(value="/getCompleted", method=RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
 	public List<Transaction> getCompleted() {
 		// defaults to status=complete, from/to=all
 		List<Transaction> retList = new ArrayList<Transaction>();
-		retList = DatasourceManagerUtil.getTransactions().byFields(1, true, null, null, -1l);
+		retList = DatasourceManagerUtil.getTransactions().bySenderStatusDate(1, true, null, null, -1l);
 		return retList;
 	}
 	
 	
-	@RequestMapping(value="/monitor/getTransactionHistory", method=RequestMethod.GET)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ResponseBody
-	public HashMap<String, Object> getTransactionHistory() {
-		HashMap<String, Object> retMap = new HashMap<String, Object>();
-		
-		return retMap;
-	}
-	
-	
+	/**
+	 * List Files endpoint<p>
+	 * TODO finish this
+	 * 
+	 * @return <code>List&lt;String&gt;</code> A list of paths to files uploaded to the server.
+	 */
 	@RequestMapping(value="/monitor/listFiles", method=RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
@@ -125,6 +128,18 @@ public class homeController {
 		networkServerId=<id of sending network server>
 		senderId=<id of sending organization> If not provided then use networkServerId
 		fileSize=<float> If not provided then calculate from file parameter
+	 */
+	/**
+	 * sendFile REST endpoint<p>
+	 * This is the REST method for sending a file to a network server.
+	 * 
+	 * @param recipientId     <code>Integer (required)</code> 
+	 * @param file            <code>MultipartFile (required)</code> 
+	 * @param networkServerId <code>Integer (required)</code> 
+	 * @param senderId        <code>Integer</code> 
+	 * @param fileFormat      <code>String (required)</code> 
+	 * @param fileSize        <code>Long</code>  
+	 * @return
 	 */
 	@RequestMapping(value="/sendFile", method=RequestMethod.POST)
 	public ModelAndView handleFileUpload(
@@ -185,7 +200,7 @@ public class homeController {
                 redir.addAttribute("status","upload successfull");
                 
                 // TODO an error will be thrown because this isn't a simple class, need to figure out a workaround
-                //redir.addAttribute("transaction", savedTx);
+                // redir.addAttribute("transaction", savedTx);
                 
                 
             } catch (Exception e) {

@@ -21,6 +21,7 @@ public class TransactionsDao {
 	
 	/**
 	 * 
+	 * 
 	 * @param senderId <b>required</b>
 	 * @param status
 	 * @param from
@@ -28,7 +29,7 @@ public class TransactionsDao {
 	 * @param fetchSize <b>required</b>
 	 * @return <code>List&lt;Transaction&gt;</code>
 	 */
-	public List<Transaction> byFields(Integer senderId, Boolean status, Long from, Long to, Long fetchSize) {
+	public List<Transaction> bySenderStatusDate(Integer senderId, Boolean status, Long from, Long to, Long fetchSize) {
 		List<Transaction> retList = new ArrayList<Transaction>();
 		try {
 			if(HibernateUtil.getSessionFactory().isClosed()) {
@@ -45,15 +46,15 @@ public class TransactionsDao {
 			}
 			
 			// TODO we can get a little bit fancier with this
-			if(from!=null) {
-				if(to==null) {
-					// set "to" to present time and make sure "from" isn't greater than it
-					to = Calendar.getInstance().getTimeInMillis();
-					if(from>to) {
-						from = to;
-					}
-				}
-				ct.add(Restrictions.between("sent", new Timestamp(from), new Timestamp(to)));
+			// if only 1 of the from/to is given:
+			//     from: sent >= {from}
+			//     to:   sent <= {to}
+			if(from!=null && to!=null) {
+				
+			} else if(from!=null) {
+				ct.add(Restrictions.ge("sent", new Timestamp(from)));
+			} else if(to!=null) {
+				ct.add(Restrictions.le("sent", new Timestamp(to)));
 			}
 			
 			ct.setMaxResults(fetchSize.intValue());

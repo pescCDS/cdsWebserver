@@ -35,8 +35,9 @@
 	<div class="container">  
 		<h2>Network Server</h2>
         
+        <hr />
+        <h3>Send A Transcript File</h3>
         <form action="sendFile" method="post" enctype="multipart/form-data" accept-charset="utf-8">
-            <h3>Send A Transcript File</h3>
             <c:if test="${error}">
 	           <p class="bg-danger">${error}</p>
             </c:if>
@@ -71,13 +72,14 @@
             </div>
             <div class="form-horizontal row">
             	<div class="form-group">
-                	<label class="control-label col-lg-2 col-md-4 col-sm-4 col-xs-4">File Format</label>
+                	<label class="control-label col-lg-2 col-lg-offset-6 col-md-4 col-md-offset-4 col-sm-4 col-xs-4">File Format</label>
                     <div class="col-lg-4 col-md-4 col-sm-8 col-xs-8">
                     	<input type="text" name="fileFormat" class="form-control" placeholder="What type of file to transfer" />
                     </div>
                 </div>
-                
-                <div class="form-group text-center">
+            </div>
+            <div class="form-horizontal row">
+            	<div class="form-group text-center">
                 	<button type="submit" class="btn btn-default">SEND</button>
                 </div>
             </div>
@@ -119,21 +121,45 @@
         </table>
         
         <br /><hr />
-        <h3>Transaction History API</h3>
-        <div class="row">
-        	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-        		status [boolean/radio]<br />
-        		from/to [timestamp/datepicker range]
-        		fetchSize [long/number input, defaults to 1000]
-        		<button type="button" class="btn btn-default">Get Transactions</button>
+        <h3>Transaction History REST API</h3>
+        <div class="form-horizontal">
+        	<div class="form-group">
+        		<label class="control-label col-sm-2">Status</label>
+        		<div class="btn-group col-sm-10" data-toggle="buttons">
+        			<label class="btn btn-primary active">
+        				<input type="radio" name="tx-history-status" autocomplete="off" value="0" checked /> incomplete
+        			</label>
+        			<label class="btn btn-primary">
+        				<input type="radio" name="tx-history-status" autocomplete="off" value="1" /> complete
+        			</label>
+        		</div>
         	</div>
-        	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-        		
+        	<div class="form-group">
+        		<label class="control-label col-sm-2">From / To</label>
+        		<div class="input-daterange input-group date">
+        			<input type="text" class="form-control" name="tx-history-from" />
+        			<span class="input-group-addon">to</span>
+        			<input type="text" class="form-control" name="tx-history-to" />
+        		</div>
+        	</div>
+        	<div class="form-group">
+        		<label class="control-label col-sm-2">Fetch Size</label>
+        		<div class="col-sm-3">
+        			<input type="number" class="form-control tx-history-fetchSize" min="1" max="1000" size="4" />
+        		</div>
+        	</div>
+        </div>
+        <div class="row">
+        	<div class="col-lg-2 col-md-3 col-sm-4 col-xs-5">
+        		<button type="button" class="btn btn-default getHistoryButton">Get Transactions</button>
+        	</div>
+        	<div class="col-lg-10 col-md-9 col-sm-8 col-xs-7">
+        		<textarea rows="10" autocomplete="off" class="full-width txHistoryResponse"></textarea>
         	</div>
         </div>
         
         <br /><hr />
-        <h3>Directory Server Communication</h3>
+        <h3>Directory Server Communication REST API</h3>
         <div class="row">
         	<div class="col-lg-6 col-md-6 col-sm-6">
                 <ul class="list-unstyled extra-space">
@@ -167,6 +193,8 @@
 // http://pesc.cccnext.net
 var directoryServer = 'http://pesc.cccnext.net';
 $(document).ready(function() {
+	
+	// add button click event handler for the directory server API calls
 	$('button.dirServerButton').click(function(e) {
 		var type = $(e.currentTarget).data('get-type');
 		$('textarea.dirServerResponse').val(null);
@@ -181,6 +209,28 @@ $(document).ready(function() {
 			$('textarea.dirServerResponse').val(errorThrown);
 		});
 	});
+	
+	// configure the transaction history UI controls
+	$('.date').datepicker({'autoclose':true, 'format':'m/d/yyyy'});
+	$('button.getHistoryButton').click(function(e) {
+		var fromDate = $('input[name="tx-history-from"]').datepicker('getDate'),
+			toDate = $('input[name="tx-history-to"]').datepicker('getDate');
+		$.ajax({
+			'url':'getTransactions',
+			'data':{
+				'status':($('input[name="tx-history-status"]').val()*1)?true:false,
+				'from':isNaN(fromDate.getTime())?null:fromDate.getTime(),
+				'to':isNaN()?null:toDate.getTime(),
+				'fetchSize':$('input[name="tx-history-fetchSize"]').val()
+			}
+		}).done(function(data, textStatus, jqxhr) {
+			console.log(data);
+			$('textarea.tx-history-fetchSize').val(JSON.stringify(data));
+		}).fail(function(jqxhr, textStatus, errorThrown) {
+			console.error(errorThrown);
+			$('textarea.tx-history-fetchSize').val(errorThrown);
+		});
+	})
 });
 
 
