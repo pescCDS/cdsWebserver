@@ -225,10 +225,10 @@ $(document).ready(function() {
 			}
 		}).done(function(data, textStatus, jqxhr) {
 			console.log(data);
-			$('textarea.tx-history-fetchSize').val(JSON.stringify(data));
+			$('textarea.txHistoryResponse').val(JSON.stringify(data));
 		}).fail(function(jqxhr, textStatus, errorThrown) {
 			console.error(errorThrown);
-			$('textarea.tx-history-fetchSize').val(errorThrown);
+			$('textarea.txHistoryResponse').val(errorThrown);
 		});
 	})
 });
