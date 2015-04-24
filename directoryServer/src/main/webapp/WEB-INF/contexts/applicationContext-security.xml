@@ -9,7 +9,9 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     <debug />
     
     <http use-expressions="true" disable-url-rewriting="true">
-        <session-management session-fixation-protection="migrateSession" invalid-session-url="/login" />
+        <session-management invalid-session-url="/login" session-fixation-protection="none">
+        	<concurrency-control max-sessions="1" />
+        </session-management>
         
         <!-- TODO: enable this later when we are ready for ssl
         <security:intercept-url pattern="/login" requires-channel="https"/>

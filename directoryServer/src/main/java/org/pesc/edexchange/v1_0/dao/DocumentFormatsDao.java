@@ -1,5 +1,6 @@
 package org.pesc.edexchange.v1_0.dao;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -17,11 +18,66 @@ import org.pesc.edexchange.v1_0.DocumentFormat;
 public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 	private static final Log log = LogFactory.getLog(DocumentFormatsDao.class);
 	
-	/**
-	 * Default no-arg constructor
-	 */
 	public DocumentFormatsDao() { }
 	
+	
+	public List<DocumentFormat> search(Integer id, String formatName, String formatDescription, Integer formatInuseCount, Long createdTime, Long modifiedTime) {
+		List<DocumentFormat> retList = new ArrayList<DocumentFormat>();
+		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			Criteria ct = session.createCriteria(DocumentFormat.class);
+			boolean hasCriteria = false;
+			
+			if(id!=null) {
+				ct.add(Restrictions.idEq(id));
+				hasCriteria = true;
+			}
+			
+			if(formatName!=null) {
+				ct.add(Restrictions.ilike("formatName", formatName, MatchMode.ANYWHERE));
+				hasCriteria = true;
+			}
+			
+			if(formatDescription!=null) {
+				ct.add(Restrictions.ilike("formatDescription", formatDescription, MatchMode.ANYWHERE));
+				hasCriteria = true;
+			}
+			
+			if(formatInuseCount!=null) {
+				ct.add(Restrictions.eq("formatInuseCount", formatInuseCount));
+				hasCriteria = true;
+			}
+			
+			if(createdTime!=null) {
+				ct.add(Restrictions.eq("createdTime", new Timestamp(createdTime)));
+				hasCriteria = true;
+			}
+			
+			if(modifiedTime!=null) {
+				ct.add(Restrictions.eq("modifiedTime", new Timestamp(modifiedTime)));
+				hasCriteria = true;
+			}
+			
+			
+			if(hasCriteria) {
+				retList = ct.list();
+			}
+			
+			session.getTransaction().commit();
+			
+		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
+			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+			
+		return retList;
+	}
 	
 	
 	public List<DocumentFormat> filterByName(String query) {

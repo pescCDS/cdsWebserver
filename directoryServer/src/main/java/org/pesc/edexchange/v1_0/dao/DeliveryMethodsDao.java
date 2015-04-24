@@ -19,6 +19,42 @@ public class DeliveryMethodsDao implements DBDataSourceDao<DeliveryMethod> {
 	public DeliveryMethodsDao() { }
 	
 	
+	public List<DeliveryMethod> search(Integer id, String method) {
+		List<DeliveryMethod> retList = new ArrayList<DeliveryMethod>();
+		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			Criteria ct = session.createCriteria(DeliveryMethod.class);
+			boolean hasCriteria = false;
+			
+			if(id!=null) {
+				ct.add(Restrictions.idEq(id));
+				hasCriteria = true;
+			}
+			
+			if(method!=null) {
+				ct.add(Restrictions.ilike("method", method, MatchMode.ANYWHERE));
+				hasCriteria = true;
+			}
+			
+			if(hasCriteria) {
+				retList = ct.list();
+			}
+			session.getTransaction().commit();
+			
+		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
+			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+		return retList;
+	}
+	
+	
 	public List<DeliveryMethod> filterByName(String query) {
 		List<DeliveryMethod> retList = new ArrayList<DeliveryMethod>();
 		try {
@@ -37,7 +73,6 @@ public class DeliveryMethodsDao implements DBDataSourceDao<DeliveryMethod> {
 			}
 			
 			retList = ct.list();
-			
 			session.getTransaction().commit();
 			
 		} catch(Exception ex) {

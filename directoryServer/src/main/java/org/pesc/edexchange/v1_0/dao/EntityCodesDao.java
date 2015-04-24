@@ -1,5 +1,6 @@
 package org.pesc.edexchange.v1_0.dao;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.edexchange.v1_0.EntityCode;
 
@@ -20,6 +23,56 @@ public class EntityCodesDao implements DBDataSourceDao<EntityCode> {
 	public EntityCodesDao() { }
 	
 	
+	public List<EntityCode> search(Integer id, Integer code, String description, Long createdTime, Long modifiedTime) {
+		List<EntityCode> retList = new ArrayList<EntityCode>();
+		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			Criteria ct = session.createCriteria(EntityCode.class);
+			boolean hasCriteria = false;
+			
+			if(id!=null) {
+				ct.add(Restrictions.idEq(id));
+				hasCriteria = true;
+			}
+			
+			if(code!=null) {
+				ct.add(Restrictions.eq("code", code));
+				hasCriteria = true;
+			}
+			
+			if(description!=null) {
+				ct.add(Restrictions.ilike("description", description, MatchMode.ANYWHERE));
+				hasCriteria = true;
+			}
+			
+			if(createdTime!=null) {
+				ct.add(Restrictions.eq("createdTime", new Timestamp(createdTime)));
+				hasCriteria = true;
+			}
+			
+			if(modifiedTime!=null) {
+				ct.add(Restrictions.eq("modifiedTime", new Timestamp(modifiedTime)));
+				hasCriteria = true;
+			}
+			
+			if(hasCriteria) {
+				retList = ct.list();
+			}
+			
+			session.getTransaction().commit();
+			
+		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
+			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+		return retList;
+	}
 	
 	public List<HashMap<String, Object>> forJson() {
 		List<HashMap<String, Object>> retList = new ArrayList<HashMap<String, Object>>();

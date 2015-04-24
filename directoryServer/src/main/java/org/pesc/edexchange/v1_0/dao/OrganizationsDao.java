@@ -1,5 +1,6 @@
 package org.pesc.edexchange.v1_0.dao;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -21,6 +22,91 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 	 * Default no-arg constructor
 	 */
 	public OrganizationsDao() { }
+	
+	
+	
+	public List<Organization> search(
+			Integer directoryId, 
+			String organizationId, 
+			String organizationIdType, 
+			String organizationName, 
+			String organizationSubcode, 
+			Integer entityId,
+			String organizationEin,
+			Long createdTime,
+			Long modifiedTime
+		) {
+		List<Organization> retList = new ArrayList<Organization>();
+		try {
+			if(HibernateUtil.getSessionFactory().isClosed()) {
+				HibernateUtil.getSessionFactory().openSession();
+			}
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			
+			Criteria ct = session.createCriteria(Organization.class);
+			boolean hasCriteria = false;
+			
+			if(directoryId!=null) {
+				ct.add(Restrictions.idEq(directoryId));
+				hasCriteria = true;
+			}
+			
+			if(organizationId!=null) {
+				ct.add(Restrictions.ilike("organizationId", organizationId, MatchMode.START));
+				hasCriteria = true;
+			}
+			
+			if(organizationIdType!=null) {
+				ct.add(Restrictions.ilike("organizationIdType", organizationIdType, MatchMode.START));
+				hasCriteria = true;
+			}
+			
+			if(organizationName!=null) {
+				ct.add(Restrictions.ilike("organizationName", organizationName, MatchMode.ANYWHERE));
+				hasCriteria = true;
+			}
+			
+			if(organizationSubcode!=null) {
+				ct.add(Restrictions.ilike("organizationSubcode", organizationSubcode, MatchMode.ANYWHERE));
+				hasCriteria = true;
+			}
+			
+			if(entityId!=null) {
+				ct.createAlias("ent", "entity");
+				ct.add(Restrictions.eq("ent.id", entityId));
+				hasCriteria = true;
+			}
+			
+			if(organizationEin!=null) {
+				ct.add(Restrictions.ilike("organizationEin", organizationEin, MatchMode.START));
+				hasCriteria = true;
+			}
+			
+			if(createdTime!=null) {
+				ct.add(Restrictions.eq("createdTime", new Timestamp(createdTime)));
+				hasCriteria = true;
+			}
+			
+			if(modifiedTime!=null) {
+				ct.add(Restrictions.eq("modifiedTime", new Timestamp(modifiedTime)));
+				hasCriteria = true;
+			}
+			
+			
+			if(hasCriteria) {
+				retList = ct.list();
+			}
+			
+			session.getTransaction().commit();
+			
+		} catch(Exception ex) {
+			log.error(ex.getMessage());
+			ex.printStackTrace();
+			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+		return retList;
+	}
 	
 	
 	// 

@@ -144,7 +144,7 @@ public class homeController {
 	@RequestMapping(value="/sendFile", method=RequestMethod.POST)
 	public ModelAndView handleFileUpload(
     		@RequestParam(value="recipientId", required=true) Integer recipientId, 
-    		@RequestParam(value="file", required=true) MultipartFile file,
+    		@RequestParam(value="file") MultipartFile file,
     		@RequestParam(value="networkServerId", required=true) Integer networkServerId,
     		@RequestParam(value="senderId") Integer senderId,
     		@RequestParam(value="fileFormat", required=true) String fileFormat,
