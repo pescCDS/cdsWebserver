@@ -8,7 +8,7 @@ $(document).ready(function() {
 			outputContainer = $(['samp[data-set-type="',type,'"]'].join(''));
 		outputContainer.val(null);
 		$.ajax(
-			[directoryServer,'EdExchange/services/rest',type].join('/')
+			['',directoryServer,'EdExchange/services/rest',type].join('/')
 		).done(function(data,textStatus,jqXHR){
 			console.log(data);
 			outputContainer.html(JSON.stringify(data));
@@ -54,7 +54,7 @@ $(document).ready(function() {
 	// Delivery Options Search
 	function sendDeliveryOptionData(data, sendType) {
 		var ajaxConfig = {
-			'url':[directoryServer,'EdExchange/services/rest/deliveryOptions/search'].join('/'),
+			'url':['',directoryServer,'EdExchange/services/rest/deliveryOptions/search'].join('/'),
 			'dataType':'json'
 		};
 		
