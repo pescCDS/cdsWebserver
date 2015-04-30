@@ -132,10 +132,12 @@ $(document).ready(function() {
 			data.deliveryMethodId = $.trim(inpt_deliveryMethodId.val())*1;
 		}
 		if(inpt_deliveryConfirm) {
-			data.deliveryConfirm = SEND_TYPE ? (inpt_deliveryConfirm==='1') : inpt_deliveryConfirm*1;
+			//data.deliveryConfirm = SEND_TYPE ? (inpt_deliveryConfirm==='1') : inpt_deliveryConfirm*1;
+			data.deliveryConfirm = inpt_deliveryConfirm==='1';
 		}
 		if(inpt_error) {
-			data.error = SEND_TYPE ? (inpt_error==='1') : inpt_error*1;
+			//data.error = SEND_TYPE ? (inpt_error==='1') : inpt_error*1;
+			data.error = inpt_error==='1';
 		}
 		if($.trim(inpt_operationalStatus.val()).length) {
 			data.operationalStatus = $.trim(inpt_operationalStatus.val());
