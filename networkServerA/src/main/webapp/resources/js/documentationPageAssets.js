@@ -41,6 +41,15 @@ $(document).ready(function() {
 		});
 	});
 	
+	// datatable for transaction history
+	$('table.xaction-history-table').DataTable({
+		'searching':false,
+		'scrollX':true,
+		'scrollY':'400px',
+		'scrollCollapse':true,
+		'dom':'ti<"clearfix">',
+		'order':[[1,'asc']]
+	});
 	
 	// Delivery Options Search
 	function sendDeliveryOptionData(data, sendType) {
@@ -91,7 +100,11 @@ $(document).ready(function() {
 		});
 	}
 	
-	$('form.doptForm button').click(function(e) {
+	$('form.doptForm button.reset-button').click(function(e) {
+		$('form.doptForm')[0].reset();
+	});
+	
+	$('form.doptForm button.search-button').click(function(e) {
 		// gather data
 		var data = {},
 			SEND_TYPE = $('input[name="sendType"]:checked', $('form.doptForm')).val()==='GET'?0:1,

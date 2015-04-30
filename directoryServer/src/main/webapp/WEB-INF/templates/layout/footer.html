@@ -7,7 +7,7 @@
 <body>
 	<footer class="row" th:fragment="layoutFooter">
     	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        	&copy; <span th:text="${#dates.year(#dates.createToday())}">2013</span> PESC CDS Ed Exchange Directory Server
+        	<span th:text="${#dates.year(#dates.createToday())}">2013</span> PESC CDS Ed Exchange Directory Server
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-center">
             <h5 th:text="${#locale}">en_US</h5>

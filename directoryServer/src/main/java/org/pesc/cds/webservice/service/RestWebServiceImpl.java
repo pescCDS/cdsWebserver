@@ -22,6 +22,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.pesc.cds.webservice.service.request.DeliveryMethodSearch;
+import org.pesc.cds.webservice.service.request.DeliveryOptionSearch;
+import org.pesc.cds.webservice.service.request.DocumentFormatSearch;
+import org.pesc.cds.webservice.service.request.EntityCodeSearch;
+import org.pesc.cds.webservice.service.request.OrganizationContactSearch;
+import org.pesc.cds.webservice.service.request.OrganizationSearch;
 import org.pesc.edexchange.v1_0.Adapter1;
 import org.pesc.edexchange.v1_0.DeliveryMethod;
 import org.pesc.edexchange.v1_0.DeliveryOption;
@@ -54,36 +60,6 @@ public class RestWebServiceImpl {
 	@Context
 	private HttpHeaders headers;
 	
-	@JsonAutoDetect(fieldVisibility=JsonAutoDetect.Visibility.ANY)
-	class DeliveryOptionSearchJson {
-		private Integer id;
-		private Integer memberId;
-		private Integer formatId;
-		private String webserviceUrl;
-		private Integer deliveryMethodId;
-		private Boolean deliveryConfirm;
-		private Boolean error;
-		private String operationalStatus;
-		
-		public DeliveryOptionSearchJson() {}
-		
-		public Integer getId() { return id; }
-		public void setId(Integer id) { this.id = id; }
-		public Integer getMemberId() { return memberId; }
-		public void setMemberId(Integer memberId) { this.memberId = memberId; }
-		public Integer getFormatId() { return formatId; }
-		public void setFormatId(Integer formatId) { this.formatId = formatId; }
-		public String getWebserviceUrl() { return webserviceUrl; }
-		public void setWebserviceUrl(String wsurl) { this.webserviceUrl = wsurl; }
-		public Integer getDeliveryMethodId() { return deliveryMethodId; }
-		public void setDeliveryMethodId(Integer dmid) { this.deliveryMethodId = dmid; }
-		public Boolean getDeliveryConfirm() { return deliveryConfirm; }
-		public void setDeliveryConfirm(Boolean cnfrm) { this.deliveryConfirm = cnfrm; }
-		public Boolean getError() { return error; }
-		public void setError(Boolean err) { this.error = err; }
-		public String getOperationalStatus() { return this.operationalStatus; }
-		public void setOperationalStatus(String opStatus) { this.operationalStatus = opStatus; }
-	}
 	
 	/***********************************************************************************
 	 * These are for AJAX web services
@@ -96,6 +72,18 @@ public class RestWebServiceImpl {
 	//////////////////////////////////////////////
 	// OrganizationContact
 	//////////////////////////////////////////////
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/contacts")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<OrganizationContact> getContacts(@QueryParam("query") String query) {
+		if(query!=null) {
+			return ((ContactsDao)DatasourceManagerUtil.getContacts()).filterByName(query);
+		} else {
+			return DatasourceManagerUtil.getContacts().all();
+		}
+	}
 	
 	/**
 	 * This is the GET version of /contacts/search<p>
@@ -167,22 +155,32 @@ public class RestWebServiceImpl {
 		);
 	}
 	
-	// TODO implement
-	public List<OrganizationContact> searchContactsPost() {
-		
-		return null;
-	}
-	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/contacts")
-	@GET
+	@Path("/contacts/search")
+	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<OrganizationContact> getContacts(@QueryParam("query") String query) {
-		if(query!=null) {
-			return ((ContactsDao)DatasourceManagerUtil.getContacts()).filterByName(query);
-		} else {
-			return DatasourceManagerUtil.getContacts().all();
-		}
+	@Consumes(MediaType.APPLICATION_JSON)
+	public List<OrganizationContact> searchContactsGet(@JsonProperty OrganizationContactSearch contactSearch) {
+		return ((ContactsDao)DatasourceManagerUtil.getContacts()).search(
+				contactSearch.getCity(), 
+				contactSearch.getContactId(), 
+				contactSearch.getContactName(), 
+				contactSearch.getContactTitle(), 
+				contactSearch.getContactType(), 
+				contactSearch.getCountry(), 
+				contactSearch.getCreatedTime(), 
+				contactSearch.getDirectoryId(), 
+				contactSearch.getEmail(), 
+				contactSearch.getModifiedTime(), 
+				contactSearch.getPhone1(), 
+				contactSearch.getPhone2(), 
+				contactSearch.getState(), 
+				contactSearch.getStreetAddress1(), 
+				contactSearch.getStreetAddress2(), 
+				contactSearch.getStreetAddress3(), 
+				contactSearch.getStreetAddress4(), 
+				contactSearch.getZip()
+		);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -240,6 +238,14 @@ public class RestWebServiceImpl {
 	//////////////////////////////////////////////
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/deliveryMethods")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DeliveryMethod> getDeliveryMethods() {
+		return DatasourceManagerUtil.getDeliveryMethods().all();
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryMethods/search")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -248,11 +254,12 @@ public class RestWebServiceImpl {
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryMethods")
-	@GET
+	@Path("/deliveryMethods/search")
+	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DeliveryMethod> getDeliveryMethods() {
-		return DatasourceManagerUtil.getDeliveryMethods().all();
+	@Consumes(MediaType.APPLICATION_JSON)
+	public List<DeliveryMethod> searchDeliveryMethods(@JsonProperty DeliveryMethodSearch deliveryMethodSearch) {
+		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).search(deliveryMethodSearch.getId(), deliveryMethodSearch.getMethod());
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -291,6 +298,14 @@ public class RestWebServiceImpl {
 	//////////////////////////////////////////////
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/deliveryOptions")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DeliveryOption> getDeliveryOptions() {
+		return DatasourceManagerUtil.getDeliveryOptions().all();
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryOptions/search")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -313,8 +328,7 @@ public class RestWebServiceImpl {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<DeliveryOption> searchDeliveryOptionsPost(@JsonProperty DeliveryOptionSearchJson deliveryOptionSearch) {
-		
+	public List<DeliveryOption> searchDeliveryOptionsPost(@JsonProperty DeliveryOptionSearch deliveryOptionSearch) {
 		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).search(
 				deliveryOptionSearch.getId(), 
 				deliveryOptionSearch.getMemberId(), 
@@ -325,14 +339,6 @@ public class RestWebServiceImpl {
 				deliveryOptionSearch.getError(), 
 				deliveryOptionSearch.getOperationalStatus()
 		);
-	}
-	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryOptions")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<DeliveryOption> getDeliveryOptions() {
-		return DatasourceManagerUtil.getDeliveryOptions().all();
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -380,6 +386,18 @@ public class RestWebServiceImpl {
 	//////////////////////////////////////////////
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/documentFormats")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<DocumentFormat> getDocumentFormats(@QueryParam("query") String query) {
+		if(query!=null) {
+			return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).filterByName(query);
+		} else {
+			return DatasourceManagerUtil.getDocumentFormats().all();
+		}
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/documentFormats/search")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -396,15 +414,19 @@ public class RestWebServiceImpl {
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/documentFormats")
-	@GET
+	@Path("/documentFormats/search")
+	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DocumentFormat> getDocumentFormats(@QueryParam("query") String query) {
-		if(query!=null) {
-			return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).filterByName(query);
-		} else {
-			return DatasourceManagerUtil.getDocumentFormats().all();
-		}
+	@Consumes(MediaType.APPLICATION_JSON)
+	public List<DocumentFormat> searchDocumentFormat(@JsonProperty DocumentFormatSearch documentFormatSearch) {
+		return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).search(
+			documentFormatSearch.getId(), 
+			documentFormatSearch.getFormatName(), 
+			documentFormatSearch.getFormatDescription(), 
+			documentFormatSearch.getFormatInuseCount(), 
+			documentFormatSearch.getCreatedTime(),
+			documentFormatSearch.getModifiedTime()
+		);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -456,7 +478,7 @@ public class RestWebServiceImpl {
 	
 	/**
 	 * This  is the <code>GET</code> version of the <code>entityCodes/search</code> 
-	 * @param id           <codeInteger></code>
+	 * @param id           <code>Integer></code>
 	 * @param code         <code>Integer</code>
 	 * @param description  <code>String</code>
 	 * @param createdTime  <code>Long</code>
@@ -478,8 +500,20 @@ public class RestWebServiceImpl {
 		return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).search(id, code, description, createdTime, modifiedTime);
 	}
 	
-	// TODO POST version
-	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/entityCodes/search/")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public List<EntityCode> searchEntityCodes(@JsonProperty EntityCodeSearch entityCodeSearch) {
+		return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).search(
+				entityCodeSearch.getId(), 
+				entityCodeSearch.getCode(), 
+				entityCodeSearch.getDescription(), 
+				entityCodeSearch.getCreatedTime(), 
+				entityCodeSearch.getModifiedTime()
+		);
+	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/entityCodes/{id}")
@@ -522,6 +556,18 @@ public class RestWebServiceImpl {
 	//////////////////////////////////////////////
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/organizations")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Organization> getOrganizations(@QueryParam("query") String query) {
+		if(query!=null) {
+			return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).filterByName(query);
+		} else {
+			return DatasourceManagerUtil.getOrganizations().all();
+		}
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/organizations/search")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -551,15 +597,22 @@ public class RestWebServiceImpl {
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/organizations")
-	@GET
+	@Path("/organizations/search")
+	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Organization> getOrganizations(@QueryParam("query") String query) {
-		if(query!=null) {
-			return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).filterByName(query);
-		} else {
-			return DatasourceManagerUtil.getOrganizations().all();
-		}
+	@Consumes(MediaType.APPLICATION_JSON)
+	public List<Organization> searchOrganizations(@JsonProperty OrganizationSearch organizationSearch) {
+		return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).search(
+			organizationSearch.getDirectoryId(), 
+			organizationSearch.getOrganizationId(), 
+			organizationSearch.getOrganizationIdType(), 
+			organizationSearch.getOrganizationName(), 
+			organizationSearch.getOrganizationSubcode(), 
+			organizationSearch.getEntityId(), 
+			organizationSearch.getOrganizationEin(), 
+			organizationSearch.getCreatedTime(), 
+			organizationSearch.getModifiedTime()
+		);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)

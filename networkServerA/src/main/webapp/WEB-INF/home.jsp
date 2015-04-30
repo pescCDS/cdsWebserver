@@ -98,7 +98,7 @@
         
         <br /><hr />
         <h3>Transaction History</h3>
-        <table class="table table-striped table-bordered table-condensed table-hover">
+        <table class="table table-striped table-bordered table-condensed table-hover xaction-history-table" width="100%">
         	<thead>
         		<tr>
         			<th>Recipient ID</th>
@@ -319,8 +319,8 @@
       						</div>
       						
       						<div class="form-group text-center">
-      							<button type="button" class="btn btn-default">SEARCH</button>
-      							<button type="reset" class="btn btn-default">RESET</button>
+      							<button type="button" class="btn btn-default search-button">SEARCH</button>
+      							<button type="button" class="btn btn-default reset-button">RESET</button>
       						</div>
       					</form>
     				</div>
@@ -1056,15 +1056,6 @@
         	</div>
         </div>
         
-        <br /><hr /><br />
-		<div class="row">
-			<div class="col-lg-6 col-md-6 col-sm-6">
-				<p>
-				entity code search: {code:2}
-				</p>
-				<button type="button" class="btn btn-default searchTestBtn">test entity code search</button>
-			</div>
-		</div>
 	</div>
     
     <script src="resources/js/jquery-2.1.1.min.js"></script>

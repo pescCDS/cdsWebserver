@@ -78,7 +78,7 @@ public class DeliveryOptionsDao implements DBDataSourceDao<DeliveryOption> {
 			}
 			
 			if(operationalStatus!=null) {
-				ct.add(Restrictions.eq("operationalStatus", operationalStatus));
+				ct.add(Restrictions.eq("operationalStatus", operationalStatus.toUpperCase()));
 				hasCriteria = true;
 			}
 			

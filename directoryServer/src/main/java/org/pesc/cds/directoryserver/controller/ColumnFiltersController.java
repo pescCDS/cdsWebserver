@@ -156,7 +156,7 @@ public class ColumnFiltersController {
 	
 	
 	/**
-	 * REST method for datatable queries. Handled by Apache CXF and not Spring
+	 * REST method for datatable queries.
 	 * This method conforms to the DataTables 1.10 server-side standard for requesting and returning filtered data.
 	 * Except the search parameters, which conform to the columnfilters standard. 
 	 * @param draw Draw counter. This is used by DataTables to ensure that the Ajax returns from server-side processing 
@@ -224,7 +224,7 @@ public class ColumnFiltersController {
 			Class mappedTableClass = TableClassMap.getClass(dtr.getTable());
 			Criteria ct = session.createCriteria(mappedTableClass);
 			
-			
+			// loop through any passed column filters
 			for(Iterator<HashMap<String, ? extends Object>> iter = dtr.getColumnfilters().iterator(); iter.hasNext();) {
 				/* 
 				 * columnfilters [n]
@@ -265,16 +265,7 @@ public class ColumnFiltersController {
 					 }
 				 */
 				HashMap<String, ? extends Object> cf = (HashMap<String, ? extends Object>)iter.next();
-				//try {
-					Map<String, ? extends Object> filterValue = (Map<String, ? extends Object>)cf.get("filterValue");
-					log.debug(filterValue);
-					FiltersToHQLUtil.addRestriction(ct, cf);
-					
-				//} catch(Exception ex) {
-				//	log.error(ex.getMessage());
-				//	ex.printStackTrace();
-				//	throw(ex);
-				//}
+				FiltersToHQLUtil.addRestriction(ct, cf);
 			}
 			
 			//orders (orders[i].column == zero-based index of the columns array
