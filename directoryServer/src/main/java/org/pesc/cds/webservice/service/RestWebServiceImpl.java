@@ -1,10 +1,8 @@
 package org.pesc.cds.webservice.service;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -14,13 +12,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
-import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.DeliveryMethodSearch;
 import org.pesc.cds.webservice.service.request.DeliveryOptionSearch;
@@ -28,7 +23,6 @@ import org.pesc.cds.webservice.service.request.DocumentFormatSearch;
 import org.pesc.cds.webservice.service.request.EntityCodeSearch;
 import org.pesc.cds.webservice.service.request.OrganizationContactSearch;
 import org.pesc.cds.webservice.service.request.OrganizationSearch;
-import org.pesc.edexchange.v1_0.Adapter1;
 import org.pesc.edexchange.v1_0.DeliveryMethod;
 import org.pesc.edexchange.v1_0.DeliveryOption;
 import org.pesc.edexchange.v1_0.DocumentFormat;

@@ -20,20 +20,20 @@ xsi:schemaLocation="EdExchangeEnvelope_v1.0.8.xsd
 				printMethod="javax.xml.bind.DatatypeConverter.printDate" />
     		
     		<jaxb:javaType name="java.util.Calendar" xmlType="xs:dateTime"
-				parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseDateTime" 
-				printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printDateTime" />
+				parseMethod="org.pesc.cds.xml.XMLAdapter.parseDateTime" 
+				printMethod="org.pesc.cds.xml.XMLAdapter.printDateTime" />
 	        
 	        <jaxb:javaType name="java.sql.Timestamp" xmlType="EdEx:Timestamp" 
-	        	printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printTimestamp"
-	        	parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseTimestamp" />
+	        	printMethod="org.pesc.cds.xml.XMLAdapter.printTimestamp"
+	        	parseMethod="org.pesc.cds.xml.XMLAdapter.parseTimestamp" />
 	        
 	        <jaxb:javaType name="java.lang.Integer" xmlType="xs:positiveInteger"
-	        	parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseInteger" />
+	        	parseMethod="org.pesc.cds.xml.XMLAdapter.parseInteger" />
 	        
 	         
 	        <jaxb:javaType name="java.lang.Boolean" xmlType="xs:boolean" 
-				parseMethod="org.pesc.cds.xml.adapter.XMLAdapter.parseBoolean"
-				printMethod="org.pesc.cds.xml.adapter.XMLAdapter.printBoolean" />
+				parseMethod="org.pesc.cds.xml.XMLAdapter.parseBoolean"
+				printMethod="org.pesc.cds.xml.XMLAdapter.printBoolean" />
 	        
     	</jaxb:globalBindings>
     	

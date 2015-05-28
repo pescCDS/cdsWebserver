@@ -15,12 +15,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	<parent>
 	  <groupId>org.cds.pesc.WebServices</groupId>
 	  <artifactId>EdExchange</artifactId>
-	  <version>0.0.z-SNAPSHOT</version>
+	  <version>0.1.1-SNAPSHOT</version>
 	</parent>
-  
-	<properties>
-		<core.basedir>../EdExchangeCore</core.basedir>
-	</properties>
 	
 	<profiles>
 		<profile>
@@ -33,9 +29,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					<value>dev</value>
 				</property>
 			</activation>
+			<properties>
+				<env>dev</env>
+			</properties>
 			<build>
 				<filters>
-					<filter>${core.basedir}/src/main/filters/filter.dev.properties</filter>
+					<filter>${basedir}/src/main/filters/filter.dev.properties</filter>
 				</filters>
 			</build>
 		</profile>
@@ -48,6 +47,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					<value>ci</value>
 				</property>
 			</activation>
+			<properties>
+				<env>ci</env>
+			</properties>
 			<repositories>
 				<repository>
 				    <id>java.net</id>
@@ -56,7 +58,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 			</repositories>
 			<build>
 				<filters>
-					<filter>${core.basedir}/src/main/filters/filter.ci.properties</filter>
+					<filter>${basedir}/src/main/filters/filter.ci.properties</filter>
 				</filters>
 			</build>
 		</profile>
@@ -69,9 +71,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					<value>qa</value>
 				</property>
 			</activation>
+			<properties>
+				<env>qa</env>
+			</properties>
 			<build>
 				<filters>
-					<filter>${core.basedir}/src/main/filters/filter.qa.properties</filter>
+					<filter>${basedir}/src/main/filters/filter.qa.properties</filter>
 				</filters>
 			</build>
 		</profile>
@@ -84,6 +89,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					<value>prod</value>
 				</property>
 			</activation>
+			<properties>
+				<env>prod</env>
+			</properties>
 			<repositories>
 				<repository>
 				    <id>java.net</id>
@@ -92,7 +100,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 			</repositories>
 			<build>
 				<filters>
-					<filter>${core.basedir}/src/main/filters/filter.prod.properties</filter>
+					<filter>${basedir}/src/main/filters/filter.prod.properties</filter>
 				</filters>
 			</build>
 		</profile>
@@ -100,14 +108,17 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 
 	<build>
 		<finalName>EdExchange</finalName>
+		
 		<resources>
 			<resource>
 				<directory>${project.build.directory}/generated-sources</directory>
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
 			</resource>
 		</resources>
+		
 		<plugins>
 		    <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -122,12 +133,67 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                         </goals>
                         <configuration>
                             <files>
-                                <file>../EdExchangeCore/src/main/resources/application.properties</file>
+                                <file>${basedir}/src/main/filters/filter.${env}.properties</file>
                             </files>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sql-maven-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<driver>${hibernate.connection.driver_class}</driver>
+							<forceMojoExecution>true</forceMojoExecution>
+							<url>${liquibase.url}</url>
+							<username>${liquibase.username}</username>
+							<password>${liquibase.password}</password>
+							<autocommit>true</autocommit>
+							<sqlCommand>CREATE SCHEMA IF NOT EXISTS `pesc_edexchange` CHARACTER SET=utf8</sqlCommand>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+			            <groupId>mysql</groupId>
+			            <artifactId>mysql-connector-java</artifactId>
+			            <version>${mysql.connector.version}</version>
+			        </dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+        		<groupId>org.liquibase</groupId>
+        		<artifactId>liquibase-maven-plugin</artifactId>
+        		<version>3.3.2</version>
+        		<configuration>
+        			<propertyFile>liquibase.properties</propertyFile>
+        			<changeLogFile>${basedir}/src/main/resources/db.changelog.xml</changeLogFile>
+        			<url>${liquibase.url}/${hibernate.catalog}</url>
+        			<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+        		</configuration>
+        		<executions>
+        			<execution>
+        				<phase>process-resources</phase>
+        				<goals>
+        					<goal>update</goal>
+        				</goals>
+        			</execution>
+        		</executions>
+        		<dependencies>
+        			<dependency>
+			            <groupId>mysql</groupId>
+			            <artifactId>mysql-connector-java</artifactId>
+			            <version>${mysql.connector.version}</version>
+			        </dependency>
+        		</dependencies>
+        	</plugin>
 			<plugin>
 				<groupId>org.apache.cxf</groupId>
 				<artifactId>cxf-codegen-plugin</artifactId>
@@ -145,13 +211,16 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 							<defaultOptions>
 								<extraargs>
 									<extraarg>-keep</extraarg>
-									<extraarg>-nexclude</extraarg>
+									<!--<extraarg>-nexclude</extraarg>
 									<extraarg>urn:org:pesc:core:CoreMain:v1.12.0=org.pesc.core.coremain.v1_12</extraarg>
 									<extraarg>-nexclude</extraarg>
 									<extraarg>urn:org:pesc:sector:AcademicRecord:v1.7.0=org.pesc.sector.academicrecord.v1_7</extraarg>
 									<extraarg>-nexclude</extraarg>
-									<extraarg>urn:org:pesc:EdExchange:v1.0.8=org.pesc.edexchange.v1_0</extraarg>
+									<extraarg>urn:org:pesc:EdExchange:v1.0.8=org.pesc.edexchange.v1_0</extraarg>-->
 								</extraargs>
+								<bindingFiles>
+									<bindingFile>${basedir}/src/main/resources/xsd/bindings.xjb.xml</bindingFile>
+								</bindingFiles>
 							</defaultOptions>
 							<wsdlOptions>
 								<wsdlOption>
@@ -160,7 +229,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	                            	</extraargs>
 									<wsdl>src/main/resources/CDS_v0.1.wsdl</wsdl>
 									<frontEnd>jaxws</frontEnd>
-
 									<!-- to generate JAX-WS 2.1 compliant code <frontEnd>jaxws21</frontEnd> -->
 									<faultSerialVersionUID>1</faultSerialVersionUID>
 								</wsdlOption>
@@ -190,51 +258,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 				</dependencies>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											properties-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-alpha-2,)
-										</versionRange>
-										<goals>
-											<goal>
-												read-project-properties
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 	<dependencies>
-		<!-- EdExchange Core Jar -->
-		<dependency>
-			<groupId>org.cds.pesc.WebServices</groupId>
-			<artifactId>EdExchangeCore</artifactId>
-		</dependency>
         
         <!-- Servlet Stuff -->
 		<dependency>
@@ -268,17 +294,14 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		<dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-tools-wsdlto-frontend-jaxws</artifactId>
-            <version>3.0.0</version>
         </dependency>
         <dependency>
 		   <groupId>org.apache.cxf</groupId>
 		   <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-		   <version>3.0.0</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.cxf</groupId>
 		  <artifactId>cxf-rt-rs-service-description</artifactId>
-		  <version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
@@ -291,20 +314,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-extension-providers</artifactId>
-			<version>3.0.2</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-security-cors</artifactId>
-			<version>3.0.0</version>
 		</dependency>
-		
-		<!-- <dependency>
-		  <groupId>org.apache.cxf</groupId>
-		  <artifactId>cxf-rt-rs-extension-providers</artifactId>
-		  <version>3.2.1</version>
-		</dependency> -->
 		
 		<!-- Apache Commons -->
 		<dependency>

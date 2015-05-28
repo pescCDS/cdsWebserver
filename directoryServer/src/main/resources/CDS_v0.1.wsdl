@@ -17,9 +17,9 @@
                              xmlns:xs="http://www.w3.org/2001/XMLSchema"
                               version="1.0">
             <!-- -->
-            <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/CoreMain_v1.12.0.xsd" />
-            <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/AcademicRecord_v1.7.0.xsd" />
-            <xs:import namespace="urn:org:pesc:EdExchange:v1.0.8" schemaLocation="../../../../EdExchangeCore/src/main/resources/xsd/EdExchangeEnvelope_v1.0.8.xsd" />
+            <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="xsd/CoreMain_v1.12.0.xsd" />
+            <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="xsd/AcademicRecord_v1.7.0.xsd" />
+            <xs:import namespace="urn:org:pesc:EdExchange:v1.0.8" schemaLocation="xsd/EdExchangeEnvelope_v1.0.8.xsd" />
             
             <xs:element name="ServletException" type="xs:string" />
             

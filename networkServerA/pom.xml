@@ -7,7 +7,7 @@
 	<groupId>org.cds.pesc.WebServices</groupId>
 	<artifactId>networkServerA</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.z-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>PESC CDS EdExchange Network Server A</name>
 	<description>This network server will simulate sending a transcript file.</description>
 	
@@ -15,7 +15,6 @@
 		<!-- prevents cp1252 encoding warning on windows environments -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
-		<core.basedir>../EdExchangeCore</core.basedir>
 		<spring.version>3.2.8.RELEASE</spring.version>
 		<mysql.connector.version>5.1.6</mysql.connector.version>
 		<hibernate.version>4.3.8.Final</hibernate.version>

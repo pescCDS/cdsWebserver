@@ -1,4 +1,4 @@
-package org.pesc.cds.xml.adapter;
+package org.pesc.cds.xml;
 
 import java.util.Calendar;
 import java.sql.Timestamp;

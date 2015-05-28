@@ -6,7 +6,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cds.pesc.WebServices</groupId>
 	<artifactId>EdExchange</artifactId>
-	<version>0.0.z-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	
 	<packaging>pom</packaging>
 	<name>PESC CDS EdExchange</name>
@@ -17,9 +17,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	</description>
 	
 	<modules>
-        <module>EdExchangeCore</module>
         <module>directoryServer</module>
-        
     </modules>
 	
 	<properties>
@@ -27,9 +25,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- self version properties -->
-	    <edexchange.system.version>0.0.z-SNAPSHOT</edexchange.system.version>
-	    <core.version>0.0.z-SNAPSHOT</core.version>
-	    <directoryServer.version>0.0.z-SNAPSHOT</directoryServer.version>
+	    <edexchange.system.version>0.1.1-SNAPSHOT</edexchange.system.version>
+	    <core.version>0.1.1-SNAPSHOT</core.version>
+	    <directoryServer.version>0.1.1-SNAPSHOT</directoryServer.version>
 	    
 	    
 	    <!--==============================================
@@ -39,7 +37,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	    <!-- Apache CXF/JAXB -->
 	    <cxf.version>3.0.0</cxf.version>
 		<cxf.xjc-utils.version>2.6.0</cxf.xjc-utils.version>
-		<jaxb2.plugin.version>1.6</jaxb2.plugin.version>
+		<cxf-rt-rs-extension-providers.version>3.0.2</cxf-rt-rs-extension-providers.version>
+		<cxf-rt-frontend-jaxrs.version>3.0.0</cxf-rt-frontend-jaxrs.version>
+		<cxf-rt-rs-service-description.version>3.0.0</cxf-rt-rs-service-description.version>
+		<jaxb2.plugin.version>2.1</jaxb2.plugin.version>
 		<jaxb2-basics-annotate.version>0.6.4</jaxb2-basics-annotate.version>
 		<jaxb2-basics.version>0.9.1</jaxb2-basics.version>
 		
@@ -103,11 +104,47 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <artifactId>cxf-parent</artifactId>
                 <version>${cxf.version}</version>
             </dependency>
-            <!-- <dependency>
-	            <groupId>org.hibernate</groupId>
-	            <artifactId>hibernate</artifactId>
-	            <version>${hibernate.version}</version>
-	        </dependency>-->
+            <dependency>
+	            <groupId>org.apache.cxf</groupId>
+	            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+	            <version>${cxf.version}</version>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.apache.cxf</groupId>
+	            <artifactId>cxf-rt-transports-http</artifactId>
+	            <version>${cxf.version}</version>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.apache.cxf.xjc-utils</groupId>
+	            <artifactId>cxf-xjc-runtime</artifactId>
+	            <version>${cxf.xjc-utils.version}</version>
+	        </dependency>
+	        <dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-rs-extension-providers</artifactId>
+				<version>${cxf-rt-rs-extension-providers.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-rs-security-cors</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+	            <groupId>org.apache.cxf</groupId>
+	            <artifactId>cxf-tools-wsdlto-frontend-jaxws</artifactId>
+	            <version>${cxf.version}</version>
+	        </dependency>
+	        <dependency>
+			   <groupId>org.apache.cxf</groupId>
+			   <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+			   <version>${cxf-rt-frontend-jaxrs.version}</version>
+			</dependency>
+			<dependency>
+			  <groupId>org.apache.cxf</groupId>
+			  <artifactId>cxf-rt-rs-service-description</artifactId>
+			  <version>${cxf-rt-rs-service-description.version}</version>
+			</dependency>
+			
 	        <dependency>
 	            <groupId>org.hibernate</groupId>
 	            <artifactId>hibernate-core</artifactId>
@@ -138,6 +175,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <artifactId>hibernate-tools</artifactId>
                 <version>${hibernate.tools.version}</version>
             </dependency>
+            
 	        <dependency>
 	            <groupId>log4j</groupId>
 	            <artifactId>log4j</artifactId>
@@ -153,26 +191,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	            <artifactId>commons-logging</artifactId>
 	            <version>${commons.logging.version}</version>
 	        </dependency>
-	        <dependency>
-	            <groupId>org.apache.cxf</groupId>
-	            <artifactId>cxf-rt-frontend-jaxws</artifactId>
-	            <version>${cxf.version}</version>
-	        </dependency>
-	        <dependency>
-	            <groupId>org.apache.cxf</groupId>
-	            <artifactId>cxf-rt-transports-http</artifactId>
-	            <version>${cxf.version}</version>
-	        </dependency>
-	        <dependency>
-	            <groupId>org.apache.cxf.xjc-utils</groupId>
-	            <artifactId>cxf-xjc-runtime</artifactId>
-	            <version>${cxf.xjc-utils.version}</version>
-	        </dependency>
+	        
 	        <dependency>
 	           <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
 	        </dependency>
+	        
 	        <dependency>
 	        	<groupId>org.springframework</groupId>
 	        	<artifactId>spring-web</artifactId>
@@ -194,6 +219,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             	<artifactId>mariadb-java-client</artifactId>
             	<version>${mariadb.version}</version>
             </dependency>
+            
+            <dependency>
+	            <groupId>org.apache.commons</groupId>
+	            <artifactId>commons-lang3</artifactId>
+	            <version>${commons-lang3.version}</version>
+	        </dependency>
             
             <dependency>
 				<groupId>com.lowagie</groupId>

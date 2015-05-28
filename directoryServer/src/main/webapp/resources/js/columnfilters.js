@@ -161,22 +161,6 @@ CFTEMPLATES.dataFiltersControlFooter = [
 	'</div>'
 ].join('');
 
-/*
-<div class="row">
-	<div class="col-md-3"><%= fromDatepicker %></div>
-	<div class="col-md-1"><span class="glyphicon glyphicon-calendar"></span></div>
-	<div><%= toDatepicker %></div>
-</div>
-CFTEMPLATES.datebetweenFilterWidgetType = '<div class="row">'+
-'<div class="col-md-6" title="from"><%= fromDatepicker %></div>'+
-'<div class="col-md-6" title="to"><%= toDatepicker %></div>'+
-'</div>';
-*/
-CFTEMPLATES.datebetweenFilterWidgetType = '<div class="row">'+
-'<div class="col-md-12" title="from"><%= fromDatepicker %></div>'+
-'</div>';
-
-
 CFTEMPLATES.numberSpinner1 = '<div class="spinbox digits-5<% print(_.has(spinbox,"name")?(" "+spinbox.name):"") %>">'+
 '  <input type="text" class="form-control input-mini spinbox-input" />'+
 '  <div class="spinbox-buttons btn-group btn-group-vertical">'+
@@ -219,6 +203,9 @@ var CDataFilterSets = Backbone.Collection.extend({
 	'model':MFilterSet
 });
 
+/**
+ * An abstract view to be extended by a filter widget
+ */
 var VFilterWidgetType = Backbone.View.extend({
 	'type':'equals',//abstract
 	'visible':false,
@@ -311,6 +298,7 @@ var VDataColumnFilterWidget = Backbone.View.extend({
 	'setFilterValue':function(filterValue) {
 		var fwt = this.collection.findWhere({'type':filterValue.type});
 		if(fwt) {
+			// fwt is the sub filter widget
 			fwt.attributes.setValue(filterValue);
 		}
 	},
@@ -454,22 +442,21 @@ var VDataFilterFactory = Backbone.View.extend({
 		var af = this.activeFilter();
 		if(af) {
 			var fw = af.activeType();
-			//console.log(af);
-			//console.log(fw);
 			this.savedState = {
-				'dataCol':fw.attributes.currentColumn,
 				'type':af.type,
 				'label':af.getLabel(),
 				'subtype':fw.attributes.type
 			};
+			if(af.type==='enum' || af.type==='biglist') {
+				_.extend(this.savedState, {'dataCol':fw.attributes.model.get('currentColumn')});
+			}
 		} else {
 			this.savedState = null;
 		}
 	},
 	'restoreState':function() {
 		if(this.savedState) {
-			//console.log(this.savedState);
-			this.load(this.savedState.dataCol,this.savedState.type,this.savedState.label,this.savedState.subtype);
+			this.load(this.savedState.dataCol, this.savedState.type, this.savedState.label, this.savedState.subtype);
 		} else {
 			//check if there is an active filter; hide it if so
 			var af = this.activeFilter();
@@ -493,7 +480,7 @@ var VDataFilterFactory = Backbone.View.extend({
 		//first we have to find the current filter widget
 		var fw = this.collection.findWhere({'type':filter.type});
 		if(fw) {
-			fw.attributes.reset();
+			// fw is a DataColumnFilterWidget (container of widgets of a specific type)
 			fw.attributes.setFilterValue(filter.filterValue);
 		}
 		return this;
@@ -563,6 +550,7 @@ var VDataFilterFactory = Backbone.View.extend({
 	
 	// displays the requested filter widget type
 	'load':function(dataCol, dataType, dataLabel, subType) {
+		//console.log(['dataCol: ',dataCol, ', dataType: ',dataType, ', dataLabel: ', dataLabel, ', subType: ', subType].join(''));
 		//find it in the collection
 		var reqfw = this.collection.findWhere({'type':dataType}),
 			curfw = this.activeFilter();
@@ -606,7 +594,6 @@ var VDataFilterFactory = Backbone.View.extend({
 	'tagName':'div',
 	'className':'cf-filter-factory',
 	'initialize':function(options) {
-		// ASSERTION: options will always have 
 		if(options.hasOwnProperty('collection')) {
 			// collection of VDataColumnFilterWidget (where models[n].attributes == VDataColumnFilterWidget)
 			this.types = options.collection.pluck('type');
@@ -628,9 +615,16 @@ var VDataFilterFactory = Backbone.View.extend({
 });
 
 
-// Data Filters Container Controller
+/**
+ * Data Filters Container Controller
+ * This view holds the list of filters applied to each data column.
+ * There are 2 lists, the main list is a tab navigation and each tab
+ * represents the column that one or more filters have been added to.
+ * The second list is the tab nav panel and it contains a list of 
+ * filters for the column.
+ */
 var VDataFiltersContainer = Backbone.View.extend({
-	
+	'version':'1.0.1',
 	'preDisableTabStates':[],
 	
 	// this is the main view template
@@ -999,7 +993,7 @@ var VCommonValueFilterControl = Backbone.View.extend({
  * 
 */
 var VDataFilters = Backbone.View.extend({
-	'version':'0.0.1b',
+	'version':'0.0.1c',
 	/*
 	Default: Column/Type-Based
 	these should translate to AND clauses being appended to WHERE
@@ -1197,6 +1191,7 @@ var VDataFilters = Backbone.View.extend({
 	// changes the filter factory widget to the given type
 	// column could be a string or an array
 	'changeFilterFactoryType':function(type,column,label,subType) {
+		//console.log(['changeFilterFactoryType >> type: ',type,', column: ',column,', label: ',label,', subType: ',subType].join(''));
 		this.currentColumnFilter = {
 			'table':this.table,
 			'type':type,
@@ -1431,6 +1426,12 @@ var VDataFilters = Backbone.View.extend({
 			'cfenumsource':array,
 			'cfenumvaluekey':string // TODO implement
 			'cfenumlabelkey':string
+			
+			  [biglist properties]
+			  'table':string
+			  'datasource':a bloodhound object
+			  'displayKey':string
+			  'valueKey':string
 			*/
 			for(var i in options.tableColumns) {
 				var tc = options.tableColumns[i];
@@ -1478,39 +1479,58 @@ var VDataFilters = Backbone.View.extend({
 		
 		// TODO implement a way to override and add filter widget types and sub-types
 		// Create and Populate the filter factory
-		this.filterFactory = new VDataFilterFactory({'showOnInit':this.defaultConfig.showOnInit, 'collection':new Backbone.Collection(
-			[
-				new VDataColumnFilterWidget({'type':'text', 'collection':new Backbone.Collection([
-					new VFilterWidgetTypeTextEq(),
-					new VFilterWidgetTypeTextSrch()
-				])}),
-				new VDataColumnFilterWidget({'type':'number', 'collection':new Backbone.Collection([
-					new VFilterWidgetTypeNumberEq(),
-					new VFilterWidgetTypeNumberBtwn(),
-					new VFilterWidgetTypeNumberSel()
-				])}),
-				new VDataColumnFilterWidget({'type':'date', 'collection':new Backbone.Collection([
-					new VFilterWidgetTypeDateEq(),
-					new VFilterWidgetTypeDateB4(),
-					new VFilterWidgetTypeDateAfter(),
-					new VFilterWidgetTypeDateBtwn(),
-					new VFilterWidgetTypeDateSel(),
-					new VFilterWidgetTypeDateCycle(),
-					new VFilterWidgetTypeDateM(),
-					new VFilterWidgetTypeDateMY(),
-					new VFilterWidgetTypeDateYr()
-				])}),
-				new VDataColumnFilterWidget({'type':'boolean', 'collection':new Backbone.Collection([
-					new VFilterWidgetTypeBoolEq({'convertNumeric':this.convertBooleanToNumeric})
-				])}),
-				new VDataColumnFilterWidget({'type':'enum', 'collection':new Backbone.Collection([
-					new VFilterWidgetTypeEnumIn({'enums':_.where(validTableColumns, {'type':'enum'})})
-				])}),
-				new VDataColumnFilterWidget({'type':'biglist', 'collection':new Backbone.Collection([
-					new VFilterWidgetTypeBiglistEq({'datasets':_.where(validTableColumns, {'type':'biglist'})})
-				])})
-			]
-		)});
+		this.filterFactory = new VDataFilterFactory({
+			'showOnInit':this.defaultConfig.showOnInit, 
+			'collection':new Backbone.Collection([
+				new VDataColumnFilterWidget({
+					'type':'text', 
+					'collection':new Backbone.Collection([
+						new VFilterWidgetTypeTextEq(),
+						new VFilterWidgetTypeTextSrch()
+					])
+				}),
+				new VDataColumnFilterWidget({
+					'type':'number', 
+					'collection':new Backbone.Collection([
+						new VFilterWidgetTypeNumberEq(),
+						new VFilterWidgetTypeNumberBtwn(),
+						new VFilterWidgetTypeNumberSel()
+					])
+				}),
+				new VDataColumnFilterWidget({
+					'type':'date', 
+					'collection':new Backbone.Collection([
+						new VFilterWidgetTypeDateEq(),
+						new VFilterWidgetTypeDateB4(),
+						new VFilterWidgetTypeDateAfter(),
+						new VFilterWidgetTypeDateBtwn(),
+						new VFilterWidgetTypeDateSel(),
+						new VFilterWidgetTypeDateCycle(),
+						new VFilterWidgetTypeDateM(),
+						new VFilterWidgetTypeDateMY(),
+						new VFilterWidgetTypeDateYr()
+					])
+				}),
+				new VDataColumnFilterWidget({
+					'type':'boolean', 
+					'collection':new Backbone.Collection([
+						new VFilterWidgetTypeBoolEq({'convertNumeric':this.convertBooleanToNumeric})
+					])
+				}),
+				new VDataColumnFilterWidget({
+					'type':'enum', 
+					'collection':new Backbone.Collection([
+						new VFilterWidgetTypeEnumIn({'enums':_.where(validTableColumns, {'type':'enum'})})
+					])
+				}),
+				new VDataColumnFilterWidget({
+					'type':'biglist', 
+					'collection':new Backbone.Collection([
+						new VFilterWidgetTypeBiglistEq({'datasets':_.where(validTableColumns, {'type':'biglist'})})
+					])
+				})
+			])
+		});
 		
 		//////////////////////////////////
 		// There will always be a user (or default) filter
@@ -1551,6 +1571,7 @@ var VDataFilters = Backbone.View.extend({
 		// EVENT HANDLERS
 		// event handler when a filter is added
 		this.filters.on('add', function(filter) {
+			//console.log('handling filters.add');
 			this.dataFiltersContainer.add(filter);
 			if(this.mode===this.MODES.CATEGORY_SETS) {
 				this.dataFiltersControl.refreshClearFiltersButton();
@@ -1558,6 +1579,7 @@ var VDataFilters = Backbone.View.extend({
 		}, this);
 		
 		this.filters.on('remove', function(filter) {
+			//console.log('handling filters.remove');
 			if(this.filters.length<1) {
 				// disable the add filter dropdown
 				$('li.cf-save-filter-list', this.dataFiltersControl).addClass('disabled');
@@ -2407,23 +2429,11 @@ var VFilterWidgetTypeTextSrch = VFilterWidgetType.extend({
 
 // Filter Widget Type Implementation Class for Number (Equals)
 var VFilterWidgetTypeNumberEq = VFilterWidgetType.extend({
-	'version':'1.0.2',
+	'version':'1.0.3',
 	'type':'equals',
-	'sb':null,
-	'sbOptions':{
-		//value:<number>
-		//min:<number>
-		//max:<number>
-		//step:<number>
-		//hold:<boolean>
-		//speed:<string> "fast","medium","slow"
-		//disabled:<boolean>
-		//units:<array> array of strings that are allowed to be entered in the input with the number
-		'min':-10, 'max':100, 'step':.25
-	},
 	
 	'isValid':function() {
-		return !isNaN(this.sb.spinbox('value')*1);
+		return !isNaN(this.model.get('sb').spinbox('value')*1);
 	},
 	
 	'validate':function() {
@@ -2437,7 +2447,7 @@ var VFilterWidgetTypeNumberEq = VFilterWidgetType.extend({
 	
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			return 'is equal to ' + this.sb.spinbox('value')*1;
+			return 'is equal to ' + this.model.get('sb').spinbox('value')*1;
 		} else {
 			return false;
 		}
@@ -2447,7 +2457,8 @@ var VFilterWidgetTypeNumberEq = VFilterWidgetType.extend({
 		if(this.validate()) {
 			return {
 				'type':this.type,
-				'value':this.sb.spinbox('value')*1,
+				'numberType':this.model.get('numberType'),
+				'value':this.model.get('sb').spinbox('value')*1,
 				'description':this.getValueDescription()
 			};
 		}
@@ -2455,25 +2466,43 @@ var VFilterWidgetTypeNumberEq = VFilterWidgetType.extend({
 	},
 	
 	'setValue':function(filterValue) {
-		this.sb.spinbox('value',filterValue.value);
+		this.model.get('sb').spinbox('value', filterValue.value);
 	},
 	
 	'reset':function() {
 		this.setValue(0);
 	},
 	
-	'template':_.template(
-		CFTEMPLATES.numberSpinner1+
-		'<span class="help-block">filtering the results by column values equal to this</span>',
-		{variable:'spinbox'}
-	),
+	'template':_.template([
+		'<div class="spinbox digits-5<% if(_.has(spinbox,"name")) { %> <%= spinbox.name %><% } %>">',
+			'<input type="text" class="form-control input-mini spinbox-input" />',
+			'<div class="spinbox-buttons btn-group btn-group-vertical">',
+				'<button class="btn btn-default spinbox-up btn-xs">',
+					'<span class="glyphicon glyphicon-chevron-up"></span><span class="sr-only">Increase</span>',
+				'</button>',
+				'<button class="btn btn-default spinbox-down btn-xs">',
+					'<span class="glyphicon glyphicon-chevron-down"></span><span class="sr-only">Decrease</span>',
+				'</button>',
+			'</div>',
+		'</div>',
+		'<span class="help-block">filtering the results by column values equal to this</span>'
+	].join(''), {variable:'spinbox'}),
 	
 	'initialize':function(options) {
 		this.$el.addClass('fuelux');
+		
+		this.model = new Backbone.Model({
+			'sb':null,
+			'sbOptions':{'min':-10, 'max':100, 'step':.25},
+			'numberType':'integer'
+		});
+		
+		console.log(options);
+		
 		// make this a spinner (FuelUX, JQueryUI)
 		this.$el.html(this.template({}));
-		$('.spinbox',this.$el).spinbox(this.sbOptions);
-		this.sb = $('.spinbox',this.$el);
+		$('.spinbox', this.$el).spinbox(this.model.get('sbOptions'));
+		this.model.set('sb', $('.spinbox', this.$el));
 	},
 	
 	'render':function() {
@@ -2756,9 +2785,12 @@ var VFilterWidgetTypeNumberSel = VFilterWidgetType.extend({
 });
 
 
-// Filter Widget Type Implementation Class for Date (Equals)
+/**
+ * Filter Widget Type Implementation Class for Date (Equals)
+ * !!! SEND/RECEIVE ALL TIMESTAMPS AS UTC !!!
+ */
 var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
-	'version':'1.0.3',
+	'version':'1.0.7',
 	'type':'equals',
 	'dp':null,
 	'dpConfig':{
@@ -2768,8 +2800,8 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 	},
 	
 	'isValid':function() {
-		var d = this.dp.datepicker('getDate');
-		return !isNaN(d.getTime());
+		var d = this.dp.datepicker('getUTCDate');
+		return d && !isNaN(d.getTime());
 	},
 	
 	'validate':function() {
@@ -2783,7 +2815,7 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 	
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			return 'is equal to ' + moment(this.dp.datepicker('getDate')).format('M/D/YYYY');
+			return 'is equal to ' + moment.utc(this.dp.datepicker('getUTCDate')).format('M/D/YYYY');
 		} else {
 			return false;
 		}
@@ -2793,7 +2825,7 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 		if(this.validate()) {
 			return {
 				'type':this.type,
-				'value':this.dp.datepicker('getDate'),
+				'value':this.dp.datepicker('getUTCDate').getTime(),
 				'description':this.getValueDescription()
 			};
 		}
@@ -2803,7 +2835,7 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 	'setValue':function(filterValue) {
 		// new way with moment
 		if(filterValue.value) {
-			this.dp.datepicker('setUTCDate', moment(filterValue.value).toDate());
+			this.dp.datepicker('setUTCDate', moment.utc(filterValue.value).toDate());
 		}
 	},
 	
@@ -2814,50 +2846,34 @@ var VFilterWidgetTypeDateEq = VFilterWidgetType.extend({
 	'template':_.template([
 		'<div class="row">',
 			'<div class="col-lg-5 col-md-7 col-sm-12 col-xs-8">',
-				CFTEMPLATES.datepicker,
+				'<div class="input-group date">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span class="input-group-addon">',
+						'<span class="glyphicon glyphicon-calendar"></span>',
+					'</span>',
+				'</div>',
 			'</div>',
 		'</div>'
 	].join(''), {variable:'datepicker'}),
 	
-	'events':{
-		/* for testing
-		'changeDate div.dpeq':function(e) {
-			console.log(e);
-			return false;
-		}*/
-	},
-	
 	'initialize':function(options) {
-		/*
-		template datepicker3 wants: 
-			name -required: string that will be added to the class list, 
-			date: string date that should be in the same format as what you assign the datepicker, 
-			format: string format - viewMode:CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us/en_gb/zh_cn, 
-			viewMode: use CFTEMPLATES.DATEPICKER_VIEW_MODES.YEARS/MONTHS/DAYS, 
-			minViewMode: same as viewMode
-		*/
 		this.$el.html(this.template(this.dpConfig));
-		$('.dpeq',this.$el).datepicker(this.dpConfig);
-		this.dp = $('.dpeq',this.$el);
+		$('input.date',this.$el).datepicker(this.dpConfig);
+		this.dp = $('input.date', this.$el);
 	}
 });
 
 
 // Filter Widget Type Implementation Class for Date (Before)
 var VFilterWidgetTypeDateB4 = VFilterWidgetType.extend({
-	'version':'1.0.1',
+	'version':'1.0.4',
 	'type':'before',
-	'dp':null,
-	'dpConfig':{
-		autoclose:true,
-		'name':'dpb4',
-		'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
-	},
 	
 	'isValid':function() {
-		var d = this.dp.datepicker('getDate');
-		return !isNaN(d.getTime());
+		var d = this.model.get('dp').datepicker('getUTCDate');
+		return d && !isNaN(d.getTime());
 	},
+	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
@@ -2866,65 +2882,77 @@ var VFilterWidgetTypeDateB4 = VFilterWidgetType.extend({
 		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A date must be selected.');
 		return false;
 	},
+	
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			return 'is before ' + moment(this.dp.datepicker('getDate')).format('M/D/YYYY');
+			return 'is before ' + moment.utc(this.model.get('dp').datepicker('getUTCDate')).format('M/D/YYYY');
 		} else {
 			return false;
 		}
 	},
+	
 	'getValue':function() {
 		if(this.validate()) {
 			return {
 				'type':this.type,
-				'value':this.dp.datepicker('getDate'),
+				'value':moment.utc(this.dp.datepicker('getUTCDate')).valueOf(),
 				'description':this.getValueDescription()
 			};
 		}
 		return false;
 	},
+	
 	'setValue':function(filterValue) {
 		// new way with moment
 		if(filterValue.value) {
-			this.dp.datepicker('setUTCDate', moment(filterValue.value).toDate());
+			this.model.get('dp').datepicker('setUTCDate', moment.utc(filterValue.value).toDate());
 		}
 	},
+	
 	'reset':function() {
-		this.dp.datepicker('update',null);
+		this.model.get('dp').datepicker('update', null);
 	},
 	
 	'template':_.template([
 		'<div class="row">',
 			'<div class="col-lg-5 col-md-7 col-sm-12 col-xs-8">',
-				CFTEMPLATES.datepicker,
+				'<div class="input-group">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span class="input-group-addon">',
+						'<span class="glyphicon glyphicon-calendar"></span>',
+					'</span>',
+				'</div>',
 			'</div>',
 		'</div>'
-	].join(''),
-	{variable:'datepicker'}),
-	'events':{},
+	].join('')),
 	
 	'initialize':function(options) {
-		this.$el.html(this.template(this.dpConfig));
-		$('.dpb4',this.$el).datepicker(this.dpConfig);
-		this.dp = $('.dpb4',this.$el);
+		this.model = new Backbone.Model({
+			'dp':null,
+			'dpConfig':{
+				'autoclose':true,
+				'name':'dpb4',
+				'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
+			}
+		});
+		
+		this.$el.html(this.template({}));
+		
+		$('input.date', this.$el).datepicker(this.model.get('dpConfig'));
+		this.model.set('dp', $('input.date', this.$el));
 	}
 });
 
 // Filter Widget Type Implementation Class for Date (After)
 var VFilterWidgetTypeDateAfter = VFilterWidgetType.extend({
-	'version':'1.0.1',
+	'version':'1.0.4',
 	'type':'after',
-	'dp':null,
-	'dpConfig':{
-		autoclose:true,
-		'name':'dpafter',
-		'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
-	},
 	
 	'isValid':function() {
-		var d = this.dp.datepicker('getDate');
-		return !isNaN(d.getTime());
+		var d = this.model.get('dp').datepicker('getUTCDate');
+		return d && !isNaN(d.getTime());
 	},
+	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
@@ -2935,45 +2963,61 @@ var VFilterWidgetTypeDateAfter = VFilterWidgetType.extend({
 	},
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			return 'is after ' + moment(this.dp.datepicker('getDate')).format('M/D/YYYY');
+			return 'is after ' + moment.utc(this.model.get('dp').datepicker('getUTCDate')).format('M/D/YYYY');
 		} else {
 			return false;
 		}
 	},
+	
 	'getValue':function() {
 		if(this.validate()) {
 			return {
 				'type':this.type,
-				'value':this.dp.datepicker('getDate'),
+				'value':moment.utc(this.model.get('dp').datepicker('getUTCDate')).valueOf(),
 				'description':this.getValueDescription()
 			};
 		}
 		return false;
 	},
+	
 	'setValue':function(filterValue) {
 		// new way with moment
 		if(filterValue.value) {
-			this.dp.datepicker('setUTCDate', moment(filterValue.value).toDate());
+			this.model.get('dp').datepicker('setUTCDate', moment.utc(filterValue.value).toDate());
 		}
 	},
+	
 	'reset':function() {
-		this.dp.datepicker('update',null);
+		this.model.get('dp').datepicker('update', null);
 	},
 	
 	'template':_.template([
 		'<div class="row">',
 			'<div class="col-lg-5 col-md-7 col-sm-12 col-xs-8">',
-				CFTEMPLATES.datepicker,
+				'<div class="input-group">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span class="input-group-addon">',
+						'<span class="glyphicon glyphicon-calendar"></span>',
+					'</span>',
+				'</div>',
 			'</div>',
 		'</div>'
-	].join(''),
-	{variable:'datepicker'}),
-	'events':{},
+	].join('')),
 	
 	'initialize':function(options) {
-		this.$el.html(this.template(this.dpConfig));
-		$('.dpafter',this.$el).datepicker(this.dpConfig);
-		this.dp = $('.dpafter',this.$el);
+		this.model = new Backbone.Model({
+			'dp':null,
+			'dpConfig':{
+				'autoclose':true,
+				'name':'dpafter',
+				'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
+			}
+		});
+		
+		this.$el.html(this.template({}));
+		
+		$('input.date', this.$el).datepicker(this.model.get('dpConfig'));
+		this.model.set('dp', $('input.date', this.$el));
 	}
 });
 
@@ -2984,27 +3028,28 @@ var VFilterWidgetTypeDateAfter = VFilterWidgetType.extend({
  * 		moment.js (http://momentjs.com/)
  */
 var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
-	'version':'1.0.4',
+	'version':'1.0.8',
 	'type':'between',
-	'dpFrom':null,
-	'dpStartDate':null,
-	'dpTo':null,
-	'dpEndDate':null,
-	'dpConfig':{
-		'autoclose':true,
-		'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
-	},
 	
 	'isValid':function() {
-		return !isNaN(this.model.get('dpFrom').datepicker('getDate').getTime()) && !isNaN(this.model.get('dpTo').datepicker('getDate').getTime());
+		var dFrom = this.model.get('dpFrom').datepicker('getUTCDate'),
+			dTo = this.model.get('dpTo').datepicker('getUTCDate'),
+			uxfrom = _.isDate(dFrom) ? dFrom.getTime() : NaN,
+			uxto = _.isDate(dTo) ? dTo.getTime() : NaN,
+			areDatesCheck = !isNaN(uxfrom) && !isNaN(uxto),
+			isChronologicalCheck = uxfrom <= uxto;
+		return areDatesCheck && isChronologicalCheck;
 	},
 	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
 		}
-		
-		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A to and from date must be selected.');
+		this.trigger(	'notify',
+						'danger',
+						'Date Filter ('+this.type+') Error',
+						'A "from" and "to" date must be selected and in chronological order.'
+		);
 		return false;
 	},
 	
@@ -3012,9 +3057,9 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 		if(this.isValid()) {
 			return [
 				'is between ',
-				moment(this.model.get('dpFrom').datepicker('getDate')).format('M/D/YYYY'),
+				moment.utc(this.model.get('dpFrom').datepicker('getUTCDate')).format('M/D/YYYY'),
 				' and ',
-				moment(this.model.get('dpTo').datepicker('getDate')).format('M/D/YYYY')
+				moment.utc(this.model.get('dpTo').datepicker('getUTCDate')).format('M/D/YYYY')
 			].join('');
 		} else {
 			return false;
@@ -3025,8 +3070,8 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 		if(this.validate()) {
 			return {
 				'type':this.type,
-				'fromDate':this.model.get('dpFrom').datepicker('getDate'),
-				'toDate':this.model.get('dpTo').datepicker('getDate'),
+				'fromDate':this.model.get('dpFrom').datepicker('getUTCDate').getTime(),
+				'toDate':this.model.get('dpTo').datepicker('getUTCDate').getTime(),
 				'description':this.getValueDescription()
 			};
 		}
@@ -3035,132 +3080,69 @@ var VFilterWidgetTypeDateBtwn = VFilterWidgetType.extend({
 	
 	'setValue':function(filterValue) {
 		// from/toDate can be: 1) an ISO Date string, 2) a Timestamp integer, 3) a javascript Date object
-		this.dpStartDate = moment(filterValue.fromDate).toDate();
-		this.dpEndDate = moment(filterValue.toDate).toDate();
-		
-		this.model.get('dpFrom').datepicker('setUTCDate', this.dpStartDate);
-		this.model.get('dpTo').datepicker('setUTCDate', this.dpEndDate);
-		this.model.get('dpFrom').datepicker('setEndDate',this.dpEndDate);
-		this.model.get('dpTo').datepicker('setStartDate',this.dpStartDate);
-	},
-	
-	// TODO unless we need to modify this, remove it
-	'processDate':function(dateObj) {
-		switch(typeof(dateObj)) {
-			case 'object':
-				// assume standard javascript date object
-				return moment(dateObj).toDate();
-				break;
-			case 'number':
-				return moment(dateObj).toDate();
-				break;
-			case 'string':
-				return moment(dateObj).toDate();
-				break;
-		}
+		this.model.get('dpFrom').datepicker('setUTCDate', moment.utc(filterValue.fromDate).toDate());
+		this.model.get('dpTo').datepicker('setUTCDate', moment.utc(filterValue.toDate).toDate());
 	},
 	
 	'reset':function() {
-		this.dpStartDate = null;
-		this.dpEndDate = null;
 		this.model.get('dpFrom').datepicker('update',null);
 		this.model.get('dpTo').datepicker('update',null);
-		this.model.get('dpFrom').datepicker('setEndDate',null);
-		this.model.get('dpTo').datepicker('setStartDate',null);
 	},
 	
-	
-	'template':_.template(CFTEMPLATES.datepickerBetween,{variable:'datepicker'}),
-	'events':{
-		// these are supposed to cap the start/end of the other datepicker
-		// when the from date changes
-		/*'changeDate .dpbtw input:first-child':function(e) {
-			if(e.date) {
-				//date is valid
-				// add a day to the dpStartDate
-				this.dpStartDate = new Date(e.timeStamp);
-				//limit the to datepicker so it can't pick a date before this selected date
-				this.model.get('dpTo').datepicker('setStartDate', this.dpStartDate);
-			} else {
-				//cleared date, clear dpTo.startDate
-				this.model.get('dpTo').datepicker('setStartDate', this.dpStartDate = null);
-			}
-		},*/
-		//'hide .dpbtw input:first-child':function(e) {
-			//show the to-date datepicker if it doesn't have a selected date
-			//if( this.model.get('dpTo').datepicker('getDate') && isNaN(this.model.get('dpTo').datepicker('getDate').getTime()) ) {
-			//	this.model.get('dpTo').datepicker('show');
-			//}
-		//},
-		
-		// when the to date changes
-		/*'changeDate .dpbtw input:last-child':function(e) {
-			// limit
-			console.log('dpTo:changeDate');
-			if(e.date) {
-				console.log('date is something: '+moment(e.timeStamp).format('M/D/YYYY'));
-				// subtract a day from the dpEndDate
-				this.dpEndDate = new Date(e.timeStamp);
-				// limit the from datepicker so it can't pick a date after this selected date
-				this.model.get('dpFrom').datepicker('setEndDate', this.dpEndDate);
-				//this.dpTo.datepicker('hide');
-			} else {
-				console.log('date is falsy');
-				//cleared date, clear dpFrom.endDate
-				this.model.get('dpFrom').datepicker('setEndDate', this.dpEndDate = null);
-			}
-		}*/
-		//'hide .dpbtw input:last-child':function(e) {
-			//if there is a from date, then just close, otherwise show from datepicker
-			//if( this.model.get('dpFrom').datepicker('getDate') && isNaN(this.model.get('dpFrom').datepicker('getDate').getTime()) ) {
-				//this.model.get('dpFrom').datepicker('show');
-			//}
-		//}
-	},
+	'template':_.template([
+		'<div class="form-inline">',
+			'<div class="form-group">',
+				'<div class="input-group input-daterange">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span  class="input-group-addon">to</span>',
+					'<input type="text" class="form-control date" value="" />',
+				'</div>',
+			'</div>',
+		'</div>'
+	].join('')),
 	
 	'initialize':function(options) {
-		this.$el.html(this.template({name:'dpbtw'}));
-		$('.dpbtw',this.$el).datepicker(this.dpConfig);
 		
 		this.model = new Backbone.Model({
-			'dpFrom':$('.dpbtw input:first-child',this.$el),
-			'dpTo':$('.dpbtw input:last-child',this.$el)
+			'dpFrom':null,
+			'dpTo':null,
+			'dpConfig':{
+				'autoclose':true,
+				'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
+			}
 		});
+		
+		this.$el.html(this.template({}));
+		$('div.input-daterange', this.$el).datepicker(this.model.get('dpConfig'));
+		this.model.set('dpFrom', $('input:first-child', this.$el));
+		this.model.set('dpTo', $('input:last-child', this.$el));
 	}
 });
 
 
-// Filter Widget Type Implementation Class for Number (Select)
+// Filter Widget Type Implementation Class for Date (Select)
 var VFilterWidgetTypeDateSel = VFilterWidgetType.extend({
-	'version':'1.0.4',
+	'version':'1.0.10',
 	'type':'select',
-	'dp':null,
-	'dpConfig':{
-		'name':'dpsel',
-		'autoclose':true,
-		'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
-	},
-	
-	'addBtn':null,
-	'listEl':null,
 	
 	'isValid':function() {
 		return this.collection.length>0;
 	},
+	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
 		}
-		
 		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'One or more dates must be selected.');
 		return false;
 	},
+	
 	'getValueDescription':function() {
 		if(this.isValid()) {
 			return [
 				'is one of these: (',
-				$.map(this.collection.models,function(md) {
-					return moment(md.get('date')).format('M/D/YYYY');
+				$.map(this.collection.models, function(md) {
+					return moment.utc(md.get('date')).format('M/D/YYYY');
 				}),
 				')'
 			].join('');
@@ -3168,153 +3150,117 @@ var VFilterWidgetTypeDateSel = VFilterWidgetType.extend({
 			return false;
 		}
 	},
+	
 	'getValue':function() {
 		if(this.validate()) {
 			return {
 				'type':this.type,
-				'value':this.collection.toJSON(),//this.collection.map(function(md){return md.get('timestamp');}),
+				'value':this.collection.toJSON(),
 				'description':this.getValueDescription()
 			};
 		}
 		return false;
 	},
+	
 	'setValue':function(filterValue) {
-		//expecting what getValue would return
 		this.collection.reset(filterValue.value);
 	},
+	
 	'reset':function() {
 		//reset datepicker and list
 		this.collection.reset();
-		this.dp.datepicker('update',null);
-	},
-	
-	'addDate':function(dateModel) {
-		$('span.badge',this.addBtn).html(this.collection.length);
-		this.listEl.append(this.listTemplate(dateModel));
-		if(this.collection.length===1) {
-			$('button.dropdown-toggle',this.$el).removeClass('disabled');
-		}
-	},
-	'removeDate':function(dateModel) {
-		$('span.badge',this.addBtn).html(this.collection.length);
-		$('li[data-cid="'+dateModel.cid+'"]',this.listEl).remove();
-		if(this.collection.length<1) {
-			$('button.dropdown-toggle',this.$el).addClass('disabled');
-		}
-	},
-	'resetCollection':function(newCol) {
-		$('span.badge',this.addBtn).empty();
-		this.listEl.empty();
-		if(newCol && newCol.length) {//is an actual collection
-			newCol.each(function(dateModel) {
-				this.addDate(dateModel);
-			}, this);
-			$('button.dropdown-toggle',this.$el).removeClass('disabled');
-		} else {
-			$('button.dropdown-toggle',this.$el).addClass('disabled');
-		}
+		this.model.get('dp').datepicker('update',null);
 	},
 	
 	'events':{
 		'click button.dpadd':function(e) {
-			var d = this.dp.datepicker('getDate');
+			var d = this.model.get('dp').datepicker('getUTCDate');
 			
 			// only add date if it isn't in the valueList array
-			if(!isNaN(d.getTime()) && this.collection.where({'timestamp':d.getTime()}).length<1) {
+			if(d && !isNaN(d.getTime()) && this.collection.where({'timestamp':d.getTime()}).length<1) {
 				this.collection.add({'date':d, 'timestamp':d.getTime()});
 			}
 		},
+		
 		'click ul.cf-select-widget-list li button.close':function(e) {
 			this.collection.remove($(e.currentTarget).data('cid'));
 		}
 	},
 	
-	'listTemplate':_.template([
-			'<li class="list-group-item" data-cid="<%= dm.cid %>">',
-				'<button class="close" data-cid="<%= dm.cid %>"><span class="glyphicon glyphicon-remove btn-sm"></span></button>',
-				'<p class="list-group-item-heading"><%= moment(dm.get("date")).format("M/D/YYYY") %></p>',
-			'</li>'
-		].join(''),
-		{'variable':'dm'}
-	),
 	'template':_.template([
-			'<div class="row">',
-				'<div class="col-lg-4 col-md-5 col-sm-10 col-xs-8">'+CFTEMPLATES.datepicker+'</div>',
-				'<div class="col-lg-4 col-md-6 col-sm-12 col-xs-8">',
-					'<div class="btn-group">',
-						'<button type="button" class="btn btn-default dpadd">Add <span class="badge">0</span></button>',
-						'<button type="button" class="btn btn-default dropdown-toggle disabled" data-toggle="dropdown" aria-expanded="false">',
-							'<span class="caret"></span>',
-							'<span class="sr-only">Toggle Dropdown</span>',
-						'</button>',
-						'<ul class="dropdown-menu list-group cf-select-widget-list" role="menu"></ul>',
-					'</div>',
+		'<div class="row">',
+			'<div class="col-lg-4 col-md-5 col-sm-10 col-xs-8">',
+				'<div class="input-group">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span class="input-group-addon">',
+						'<span class="glyphicon glyphicon-calendar"></span>',
+					'</span>',
+				'</div>',
+			,'</div>',
+			'<div class="col-lg-4 col-md-6 col-sm-12 col-xs-8">',
+				'<div class="btn-group">',
+					'<button type="button" class="btn btn-default dpadd">Add <span class="badge"><%= collection.length %></span></button>',
+					'<button type="button" class="btn btn-default dropdown-toggle<% if(collection.length<1) { %>disabled<% } %>"<% if(collection.length<1) { %> disabled="disabled"<% } %> data-toggle="dropdown" aria-expanded="false">',
+						'<span class="caret"></span>',
+						'<span class="sr-only">Toggle Dropdown</span>',
+					'</button>',
+					'<ul class="dropdown-menu list-group cf-select-widget-list" role="menu">',
+						'<% collection.each(function(m, i) { %>',
+						'<li class="list-group-item" data-cid="<%= m.cid %>">',
+							'<button class="close" data-cid="<%= m.cid %>"><span class="glyphicon glyphicon-remove btn-sm"></span></button>',
+							'<p class="list-group-item-heading"><%= moment.utc(m.get("date")).format("M/D/YYYY") %></p>',
+						'</li>',
+						'<% }) %>',
+					'</ul>',
 				'</div>',
 			'</div>',
-			'<div class="row">',
-				'<div class="col-xs-12">',
-					'<span class="help-block">filtering the results by column values in this list</span>',
-				'</div>',
-			'</div>'
-		].join(''),
-		{variable:'datepicker'}
-	),
+		'</div>',
+		'<div class="row">',
+			'<div class="col-xs-12">',
+				'<span class="help-block">filtering the results by column values in this list</span>',
+			'</div>',
+		'</div>'
+	].join(''), {'variable':'collection'}),
 	
 	'initialize':function(options) {
-		var Col = Backbone.Collection.extend({
-			'model':Backbone.Model.extend({
-				'defaults':{
-					'date':null
-				}
-			})
+		this.model = new Backbone.Model({
+			'dp':null,
+			'dpConfig':{
+				'name':'dpsel',
+				'autoclose':true,
+				'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us
+			},
+			'addBtn':null,
+			'listEl':null
 		});
-		this.collection = new Col();
-		this.collection.on({
-			'add':this.addDate,
-			'reset':this.resetCollection,
-			'remove':this.removeDate
-		}, this);
 		
-		// add ui
-		this.$el.html(this.template(this.dpConfig));
+		this.collection = new Backbone.Collection();
+		this.collection.on('add', this.render, this);
+		this.collection.on('reset', this.render, this);
+		this.collection.on('remove', this.render, this);
 		
+		this.render(null, this.collection);
+	},
+	
+	'render':function(m, col) {
+		this.$el.empty().append(this.template(this.collection));
 		// initialize datepicker
-		$('.dpsel',this.$el).datepicker(this.dpConfig);
-		
-		// assign class variables
-		this.dp = $('.dpsel',this.$el);
-		this.addBtn = $('button.dpadd',this.$el);
-		this.listEl = $('.dropdown-menu',this.$el);
+		$('input.date', this.$el).datepicker(this.model.get('dpConfig'));
+		this.model.set('dp', $('input.date', this.$el));
 	}
 });
 
 
 // Filter Widget Type Implementation Class for Date (Equals)
 var VFilterWidgetTypeDateCycle = VFilterWidgetType.extend({
-	'version':'1.0.2',
+	'version':'1.0.4',
 	'type':'cycle',
 	
-	//aren't these available somewhere else like JQuery or Backbone or something?
-	'months':['January','February','March','April','May','June','July','August','September','October','November','December'],
-	
-	'dp':null,
-	'dpConfig':{
-		'autoclose':true,
-		'minViewMode':1,
-		'startView':1,
-		'name':'dpcy',
-		'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.month_year
-	},
-	'cycle':[
-		{'label':'1st-15th', 'value':1},
-		{'label':'16th-End Of Month', 'value':2}
-	],
-	
-	
 	'isValid':function() {
-		var d = this.dp.datepicker('getDate');
-		return !isNaN(d.getTime());
+		var d = this.model.get('dp').datepicker('getUTCDate');
+		return d && !isNaN(d.getTime());
 	},
+	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
@@ -3323,93 +3269,147 @@ var VFilterWidgetTypeDateCycle = VFilterWidgetType.extend({
 		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A month and year must be selected.');
 		return false;
 	},
+	
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			var d = this.dp.datepicker('getDate');
+			var d = this.model.get('dp').datepicker('getUTCDate');
 			return [
-				'for the ', _.findWhere(this.cycle, {'value':$('div.btn-group label.active input',this.$el).val()*1}).label, ' billing cycle of ',
-				this.months[d.getMonth()], ', ', d.getFullYear()
+				'for the ',
+				 _.findWhere(this.model.get('cycle'), {'value':$('div.btn-group label.active input', this.$el).val()*1}).label, 
+				 ' billing cycle of ',
+				this.model.get('months')[d.getMonth()+1], 
+				', ', 
+				d.getFullYear()
 			].join('');
 		} else {
 			return false;
 		}
 	},
+	
+	/**
+	 * Returns:
+	 * {
+		 type:'cycle',
+		 monthYear:{ date:<ISO 8601 string>, timestamp:<timestamp> },
+		 cycle:<int>,
+		 cycleMap:<array>,
+		 description:<string>
+	 * }
+	 */
 	'getValue':function() {
 		if(this.validate()) {
 			// pass along the cycle map object for server-side processing
+			// the date will always be the first day of the month
+			var d = moment.utc(this.model.get('dp').datepicker('getUTCDate')),
+				cycle = $('div.btn-group label.active input', this.$el).val()*1;
 			return {
 				'type':this.type,
-				'monthYear':{'date':this.dp.datepicker('getDate'), 'timestamp':this.dp.datepicker('getDate').getTime()},
-				'cycle':$('div.btn-group label.active input',this.$el).val()*1,
-				'cycleMap':this.cycle,
+				'monthYear':{
+					'date':this.model.get('dp').datepicker('getUTCDate'), 
+					'timestamp':moment.utc(this.model.get('dp').datepicker('getUTCDate')).valueOf()
+				},
+				'cycle':cycle,
+				'cycleMap':this.model.get('cycle'),
 				'description':this.getValueDescription()
 			};
 		}
 		return false;
 	},
+	
 	'setValue':function(filterValue) {
 		if(_.has(filterValue,'monthYear') && _.isDate(filterValue.monthYear.date)) {
-			this.dp.datepicker('setUTCDate',filterValue.monthYear.date);
+			this.model.get('dp').datepicker('setUTCDate', filterValue.monthYear.date);
 		} else {
-			this.dp.datepicker('update',null);
+			this.model.get('dp').datepicker('update', null);
 		}
 		if(_.has(filterValue,'cycle')) {
-			// here it is
-			$('div.btn-group label',this.$el).each(function(i,e){
+			$('div.btn-group label', this.$el).each(function(i, e) {
 				var lbl = $(e),
 					inpt = $('input',$(e));
 				lbl.removeClass('active');
 				inpt.removeAttr('checked');
-				if((inpt.val()*1)==filterValue.cycle){
+				if((inpt.val()*1)==filterValue.cycle) {
 					lbl.addClass('active');
 					inpt.attr('checked','checked');
+					
 				}
 			});
 		}
 	},
+	
 	'reset':function() {
 		this.setValue({'cycle':1});
 	},
 	
+	'template':_.template([
+		'<div class="row">',
+			'<div class="col-lg-6 col-md-7 col-sm-12 col-xs-12">',
+				'<div class="btn-group" data-toggle="buttons">',
+					'<% for(var i in config.cycle) { %>',
+						'<label class="btn btn-xs btn-primary<% if(i==0) { %> active<% } %>">',
+							'<input type="radio" value="<%= config.cycle[i].value %>" <% if(i==0) { %> checked="checked"<% } %> /> ',
+							'<%= config.cycle[i].label %>',
+						'</label>',
+					'<% } %>',
+				'</div>',
+			'</div>',
+			'<div class="col-lg-6 col-md-5 col-sm-12 col-xs-12">',
+				'<div class="input-group">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span class="input-group-addon">',
+						'<span class="glyphicon glyphicon-calendar"></span>',
+					'</span>',
+				'</div>',
+			'</div>',
+		'</div>'
+	].join(''), {variable:'config'}),
 	
-	'template':_.template(
-		'<div class="btn-group" data-toggle="buttons"></div>'+CFTEMPLATES.datepicker,
-		{variable:'datepicker'}
-	),
 	'initialize':function(options) {
-		if(options && options.hasOwnProperty('cycle')) {
+		this.model = new Backbone.Model({
+			'months':[
+				'January','February','March',
+				'April','May','June',
+				'July','August','September',
+				'October','November','December'
+			],
 			// cycle is expected to be an array of date range objects within 1 month
-			// [{label:<str>,value:<?>},...]
-			this.cycle = options.cycle;
-		}
-		this.$el.html(this.template(this.dpConfig));
-		$('.dpcy',this.$el).datepicker(this.dpConfig);
-		this.dp = $('.dpcy',this.$el);
+			'cycle':[
+				{'label':'1st-15th', 'value':1},
+				{'label':'16th-End Of Month', 'value':2}
+			],
+			'dp':null,
+			'dpConfig':{
+				'autoclose':true,
+				'minViewMode':1,
+				'startView':1,
+				'name':'dpcy',
+				'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.month_year
+			}
+		});
 		
-		//populate buttons
-		for(var i in this.cycle) {
-			$('div.btn-group',this.$el).append(
-				$(document.createElement('label')).addClass('btn btn-primary').append(
-					$(document.createElement('input')).attr({'type':'radio','id':_.uniqueId('cf-dpcy_'),'value':this.cycle[i].value}),
-					this.cycle[i].label
-				)
-			);
+		if(options) {
+			console.log(options);
+			for(var i in options) {
+				this.model.set(i, options[i]);
+			}
 		}
-		$('div.btn-group label.btn:first-child',this.$el).addClass('active');
-		$('div.btn-group label.btn:first-child input',this.$el).first().attr('checked','checked');
+		
+		this.$el.html(this.template(this.model.toJSON()));
+		$('input.date', this.$el).datepicker(this.model.get('dpConfig'));
+		this.model.set('dp', $('input.date', this.$el));
 	}
 });
 
 
 // Filter Widget Type Implementation Class for Date (Month)
 var VFilterWidgetTypeDateM = VFilterWidgetType.extend({
-	'version':'1.0.1',
+	'version':'1.0.7',
 	'type':'month',
 	
 	'isValid':function() {
 		// a month and year is selected
 		var retM = $('select', this.$el).val()*1
-		return (retM>-1);
+		return (retM>-1 && retM<12);
 	},
 	
 	'validate':function() {
@@ -3432,6 +3432,10 @@ var VFilterWidgetTypeDateM = VFilterWidgetType.extend({
 		}
 	},
 	
+	/**
+	 * Returns:
+	 * { type:'month', month:<0-11>, description:<string> } 
+	 */
 	'getValue':function() {
 		if(this.validate()) {
 			return {
@@ -3459,22 +3463,13 @@ var VFilterWidgetTypeDateM = VFilterWidgetType.extend({
 			'<div class="col-lg-8 col-md-8 col-sm-12 col-xs-8">',
 				'<label class="control-label">Month: </label>',
 				'<select class="form-control">',
-					'<option value="-1"></option>',
 				'<% for(var i in months) { %>',
-					'<option value="<%= ((i*1)+1) %>"><%= months[i] %></option>',
+					'<option value="<%= ((i*1)) %>"><%= months[i] %></option>',
 				'<% } %>',
 				'</select>',
 			'</div>',
 		'</div>'
 	].join('')),
-	
-	'events':{
-		/* for testing
-		'changeDate div.dpeq':function(e) {
-			console.log(e);
-			return false;
-		}*/
-	},
 	
 	'initialize':function(options) {
 		this.model = new Backbone.Model({
@@ -3486,19 +3481,19 @@ var VFilterWidgetTypeDateM = VFilterWidgetType.extend({
 		});
 		
 		// render this view's elements
-		this.$el.html( this.template({'months':this.model.get('months')}) );
+		this.$el.html( this.template(this.model.toJSON()) );
 	}
 });
 
 // Filter Widget Type Implementation Class for Date (Month Year)
 var VFilterWidgetTypeDateMY = VFilterWidgetType.extend({
-	'version':'1.0.3',
+	'version':'1.0.8',
 	'type':'monthyear',
 	
 	'isValid':function() {
 		// a month and year is selected
 		var retM = $('select', this.$el).val()*1,
-			retY = this.model.get('dp').datepicker('getDate');
+			retY = this.model.get('dp').datepicker('getUTCDate');
 		return ( (retM>-1) && (retY));
 	},
 	
@@ -3506,7 +3501,6 @@ var VFilterWidgetTypeDateMY = VFilterWidgetType.extend({
 		if(this.isValid()) {
 			return true;
 		}
-		
 		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A month and year must be selected.');
 		return false;
 	},
@@ -3517,19 +3511,24 @@ var VFilterWidgetTypeDateMY = VFilterWidgetType.extend({
 				'is in ', 
 				moment({'month':$('select', this.$el).val()*1}).format('MMMM'),
 				' of year ',
-				moment(this.model.get('dp').datepicker('getDate')).format('YYYY')
+				moment.utc(this.model.get('dp').datepicker('getUTCDate')).format('YYYY')
 			].join('');
 		} else {
 			return false;
 		}
 	},
 	
+	/**
+	 * Returns:
+	 * { type:'monthyear', month:<0-11>, start:<timestamp>, year:<int>, description:<string> }
+	 */
 	'getValue':function() {
 		if(this.validate()) {
 			return {
 				'type':this.type,
 				'month':$('select', this.$el).val()*1,
-				'year':this.model.get('dp').datepicker('getDate').getFullYear(),
+				'start':moment.utc(this.model.get('dp').datepicker('getUTCDate')).valueOf(),
+				'year':moment.utc(this.model.get('dp').datepicker('getUTCDate')).year(),
 				'description':this.getValueDescription()
 			};
 		}
@@ -3554,15 +3553,19 @@ var VFilterWidgetTypeDateMY = VFilterWidgetType.extend({
 			'<div class="col-lg-5 col-md-6 col-sm-12 col-xs-8">',
 				'<label class="control-label">Month: </label>',
 				'<select class="form-control">',
-					'<option value="-1"></option>',
 				'<% for(var i in months) { %>',
-					'<option value="<%= ((i*1)+1) %>"><%= months[i] %></option>',
+					'<option value="<%= ((i*1)) %>"><%= months[i] %></option>',
 				'<% } %>',
 				'</select>',
 			'</div>',
 			'<div class="col-lg-5 col-md-6 col-sm-12 col-xs-8">',
 				'<label class="control-label">Year: </label>',
-				CFTEMPLATES.datepicker,
+				'<div class="input-group date">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span class="input-group-addon">',
+						'<span class="glyphicon glyphicon-calendar"></span>',
+					'</span>',
+				'</div>',
 			'</div>',
 		'</div>'
 	].join('')),
@@ -3596,88 +3599,95 @@ var VFilterWidgetTypeDateMY = VFilterWidgetType.extend({
 		this.$el.html( this.template({'datepicker':this.model.get('dpConfig'), 'months':this.model.get('months')}) );
 		
 		// create the datepicker
-		$('.dpmy', this.$el).datepicker(this.model.get('dpConfig'));
+		$('input', this.$el).datepicker(this.model.get('dpConfig'));
 		
 		// set the model's dp property now that the datepicker has been created
-		this.model.set('dp', $('.dpmy', this.$el));
+		this.model.set('dp', $('input', this.$el));
 	}
 });
 
 // Filter Widget Type Implementation Class for Date Year List (Equals)
 var VFilterWidgetTypeDateYr = VFilterWidgetType.extend({
-	'version':'1.0.1',
+	'version':'1.0.4',
 	'type':'year',
-	'dp':null,
-	'dpConfig':{
-		autoclose:true,
-		'name':'dpyr',
-		'minViewMode':'years',
-		'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.year
-	},
 	
 	'isValid':function() {
-		var d = this.dp.datepicker('getDate');
-		return !isNaN(d.getTime());
+		var d = this.model.get('dp').datepicker('getUTCDate');
+		return d && !isNaN(d.getTime());
 	},
+	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
 		}
-		
 		this.trigger('notify', 'danger', 'Date Filter ('+this.type+') Error', 'A year must be selected.');
 		return false;
 	},
+	
 	'getValueDescription':function() {
 		if(this.isValid()) {
-			var d = this.dp.datepicker('getDate');
-			return 'year is ' + d.getFullYear();
+			var d = moment.utc(this.model.get('dp').datepicker('getUTCDate'));
+			return 'year is ' + d.year();
 		} else {
 			return false;
 		}
 	},
+	
+	/**
+	 * Returns:
+	 * { type:'year', value:<int>, start:<timestamp>, description:<int> }
+	 */
 	'getValue':function() {
 		if(this.validate()) {
-			var d = this.dp.datepicker('getDate');
+			var d = this.model.get('dp').datepicker('getUTCDate');
 			return {
 				'type':this.type,
-				'value':d.getFullYear(),
+				'value':moment.utc(d).year(),
+				'start':moment.utc(d).valueOf(),
 				'description':this.getValueDescription()
 			};
 		}
 		return false;
 	},
+	
 	'setValue':function(filterValue) {
 		// date should be a date
 		if(_.isFinite(filterValue.value)) {
-			this.dp.datepicker('setUTCDate', new Date(filterValue.value,1,1));
+			this.model.get('dp').datepicker('setUTCDate', new Date(filterValue.value, 1, 1));
 		}
 	},
+	
 	'reset':function() {
-		this.dp.datepicker('update',null);
+		this.model.get('dp').datepicker('update',null);
 	},
 	
 	'template':_.template([
 		'<div class="row">',
 			'<div class="col-lg-5 col-md-7 col-sm-12 col-xs-8">',
-				CFTEMPLATES.datepicker,
+				'<div class="input-group date">',
+					'<input type="text" class="form-control date" value="" />',
+					'<span class="input-group-addon">',
+						'<span class="glyphicon glyphicon-calendar"></span>',
+					'</span>',
+				'</div>',
 			'</div>',
 		'</div>'
-	].join(''),
-	{variable:'datepicker'}),
+	].join('')),
 	
 	'initialize':function(options) {
-		/*
-		template datepicker wants: 
-			name -required: string that will be added to the class list, 
-			date: string date that should be in the same format as what you assign the datepicker, 
-			format: string format - viewMode:CFTEMPLATES.DATEPICKER_DATE_FORMATS.en_us/en_gb/zh_cn, 
-			viewMode: use CFTEMPLATES.DATEPICKER_VIEW_MODES.YEARS/MONTHS/DAYS, 
-			minViewMode: same as viewMode
-		*/
-		this.$el.html(this.template(this.dpConfig));
-		$('.dpyr',this.$el).datepicker(this.dpConfig);
-		//this.dp = $('.dpyr input',this.$el);
-		this.dp = $('.dpyr',this.$el);
+		this.model = new Backbone.Model({
+			'dp':null,
+			'dpConfig':{
+				autoclose:true,
+				'name':'dpyr',
+				'minViewMode':'years',
+				'format':CFTEMPLATES.DATEPICKER_DATE_FORMATS.year
+			}
+		});
+		
+		this.$el.html(this.template({}));
+		$('input.date', this.$el).datepicker(this.model.get('dpConfig'));
+		this.model.set('dp', $('input.date', this.$el));
 	}
 });
 
@@ -3761,10 +3771,8 @@ var VFilterWidgetTypeBoolEq = VFilterWidgetType.extend({
 
 // Filter Widget Type Implementation Class for Enum (Select)
 var VFilterWidgetTypeEnumIn = VFilterWidgetType.extend({
-	'version':'1.0.2',
+	'version':'1.0.3',
 	'type':'in',
-	
-	'currentColumn':null,
 	
 	'isValid':function() {
 		return $.map($('.dropdown-menu input:checked',this.$el), function(e,i){ return e.value*1; }).length>0;
@@ -3804,8 +3812,8 @@ var VFilterWidgetTypeEnumIn = VFilterWidgetType.extend({
 			
 			return {
 				'type':this.type,
-				'table':this.collection.findWhere({'column':this.currentColumn}).get('table'),
-				'column':this.currentColumn,
+				'table':this.collection.findWhere({'column':this.model.get('currentColumn')}).get('table'),
+				'column':this.model.get('currentColumn'),
 				'value':checkMap,
 				'description':[desc_1,checkNames.join(','),desc_2].join('')
 			};
@@ -3838,8 +3846,8 @@ var VFilterWidgetTypeEnumIn = VFilterWidgetType.extend({
 	
 	'config':function(dataCol) {
 		// dataCol will be a string
-		if(dataCol!==this.currentColumn) {
-			this.currentColumn = dataCol;
+		if(dataCol!==this.model.get('currentColumn')) {
+			this.model.set('currentColumn', dataCol);
 			this.$el.html(this.template(this.collection.findWhere({'column':dataCol}).attributes));
 		}
 	},
@@ -3878,9 +3886,13 @@ var VFilterWidgetTypeEnumIn = VFilterWidgetType.extend({
 	].join(''),{variable:'data'}),
 	
 	'initialize':function(options) {
+		this.model = new Backbone.Model({
+			'currentColumn':null
+		});
+		
 		//split enums into groups by options.enums[i].name
 		// check options.enums array of keys named 'id', a mapped copy of the array will 
-		// need to be made where the 'id' keys are renamed to 'code' (mimicing java Enum class)
+		// need to be configured so that the 'id' keys are renamed to 'code' (mimicing java Enum class)
 		var enumData;
 		if(_.has(options,'enums') && _.isArray(options.enums) && options.enums.length) {
 			// incoming meta data
@@ -3898,9 +3910,10 @@ var VFilterWidgetTypeEnumIn = VFilterWidgetType.extend({
 					};
 				})
 			);
-			this.currentColumn = this.collection.at(0).get('column');
-			this.$el.html(this.template(this.collection.at(0).attributes));
+			this.model.set('currentColumn', this.collection.at(0).get('column'));
+			this.$el.html(this.template(this.collection.at(0).toJSON()));
 		} else {
+			// shouldn't we error out?
 			this.$el.html(this.template({'enums':[]}));
 		}
 	}
@@ -3913,25 +3926,16 @@ the primary input is a typeahead
 [typeahead] -scrollable -custom templates 1)local, 2)prefetch 3)remote
 */
 var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
-	'version':'1.0.0',
+	'version':'1.0.3',
 	'type':'equals',
-	
-	/*
-	model attributes:
-	currentColumn
-	currentData
-	displayKey
-	valueKey
-	*/
-	'model':null,
 	
 	// the text input used for typeahead
 	'taInput':null,
 	
-	
 	'isValid':function() {
 		return this.model.get('currentData')!=null;
 	},
+	
 	'validate':function() {
 		if(this.isValid()) {
 			return true;
@@ -3956,6 +3960,7 @@ var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
 	'getValueDescription':function() {//is this public?
 		return this.isValid() ? ('is '+this.getDisplayValue()) : false;
 	},
+	
 	'getValue':function() {
 		if(this.validate()) {
 			return {
@@ -3970,6 +3975,7 @@ var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
 		}
 		return false;
 	},
+	
 	'setValue':function(filterValue) {
 		/*
 		filterValue:
@@ -3977,7 +3983,7 @@ var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
 			column:string -- should match a 'dataColumn' attribute in one of the collection models
 		*/
 		// TODO multi-column type
-		console.log(filterValue);
+		//console.log(filterValue);
 		var dataset = this.collection.findWhere({'dataColumn':filterValue.column});
 		if(dataset && _.has(filterValue,'column') && _.has(filterValue,'value')) {
 			this.model.set('table', filterValue.table);
@@ -4002,8 +4008,9 @@ var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
 	
 	//called from the filter factory
 	'config':function(dataCol) {
+		//console.log(dataCol);
 		if(_.isArray(dataCol)) {
-			// 
+			// for a "common value" filter type
 			var firstDataset = this.collection.findWhere({'column':dataCol[0]}),
 				sameDataset = this.collection.where({'table':firstDataset.get('table')});
 			
@@ -4016,6 +4023,7 @@ var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
 			this.model.set('valueKey', firstDataset.get('valueKey'));
 			this.model.set('currentData', null);
 		} else {
+			//console.log(this.collection.toJSON());
 			var newData = this.collection.findWhere({'column':dataCol});
 			if(dataCol!==this.model.get('currentColumn')) {
 				this.model.set('table', newData.get('table'));
@@ -4062,7 +4070,14 @@ var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
 	].join('')),
 	
 	'initialize':function(options) {
-		this.model = new Backbone.Model();
+		this.model = new Backbone.Model({
+			'table':null,
+			'currentData':null,
+			'currentColumn':null,
+			'displayKey':null,
+			'valueKey':null
+		});
+		
 		if(_.has(options,'datasets') && _.isArray(options.datasets) && options.datasets.length) {
 			//split datasets into groups by options.datasets[i].name (column name)
 			this.collection = new Backbone.Collection(
@@ -4102,8 +4117,9 @@ var VFilterWidgetTypeBiglistEq = VFilterWidgetType.extend({
 				}
 			);
 		} else {
+			// shouldn't we error out at this point?
 			this.$el.html(this.template());
-			this.taInput = $('input.typeahead',this.$el);
+			this.taInput = $('input.typeahead', this.$el);
 		}
 	},
 	'render':function() {

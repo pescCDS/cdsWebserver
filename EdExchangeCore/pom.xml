@@ -13,78 +13,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<parent>
 		<groupId>org.cds.pesc.WebServices</groupId>
 		<artifactId>EdExchange</artifactId>
-		<version>0.0.z-SNAPSHOT</version>
+		<version>0.1.1-SNAPSHOT</version>
 	</parent>
-	
-	<profiles>
-		<profile>
-			<!-- local tomcat, local database -->
-			<id>dev.profile</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-				<property>
-					<name>env</name>
-					<value>dev</value>
-				</property>
-			</activation>
-			<build>
-				<filters>
-					<filter>${basedir}/src/main/filters/filter.dev.properties</filter>
-				</filters>
-			</build>
-		</profile>
-		<profile>
-			<!-- local or VM tomcat, VM database (release testing) -->
-			<id>ci.profile</id>
-			<activation>
-				<property>
-					<name>env</name>
-					<value>ci</value>
-				</property>
-			</activation>
-			<repositories>
-				<repository>
-				    <id>java.net</id>
-				    <url>http://download.java.net/maven/2/</url>
-				</repository>
-			</repositories>
-			<build>
-				<filters>
-					<filter>${basedir}/src/main/filters/filter.ci.properties</filter>
-				</filters>
-			</build>
-		</profile>
-		<profile>
-			<!-- Remote VM tomcat, Remote VM database (for users to test) -->
-			<id>qa.profile</id>
-			<activation>
-				<property>
-					<name>env</name>
-					<value>qa</value>
-				</property>
-			</activation>
-			<build>
-				<filters>
-					<filter>${basedir}/src/main/filters/filter.qa.properties</filter>
-				</filters>
-			</build>
-		</profile>
-		<profile>
-			<!-- remote tomcat, remote database (live production) -->
-			<id>prod.profile</id>
-			<activation>
-				<property>
-					<name>env</name>
-					<value>prod</value>
-				</property>
-			</activation>
-			<build>
-				<filters>
-					<filter>${basedir}/src/main/filters/filter.prod.properties</filter>
-				</filters>
-			</build>
-		</profile>
-	</profiles>
 
 	<build>
 		<resources>
@@ -98,67 +28,19 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		</resources>
 
 		<plugins>
-			<!-- This plugin reads properties from a file for use in the maven build process -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.0-alpha-2</version>
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${basedir}/src/main/resources/application.properties</file>
-							</files>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-        		<groupId>org.liquibase</groupId>
-        		<artifactId>liquibase-maven-plugin</artifactId>
-        		<version>3.3.2</version>
-        		<configuration>
-        			<propertyFile>liquibase.properties</propertyFile>
-        			<changeLogFile>${basedir}/src/main/resources/db.changelog.xml</changeLogFile>
-        		</configuration>
-        		<executions>
-        			<execution>
-        				<phase>process-resources</phase>
-        				<goals>
-        					<goal>update</goal>
-        				</goals>
-        			</execution>
-        		</executions>
-        		<dependencies>
-        			<dependency>
-			            <groupId>mysql</groupId>
-			            <artifactId>mysql-connector-java</artifactId>
-			            <version>${mysql.connector.version}</version>
-			        </dependency>
-        		</dependencies>
-        	</plugin>
-			
-			<!-- This plugin filters what files are included/excluded in the final .jar -->
+			<!-- This plugin filters what files are included/excluded in the final .jar 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.5</version>
 				<configuration>
 					<excludes>
-						<exclude>/application.properties</exclude>
-						<exclude>generated-sources/org/**/*.java</exclude>
 						<exclude>org/**/*.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
-
-			<!-- This plugin creates the java package/classes (files) before everything is compiled. -->
+			-->
+			<!-- This plugin creates the java package/classes (files) before everything is compiled. 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
@@ -174,13 +56,14 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 					</execution>
 				</executions>
 				<configuration>
-					<arguments>-Xannotate</arguments>
-					<arguments>-Xinheritance</arguments>
-				    <extension>true</extension>
+					<encoding>UTF-8</encoding>
+					<addGeneratedAnnotation>true</addGeneratedAnnotation>
 					<outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-					<schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
-					<bindingDirectory>${basedir}/src/main/resources/xsd</bindingDirectory>
-					<bindingFiles>bindings.xjb.xml</bindingFiles>
+				    <extension>true</extension>
+					<sources>
+						<source>../directoryServer/src/main/resources/xsd/AcademicRecord_v1.7.0.xsd</source>
+						<source>../directoryServer/src/main/resources/xsd/CoreMain_v1.12.0.xsd</source>
+					</sources>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -209,53 +92,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			            <version>${commons-lang3.version}</version>
 			        </dependency>
 				</dependencies>
-			</plugin>
+			</plugin>-->
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. 
-					It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											properties-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-alpha-2,)
-										</versionRange>
-										<goals>
-											<goal>
-												read-project-properties
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 	<dependencies>
-	   <dependency>
-            <groupId>org.apache.cxf.xjc-utils</groupId>
-            <artifactId>cxf-xjc-runtime</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -268,49 +109,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-annotations</artifactId>
-		</dependency>
-		<dependency>
-        	<groupId>org.hibernate</groupId>
-        	<artifactId>hibernate-search</artifactId>
-        </dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-commons-annotations</artifactId>
-		</dependency>
-		<dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-tools</artifactId>
-        </dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>log4j</groupId> -->
-<!-- 			<artifactId>log4j</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.slf4j</groupId> -->
-<!-- 			<artifactId>slf4j-simple</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>commons-logging</groupId> -->
-<!-- 			<artifactId>commons-logging</artifactId> -->
-<!-- 		</dependency> -->
-		<dependency>
-			<groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-		</dependency>
-		
-		<dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.3.2</version>
-        </dependency>
         
         <!-- Joda Time -->
 		<dependency>

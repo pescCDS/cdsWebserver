@@ -20,6 +20,8 @@
 	Local Dev (Windows 8.1)
 	maven.home = D:\installs\apache-maven-3.1.0
 	tomcat.path = D:\installs\tomcat\tomcat-7.0.42\apache-tomcat-7.0.42
+	
+	TODO make a target that will output the contents of the EdExchangeCore.jar file : command = jar -tf EdExchangeCore.jar
 	-->
 	
 	<condition property="is-windows">
@@ -98,6 +100,12 @@
 	<target name="webapp-deploy">
 		<copy file="${webapp.target.path}\${target.finalName}.war" 
 			  todir="${tomcat.path}\webapps" />
+	</target>
+	<target name="webapp-init">
+		<antcall target="webapp-remove" />
+		<antcall target="webapp-compile" />
+		<antcall target="webapp-deploy" />
+		<antcall target="tomcat-start" />
 	</target>
 	
 	<!--
