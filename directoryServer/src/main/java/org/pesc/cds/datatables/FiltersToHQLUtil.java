@@ -1,5 +1,6 @@
 package org.pesc.cds.datatables;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,6 +18,7 @@ import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -28,6 +30,22 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	
 	private static DateTimeFormatter dateFormat = ISODateTimeFormat.dateTime();
 	
+	private static enum NumberType {
+		INTEGER,
+		FLOAT,
+		BIGDECIMAL
+	}
+	
+	private static HashMap<String, NumberType> columnNumberType = buildColumnNumberTypeMap();
+	
+	private static HashMap<String, NumberType> buildColumnNumberTypeMap() {
+		HashMap<String, NumberType> retMap = new HashMap<String, NumberType>();
+		retMap.put("document_format.formatInuseCount", NumberType.INTEGER);
+		retMap.put("organization_entity_code.code", NumberType.INTEGER);
+		retMap.put("filter_sets.credentialId", NumberType.INTEGER);
+		return retMap;
+	}
+	
 	// for custom Date filter type (CYCLE)
 	private static HashMap<String, String> columnAliasMap = buildColumnAliasMap();
 	
@@ -36,18 +54,45 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	// I think the columns that are not dates can be removed
 	private static HashMap<String, String> buildColumnAliasMap() {
 		HashMap<String, String> retMap = new HashMap<String, String>();
-		//retMap.put("authorizedHours", "authorized_hours");
+		retMap.put("organization_contact.createdTime", "created_time");
+		retMap.put("organization_contact.modifiedTime", "modified_time");
+		retMap.put("organization_credential.createdTime", "created_time");
+		retMap.put("organization_credential.modifiedTime", "modified_time");
+		retMap.put("organization_directory.createdTime", "created_time");
+		retMap.put("organization_directory.modifiedTime", "modified_time");
+		retMap.put("document_format.createdTime", "created_time");
+		retMap.put("document_format.modifiedTime", "modified_time");
+		retMap.put("organization_entity_code.createdTime", "created_time");
+		retMap.put("organization_entity_code.modifiedTime", "modified_time");
 		return retMap;
 	}
 	
+	/**
+	 * This method is needed for filters that have to use native sql on a column. 
+	 * Normally this is just a simple mapping of hibernate column name to table name, but
+	 * there is a more complicated case where the column requested is a generated type.<br>
+	 * @param tableColumn The hibernate column
+	 * @param table The table
+	 * @return
+	 */
 	private static String createSqlColumn(String tableColumn, String table) {
-		String s = String.format("%s", tableColumn);
-		// the only time we need to swap out the column name is for tables that
-		// have columns with different names than the hibernate property value
-		if(table.equals("clients") || table.equals("timesheets") || table.equals("r1")) {
-			s = columnAliasMap.get(tableColumn);
+		if(tableColumn==null || table==null) {
+			return null;
 		}
-		return s;
+		String tableAndColumn = String.format("%s.%s", table, tableColumn);
+		return columnAliasMap.get(tableAndColumn);
+	}
+	
+	/**
+	 * Takes a UTC unix timestamp and creates a <code>Calendar</code> that can be used in <code>.equals()</code> 
+	 * methods on other <code>Calendar</code> instances with the same timezone.
+	 * @param timestamp A UTC unix timestamp
+	 * @return <b><code>Calendar</code></b> A <code>Calendar</code> that can be used to compare 
+	 * against other <code>Calendar</code> instances in the same timezone.
+	 */
+	private static Calendar createCalendarFromTimestamp(long timestamp) {
+		DateTime dtConverter = new DateTime(timestamp, DateTimeZone.UTC);
+		return dtConverter.toLocalDate().toDateTimeAtStartOfDay().toGregorianCalendar();
 	}
 	
 	// adds restrictions from the filters list into the Criteria
@@ -68,12 +113,17 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		}
 	}
 	
-	// adds the filter as a restriction to the criteria
+	/**
+	 * Adds the passed filter as a restriction to the passed criteria.
+	 * @param ct The criteria to be modified.
+	 * @param filter A filter to be applied as a restriction on the criteria.
+	 * @return <b><code>Criterion</code></b> A restriction applied to the criteria based on the filter.
+	 * @throws Throwable 
+	 */
 	public static Criterion addRestriction(Criteria ct, Map<String, ? extends Object> filter) {
-		log.debug(filter);
 		Criterion retC = null;
 		try {
-			Map<String, ? extends Object> filterValue = (Map<String, ? extends Object>)filter.get("filterValue");
+			Map<String, Object> filterValue = (Map<String, Object>)filter.get("filterValue");
 			
 			String filterTable = filter.get("table").toString();
 			String filterType = filter.get("type").toString();
@@ -95,13 +145,12 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 				break;
 			case NUMBER:
 				if(isMultiColumn) {
-					ct.add(retC = processNumberFilter((ArrayList<String>)filter.get("column"), filterValue));
+					ct.add(retC = processNumberFilter(filterTable, (ArrayList<String>)filter.get("column"), filterValue));
 				} else {
-					ct.add(retC = processNumberFilter(filter.get("column").toString(), filterValue));
+					ct.add(retC = processNumberFilter(filterTable, filter.get("column").toString(), filterValue));
 				}
 				break;
 			case DATE:
-				log.debug("filter is a date");
 				if(isMultiColumn) {
 					ct.add(retC = processDateFilter(filterTable, (ArrayList<String>)filter.get("column"), filterValue));
 				} else {
@@ -133,6 +182,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		
 		} catch(Throwable ex) {
 			log.error(ex.getMessage());
+			ex.printStackTrace();
 		}
 		
 		return retC;
@@ -176,249 +226,369 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	}
 	
 	
-	private static Criterion processNumberFilter(String column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Criterion processNumberFilter(String table, String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
 		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
 		switch(type) {
 		case EQUALS:
-			r = Restrictions.eq(column, filterValue.get("value"));
+			switch(columnNumberType.get(String.format("%s.%s", table, column))) {
+			case INTEGER:
+				r = Restrictions.eq(column, new Integer(filterValue.get("value").toString()));
+				break;
+			case FLOAT:
+				r = Restrictions.eq(column, new Float(filterValue.get("value").toString()));
+				break;
+			case BIGDECIMAL:
+				r = Restrictions.eq(column, new BigDecimal(filterValue.get("value").toString()));
+				break;
+			}
+			
 			break;
 		case BETWEEN:
-			r = Restrictions.between(column, filterValue.get("from"), filterValue.get("to"));
+			switch(columnNumberType.get(String.format("%s.%s", table, column))) {
+			case INTEGER:
+				r = Restrictions.between(column, new Integer(filterValue.get("from").toString()), new Integer(filterValue.get("to").toString()));
+				break;
+			case FLOAT:
+				r = Restrictions.between(column, new Float(filterValue.get("from").toString()), new Float(filterValue.get("to").toString()));
+				break;
+			case BIGDECIMAL:
+				r = Restrictions.between(column, new BigDecimal(filterValue.get("from").toString()), new BigDecimal(filterValue.get("to").toString()));
+				break;
+			}
 			break;
 		case SELECT:
-			r = Restrictions.in(column, (ArrayList)filterValue.get("value"));
+			ArrayList lookupNumberList = null;
+			switch(columnNumberType.get(String.format("%s.%s", table, column))) {
+			case INTEGER:
+				lookupNumberList = new ArrayList<Integer>();
+				for(Object num : (ArrayList<Object>)filterValue.get("value")) {
+					lookupNumberList.add(new Integer(num.toString()));
+				}
+				break;
+			case FLOAT:
+				lookupNumberList = new ArrayList<Float>();
+				for(Object num : (ArrayList<Object>)filterValue.get("value")) {
+					lookupNumberList.add(new Float(num.toString()));
+				}
+				break;
+			case BIGDECIMAL:
+				lookupNumberList = new ArrayList<BigDecimal>();
+				for(Object num : (ArrayList<Object>)filterValue.get("value")) {
+					lookupNumberList.add(new BigDecimal(num.toString()));
+				}
+				break;
+			}
+			r = Restrictions.in(column, lookupNumberList);
 			break;
 		}
 		return r;
 	}
-	private static Disjunction processNumberFilter(List<String> column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Disjunction processNumberFilter(String table, List<String> column, Map<String, Object> filterValue) throws Throwable {
 		Disjunction d = Restrictions.disjunction();
 		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
 		switch(type) {
 		case EQUALS:
-			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
-				String col = li.next();
-				d.add(Restrictions.eq(col, filterValue.get("value")));
+			for(String col : column) {
+				switch(columnNumberType.get(String.format("%s.%s", table, col))) {
+				case INTEGER:
+					d.add(Restrictions.eq(col, new Integer(filterValue.get("value").toString())));
+					break;
+				case FLOAT:
+					d.add(Restrictions.eq(col, new Float(filterValue.get("value").toString())));
+					break;
+				case BIGDECIMAL:
+					d.add(Restrictions.eq(col, new BigDecimal(filterValue.get("value").toString())));
+					break;
+				}
 			}
 			break;
 		case BETWEEN:
-			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
-				String col = li.next();
-				d.add(Restrictions.between(col, filterValue.get("from"), filterValue.get("to")));
+			for(String col : column) {
+				switch(columnNumberType.get(String.format("%s.%s", table, col))) {
+				case INTEGER:
+					d.add(Restrictions.between(col, new Integer(filterValue.get("from").toString()), new Integer(filterValue.get("to").toString())));
+					break;
+				case FLOAT:
+					d.add(Restrictions.between(col, new Float(filterValue.get("from").toString()), new Float(filterValue.get("to").toString())));
+					break;
+				case BIGDECIMAL:
+					d.add(Restrictions.between(col, new BigDecimal(filterValue.get("from").toString()), new BigDecimal(filterValue.get("to").toString())));
+					break;
+				}
 			}
 			break;
 		case SELECT:
-			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
-				String col = li.next();
-				d.add(Restrictions.in(col, (ArrayList)filterValue.get("value")));
+			for(String col : column) {
+				ArrayList lookupNumberList = null;
+				switch(columnNumberType.get(String.format("%s.%s", table, col))) {
+				case INTEGER:
+					lookupNumberList = new ArrayList<Integer>();
+					for(Object num : (ArrayList<Object>)filterValue.get("value")) {
+						lookupNumberList.add(new Integer(num.toString()));
+					}
+					break;
+				case FLOAT:
+					lookupNumberList = new ArrayList<Float>();
+					for(Object num : (ArrayList<Object>)filterValue.get("value")) {
+						lookupNumberList.add(new Float(num.toString()));
+					}
+					break;
+				case BIGDECIMAL:
+					lookupNumberList = new ArrayList<BigDecimal>();
+					for(Object num : (ArrayList<Object>)filterValue.get("value")) {
+						lookupNumberList.add(new BigDecimal(num.toString()));
+					}
+					break;
+				}
+				d.add(Restrictions.in(col, lookupNumberList));
 			}
 			break;
 		}
 		return d;
 	}
 	
-	// The Date type can be one of many chronological types (Date, Timestamp, Calendar, ...)
-	// So we need a way to know what to convert the DateTime to the appropriate class
-	// luckily the only other date types are Timestamps and they only belong to 
-	// createdTime and modifiedTime columns in this system
-	private static Criterion processDateFilter(String table, String column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Criterion processDateFilter(String table, String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
 		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
-		Boolean isTimestamp = (column.equalsIgnoreCase("createdTime") || column.equalsIgnoreCase("modifiedTime"));
-		
 		switch(type) {
-		case YEAR:
-			log.debug(String.format("processing YEAR date filter for: table:%s column:%s, sqlColumn:%s", table, column, createSqlColumn(column,table)));
-			log.debug(filterValue);
+		case MONTH:
+			// ASSERTION: month will be zero-based
+			// do a check on the month value to keep it within range
+			Integer m1 = (Integer)filterValue.get("month");
+			if(m1<0) {
+				m1 = 1;
+			} else if(m1>12) {
+				m1 = 12;
+			} else {
+				m1++;
+			}
 			
-			DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-M-d");
-			DateTime yearDay1 = fmt.parseDateTime( String.format("%s-1-1", filterValue.get("value")) );
-			DateTime yearDayLast = fmt.parseDateTime( String.format("%s-12-31", filterValue.get("value")) );
-			r = Restrictions.between(column, (Calendar)yearDay1.toGregorianCalendar(), (Calendar)yearDayLast.toGregorianCalendar());
+			r = Restrictions.sqlRestriction( String.format("MONTH(%s) = %d", createSqlColumn(column, table), m1) );
 			break;
+		
+		case MONTHYEAR:
+			// filterValue:{month:<int>, year:<int>,...}
+			Calendar monthStartDate = createCalendarFromTimestamp((long)filterValue.get("start"));
+			Calendar monthEndDate = createCalendarFromTimestamp(monthStartDate.getTimeInMillis());
+			monthEndDate.set(Calendar.DATE, monthEndDate.getActualMaximum(Calendar.DATE));
+			monthEndDate.set(Calendar.HOUR_OF_DAY, 23);
+			monthEndDate.set(Calendar.MINUTE, 59);
+			monthEndDate.set(Calendar.SECOND, 59);
+			monthEndDate.set(Calendar.MILLISECOND, 999);
+			
+			r = Restrictions.between(column, monthStartDate, monthEndDate);
+			break;
+		
+		case YEAR:
+			Calendar startDay = createCalendarFromTimestamp((long)filterValue.get("start"));
+			Calendar endDay = createCalendarFromTimestamp((long)filterValue.get("start"));
+			endDay.set(Calendar.DAY_OF_YEAR, endDay.getActualMaximum(Calendar.DAY_OF_YEAR));
+			endDay.set(Calendar.HOUR_OF_DAY, 23);
+			endDay.set(Calendar.MINUTE, 59);
+			endDay.set(Calendar.SECOND, 59);
+			endDay.set(Calendar.MILLISECOND, 999);
+			
+			r = Restrictions.between(column, startDay, endDay);
+			break;
+		
 		case EQUALS:
-			DateTime dt = dateFormat.parseDateTime(filterValue.get("value").toString());
-			r = Restrictions.eq(column, isTimestamp ? dt.toDate() : (Calendar)dt.toGregorianCalendar());
+			long filterTime = (long)filterValue.get("value");
+			r = Restrictions.eq(column, createCalendarFromTimestamp(filterTime));
 			break;
+		
 		case BEFORE:
-			DateTime dtb4 = dateFormat.parseDateTime(filterValue.get("value").toString());
-			r = Restrictions.lt(column, isTimestamp ? dtb4.toDate() : (Calendar)dtb4.toGregorianCalendar());
+			Calendar dtb4 = createCalendarFromTimestamp((long)filterValue.get("value"));
+			r = Restrictions.lt(column, dtb4);
 			break;
+		
 		case AFTER:
-			DateTime dtAfter = dateFormat.parseDateTime(filterValue.get("value").toString());
-			r = Restrictions.gt(column, isTimestamp ? dtAfter.toDate() : (Calendar)dtAfter.toGregorianCalendar());
+			Calendar dtAfter = createCalendarFromTimestamp((long)filterValue.get("value"));
+			r = Restrictions.gt(column, dtAfter);
 			break;
+		
 		case BETWEEN:
-			DateTime fromDate = dateFormat.parseDateTime(filterValue.get("fromDate").toString());
-			DateTime toDate = dateFormat.parseDateTime(filterValue.get("toDate").toString());
-			log.debug(String.format("Column: %s,%nisTimestamp: %s", column, isTimestamp));
-			r = Restrictions.between(column, 
-					isTimestamp ? fromDate.toDate() : (Calendar)fromDate.toGregorianCalendar(), 
-					isTimestamp ? toDate.toDate() : (Calendar)toDate.toGregorianCalendar()
-			);
+			Calendar from = createCalendarFromTimestamp((long)filterValue.get("fromDate"));
+			Calendar to = createCalendarFromTimestamp((long)filterValue.get("toDate"));
+			// set time parts to end of day
+			to.set(Calendar.HOUR_OF_DAY, 23);
+			to.set(Calendar.MINUTE, 59);
+			to.set(Calendar.SECOND, 59);
+			to.set(Calendar.MILLISECOND, 999);
+			
+			r = Restrictions.between(column, from, to);
 			break;
+		
 		case SELECT:
 			// the select widget will save the list of dates as an array of {date:<Date>, timestamp:<Long>} objects
 			// so we need to convert to a list of Dates or Calendars
-			ArrayList fvalues = new ArrayList();
-			List<HashMap<String, ? extends Object>> datesList = (ArrayList<HashMap<String, ? extends Object>>)filterValue.get("value");
-			for(ListIterator<HashMap<String, ? extends Object>> dIter = datesList.listIterator(); dIter.hasNext();) {
-				HashMap<String, ? extends Object> dateHash = dIter.next();
+			ArrayList<Calendar> fvalues = new ArrayList<Calendar>();
+			List<HashMap<String, Object>> datesList = (ArrayList<HashMap<String, Object>>)filterValue.get("value");
+			
+			for(ListIterator<HashMap<String, Object>> dIter = datesList.listIterator(); dIter.hasNext();) {
+				HashMap<String, Object> dateHash = dIter.next();
 				Calendar cal = Calendar.getInstance();
-				Long selTimestamp = (Long)dateHash.get("timestamp");
-				cal.setTimeInMillis(selTimestamp);
-				fvalues.add( isTimestamp ? new Date(selTimestamp) : (Calendar)cal.clone() );
+				cal.setTimeInMillis((Long)dateHash.get("timestamp"));
+				fvalues.add((Calendar)cal.clone());
 			}
 			r = Restrictions.in(column, fvalues);
 			break;
+		
 		case CYCLE:
-			/*
-			 * This is a custom filter type.
-			 * In order for this to work we need the original database column name since we are 
-			 * going to use a native SQL clause.
-			 * WHERE <column> BETWEEN DATE( CONCAT( YEAR(<D>),'-',MONTH(<D>),'-16' ) ) 
-			 * AND DATE( CONCAT( YEAR(<D>),'-',MONTH(<D>),'-',DAY( LAST_DAY(<D>) ) ) )
-			 * 1 = column, 2 = date string, 3 = date string, 4 = start day variable, 5 = date string, 6 = date string, 7 = end day variable
-			 */
-			Map<String, ? extends Object> cycleDateObj = (HashMap<String, ? extends Object>)filterValue.get("monthYear");
-			DateTime cycleDT = new DateTime((Long)cycleDateObj.get("timestamp"));
-			DateTimeFormatter sqlDateFormat = DateTimeFormat.forPattern("yyyy-M-d");
-			String cycleDateStr = sqlDateFormat.print(cycleDT);
-			String startDay = "16";
-			String endDaySQL = String.format("DAY(LAST_DAY('%s'))", cycleDateStr);
+			Map<String, Object> cycleDateObj = (Map<String, Object>)filterValue.get("monthYear");
+			// fitlerValue: { monthYear:{date:<ISO 8601 String>, timestamp:<long>}, cycle:<int>, cycleMap:<List<Map<label:<String>, value:<int>>>> }
+			long monthYearTimestamp = (long)cycleDateObj.get("timestamp");
+			Calendar fromRange = createCalendarFromTimestamp(monthYearTimestamp);
+			fromRange.set(Calendar.MILLISECOND, 0);
+			fromRange.set(Calendar.SECOND, 0);
+			fromRange.set(Calendar.MINUTE, 0);
+			fromRange.set(Calendar.HOUR, 0);
+			fromRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 1 : 16);
 			
-			// set start/end days based on the cycle property
-			if(filterValue.get("cycle").toString().equals("1")) {
-				startDay = "1";
-				endDaySQL = "'15'";
-			}
+			Calendar toRange = createCalendarFromTimestamp(monthYearTimestamp);
+			toRange.set(Calendar.MILLISECOND, 999);
+			toRange.set(Calendar.SECOND, 59);
+			toRange.set(Calendar.MINUTE, 59);
+			toRange.set(Calendar.HOUR_OF_DAY, 23);
+			toRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 15 : fromRange.getActualMaximum(Calendar.DATE));
 			
-			r = Restrictions.sqlRestriction(
-				String.format(
-					"%s BETWEEN DATE( CONCAT(YEAR('%s'),'-',MONTH('%s'),'-','%s') ) AND DATE( CONCAT(YEAR('%s'),'-',MONTH('%s'),'-',%s) )",
-					createSqlColumn(column,table),
-					cycleDateStr,
-					cycleDateStr,
-					startDay,
-					cycleDateStr,
-					cycleDateStr,
-					endDaySQL
-					)
-			);
+			log.debug(String.format("Cycle: %1$tF %1$tT (%3$s) to %2$tF %2$tT (%4$s)", fromRange, toRange, fromRange.getTimeInMillis(), toRange.getTimeInMillis()));
+			
+			r = Restrictions.between(column, fromRange, toRange);
 			break;
 		}
+		
 		return r;
 	}
-	private static Disjunction processDateFilter(String table, List<String> column, Map<String, ? extends Object> filterValue) throws Throwable {
-		// TODO finish processDateFilter() for multi-column
+	
+	
+	private static Disjunction processDateFilter(String table, List<String> column, Map<String, Object> filterValue) throws Throwable {
 		Disjunction d = Restrictions.disjunction();
 		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
-		
 		switch(type) {
+		case MONTH:
+			Integer m1 = (Integer)filterValue.get("month");
+			if(m1<0) {
+				m1 = 1;
+			} else if(m1>12) {
+				m1 = 12;
+			} else {
+				m1++;
+			}
+			for(String col : column) {
+				d.add( Restrictions.sqlRestriction( String.format("MONTH(%s) = %d", createSqlColumn(col, table), m1)) );
+			}
+			break;
+		
+		case MONTHYEAR:
+			Calendar monthStartDate = createCalendarFromTimestamp((long)filterValue.get("start"));
+			Calendar monthEndDate = createCalendarFromTimestamp(monthStartDate.getTimeInMillis());
+			monthEndDate.set(Calendar.DATE, monthEndDate.getActualMaximum(Calendar.DATE));
+			monthEndDate.set(Calendar.HOUR_OF_DAY, 23);
+			monthEndDate.set(Calendar.MINUTE, 59);
+			monthEndDate.set(Calendar.SECOND, 59);
+			monthEndDate.set(Calendar.MILLISECOND, 999);
+			
+			for(String col : column) {
+				d.add( Restrictions.between(col, monthStartDate, monthEndDate) );
+			}
+			break;
+		
 		case YEAR:
+			Calendar startDay = createCalendarFromTimestamp((long)filterValue.get("start"));
+			Calendar endDay = createCalendarFromTimestamp((long)filterValue.get("start"));
+			endDay.set(Calendar.DAY_OF_YEAR, endDay.getActualMaximum(Calendar.DAY_OF_YEAR));
+			endDay.set(Calendar.HOUR_OF_DAY, 23);
+			endDay.set(Calendar.MINUTE, 59);
+			endDay.set(Calendar.SECOND, 59);
+			endDay.set(Calendar.MILLISECOND, 999);
+			
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				d.add(Restrictions.sqlRestriction( String.format("YEAR(%s) = %s", createSqlColumn(col,table), filterValue.get("value")) ));
+				d.add(Restrictions.between(col, startDay, endDay));
 			}
 			break;
+		
 		case EQUALS:
-			DateTime dt = dateFormat.parseDateTime(filterValue.get("value").toString());
+			long filterTime = (long)filterValue.get("value");
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
-				d.add(Restrictions.eq(col, isTimestamp ? dt.toDate() : (Calendar)dt.toGregorianCalendar()));
+				d.add(Restrictions.eq(col, createCalendarFromTimestamp(filterTime)));
 			}
 			break;
+		
 		case BEFORE:
-			DateTime dtB4 = dateFormat.parseDateTime(filterValue.get("value").toString());
+			Calendar dtb4 = createCalendarFromTimestamp((long)filterValue.get("value"));
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
-				d.add(Restrictions.lt(col, isTimestamp ? dtB4.toDate() : (Calendar)dtB4.toGregorianCalendar()));
+				d.add(Restrictions.lt(col, dtb4));
 			}
 			break;
+		
 		case AFTER:
-			DateTime dtAfter = dateFormat.parseDateTime(filterValue.get("value").toString());
+			Calendar dtAfter = createCalendarFromTimestamp((long)filterValue.get("value"));
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
-				d.add(Restrictions.gt(col, isTimestamp ? dtAfter.toDate() : (Calendar)dtAfter.toGregorianCalendar()));
+				d.add(Restrictions.gt(col, dtAfter));
 			}
 			break;
+		
 		case BETWEEN:
-			DateTime fromDate = dateFormat.parseDateTime(filterValue.get("fromDate").toString());
-			DateTime toDate = dateFormat.parseDateTime(filterValue.get("toDate").toString());
+			Calendar from = createCalendarFromTimestamp((long)filterValue.get("fromDate"));
+			Calendar to = createCalendarFromTimestamp((long)filterValue.get("toDate"));
+			// set time parts to end of day
+			to.set(Calendar.HOUR_OF_DAY, 23);
+			to.set(Calendar.MINUTE, 59);
+			to.set(Calendar.SECOND, 59);
+			to.set(Calendar.MILLISECOND, 999);
+			
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
-				d.add( Restrictions.between(col, 
-					isTimestamp ? fromDate.toDate() : (Calendar)fromDate.toGregorianCalendar(), 
-					isTimestamp ? toDate.toDate() : (Calendar)toDate.toGregorianCalendar())
-				);
+				d.add( Restrictions.between(col, from, to) );
 			}
 			break;
+		
 		case SELECT:
 			ArrayList<Calendar> fvalues = new ArrayList<Calendar>();
-			List<HashMap<String, ? extends Object>> datesList = (ArrayList<HashMap<String, ? extends Object>>)filterValue.get("value");
-			for(ListIterator<HashMap<String, ? extends Object>> dIter = datesList.listIterator(); dIter.hasNext();) {
-				HashMap<String, ? extends Object> dateHash = dIter.next();
+			List<HashMap<String, Object>> datesList = (ArrayList<HashMap<String, Object>>)filterValue.get("value");
+			
+			for(ListIterator<HashMap<String, Object>> dIter = datesList.listIterator(); dIter.hasNext();) {
+				HashMap<String, Object> dateHash = dIter.next();
 				Calendar cal = Calendar.getInstance();
-				Long selTimestamp = (Long)dateHash.get("timestamp");
-				cal.setTimeInMillis(selTimestamp);
-				fvalues.add( (Calendar)cal.clone() );
+				cal.setTimeInMillis((Long)dateHash.get("timestamp"));
+				fvalues.add((Calendar)cal.clone());
 			}
 			
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
-				Boolean isTimestamp = (col.equalsIgnoreCase("createdTime") || col.equalsIgnoreCase("modifiedTime"));
-				if(isTimestamp) {
-					// need a List of Date no Calendar
-					ArrayList<Date> changeList = new ArrayList<Date>();
-					for(ListIterator<Calendar> calIter = fvalues.listIterator(); calIter.hasNext();) {
-						Calendar c = calIter.next();
-						changeList.add(c.getTime());
-					}
-					d.add( Restrictions.in(col, changeList) );
-					
-				} else {
-					d.add( Restrictions.in(col, fvalues) );
-				}
+				d.add( Restrictions.in(col, fvalues) );
 			}
 			break;
+		
 		case CYCLE:
-			Map<String, ? extends Object> cycleDateObj = (HashMap<String, ? extends Object>)filterValue.get("monthYear");
-			DateTime cycleDT = new DateTime((Long)cycleDateObj.get("timestamp"));
-			DateTimeFormatter sqlDateFormat = DateTimeFormat.forPattern("yyyy-M-d");
-			String cycleDateStr = sqlDateFormat.print(cycleDT);
-			String startDay = "16";
-			String endDaySQL = String.format("DAY(LAST_DAY('%s'))", cycleDateStr);
-			String sqlColumn = String.format("%s", column);//ensures a copy
+			Map<String, Object> cycleDateObj = (Map<String, Object>)filterValue.get("monthYear");
+			// fitlerValue: { monthYear:{date:<ISO 8601 String>, timestamp:<long>}, cycle:<int>, cycleMap:<List<Map<label:<String>, value:<int>>>> }
+			long monthYearTimestamp = (long)cycleDateObj.get("timestamp");
+			Calendar fromRange = createCalendarFromTimestamp(monthYearTimestamp);
+			fromRange.set(Calendar.MILLISECOND, 0);
+			fromRange.set(Calendar.SECOND, 0);
+			fromRange.set(Calendar.MINUTE, 0);
+			fromRange.set(Calendar.HOUR, 0);
+			fromRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 1 : 16);
 			
-			if(filterValue.get("cycle").toString().equals("1")) {
-				startDay = "1";
-				endDaySQL = "'15'";
-			}
+			Calendar toRange = createCalendarFromTimestamp(monthYearTimestamp);
+			toRange.set(Calendar.MILLISECOND, 999);
+			toRange.set(Calendar.SECOND, 59);
+			toRange.set(Calendar.MINUTE, 59);
+			toRange.set(Calendar.HOUR_OF_DAY, 23);
+			toRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 15 : fromRange.getActualMaximum(Calendar.DATE));
 			
-			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
-				String col = li.next();
-				d.add(
-					Restrictions.sqlRestriction(
-						String.format(
-							"%s BETWEEN DATE( CONCAT(YEAR('%s'),'-',MONTH('%s'),'-','%s') ) AND DATE( CONCAT(YEAR('%s'),'-',MONTH('%s'),'-',%s) )",
-							createSqlColumn(col,table),
-							cycleDateStr,
-							cycleDateStr,
-							startDay,
-							cycleDateStr,
-							cycleDateStr,
-							endDaySQL
-							)
-					)
-				);
+			for(String col : column) {
+				d.add( Restrictions.between(col, fromRange, toRange) );
 			}
 			break;
 		}
+		
 		return d;
 	}
 	

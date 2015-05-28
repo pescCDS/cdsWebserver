@@ -1,20 +1,21 @@
 package org.pesc.cds.datatables;
 
 public enum Filter_Type {
-	EQUALS	(0, "EQUALS", "Filter type where the filter value is explicitely equal to another value"),
-	SEARCH	(1, "SEARCH", "Filter type where the filter value is similar to another value"),
-	BETWEEN	(2, "BETWEEN", "Filter type where the filter value is between two values"),
-	SELECT	(3, "SELECT", "Filter type where the filter value will be in a list of values"),
-	CYCLE	(4, "CYCLE", "Filter type (most likely date) where the filter value matches a particular cycle"),
-	IN		(5, "IN", "Filter type where the filter value is a list of values"),
-	BEFORE  (6, "BEFORE", "Filter type where the expected value (date) is before the filter value"),
-	AFTER	(7, "AFTER", "Filter type where the expected value (date) is after the filter value"),
-	YEAR	(8, "YEAR", "Filter type where the filter value is just the year component of a date value"),
-	MONTH	(9, "MONTH", "Filter type where the filter value is a month"),
-	MONTHDAY(10, "MONTHDAY", "Filter type where the filter value is the month and day compenents of a date value"),
-	DAY		(11, "DAY", "Filter type where the filter value is a list of numbers from 1 to 31"),
-	WEEKDAY (12, "WEEKDAY", "Filter type where the filter value is the name of a week day"),
-	RELATIVE(13, "RELATIVE", "Filter type where the filter value is a relative date phrase with a numeric value");
+	EQUALS	  (0, "EQUALS", "Filter type where the filter value is explicitely equal to another value"),
+	SEARCH	  (1, "SEARCH", "Filter type where the filter value is similar to another value"),
+	BETWEEN	  (2, "BETWEEN", "Filter type where the filter value is between two values"),
+	SELECT	  (3, "SELECT", "Filter type where the filter value will be in a list of values"),
+	CYCLE	  (4, "CYCLE", "Filter type (most likely date) where the filter value matches a particular cycle"),
+	IN		  (5, "IN", "Filter type where the filter value is a list of values"),
+	BEFORE    (6, "BEFORE", "Filter type where the expected value (date) is before the filter value"),
+	AFTER	  (7, "AFTER", "Filter type where the expected value (date) is after the filter value"),
+	YEAR	  (8, "YEAR", "Filter type where the filter value is just the year component of a date value"),
+	MONTH	  (9, "MONTH", "Filter type where the filter value is a month"),
+	MONTHDAY  (10, "MONTHDAY", "Filter type where the filter value is the month and day compenents of a date value"),
+	MONTHYEAR (11, "MONTHYEAR", "Filter type where the filter value is the month and year components of a date value"),
+	DAY		  (12, "DAY", "Filter type where the filter value is a list of numbers from 1 to 31"),
+	WEEKDAY   (13, "WEEKDAY", "Filter type where the filter value is the name of a week day"),
+	RELATIVE  (14, "RELATIVE", "Filter type where the filter value is a relative date phrase with a numeric value");
 	
 	private Integer code;
 	private String label;
@@ -43,9 +44,10 @@ public enum Filter_Type {
 		case 8: return Filter_Type.YEAR;
 		case 9: return Filter_Type.MONTH;
 		case 10: return Filter_Type.MONTHDAY;
-		case 11: return Filter_Type.DAY;
-		case 12: return Filter_Type.WEEKDAY;
-		case 13: return Filter_Type.RELATIVE;
+		case 11: return Filter_Type.MONTHYEAR;
+		case 12: return Filter_Type.DAY;
+		case 13: return Filter_Type.WEEKDAY;
+		case 14: return Filter_Type.RELATIVE;
 		default: throw new Exception("Unknown Filter Type");
 		}
 	}
@@ -62,6 +64,7 @@ public enum Filter_Type {
 		else if(v.equalsIgnoreCase("year")) { return Filter_Type.YEAR; }
 		else if(v.equalsIgnoreCase("month")) { return Filter_Type.MONTH; }
 		else if(v.equalsIgnoreCase("monthday")) { return Filter_Type.MONTHDAY; }
+		else if(v.equalsIgnoreCase("monthyear")) { return Filter_Type.MONTHYEAR; }
 		else if(v.equalsIgnoreCase("day")) { return Filter_Type.DAY; }
 		else if(v.equalsIgnoreCase("weekday")) { return Filter_Type.WEEKDAY; }
 		else if(v.equalsIgnoreCase("relative")) { return Filter_Type.RELATIVE; }
