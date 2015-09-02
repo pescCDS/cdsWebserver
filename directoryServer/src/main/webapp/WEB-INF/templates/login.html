@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/resources :: resourceHead (title=#{title.login})">
-    <title>Login Page</title>
-    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
-</head>
+<head th:replace="layout/resources :: resourceHead (title=#{title.login})"></head>
 <body>
-
 	<div class="container-fluid">
     	<div class="page-header">
         	<h1 th:text="#{title.login}"></h1>
@@ -59,11 +55,11 @@
     <th:block th:replace="layout/resources :: resourceScripts"></th:block>
     <script th:inline="javascript">
 	
-	var loginusers = [{username:'sysadmin'},{username:'dsadmin'},{username:'dsuser'}],
+	var loginusers = [{'username':'sysadmin'},{'username':'dsadmin'},{'username':'dsuser'}],
 		logins = new Bloodhound({
-		datumTokenizer:Bloodhound.tokenizers.obj.whitespace('username'),
-		queryTokenizer:Bloodhound.tokenizers.whitespace,
-		local:loginusers
+		'datumTokenizer':Bloodhound.tokenizers.obj.whitespace('username'),
+		'queryTokenizer':Bloodhound.tokenizers.whitespace,
+		'local':loginusers
 	});
 	
 	$(document).ready(function(){
@@ -71,8 +67,8 @@
 		
 		logins.initialize().done(function(){
 			$('#login_user_input .typeahead').typeahead(
-				{highlight:false, hint:false, minLength:3},
-				{ name:'logins', displayKey:'username', source:logins.ttAdapter() }
+				{'highlight':false, 'hint':false, 'minLength':3},
+				{ 'name':'logins', 'displayKey':'username', 'source':logins.ttAdapter() }
 			);
 		}).fail(function(){
 			console.log('login data source initialize fail');

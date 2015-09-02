@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/resources :: resourceHead (title=#{title.contacts})">
-    <title th:text="#{title.contacts}">Contacts Page</title>
-    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/jquery.dataTables.min.css" th:href="@{/resources/css/jquery.dataTables.min.css}" />
-</head>
+<head th:replace="layout/resources :: resourceHead (title=#{title.contacts})"></head>
 <body>
 	<div class="container-fluid">
 		<div th:replace="layout/nav :: layoutNav"></div>
@@ -17,81 +9,246 @@
         	<h1 th:text="#{title.contacts}">Page Title</h1>
         </div>
     	
-        <div id="ecView"></div>
+        <div id="dtView"></div>
     
     	<div th:replace="layout/footer :: layoutFooter"></div>
     </div>
 	<th:block th:replace="layout/resources :: resourceScripts"></th:block>
     <script th:inline="javascript">
-		var organizations = new Bloodhound({
-			'name':'organizations',
-			'datumTokenizer':function(d) {
-				return Bloodhound.tokenizers.whitespace(d.value);
-			},
-			'queryTokenizer':Bloodhound.tokenizers.nonword,
-			'remote':{
-				'url':/*[[ @{/services/rest/organizations} ]]*/ '/EdExchange/services/rest/organizations',
-				'replace':function(url,query) {
-					return [url,query].join('?query=');
+		var dtView,
+		    organizations = new Bloodhound({
+				'name':'organizations',
+				'datumTokenizer':function(d) {
+					return Bloodhound.tokenizers.whitespace(d.value);
+				},
+				'queryTokenizer':Bloodhound.tokenizers.nonword,
+				'remote':{
+					'url':/*[[ @{/services/rest/organizations} ]]*/ '/EdExchange/services/rest/organizations',
+					'replace':function(url,query) {
+						return [url,query].join('?query=');
+					}
 				}
-			}
-		}),
-			dtView;
+		    });
 		
 		$(document).ready(function(e){
-			dtView = new DataTableView({
-				'dataClass':'OrganizationContact',
-				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
-				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
-				'table':{
-					'name':'contacts',
-					'primaryKey':'contactId',
-					'defaultColumnOrder':[[4,'asc']],
-					'columns':[
-						{'data':'contactId', 'name':'contactId', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
-						{'data':'contactName', 'name':'contactName', 'type':'varchar', 'title':'Name', 'required':true, 'controlType':'text'},
-						{'data':'contactTitle', 'name':'contactTitle', 'type':'text', 'title':'Title', 'required':true, 'required':false, 'controlType':'text'},
-						{'data':'contactType', 'name':'contactType', 'type':'text', 'title':'Type', 'required':true, 'controlType':'text'},
-						{'data':'email', 'name':'email', 'type':'text', 'title':'Email', 'required':true, 'controlType':'text'},
-						{'data':'phone1', 'name':'phone1', 'type':'text', 'title':'Phone 1', 'required':true, 'controlType':'text'},
-						{'data':'phone2', 'name':'phone2', 'type':'text', 'title':'Phone 2', 'required':false, 'controlType':'text'},
-						{'data':'streetAddress1', 'name':'streetAddress1', 'type':'text', 'title':'Address 1', 'required':true, 'controlType':'text'},
-						{'data':'streetAddress2', 'name':'streetAddress2', 'type':'text', 'title':'Address 2', 'required':true, 'controlType':'text'},
-						{'data':'streetAddress3', 'name':'streetAddress3', 'type':'text', 'title':'Address 3', 'required':false, 'controlType':'text'},
-						{'data':'streetAddress4', 'name':'streetAddress4', 'type':'text', 'title':'Address 4', 'required':false, 'controlType':'text'},
-						{'data':'city', 'name':'city', 'type':'text', 'title':'City', 'required':true, 'controlType':'text'},
-						{'data':'state', 'name':'state', 'type':'text', 'title':'State', 'required':true, 'controlType':'text'},
-						{'data':'zip', 'name':'zip', 'type':'text', 'title':'Zip', 'required':true, 'controlType':'text'},
-						{'data':'country', 'name':'country', 'type':'text', 'title':'Country', 'required':true, 'controlType':'text'},
-						
+			dtView = $('#dtView').DataTableView({
+			    'mode':$.fn.DataTableView.MODES.MODIFY,
+                'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
+                'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+                'tableData':{
+                    'name':'contacts',
+                    'class':'OrganizationContact',
+                    'label':'Contact',
+                    'primaryKeyColumn':'contactId',
+                    'columns':[
 						{
-							'data':'directory',
-							'name':'directory',
-							'type':'object',
-							'required':true,
-							'displayKey':'organizationName',
-							'valueKey':'directoryId',
-							'table':'organizations',
-							'datasource':organizations,
-							'title':'Directory', 
-							'controlType':'typeahead',
-							'cftype':'biglist'
-						},
-						
-						{
-							'data':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 
-							'disabled':true, 'required':false, 'controlType':'timestamp', 
-							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						    'data':'contactId', 
+						    'control':{
+                                'type':'hidden', 
+                                'name':'contactId'
+                            }
 						},
 						{
-							'data':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 
-							'disabled':true, 'required':false, 'controlType':'timestamp', 
-							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
-						}
-					]
-				}
+						    'data':'contactName', 
+						    'type':'varchar', 
+						    'title':'Name', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'contactName',
+                                'label':'Name'
+                            }
+						},
+						{
+						    'data':'contactTitle',  
+						    'type':'text', 
+						    'title':'Title', 
+						    'required':false, 
+						    'control':{
+                                'type':'text',
+                                'name':'contactTitle',
+                                'label':'Title'
+                            }
+						},
+						{
+						    'data':'contactType',  
+						    'type':'text', 
+						    'title':'Type', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'contactType',
+                                'label':'Type'
+                            }
+						},
+						{
+						    'data':'email',  
+						    'type':'text', 
+						    'title':'Email', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'email',
+                                'label':'Email'
+                            }
+						},
+						{
+						    'data':'phone1',  
+						    'type':'text', 
+						    'title':'Phone 1', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'phone1',
+                                'label':'Phone 1'
+                            }
+						},
+						{
+						    'data':'phone2',  
+						    'type':'text', 
+						    'title':'Phone 2', 
+						    'required':false, 
+						    'control':{
+                                'type':'text',
+                                'name':'phone2',
+                                'label':'Phone 2'
+                            }
+						},
+						{
+						    'data':'streetAddress1',  
+						    'type':'text', 
+						    'title':'Address 1', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'streetAddress1',
+                                'label':'Address 1'
+                            }
+						},
+						{
+						    'data':'streetAddress2',  
+						    'type':'text', 
+						    'title':'Address 2', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'streetAddress2',
+                                'label':'Address 2'
+                            }
+						},
+						{
+						    'data':'streetAddress3',  
+						    'type':'text', 
+						    'title':'Address 3', 
+						    'required':false, 
+						    'control':{
+                                'type':'text',
+                                'name':'streetAddress3',
+                                'label':'Address 3'
+                            }
+						},
+						{
+						    'data':'streetAddress4',  
+						    'type':'text', 
+						    'title':'Address 4', 
+						    'required':false, 
+						    'control':{
+                                'type':'text',
+                                'name':'streetAddress4',
+                                'label':'Address 4'
+                            }
+						},
+						{
+						    'data':'city', 
+						    'type':'text', 
+						    'title':'City', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'city',
+                                'label':'City'
+                            }
+						},
+						{
+						    'data':'state', 
+						    'type':'text', 
+						    'title':'State', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'state',
+                                'label':'State'
+                            }
+						},
+						{
+						    'data':'zip', 
+						    'type':'text', 
+						    'title':'Zip', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'zip',
+                                'label':'Zip'
+                            }
+						},
+						{
+						    'data':'country', 
+						    'type':'text', 
+						    'title':'Country', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'country',
+                                'label':'Country'
+                            }
+						},
+						{
+						    'data':'directory',
+						    'type':'reference',
+						    'title':'Directory', 
+						    'required':true,
+						    'control':{
+                                'type':'typeahead'
+                            },
+						    'table':'organizations',
+						    'datasource':organizations,
+						    'displayKey':'organizationName',
+						    'valueKey':'directoryId'
+						},
+						{
+                            'data':'createdTime',  
+                            'type':'timestamp', 
+                            'title':'Created', 
+                            'required':false, 
+                            'control':{
+                                'type':'timestamp',
+                                'disabled':true
+                            },
+                            'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+                        },
+                        {
+                            'data':'modifiedTime',  
+                            'type':'timestamp', 
+                            'title':'Modified',  
+                            'required':false, 
+                            'control':{
+                                'type':'timestamp',
+                                'disabled':true
+                            },
+                            'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+                        }
+                    ]
+			    },
+			    'columnfiltersConfig':{
+                    'table':'contacts'
+                },
+                'datatableConfig':{
+                    'mode':$.fn.ColumnFilters.Modes.CATEGORY_SETS,
+                    'url':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
+                    'table':'contacts',
+                    'order':[[4,'asc']]
+                }
 			});
-			$('#ecView').replaceWith(dtView.$el);
 		});
 	</script>
 </body>

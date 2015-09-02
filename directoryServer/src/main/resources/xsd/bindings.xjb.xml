@@ -23,7 +23,7 @@ xsi:schemaLocation="EdExchangeEnvelope_v1.0.8.xsd
 				parseMethod="org.pesc.cds.xml.XMLAdapter.parseDateTime" 
 				printMethod="org.pesc.cds.xml.XMLAdapter.printDateTime" />
 	        
-	        <jaxb:javaType name="java.sql.Timestamp" xmlType="EdEx:Timestamp" 
+	        <jaxb:javaType name="java.util.Calendar" xmlType="EdEx:Timestamp" 
 	        	printMethod="org.pesc.cds.xml.XMLAdapter.printTimestamp"
 	        	parseMethod="org.pesc.cds.xml.XMLAdapter.parseTimestamp" />
 	        

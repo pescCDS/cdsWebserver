@@ -13,7 +13,7 @@
 		<property name="formatName" column="format_name" not-null="true" type="string" length="10" />
 		<property name="formatDescription" column="format_description" type="string" />
 		<property name="formatInuseCount" column="format_inuse_count" type="integer" />
-		<property name="createdTime" column="created_time" type="timestamp" update="false" insert="false" generated="always" />
-		<property name="modifiedTime" column="modified_time" type="timestamp" update="false" insert="false" generated="always" />
+		<property name="createdTime" column="created_time" type="java.util.Calendar" update="false" insert="false" generated="always" />
+		<property name="modifiedTime" column="modified_time" type="java.util.Calendar" update="false" insert="false" generated="always" />
 	</class>
 </hibernate-mapping>

@@ -5,9 +5,9 @@
 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
     
-    <!-- remove this for production -->
+    <!-- remove this for production 
     <debug />
-    
+    -->
     <http use-expressions="true" disable-url-rewriting="true">
         <session-management invalid-session-url="/login" session-fixation-protection="none">
         	<concurrency-control max-sessions="1" />

@@ -1,0 +1,36 @@
+.columnfilters .panel>nav.navbar{min-height:auto !important;margin-bottom:auto !important}
+.columnfilters nav.navbar form.navbar-form{margin:2px 0 !important}
+.columnfilters nav.cf-column-select-control{border-bottom-left-radius:0 !important;border-bottom-right-radius:0 !important}
+.columnfilters #cf-filter-select-tools option.disabled{color:#bfbfbf !important}
+.columnfilters .cf-select-widget-list li{border-style:none !important;padding:3px 9px !important}
+.columnfilters .cf-select-widget-list li button{margin-top:-4px}
+.columnfilters .cf-enum-dropdown-list{min-width:150px;max-height:200px;overflow:hidden;overflow-y:auto}
+.columnfilters .cf-enum-dropdown-list li{padding-left:8px;padding-right:8px}
+.columnfilters .cf-nopad-dropdown{padding:0}
+.columnfilters .cf-custom-ui-container{margin-left:5px;margin-right:5px}
+.columnfilters .cf-fw-enum-list-item{padding:3px 10px}
+.columnfilters .cf-fw-enum-list-item label{white-space:nowrap}
+.columnfilters .cf-fw-enum-list-item label span{margin-left:7px}
+.columnfilters .panel .cf-data-filters-container{max-height:86px;overflow:hidden;padding:0 !important}
+.columnfilters .panel .cf-data-filters-container>p{margin-top:10px;padding:10px 15px}
+.columnfilters .panel .cf-data-filters-container .cf-column-filters-list-container{max-height:86px;overflow-y:auto;width:30%;float:left}
+.columnfilters .panel .cf-data-filters-container div.tab-content{max-height:86px;overflow-y:auto;width:70%;float:left}
+.columnfilters .panel .cf-data-filters-container div.tab-content div.tab-pane{margin-bottom:0 !important}
+.columnfilters nav.cf-filter-save-control{border-top-left-radius:0 !important;border-top-right-radius:0 !important}
+.columnfilters nav.cf-filter-save-control li.cf-save-filter-list-item{list-style-type:none !important}
+.columnfilters nav.cf-filter-save-control .nav>li>a{padding:inherit}
+.columnfilters nav.cf-filter-save-control .cf-fsc-filter-set-menu{max-width:450px;max-height:125px;overflow:hidden;overflow-y:auto;border-radius:4px !important;padding:0 !important;box-shadow:0 6px 12px rgba(0,0,0,0.176)}
+.columnfilters nav.cf-filter-save-control .cf-fsc-filter-set-menu li{border-left-style:none !important;border-right-style:none !important;border-top-style:none !important;border-radius:0 !important;padding:5px 10px}
+.columnfilters nav.cf-filter-save-control .cf-fsc-filter-set-menu li:nth-child(odd){border-bottom:solid 2px #ccc !important;border-top:solid 1px #ccc !important}
+.columnfilters nav.cf-filter-save-control .cf-fsc-filter-set-menu li:first-child{border-top-style:none !important}
+.columnfilters nav.cf-filter-save-control .cf-fsc-filter-set-menu li:last-child{border-bottom-style:none !important}
+.columnfilters nav.cf-filter-save-control .cf-fsc-filter-set-menu li h4{white-space:nowrap;overflow:hidden;text-overflow:ellipsis !important}
+.columnfilters nav.cf-filter-save-control .cf-fsc-filter-set-menu li p{min-width:300px;max-height:2.5em;font-size:.8em;white-space:normal;overflow:hidden;text-overflow:ellipsis !important}
+.cf-notification{position:fixed !important;margin-top:-10px !important;z-index:99999 !important;max-height:100px !important}
+.cf-notification p{max-height:3em;overflow:auto}
+.columnfilters .tt-query{box-shadow:inset 0 1px 1px rgba(0,0,0,0.075)}
+.columnfilters .tt-hint{color:#999}
+.columnfilters .tt-menu{margin-top:1px;padding:8px 0;background-color:#fff;border:1px solid #ccc;border:1px solid rgba(0,0,0,0.2);border-radius:8px;box-shadow:0 5px 10px rgba(0,0,0,.2);width:100%}
+.columnfilters .tt-dropdown-menu .tt-menu{max-height:150px;overflow-y:auto}
+.columnfilters .tt-suggestion{padding:3px 20px;font-size:18px;line-height:24px}
+.columnfilters .tt-suggestion:hover{color:#fff;background-color:#0097cf;cursor:pointer}

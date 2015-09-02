@@ -13,17 +13,13 @@
     <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
     <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
     <link rel="stylesheet" href="../../resources/css/dataTables.bootstrap.css" th:href="@{/resources/css/dataTables.bootstrap.css}" />
-    <link rel="stylesheet" href="../../resources/css/datepicker.css" th:href="@{/resources/css/datepicker.css}" />
-    <link rel="stylesheet" href="../../resources/css/datepicker3.css" th:href="@{/resources/css/datepicker3.css}" />
+    <link rel="stylesheet" href="../../resources/css/bootstrap-datepicker3.min.css" th:href="@{/resources/css/bootstrap-datepicker3.min.css}" />
     <link rel="stylesheet" href="../../resources/css/fuelux.min.css" th:href="@{/resources/css/fuelux.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/columnfilters.css" th:href="@{/resources/css/columnfilters.css}" />
     <link rel="stylesheet" href="../../resources/css/typeahead-ext.css" th:href="@{/resources/css/typeahead-ext.css}" />
+    <link rel="stylesheet" href="../../resources/css/dataTables.columnfilters.min.css" th:href="@{/resources/css/dataTables.columnfilters.min.css}" />
+    <link rel="stylesheet" href="../../resources/css/dataTables.fixedColumns.min.css" th:href="@{/resources/css/dataTables.fixedColumns.min.css}" />
+    <link rel="stylesheet" href="../../resources/css/datatable-view.min.css" th:href="@{/resources/css/datatable-view.min.css}" />
     <link rel="stylesheet" href="../../resources/css/edex-master-style.css" th:href="@{/resources/css/edex-master-style.css}" />
-    
-    <!-- TODO we only need one page template, so just have /templates/content/page.html -->
-    <th:block th:with="page=${#vars.get('org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping')},isDatatablePage=${#arrays.contains(new String[]{'/documentFormats','/entityCodes','/organizations','/contacts','/deliveryMethods','/deliveryOptions'}, page )}">
-    	<script id="pageTemplate" type="text/template" th:include="content/datatablePage :: content (page=${page})" th:if="*{isDatatablePage}"></script>
-    </th:block>
 </head>
 
 <body>
@@ -33,14 +29,14 @@
         <script src="../../resources/js/backbone-min.js" th:src="@{/resources/js/backbone-min.js}"></script>
 		<script src="../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
         <script src="../../resources/js/moment.min.js" th:src="@{/resources/js/moment.min.js}"></script>
-        <script src="../../resources/js/typeahead.bundle.js" th:src="@{/resources/js/typeahead.bundle.js}"></script>
+        <script src="../../resources/js/typeahead.bundle.min.js" th:src="@{/resources/js/typeahead.bundle.min.js}"></script>
         <script src="../../resources/js/jquery.dataTables.min.js" th:src="@{/resources/js/jquery.dataTables.min.js}"></script>
         <script src="../../resources/js/dataTables.bootstrap.js" th:src="@{/resources/js/dataTables.bootstrap.js}"></script>
         <script src="../../resources/js/dataTables.fixedColumns.min.js" th:src="@{/resources/js/dataTables.fixedColumns.min.js}"></script>
-        <script src="../../resources/js/bootstrap-datepicker.js" th:src="@{/resources/js/bootstrap-datepicker.js}"></script>
+        <script src="../../resources/js/bootstrap-datepicker.min.js" th:src="@{/resources/js/bootstrap-datepicker.min.js}"></script>
         <script src="../../resources/js/spinbox.js" th:src="@{/resources/js/spinbox.js}"></script>
-        <script src="../../resources/js/columnfilters.js" th:src="@{/resources/js/columnfilters.js}"></script>
-        <script src="../../resources/js/datatable-view.js" th:src="@{/resources/js/datatable-view.js}"></script>
+        <script src="../../resources/js/dataTables.columnfilters.min.js" th:src="@{/resources/js/dataTables.columnfilters.min.js}"></script>
+        <script src="../../resources/js/datatable-view.min.js" th:src="@{/resources/js/datatable-view.min.js}"></script>
     </th:block>
 </body>
 </html>

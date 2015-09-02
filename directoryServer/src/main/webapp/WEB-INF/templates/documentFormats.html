@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/resources :: resourceHead (title=#{title.documentFormats})">
-    <title th:text="#{title.documentFormats}">Document Formats Page</title>
-    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/jquery.dataTables.min.css" th:href="@{/resources/css/jquery.dataTables.min.css}" />
-</head>
+<head th:replace="layout/resources :: resourceHead (title=#{title.documentFormats})"></head>
 <body>
 	<div class="container-fluid">
 		<div th:replace="layout/nav :: layoutNav"></div>
@@ -17,7 +9,7 @@
         	<h1 th:text="#{title.documentFormats}">Page Title</h1>
         </div>
     	
-        <div id="dfView"></div>
+        <div id="dtView"></div>
     
     	<div th:replace="layout/footer :: layoutFooter"></div>
     </div>
@@ -26,25 +18,86 @@
 		var dtView;
 		
 		$(document).ready(function(e){
-			dtView = new DataTableView({
-				'dataClass':'DocumentFormat',
-				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
-				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
-				'table':{
-					'name':'documentFormats',
-					'primaryKey':'id',
-					'defaultColumnOrder':[[4,'asc']],
-					'columns':[
-						{'data':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
-						{'data':'formatName', 'name':'formatName', 'title':'Name', 'type':'varchar', 'controlType':'text'},
-						{'data':'formatDescription', 'name':'formatDescription', 'type':'text', 'title':'Description', 'required':false, 'controlType':'textarea'},
-						{'data':'formatInuseCount', 'name':'formatInuseCount', 'type':'tinyint', 'title':'Inuse Count', 'controlType':'spinbox'},
-						{'data':'createdTime', 'name':'createdTime', 'type':'timestamp', 'title':'Created', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}},
-						{'data':'modifiedTime', 'name':'modifiedTime', 'type':'timestamp', 'title':'Modified', 'disabled':true, 'required':false, 'controlType':'timestamp', 'render':{'_':function(z){ return moment(z).format('M/d/YYYY h:mm:ss a'); }}}
-					]
-				}
-			});
-			$('#dfView').replaceWith(dtView.$el);
+			dtView = $('#dtView').DataTableView({
+                'mode':$.fn.DataTableView.MODES.MODIFY,
+                'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
+                'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+                'tableData':{
+                    'name':'documentFormats',
+                    'class':'DocumentFormat',
+                    'label':'Document Format',
+                    'primaryKeyColumn':'id',
+                    'columns':[
+						{
+						    'data':'id',  
+						    'type':'int', 
+						    'control':{
+                                'type':'hidden', 
+                                'name':'id'
+                            }
+						},
+						{
+						    'data':'formatName',  
+						    'title':'Name', 
+						    'type':'varchar', 
+						    'control':{
+                                'type':'text',
+                                'name':'formatName',
+                                'label':'Name'
+                            }
+						},
+						{
+						    'data':'formatDescription',  
+						    'type':'text', 
+						    'title':'Description', 
+						    'control':{
+                                'type':'textarea',
+                                'name':'formatDescription',
+                                'label':'Description'
+                            }
+						},
+						{
+						    'data':'formatInuseCount',  
+						    'type':'tinyint', 
+						    'title':'Inuse Count', 
+						    'control':{
+		                        'type':'number'
+		                    }
+						},
+						{
+                            'data':'createdTime',  
+                            'type':'timestamp', 
+                            'title':'Created', 
+                            'required':false, 
+                            'control':{
+                                'type':'timestamp',
+                                'disabled':true
+                            },
+                            'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+                        },
+                        {
+                            'data':'modifiedTime',  
+                            'type':'timestamp', 
+                            'title':'Modified',  
+                            'required':false, 
+                            'control':{
+                                'type':'timestamp',
+                                'disabled':true
+                            },
+                            'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+                        }
+                    ]
+                },
+                'columnfiltersConfig':{
+                    'table':'documentFormats'
+                },
+                'datatableConfig':{
+                    'mode':$.fn.ColumnFilters.Modes.CATEGORY_SETS,
+                    'url':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
+                    'table':'documentFormats',
+                    'order':[[4,'asc']]
+                }
+            });
 		});
 	</script>
 </body>

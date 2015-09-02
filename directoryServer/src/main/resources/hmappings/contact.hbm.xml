@@ -27,8 +27,8 @@
     
     <many-to-one name="directory" column="directory_id" class="Organization" not-null="true" lazy="false" />
     
-    <property name="createdTime" column="created_time" type="timestamp" update="false" insert="false" generated="always" />
-	<property name="modifiedTime" column="modified_time" type="timestamp" update="false" insert="false" generated="always" />
+    <property name="createdTime" column="created_time" type="java.util.Calendar" update="false" insert="false" generated="always" />
+	<property name="modifiedTime" column="modified_time" type="java.util.Calendar" update="false" insert="false" generated="always" />
     
    </class>
 </hibernate-mapping>

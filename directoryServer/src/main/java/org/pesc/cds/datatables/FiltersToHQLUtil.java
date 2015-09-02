@@ -3,7 +3,6 @@ package org.pesc.cds.datatables;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.pesc.cds.webservice.service.DatasourceManagerUtil;
@@ -54,16 +52,14 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	// I think the columns that are not dates can be removed
 	private static HashMap<String, String> buildColumnAliasMap() {
 		HashMap<String, String> retMap = new HashMap<String, String>();
-		retMap.put("organization_contact.createdTime", "created_time");
-		retMap.put("organization_contact.modifiedTime", "modified_time");
-		retMap.put("organization_credential.createdTime", "created_time");
-		retMap.put("organization_credential.modifiedTime", "modified_time");
-		retMap.put("organization_directory.createdTime", "created_time");
-		retMap.put("organization_directory.modifiedTime", "modified_time");
-		retMap.put("document_format.createdTime", "created_time");
-		retMap.put("document_format.modifiedTime", "modified_time");
-		retMap.put("organization_entity_code.createdTime", "created_time");
-		retMap.put("organization_entity_code.modifiedTime", "modified_time");
+		retMap.put("contacts.createdTime", "created_time");
+		retMap.put("contacts.modifiedTime", "modified_time");
+		retMap.put("organizations.createdTime", "created_time");
+		retMap.put("organizations.modifiedTime", "modified_time");
+		retMap.put("documentFormats.createdTime", "created_time");
+		retMap.put("documentFormats.modifiedTime", "modified_time");
+		retMap.put("entityCodes.createdTime", "created_time");
+		retMap.put("entityCodes.modifiedTime", "modified_time");
 		return retMap;
 	}
 	
@@ -95,18 +91,27 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		return dtConverter.toLocalDate().toDateTimeAtStartOfDay().toGregorianCalendar();
 	}
 	
-	// adds restrictions from the filters list into the Criteria
-	public static void applyFiltersToCriteria(Criteria ct, List<Map<String,? extends Object>> filters) {
-		for(ListIterator<Map<String,? extends Object>> iter = filters.listIterator(); iter.hasNext();) {
-			Map<String,? extends Object> filter = iter.next();
+	/**
+	 * Adds restrictions from the filters list into the Criteria.
+	 * @param ct The criteria to be modified.
+	 * @param filters A list of filters to be applied as restrictions to the criteria.
+	 */
+	public static void applyFiltersToCriteria(Criteria ct, List<Map<String, Object>> filters) {
+		for(ListIterator<Map<String, Object>> iter = filters.listIterator(); iter.hasNext();) {
+			Map<String, Object> filter = iter.next();
 			addRestriction(ct, filter);
 		}
 	}
 	
-	// adds restrictions from the filters list into the Criteria, but not filters in the exclude list
-	public static void applyFiltersToCriteria(Criteria ct, List<Map<String,? extends Object>> filters, List<String> excludeFilters) {
-		for(ListIterator<Map<String,? extends Object>> iter = filters.listIterator(); iter.hasNext();) {
-			Map<String,? extends Object> filter = iter.next();
+	/**
+	 * Adds restrictions from the filters list into the Criteria, but not filters in the exclude list.
+	 * @param ct The criteria to be modified.
+	 * @param filters A list of filters to be applied as restrictions to the criteria.
+	 * @param excludeFilters A list of filters in the <code>filters</code> parameter that shouldn't be added to the criteria.
+	 */
+	public static void applyFiltersToCriteria(Criteria ct, List<Map<String, Object>> filters, List<String> excludeFilters) {
+		for(ListIterator<Map<String, Object>> iter = filters.listIterator(); iter.hasNext();) {
+			Map<String, Object> filter = iter.next();
 			if(!excludeFilters.contains(filter.get("column").toString())) {
 				addRestriction(ct, filter);
 			}
@@ -190,11 +195,11 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	
 	// TODO public methods for each of the process?Filter(), applyTextFilter(?, Map filter)
 	
-	private static Criterion processTextFilter(String column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Criterion processTextFilter(String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
 		String textValue = filterValue.get("value").toString();
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
-		switch(type) {
+		Filter_Type operator = Filter_Type.getType(filterValue.get("operator").toString());
+		switch(operator) {
 		case EQUALS:
 			r = Restrictions.eq(column, textValue);
 			break;
@@ -204,11 +209,11 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		}
 		return r;
 	}
-	private static Disjunction processTextFilter(List<String> column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Disjunction processTextFilter(List<String> column, Map<String, Object> filterValue) throws Throwable {
 		Disjunction d = Restrictions.disjunction();
 		String textValue = filterValue.get("value").toString();
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
-		switch(type) {
+		Filter_Type operator = Filter_Type.getType(filterValue.get("operator").toString());
+		switch(operator) {
 		case EQUALS:
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {
 				String col = li.next();
@@ -228,7 +233,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	
 	private static Criterion processNumberFilter(String table, String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case EQUALS:
 			switch(columnNumberType.get(String.format("%s.%s", table, column))) {
@@ -286,7 +291,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	}
 	private static Disjunction processNumberFilter(String table, List<String> column, Map<String, Object> filterValue) throws Throwable {
 		Disjunction d = Restrictions.disjunction();
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case EQUALS:
 			for(String col : column) {
@@ -350,7 +355,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	
 	private static Criterion processDateFilter(String table, String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case MONTH:
 			// ASSERTION: month will be zero-based
@@ -433,29 +438,6 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 			}
 			r = Restrictions.in(column, fvalues);
 			break;
-		
-		case CYCLE:
-			Map<String, Object> cycleDateObj = (Map<String, Object>)filterValue.get("monthYear");
-			// fitlerValue: { monthYear:{date:<ISO 8601 String>, timestamp:<long>}, cycle:<int>, cycleMap:<List<Map<label:<String>, value:<int>>>> }
-			long monthYearTimestamp = (long)cycleDateObj.get("timestamp");
-			Calendar fromRange = createCalendarFromTimestamp(monthYearTimestamp);
-			fromRange.set(Calendar.MILLISECOND, 0);
-			fromRange.set(Calendar.SECOND, 0);
-			fromRange.set(Calendar.MINUTE, 0);
-			fromRange.set(Calendar.HOUR, 0);
-			fromRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 1 : 16);
-			
-			Calendar toRange = createCalendarFromTimestamp(monthYearTimestamp);
-			toRange.set(Calendar.MILLISECOND, 999);
-			toRange.set(Calendar.SECOND, 59);
-			toRange.set(Calendar.MINUTE, 59);
-			toRange.set(Calendar.HOUR_OF_DAY, 23);
-			toRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 15 : fromRange.getActualMaximum(Calendar.DATE));
-			
-			log.debug(String.format("Cycle: %1$tF %1$tT (%3$s) to %2$tF %2$tT (%4$s)", fromRange, toRange, fromRange.getTimeInMillis(), toRange.getTimeInMillis()));
-			
-			r = Restrictions.between(column, fromRange, toRange);
-			break;
 		}
 		
 		return r;
@@ -464,7 +446,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	
 	private static Disjunction processDateFilter(String table, List<String> column, Map<String, Object> filterValue) throws Throwable {
 		Disjunction d = Restrictions.disjunction();
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case MONTH:
 			Integer m1 = (Integer)filterValue.get("month");
@@ -564,38 +546,15 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 				d.add( Restrictions.in(col, fvalues) );
 			}
 			break;
-		
-		case CYCLE:
-			Map<String, Object> cycleDateObj = (Map<String, Object>)filterValue.get("monthYear");
-			// fitlerValue: { monthYear:{date:<ISO 8601 String>, timestamp:<long>}, cycle:<int>, cycleMap:<List<Map<label:<String>, value:<int>>>> }
-			long monthYearTimestamp = (long)cycleDateObj.get("timestamp");
-			Calendar fromRange = createCalendarFromTimestamp(monthYearTimestamp);
-			fromRange.set(Calendar.MILLISECOND, 0);
-			fromRange.set(Calendar.SECOND, 0);
-			fromRange.set(Calendar.MINUTE, 0);
-			fromRange.set(Calendar.HOUR, 0);
-			fromRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 1 : 16);
-			
-			Calendar toRange = createCalendarFromTimestamp(monthYearTimestamp);
-			toRange.set(Calendar.MILLISECOND, 999);
-			toRange.set(Calendar.SECOND, 59);
-			toRange.set(Calendar.MINUTE, 59);
-			toRange.set(Calendar.HOUR_OF_DAY, 23);
-			toRange.set(Calendar.DATE, filterValue.get("cycle").toString().equals("1") ? 15 : fromRange.getActualMaximum(Calendar.DATE));
-			
-			for(String col : column) {
-				d.add( Restrictions.between(col, fromRange, toRange) );
-			}
-			break;
 		}
 		
 		return d;
 	}
 	
 	
-	private static Criterion processBooleanFilter(String column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Criterion processBooleanFilter(String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case EQUALS:
 			String bString = filterValue.get("value").toString();
@@ -611,9 +570,9 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		}
 		return r;
 	}
-	private static Disjunction processBooleanFilter(List<String> column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Disjunction processBooleanFilter(List<String> column, Map<String, Object> filterValue) throws Throwable {
 		Disjunction d = Restrictions.disjunction();
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case EQUALS:
 			String bString = filterValue.get("value").toString();
@@ -634,35 +593,37 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	}
 	
 	
-	private static Criterion processEnumFilter(String column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Criterion processEnumFilter(String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
-		case IN:
+		case EQUALS:
 			ArrayList inValues = new ArrayList();
 			ArrayList<Map> filterInValues = (ArrayList)filterValue.get("value");
 			try {
 				for(Iterator inIter = filterInValues.iterator(); inIter.hasNext();) {
-					HashMap<String, ? extends Object> inVal = (HashMap<String, ? extends Object>)inIter.next();
+					HashMap<String, Object> inVal = (HashMap<String, Object>)inIter.next();
 					Integer iCode = Integer.parseInt(inVal.get("code").toString());
 					inValues.add(((DBDataSourceDao)DatasourceManagerUtil.byName( filterValue.get("table").toString() )).byId(iCode));
 				}
 			} catch(NumberFormatException nfe) {
 				log.error(nfe.getMessage());
 			}
+			
 			r = Restrictions.in(column, inValues);
+			
 			break;
 		}
 		return r;
 	}
 	
 	
-	private static Criterion processBiglistFilter(String column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Criterion processBiglistFilter(String column, Map<String, Object> filterValue) throws Throwable {
 		Criterion r = null;
 		String tableKey = filterValue.get("table").toString();
 		String valueKey = filterValue.get("valueKey").toString();
-		HashMap<String, ? extends Object> filterValueMap = (HashMap<String, ? extends Object>)filterValue.get("value");
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		HashMap<String, Object> filterValueMap = (HashMap<String, Object>)filterValue.get("value");
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case EQUALS:
 			r = Restrictions.eq(String.format("%s.%s", column, valueKey), filterValueMap.get(valueKey));
@@ -671,12 +632,12 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 		return r;
 	}
 	
-	private static Disjunction processBiglistFilter(List<String> column, Map<String, ? extends Object> filterValue) throws Throwable {
+	private static Disjunction processBiglistFilter(List<String> column, Map<String, Object> filterValue) throws Throwable {
 		Disjunction d = Restrictions.disjunction();
 		String tableKey = filterValue.get("table").toString();
 		String valueKey = filterValue.get("valueKey").toString();
-		HashMap<String, ? extends Object> filterValueMap = (HashMap<String, ? extends Object>)filterValue.get("value");
-		Filter_Type type = Filter_Type.getType(filterValue.get("type").toString());
+		HashMap<String, ? extends Object> filterValueMap = (HashMap<String, Object>)filterValue.get("value");
+		Filter_Type type = Filter_Type.getType(filterValue.get("operator").toString());
 		switch(type) {
 		case EQUALS:
 			for(ListIterator<String> li = column.listIterator(); li.hasNext();) {

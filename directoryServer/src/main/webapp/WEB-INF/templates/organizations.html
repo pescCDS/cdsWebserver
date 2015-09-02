@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/resources :: resourceHead (title=#{title.organizations})">
-    <title th:text="#{title.organizations}">Organizations Page</title>
-    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/jquery.dataTables.min.css" th:href="@{/resources/css/jquery.dataTables.min.css}" />
-</head>
+<head th:replace="layout/resources :: resourceHead (title=#{title.organizations})"></head>
 <body>
 	<div class="container-fluid">
 		<div th:replace="layout/nav :: layoutNav"></div>
@@ -21,75 +13,182 @@
     </div>
 	<th:block th:replace="layout/resources :: resourceScripts"></th:block>
     <script th:inline="javascript">
-		// create a new DataTableView populated with organization meta data
 		var entities = /*[[ ${@datasourceManager.byName("entities").forJson()} ]]*/ [],
 			entityDisplayFunc = function(e) {
-				return [e.code,e.description].join(' ');
+				return [e.code, e.description].join(' ');
 			},
-			dtView,
-			tsConfig = {'format':'mm/dd/yyyy '};
+			dtView, tsConfig = {'format':'mm/dd/yyyy'};
 		
 		$(document).ready(function(e){
-			dtView = new DataTableView({
-				'dataClass':'Organization',
-				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
-				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
-				'mode':1,
-				'table':{
-					'name':'organizations',
-					'primaryKey':'directoryId',
-					'defaultColumnOrder':[[1,'asc']],
-					'columns':[
-						{'data':'directoryId', 'name':'directoryId', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
-						{'data':'organizationId', 'name':'organizationId', 'type':'varchar', 'title':'Id', 'controlType':'text'},
-						{'data':'organizationIdType', 'name':'organizationIdType', 'type':'varchar', 'title':'Id Type', 'controlType':'text'},
-						{'data':'organizationName', 'name':'organizationName', 'type':'varchar', 'title':'Name', 'controlType':'text'},
-						{'data':'organizationSubcode', 'name':'organizationSubcode', 'type':'varchar', 'title':'Sub Code', 'required':false, 'controlType':'text'},
+			dtView = $('#orgView').DataTableView({
+			    'mode':$.fn.DataTableView.MODES.MODIFY,
+			    'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
+		        'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+			    'tableData':{
+			        'name':'organizations',
+		            'class':'Organization',
+		            'label':'Organization',
+		            'primaryKeyColumn':'directoryId',
+		            'columns':[
 						{
-							'data':'entity', 
-							'name':'entity.id',
-							'type':'object',
-							'displayKey':entityDisplayFunc,
-							'valueKey':'id',
-							'table':'organization_entity_code',
-							'title':'Entity Code',
-							'required':false, 
-							'controlType':'dropdown',
-							'cftype':'enum',
-							'cfenumsource':entities,
-							'cfenumvaluekey':'id',
-							'cfenumlabelkey':'code'
-						},
-						
-						{'data':'organizationEin', 'name':'organizationEin', 'type':'varchar', 'title':'EIN', 'controlType':'text'},
-						{'data':'organizationSiteUrl', 'name':'organizationSiteUrl', 'type':'varchar', 'title':'Site URL', 'controlType':'text'},
-						{'data':'description', 'name':'description', 'type':'text', 'title':'Description', 'visible':false, 'required':false, 'controlType':'textarea'},
-						{'data':'termsOfUse', 'name':'termsOfUse', 'type':'text', 'title':'Terms of Use', 'visible':false, 'controlType':'textarea'},
-						{'data':'privacyPolicy', 'name':'privacyPolicy', 'type':'text', 'title':'Privacy Policy', 'visible':false, 'controlType':'textarea'},
-						{
-							'data':'createdTime', 
-							'name':'createdTime', 
-							'type':'timestamp', 
-							'title':'Created', 
-							'disabled':true, 
-							'required':false, 
-							'controlType':'timestamp',
-							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						    'data':'directoryId', 
+						    'type':'int', 
+						    'control':{
+						        'type':'hidden', 
+						        'name':'directoryId'
+						    }
 						},
 						{
-							'data':'modifiedTime', 
-							'name':'modifiedTime', 
-							'type':'timestamp', 
-							'title':'Modified', 
-							'disabled':true, 
-							'required':false, 
-							'controlType':'timestamp',
-							'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						    'data':'organizationId', 
+						    'required':true, 
+						    'type':'varchar', 
+						    'title':'Id', 
+						    'control':{
+						        'type':'text',
+						        'name':'organizationId',
+						        'label':'Id'
+						    }
+						},
+						{
+						    'data':'organizationIdType', 
+						    'required':true, 
+						    'type':'varchar', 
+						    'title':'Id Type', 
+						    'control':{
+						        'type':'text',
+						        'name':'organizationIdType',
+						        'label':'Id Type'
+						    }
+						},
+						{
+						    'data':'organizationName', 
+						    'required':true, 
+						    'type':'varchar', 
+						    'title':'Name', 
+						    'control':{
+						        'type':'text',
+						        'name':'organizationName',
+						        'label':'Name'
+						    }
+						},
+						{
+						    'data':'organizationSubcode', 
+						    'required':false, 
+						    'type':'varchar', 
+						    'title':'Sub Code', 
+						    'control':{
+						        'type':'text',
+						        'name':'organizationSubcode',
+						        'label':'Sub Code'
+						    }
+						},
+						{
+						    'data':'entity', 
+						    'type':'object',
+						    'title':'Entity Code',
+						    'required':false,
+						    'table':'organization_entity_code',
+						    'datasource':entities,
+						    'displayKey':'description',
+						    'valueKey':'id',
+						    'control':{
+                                'type':'select',
+                                'name':'entity',
+                                'label':'Entity Code'
+                            },
+                            'render':{'_':entityDisplayFunc}
+						},
+						{
+						    'data':'organizationEin', 
+						    'type':'varchar', 
+						    'title':'EIN', 
+						    'control':{
+                                'type':'text',
+                                'name':'organizationEin',
+                                'label':'EIN'
+                            }
+						},
+						{
+						    'data':'organizationSiteUrl', 
+						    'type':'varchar', 
+						    'title':'Site URL', 
+						    'control':{
+                                'type':'text',
+                                'name':'organizationSiteUrl',
+                                'label':'Site URL'
+                            }
+						},
+						{
+						    'data':'description', 
+						    'type':'text', 
+						    'title':'Description', 
+						    'visible':false, 
+						    'required':false, 
+						    'control':{
+                                'type':'textarea',
+                                'name':'description',
+                                'label':'Description',
+                                'textarea':true
+                            }
+						},
+						{
+						    'data':'termsOfUse', 
+						    'type':'text', 
+						    'title':'Terms of Use', 
+						    'visible':false, 
+						    'control':{
+                                'type':'textarea',
+                                'name':'termsOfUse',
+                                'label':'Terms of Use',
+                                'textarea':true
+                            }
+						},
+						{
+						    'data':'privacyPolicy', 
+						    'type':'text', 
+						    'title':'Privacy Policy', 
+						    'visible':false, 
+						    'control':{
+                                'type':'textarea',
+                                'name':'privacyPolicy',
+                                'label':'Privacy Policy',
+                                'textarea':true
+                            }
+						},
+						{
+						    'data':'createdTime',  
+						    'type':'timestamp', 
+						    'title':'Created', 
+						    'required':false, 
+						    'control':{
+		                        'type':'timestamp',
+		                        'disabled':true
+		                    },
+						    'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						},
+						{
+						    'data':'modifiedTime',  
+						    'type':'timestamp', 
+						    'title':'Modified',  
+						    'required':false, 
+						    'control':{
+                                'type':'timestamp',
+                                'disabled':true
+                            },
+						    'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
 						}
-					]
-				}
+		            ]
+			    },
+			    'columnfiltersConfig':{
+		            'table':'organizations'
+		        },
+		        'datatableConfig':{
+		            'mode':$.fn.ColumnFilters.Modes.CATEGORY_SETS,
+		            'url':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
+		            'table':'organizations',
+		            'order':[[1,'asc']]
+		        }
 			});
-			$('#orgView').replaceWith(dtView.$el);
 		});
 	</script>
 </body>

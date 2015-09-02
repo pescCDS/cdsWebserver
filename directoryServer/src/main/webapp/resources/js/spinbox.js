@@ -8,7 +8,7 @@
 
 // -- BEGIN UMD WRAPPER PREFACE --
 
-// For more information on UMD visit: 
+// For more information on UMD visit:
 // https://github.com/umdjs/umd/blob/master/jqueryPlugin.js
 
 (function (factory) {
@@ -30,6 +30,10 @@
 
 	var Spinbox = function (element, options) {
 		this.$element = $(element);
+		this.$element.find('.btn').on('click', function (e) {
+			//keep spinbox from submitting if they forgot to say type="button" on their spinner buttons
+			e.preventDefault();
+		});
 		this.options = $.extend({}, $.fn.spinbox.defaults, options);
 		this.$input = this.$element.find('.spinbox-input');
 		this.$element.on('focusin.fu.spinbox', this.$input, $.proxy(this.changeFlag, this));
@@ -41,13 +45,21 @@
 		this.mousewheelTimeout = {};
 
 		if (this.options.hold) {
-			this.$element.on('mousedown.fu.spinbox', '.spinbox-up', $.proxy(function() { this.startSpin(true); } , this));
+			this.$element.on('mousedown.fu.spinbox', '.spinbox-up', $.proxy(function () {
+				this.startSpin(true);
+			}, this));
 			this.$element.on('mouseup.fu.spinbox', '.spinbox-up, .spinbox-down', $.proxy(this.stopSpin, this));
 			this.$element.on('mouseout.fu.spinbox', '.spinbox-up, .spinbox-down', $.proxy(this.stopSpin, this));
-			this.$element.on('mousedown.fu.spinbox', '.spinbox-down', $.proxy(function() {this.startSpin(false);} , this));
+			this.$element.on('mousedown.fu.spinbox', '.spinbox-down', $.proxy(function () {
+				this.startSpin(false);
+			}, this));
 		} else {
-			this.$element.on('click.fu.spinbox', '.spinbox-up', $.proxy(function() { this.step(true); } , this));
-			this.$element.on('click.fu.spinbox', '.spinbox-down', $.proxy(function() { this.step(false); }, this));
+			this.$element.on('click.fu.spinbox', '.spinbox-up', $.proxy(function () {
+				this.step(true);
+			}, this));
+			this.$element.on('click.fu.spinbox', '.spinbox-down', $.proxy(function () {
+				this.step(false);
+			}, this));
 		}
 
 		this.switches = {
@@ -75,12 +87,12 @@
 	Spinbox.prototype = {
 		constructor: Spinbox,
 
-		destroy: function() {
+		destroy: function () {
 			this.$element.remove();
 			// any external bindings
 			// [none]
 			// set input value attrbute
-			this.$element.find('input').each(function() {
+			this.$element.find('input').each(function () {
 				$(this).attr('value', $(this).val());
 			});
 			// empty elements to return to original markup
@@ -90,63 +102,65 @@
 		},
 
 		render: function () {
-			var inputValue = this.parseInput( this.$input.val() );
+			var inputValue = this.parseInput(this.$input.val());
 			var maxUnitLength = '';
 
 			// if input is empty and option value is default, 0
 			if (inputValue !== '' && this.options.value === 0) {
 				this.value(inputValue);
 			} else {
-				this.output ( this.options.value );
+				this.output (this.options.value);
 			}
 
-			if ( this.options.units.length ) {
-				$.each(this.options.units, function(index, value){
-					if( value.length > maxUnitLength.length) {
+			if (this.options.units.length) {
+				$.each(this.options.units, function (index, value) {
+					if (value.length > maxUnitLength.length) {
 						maxUnitLength = value;
 					}
 				});
 			}
-
 		},
 
-		output: function(value, updateField) {
+		output: function (value, updateField) {
 			value = (value + '').split('.').join(this.options.decimalMark);
-			updateField = ( updateField || true );
-			if ( updateField ) { this.$input.val(value); }
+			updateField = (updateField || true);
+			if (updateField) {
+				this.$input.val(value);
+			}
 
 			return value;
 		},
 
-		parseInput: function(value) {
+		parseInput: function (value) {
 			value = (value + '').split(this.options.decimalMark).join('.');
 
 			return value;
 		},
 
 		change: function () {
-			var newVal = this.parseInput( this.$input.val() ) || '';
+			var newVal = this.parseInput(this.$input.val()) || '';
 
-			if(this.options.units.length || this.options.decimalMark !== '.'){
+			if (this.options.units.length || this.options.decimalMark !== '.') {
 				newVal = this.parseValueWithUnit(newVal);
-			} else if (newVal/1){
-				newVal = this.options.value = this.checkMaxMin(newVal/1);
+			} else if (newVal / 1) {
+				newVal = this.options.value = this.checkMaxMin(newVal / 1);
 			} else {
-				newVal = this.checkMaxMin(newVal.replace(/[^0-9.-]/g,'') || '');
-				this.options.value = newVal/1;
+				newVal = this.checkMaxMin(newVal.replace(/[^0-9.-]/g, '') || '');
+				this.options.value = newVal / 1;
 			}
-			this.output ( newVal );
+
+			this.output (newVal);
 
 			this.changeFlag = false;
 			this.triggerChangedEvent();
 		},
 
-		changeFlag: function(){
+		changeFlag: function () {
 			this.changeFlag = true;
 		},
 
 		stopSpin: function () {
-			if(this.switches.timeout!==undefined){
+			if (this.switches.timeout !== undefined) {
 				clearTimeout(this.switches.timeout);
 				this.switches.count = 1;
 				this.triggerChangedEvent();
@@ -156,30 +170,30 @@
 		triggerChangedEvent: function () {
 			var currentValue = this.value();
 			if (currentValue === this.lastValue) return;
-
 			this.lastValue = currentValue;
 
 			// Primary changed event
-			this.$element.trigger('changed.fu.spinbox', this.output(currentValue, false)); // no DOM update
+			this.$element.trigger('changed.fu.spinbox', this.output(currentValue, false));// no DOM update
 		},
 
 		startSpin: function (type) {
-
 			if (!this.options.disabled) {
 				var divisor = this.switches.count;
 
 				if (divisor === 1) {
 					this.step(type);
 					divisor = 1;
-				} else if (divisor < 3){
+				} else if (divisor < 3) {
 					divisor = 1.5;
-				} else if (divisor < 8){
+				} else if (divisor < 8) {
 					divisor = 2.5;
 				} else {
 					divisor = 4;
 				}
 
-				this.switches.timeout = setTimeout($.proxy(function() {this.iterate(type);} ,this),this.switches.speed/divisor);
+				this.switches.timeout = setTimeout($.proxy(function () {
+					this.iterate(type);
+				}, this), this.switches.speed / divisor);
 				this.switches.count++;
 			}
 		},
@@ -195,7 +209,7 @@
 			var digits, multiple, currentValue, limitValue;
 
 			// trigger change event
-			if( this.changeFlag ) {
+			if (this.changeFlag) {
 				this.change();
 			}
 
@@ -203,11 +217,11 @@
 			currentValue = this.options.value;
 			limitValue = isIncrease ? this.options.max : this.options.min;
 
-			if ((isIncrease ? currentValue < limitValue : currentValue > limitValue)) {
+			if ( (isIncrease ? currentValue < limitValue : currentValue > limitValue) ) {
 				var newVal = currentValue + (isIncrease ? 1 : -1) * this.options.step;
 
 				// raise to power of 10 x number of decimal places, then round
-				if(this.options.step % 1 !== 0){
+				if (this.options.step % 1 !== 0) {
 					digits = (this.options.step + '').split('.')[1].length;
 					multiple = Math.pow(10, digits);
 					newVal = Math.round(newVal * multiple) / multiple;
@@ -216,49 +230,48 @@
 				// if outside limits, set to limit value
 				if (isIncrease ? newVal > limitValue : newVal < limitValue) {
 					this.value(limitValue);
-				}
-				else {
+				} else {
 					this.value(newVal);
 				}
 
-			}
-			else if (this.options.cycle) {
+			} else if (this.options.cycle) {
 				var cycleVal = isIncrease ? this.options.min : this.options.max;
 				this.value(cycleVal);
 			}
 		},
 
 		value: function (value) {
+			if (value || value === 0) {
+				if (this.options.units.length || this.options.decimalMark !== '.') {
+					this.output(this.parseValueWithUnit(value + (this.unit || '')));
+					return this;
 
-			if ( value || value === 0 ) {
-				if( this.options.units.length || this.options.decimalMark !== '.' ) {
-					this.output( this.parseValueWithUnit( value + (this.unit || '') ) );
+				} else if (!isNaN(parseFloat(value)) && isFinite(value)) {
+					this.options.value = value / 1;
+					this.output (value + (this.unit ? this.unit : ''));
 					return this;
-				
-				} else if ( !isNaN(parseFloat(value)) && isFinite(value) ) {
-					this.options.value = value/1;
-					this.output ( value + (this.unit ? this.unit : '') ) ;
-					return this;
-				
+
 				}
+
 			} else {
-				if( this.changeFlag ) {
+				if (this.changeFlag) {
 					this.change();
 				}
 
-				if( this.unit ){
+				if (this.unit) {
 					return this.options.value + this.unit;
 				} else {
-					return this.output(this.options.value, false); // no DOM update
+					return this.output(this.options.value, false);// no DOM update
 				}
+
 			}
 		},
 
 		isUnitLegal: function (unit) {
 			var legalUnit;
 
-			$.each(this.options.units, function(index, value){
-				if( value.toLowerCase() === unit.toLowerCase()){
+			$.each(this.options.units, function (index, value) {
+				if (value.toLowerCase() === unit.toLowerCase()) {
 					legalUnit = unit.toLowerCase();
 					return false;
 				}
@@ -268,97 +281,102 @@
 		},
 
 		// strips units and add them back
-		parseValueWithUnit: function( value ){
-			var unit = value.replace(/[^a-zA-Z]/g,'');
-			var number = value.replace(/[^0-9.-]/g,'');
+		parseValueWithUnit: function (value) {
+			var unit = value.replace(/[^a-zA-Z]/g, '');
+			var number = value.replace(/[^0-9.-]/g, '');
 
-			if(unit){
+			if (unit) {
 				unit = this.isUnitLegal(unit);
 			}
 
-			this.options.value = this.checkMaxMin(number/1);
+			this.options.value = this.checkMaxMin(number / 1);
 			this.unit = unit || undefined;
 			return this.options.value + (unit || '');
 		},
 
-		checkMaxMin: function(value){
+		checkMaxMin: function (value) {
 			// if unreadable
-			if ( isNaN( parseFloat(value) ) ) {
+			if (isNaN(parseFloat(value))) {
 				return value;
 			}
+
 			// if not within range return the limit
-			if ( !( value <= this.options.max && value >= this.options.min ) ){
+			if (!(value <= this.options.max && value >= this.options.min)) {
 				value = value >= this.options.max ? this.options.max : this.options.min;
 			}
+
 			return value;
 		},
 
 		disable: function () {
 			this.options.disabled = true;
 			this.$element.addClass('disabled');
-			this.$input.attr('disabled','');
+			this.$input.attr('disabled', '');
 			this.$element.find('button').addClass('disabled');
 		},
 
 		enable: function () {
 			this.options.disabled = false;
 			this.$element.removeClass('disabled');
-			this.$input.removeAttr("disabled");
+			this.$input.removeAttr('disabled');
 			this.$element.find('button').removeClass('disabled');
 		},
 
-		keydown: function(event){
+		keydown: function (event) {
 			var keyCode = event.keyCode;
-			if(keyCode===38){
+			if (keyCode === 38) {
 				this.step(true);
-			}else if(keyCode===40){
+			} else if (keyCode === 40) {
 				this.step(false);
 			}
 		},
 
-		keyup: function(event){
+		keyup: function (event) {
 			var keyCode = event.keyCode;
 
-			if(keyCode===38 || keyCode===40){
+			if (keyCode === 38 || keyCode === 40) {
 				this.triggerChangedEvent();
 			}
 		},
 
-		bindMousewheelListeners: function(){
+		bindMousewheelListeners: function () {
 			var inputEl = this.$input.get(0);
-			if(inputEl.addEventListener){
+			if (inputEl.addEventListener) {
 				//IE 9, Chrome, Safari, Opera
 				inputEl.addEventListener('mousewheel', $.proxy(this.mousewheelHandler, this), false);
 				// Firefox
 				inputEl.addEventListener('DOMMouseScroll', $.proxy(this.mousewheelHandler, this), false);
-			}else{
+			} else {
 				// IE <9
 				inputEl.attachEvent('onmousewheel', $.proxy(this.mousewheelHandler, this));
 			}
 		},
 
-		mousewheelHandler: function(event){
-			var e = window.event || event; // old IE support
-			var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-			var self = this;
+		mousewheelHandler: function (event) {
+			if (!this.options.disabled) {
+				var e = window.event || event;// old IE support
+				var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+				var self = this;
 
-			clearTimeout(this.mousewheelTimeout);
-			this.mousewheelTimeout = setTimeout(function(){
-				self.triggerChangedEvent();
-			}, 300);
+				clearTimeout(this.mousewheelTimeout);
+				this.mousewheelTimeout = setTimeout(function () {
+					self.triggerChangedEvent();
+				}, 300);
 
-			if(delta<0){
-				this.step(true);
-			}else{
-				this.step(false);
+				if (delta < 0) {
+					this.step(true);
+				} else {
+					this.step(false);
+				}
+
+				if (e.preventDefault) {
+					e.preventDefault();
+				} else {
+					e.returnValue = false;
+				}
+
+				return false;
 			}
-
-			if(e.preventDefault){
-				e.preventDefault();
-			}else{
-				e.returnValue = false;
-			}
-			return false;
 		}
 	};
 
@@ -366,23 +384,24 @@
 	// SPINBOX PLUGIN DEFINITION
 
 	$.fn.spinbox = function (option) {
-		var args = Array.prototype.slice.call( arguments, 1 );
+		var args = Array.prototype.slice.call(arguments, 1);
 		var methodReturn;
 
 		var $set = this.each(function () {
-			var $this   = $( this );
-			var data    = $this.data('fu.spinbox');
+			var $this = $(this);
+			var data = $this.data('fu.spinbox');
 			var options = typeof option === 'object' && option;
 
-			if( !data ) {
-				$this.data('fu.spinbox', (data = new Spinbox( this, options ) ) );
+			if (!data) {
+				$this.data('fu.spinbox', (data = new Spinbox(this, options)));
 			}
-			if( typeof option === 'string' ) {
-				methodReturn = data[ option ].apply( data, args );
+
+			if (typeof option === 'string') {
+				methodReturn = data[option].apply(data, args);
 			}
 		});
 
-		return ( methodReturn === undefined ) ? $set : methodReturn;
+		return (methodReturn === undefined) ? $set : methodReturn;
 	};
 
 	// value needs to be 0 for this.render();
@@ -411,7 +430,7 @@
 
 	$(document).on('mousedown.fu.spinbox.data-api', '[data-initialize=spinbox]', function (e) {
 		var $control = $(e.target).closest('.spinbox');
-		if ( !$control.data('fu.spinbox') ) {
+		if (!$control.data('fu.spinbox')) {
 			$control.spinbox($control.data());
 		}
 	});
@@ -426,6 +445,6 @@
 		});
 	});
 
-// -- BEGIN UMD WRAPPER AFTERWORD --
+	// -- BEGIN UMD WRAPPER AFTERWORD --
 }));
 // -- END UMD WRAPPER AFTERWORD --

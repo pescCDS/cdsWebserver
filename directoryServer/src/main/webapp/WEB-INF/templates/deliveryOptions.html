@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/resources :: resourceHead (title=#{title.deliveryOptions})">
-    <title th:text="#{title.deliveryOptions}">Delivery Options Page</title>
-    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" th:href="@{/resources/css/bootstrap.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" th:href="@{/resources/css/bootstrap-theme.min.css}" />
-    <link rel="stylesheet" href="../../resources/css/jquery.dataTables.min.css" th:href="@{/resources/css/jquery.dataTables.min.css}" />
-</head>
+<head th:replace="layout/resources :: resourceHead (title=#{title.deliveryOptions})"></head>
 <body>
 	<div class="container-fluid">
 		<div th:replace="layout/nav :: layoutNav"></div>
@@ -17,7 +9,7 @@
         	<h1 th:text="#{title.deliveryOptions}">Page Title</h1>
         </div>
     	
-        <div id="ecView"></div>
+        <div id="dtView"></div>
     
     	<div th:replace="layout/footer :: layoutFooter"></div>
     </div>
@@ -64,147 +56,136 @@
 				console.error('documentFormats initialize fail');
 			});
 			
-			dtView = new DataTableView({
-				'dataClass':'DeliveryOption',
-				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
-				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
-				'table':{
-					'name':'deliveryOptions',
-					'primaryKey':'id',
-					'defaultColumnOrder':[[1,'asc']],
-					'columns':[
-						{'data':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
+			dtView = $('#dtView').DataTableView({
+                'mode':$.fn.DataTableView.MODES.MODIFY,
+                'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
+                'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+                'tableData':{
+                    'name':'deliveryOptions',
+                    'class':'DeliveryOption',
+                    'label':'Delivery Option',
+                    'primaryKeyColumn':'id',
+                    'columns':[
 						{
-							'data':'member',
-							'name':'member',
-							'type':'object',
-							'required':true,
-							'displayKey':'organizationName',
-							'valueKey':'directoryId',
-							'table':'organizations',
-							'datasource':organizations,
-							'title':'Directory', 
-							'controlType':'typeahead',
-							'cftype':'biglist'
+						    'data':'id', 
+						    'control':{
+                                'type':'hidden', 
+                                'name':'id'
+                            }
 						},
 						{
-							'data':'format',
-							'name':'format',
-							'type':'object',
-							'required':true,
-							'displayKey':'formatName',
-							'valueKey':'id',
-							'table':'documentFormats',
-							'datasource':documentFormats,
-							'title':'Format', 
-							'controlType':'typeahead',
-							'cftype':'biglist'
-						},
-						{'data':'webserviceUrl', 'name':'webserviceUrl', 'type':'varchar', 'title':'Web Service URL', 'required':false, 'controlType':'text'},
-						{
-							'data':'deliveryMethod',
-							'name':'deliveryMethod',//might need to be deliveryMethod.id
-							'type':'object',
-							'title':'Delivery Method',
-							'required':true,
-							'displayKey':'method',
-							'valueKey':'id',
-							'table':'deliveryMethods',
-							'controlType':'custom',
-							'cftype':'enum',
-							'cfenumsource':deliveryMethods,
-							'cfenumvaluekey':'id',
-							'cfenumlabelkey':'method',
-							'customInputControl': new DropdownSelectInputControl({
-								'dataset':deliveryMethods,
-								'inputName':'deliveryMethod',
-								'displayKey':'method',
-								'label':'Delivery Method'
-							}),
-							'validate':function(cdata) {
-								// cdata must be a deliveryConfirmation object
-								var dm = _.find(deliveryMethods, cdata);
-								return dm ? true : false;
-							}
+						    'data':'member',
+						    'type':'reference',
+						    'title':'Directory',
+						    'required':true,
+						    'control':{
+                                'type':'typeahead'
+                            },
+                            'table':'organizations',
+                            'datasource':organizations,
+						    'displayKey':'organizationName',
+						    'valueKey':'directoryId'
 						},
 						{
-							'data':'deliveryConfirm', 
-							'name':'deliveryConfirm', 
-							'type':'object', 
-							'title':'Delivery Confirmation', 
-							'required':false,
-							'displayKey':'label',
-							'valueKey':'value',
-							'controlType':'custom',
-							'render':function (data, type, full, meta) {
-								return data===true?'Yes' : (data===false?'No' : '');
-							},
-							'cftype':'enum',
-							'cfenumsource':deliveryConfirmations,
-							'cfenumvaluekey':'value',
-							'cfenumlabelkey':'label',
-							'customInputControl': new DropdownSelectInputControl({
-								'dataset':deliveryConfirmations,
-								'inputName':'deliveryConfirm',
-								'displayKey':'label',
-								'valueOnly':true,
-								'valueKey':'value',
-								'label':'Delivery Confirmation'
-							}),
-							'validate':function(cdata) {
-								// cdata must be a deliveryConfirmation object
-								var dm = _.find(deliveryConfirmations, {'value':cdata});
-								return dm ? true : false;
-							}
+						    'data':'format',
+						    'type':'reference',
+						    'title':'Format',
+						    'required':true,
+						    'control':{
+                                'type':'typeahead'
+                            },
+                            'table':'documentFormats',
+                            'datasource':documentFormats,
+						    'displayKey':'formatName',
+						    'valueKey':'id'
 						},
 						{
-							'data':'error', 
-							'name':'error', 
-							'type':'object', 
-							'title':'Error Indicator', 
-							'required':false,
-							'displayKey':'label',
-							'valueKey':'value',
-							'controlType':'custom',
-							'render':function (data, type, full, meta) {
-								return data===true?'Yes' : (data===false?'No' : '');
-							},
-							'cftype':'enum',
-							'cfenumsource':deliveryConfirmations,
-							'cfenumvaluekey':'value',
-							'cfenumlabelkey':'label',
-							'customInputControl': new DropdownSelectInputControl({
-								'dataset':deliveryConfirmations,
-								'inputName':'error',
-								'displayKey':'label',
-								'valueOnly':true,
-								'valueKey':'value',
-								'label':'Error Indicator'
-							}),
-							'validate':function(cdata) {
-								// cdata must be a deliveryMethod object
-								var dm = _.find(deliveryConfirmations, {'value':cdata});
-								return dm ? true : false;
-							}
+						    'data':'webserviceUrl',  
+						    'type':'varchar', 
+						    'title':'Web Service URL',  
+						    'control':{
+                                'type':'text',
+                                'name':'webserviceUrl',
+                                'label':'Web Service URL'
+                            }
 						},
 						{
-							'data':'operationalStatus',
-							'name':'operationalStatus', 
-							'type':'varchar',
-							'displayKey':'id',
-							'valueKey':'id',
-							'title':'Operational Status', 
-							'controlType':'radioset',
-							'useValueOnly':true,
-							'cftype':'enum',
-							'cfenumsource':[{'id':'ACTIVE'},{'id':'INACTIVE'},{'id':'OUTAGE'}],
-							'cfenumvaluekey':'id',
-							'cfenumlabelkey':'id'
+						    'data':'deliveryMethod',
+						    'type':'reference',
+						    'title':'Delivery Method',
+						    'required':true,
+						    'control':{
+		                        'type':'select'
+		                    },
+		                    'table':'deliveryMethods',
+		                    'datasource':deliveryMethods,
+						    'displayKey':'method',
+						    'valueKey':'id'
+						},
+						{
+						    'data':'deliveryConfirm',  
+						    'type':'int',
+						    'cftype':'boolean',
+						    'title':'Delivery Confirmation', 
+						    'control':{
+						        'type':'toggle',
+						        'trueLabel':'Yes',
+						        'trueValue':true,
+						        'falseLabel':'No',
+						        'falseValue':false
+						    },
+						    'render':{'_':function(data, type, full, meta) {
+						        return data===true?'Yes' : (data===false?'No' : '');
+						    }}
+						},
+						{
+						    'data':'error',  
+						    'type':'int',
+						    'cftype':'boolean',
+						    'title':'Error Indicator', 
+						    'control':{
+                                'type':'toggle',
+                                'trueLabel':'Yes',
+                                'trueValue':true,
+                                'falseLabel':'No',
+                                'falseValue':false
+                            },
+                            'render':{'_':function(data, type, full, meta) {
+                                return data===true?'Yes' : (data===false?'No' : '');
+                            }}
+						},
+						{
+						    'data':'operationalStatus', 
+						    'type':'object',
+						    'cftype':'enum',
+						    'title':'Operational Status',
+						    'control':{
+						        'type':'buttonGroup',
+						        'buttons':[
+						            {'label':'ACTIVE', 'value':'ACTIVE'},
+						            {'label':'INACTIVE', 'value':'INACTIVE'},
+						            {'label':'OUTAGE', 'value':'OUTAGE'}
+						        ]
+						    },
+						    'datasource':[{'id':'ACTIVE'},{'id':'INACTIVE'},{'id':'OUTAGE'}],
+						    'displayKey':'id',
+						    'valueKey':'id',
+						    'render':{'_':function(data, type, full, meta) {
+                                return data;
+                            }}
 						}
-					]
-				}
-			});
-			$('#ecView').replaceWith(dtView.$el);
+                    ]
+                },
+                'columnfiltersConfig':{
+                    'table':'deliveryOptions'
+                },
+                'datatableConfig':{
+                    'mode':$.fn.ColumnFilters.Modes.CATEGORY_SETS,
+                    'url':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
+                    'table':'deliveryOptions',
+                    'order':[[1,'asc']]
+                }
+            });
 		});
 	</script>
 </body>

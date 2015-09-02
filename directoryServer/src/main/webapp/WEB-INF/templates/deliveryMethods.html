@@ -17,7 +17,7 @@
         	<h1 th:text="#{title.deliveryMethods}">Page Title</h1>
         </div>
     	
-        <div id="ecView"></div>
+        <div id="dtView"></div>
     
     	<div th:replace="layout/footer :: layoutFooter"></div>
     </div>
@@ -26,21 +26,46 @@
 		var dtView;
 		
 		$(document).ready(function(e){
-			dtView = new DataTableView({
-				'dataClass':'DeliveryMethod',
-				'webServiceUrl':/*[[ @{/services/rest} ]]*/'/services/rest',
-				'cfWebServiceUrl':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
-				'table':{
-					'name':'deliveryMethods',
-					'primaryKey':'id',
-					'defaultColumnOrder':[[1,'asc']],
-					'columns':[
-						{'data':'id', 'name':'id', 'type':'int', 'title':'', 'visible':false, 'cfexclude':true, 'controlType':'hidden'},
-						{'data':'method', 'name':'method', 'type':'varchar', 'title':'Name', 'required':true, 'controlType':'text'}
-					]
-				}
-			});
-			$('#ecView').replaceWith(dtView.$el);
+			dtView = $('#dtView').DataTableView({
+                'mode':$.fn.DataTableView.MODES.MODIFY,
+                'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
+                'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+                'tableData':{
+                    'name':'deliveryMethods',
+                    'class':'DeliveryMethod',
+                    'label':'Delivery Method',
+                    'primaryKeyColumn':'id',
+                    'columns':[
+						{
+						    'data':'id',  
+						    'control':{
+                                'type':'hidden', 
+                                'name':'id'
+                            }
+						},
+						{
+						    'data':'method',  
+						    'type':'varchar', 
+						    'title':'Name', 
+						    'required':true, 
+						    'control':{
+                                'type':'text',
+                                'name':'method',
+                                'label':'Name'
+                            }
+						}
+                    ]
+                },
+                'columnfiltersConfig':{
+                    'table':'deliveryMethods'
+                },
+                'datatableConfig':{
+                    'mode':$.fn.ColumnFilters.Modes.CATEGORY_SETS,
+                    'url':/*[[ @{/columnfilters} ]]*/ '/EdExchange/columnfilters',
+                    'table':'deliveryMethods',
+                    'order':[[1,'asc']]
+                }
+            });
 		});
 	</script>
 </body>

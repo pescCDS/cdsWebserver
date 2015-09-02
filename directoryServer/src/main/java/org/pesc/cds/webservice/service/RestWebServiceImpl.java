@@ -39,7 +39,7 @@ import org.pesc.edexchange.v1_0.dao.DeliveryOptionsDao;
 /**
  * REST web service class
  * @author owenwe
- *
+ * 
  */
 @CrossOriginResourceSharing(
 		allowAllOrigins = true,
@@ -66,6 +66,14 @@ public class RestWebServiceImpl {
 	//////////////////////////////////////////////
 	// OrganizationContact
 	//////////////////////////////////////////////
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/contacts/{contactId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public OrganizationContact getContact(@PathParam("contactId") Integer id) {
+		return DatasourceManagerUtil.getContacts().byId(id);
+	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/contacts")
@@ -177,13 +185,7 @@ public class RestWebServiceImpl {
 		);
 	}
 	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/contacts/{contactId}")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public OrganizationContact getContact(@PathParam("contactId") Integer id) {
-		return DatasourceManagerUtil.getContacts().byId(id);
-	}
+	
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/contacts/save/")

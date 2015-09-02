@@ -205,10 +205,9 @@ public class ColumnFiltersController {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@RequestMapping("/columnfilters/data")
+	@RequestMapping("/datatableview")
 	@ResponseBody
 	public Map<String, ?> getDataTableData(Model model, @RequestBody DataTablesRequest dtr) {
-		//log.debug(dtr);
 		Integer draw = dtr.getDraw();
 		int start = dtr.getStart();
 		int length = dtr.getLength();
@@ -220,68 +219,29 @@ public class ColumnFiltersController {
 		try {
 			Session session = HibernateUtil.getSessionFactory().openSession();
 			session.beginTransaction();
+			
 			// include table property in AJAX call and use it to get the class 
 			Class mappedTableClass = TableClassMap.getClass(dtr.getTable());
 			Criteria ct = session.createCriteria(mappedTableClass);
 			
 			// loop through any passed column filters
-			for(Iterator<HashMap<String, ? extends Object>> iter = dtr.getColumnfilters().iterator(); iter.hasNext();) {
-				/* 
-				 * columnfilters [n]
-				 * table: the database table name
-				 * column: database table column name
-				 * type: data type
-				 * label: desctriptive name for the column
-				 * filterValue: {
-				 *	type: sup-type
-				 *	value - varies based on type
-				 *  <other properties>
-				 * }
-				 * 
-				 * example:
-				 * columnfilters:[
-				   { 
-					     filterValue:{
-					       type:'equals',
-					       value:1,
-						   description:'is equal to 1'
-					     },
-					     column:['status', 'programId'], 
-					     label:'Status,Program',
-					     table:'employees', 
-					     type:'number'
-					   },
-					   { 
-					     filterValue:{
-					         type:'equals', 
-					         value:'2014-09-30T07:00:00.000Z', 
-					         description:'is equal to 9/30/2014'
-					     }, 
-					     column:'hired', 
-					     label:'hired', 
-					     table:'employees', 
-					     type:'date'
-					   }
-					 }
-				 */
-				HashMap<String, ? extends Object> cf = (HashMap<String, ? extends Object>)iter.next();
+			for(HashMap<String, Object> cf : dtr.getColumnfilters()) {
+				Map<String, Object> filterValue = (Map<String, Object>)cf.get("filterValue");
 				FiltersToHQLUtil.addRestriction(ct, cf);
 			}
 			
 			//orders (orders[i].column == zero-based index of the columns array
 			if(dtr.getOrder().size()>0) {
-				for(Iterator<? extends Object> iter = dtr.getOrder().iterator(); iter.hasNext();) {
-					Map<String,Object> o = (Map<String,Object>)iter.next();
+				for(HashMap<String, Object> o : dtr.getOrder()) {
 					Integer colIndx = Integer.parseInt(o.get("column").toString());
 					Map<String, Object> col = ((Map<String, Object>) dtr.getColumns().get(colIndx));
 					String orderDir = (String)o.get("dir");
-					String columnName = (String)col.get("name");
+					String columnName = (String)col.get("data");
 					if((Boolean)col.get("orderable")) {
 						ct.addOrder(orderDir.toLowerCase().equals("asc") ? Order.asc(columnName) : Order.desc(columnName));
 					}
 				}
 			}
-			
 			
 			
 			// recordsFiltered is the number of rows after any filtering has been applied

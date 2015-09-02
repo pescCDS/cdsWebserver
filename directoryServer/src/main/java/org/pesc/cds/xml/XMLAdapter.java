@@ -25,15 +25,17 @@ public class XMLAdapter {
 	}
 	
 	// Parse/Print Timestamp
-	public static Timestamp parseTimestamp(String timestampString) {
+	public static Calendar parseTimestamp(String timestampString) {
 		// string format should be "yyyy-MM-dd HH:mm:ss"
-		return Timestamp.valueOf(timestampString);
+		return DatatypeConverter.parseDate(timestampString);
+		//return Timestamp.valueOf(timestampString);
 		
 		// an alternative to just use the seconds
 		//return DatatypeConverter.parseDate(timestampString).getTime().getTime();
 	}
-	public static String printTimestamp(Timestamp ts) {
-		return Long.toString( ts.getTime() );
+	public static String printTimestamp(Calendar ts) {
+		//return Long.toString( ts.getTime() );
+		return Long.toString( ts.getTime().getTime() );
 	}
 	
 	
