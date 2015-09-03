@@ -177,12 +177,8 @@ version="v1.12.0">
 	</xs:complexType>
 	<xs:complexType name="OrganizationType">
 		<xs:sequence>
-			<xs:group ref="core:OrganizationIDGroup"/><!--
-            Edit:8/21/2014:Wes Owen
-            Removed maxOccurs="unbounded" on OrganizationName so JAXB doesn't create a List<String> class property.
-            I'm assuming that this property is supposed to be a string.
-            -->
-			<xs:element name="OrganizationName" type="core:OrganizationNameType" minOccurs="0"/>
+			<xs:group ref="core:OrganizationIDGroup"/>
+			<xs:element name="OrganizationName" type="core:OrganizationNameType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="Contacts" type="core:ContactsType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="NoteMessage" type="core:NoteMessageType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
@@ -4205,36 +4201,12 @@ YT Yukon
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	
-	<!--
-	Added By Wes Owen 8/20/2014
-	The GeneralAddressGroup contained a choice; DomesticAddressDetailsGroup or InternationalAddressDetailsGroup,
-	both of which end up including a PostalCode element. This makes JAXB xjc kick out a general content class instead of 
-	a class with named properties
-	-->
-	<xs:group name="GeneralAddressGroup2">
-	   <xs:annotation>
-	       <xs:documentation>This combines elements of the Domestic and International address groups</xs:documentation>
-	   </xs:annotation>
-	   <xs:sequence>
-	       <xs:group ref="core:CommonAddressDetailsGroup"/>
-	       <xs:element name="PostalCode" type="core:PostalCodeType"/>
-	       <xs:element name="StateProvinceCode" type="core:StateProvinceCodeType"/>
-	       <xs:element name="StateProvince" type="core:StateProvinceType" minOccurs="0"/>
-	       <xs:element name="CountryCode" type="core:CountryCodeType"/>
-	   </xs:sequence>
-	</xs:group>
-	
-	<!-- Edited:8/21/2014:Wes Owen 
-	Removed maxOccurs="unbounded" on the AttentionLine element, I'm assuming the intent was for a
-	single string value and not an array.
-	-->
 	<xs:complexType name="AddressType">
 		<xs:sequence>
-			<xs:group ref="core:GeneralAddressGroup2"/>
+			<xs:group ref="core:GeneralAddressGroup"/>
 			<xs:element name="EffectiveDate" type="core:AddressEffectiveDateType" minOccurs="0"/>
 			<xs:element name="ExpirationDate" type="core:AddressExpirationDateType" minOccurs="0"/>
-			<xs:element name="AttentionLine" type="core:AttentionLineType" minOccurs="0" />
+			<xs:element name="AttentionLine" type="core:AttentionLineType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="NoteMessage" type="core:NoteMessageType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>

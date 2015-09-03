@@ -6,6 +6,8 @@
     xmlns:cds="http://webservice.cds.pesc.org/" 
     xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
     xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
+    xmlns:ColTrn="urn:org:pesc:message:CollegeTranscript:v1.4.0"
+    xmlns:HSTrn="urn:org:pesc:message:HighSchoolTranscript:v1.3.0"
     xmlns:edex="urn:org:pesc:EdExchange:v1.0.8"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xs="http://www.w3.org/2001/XMLSchema">
@@ -20,7 +22,9 @@
             <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="xsd/CoreMain_v1.12.0.xsd" />
             <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="xsd/AcademicRecord_v1.7.0.xsd" />
             <xs:import namespace="urn:org:pesc:EdExchange:v1.0.8" schemaLocation="xsd/EdExchangeEnvelope_v1.0.8.xsd" />
-            
+            <xs:import namespace="urn:org:pesc:message:CollegeTranscript:v1.4.0" schemaLocation="xsd/CollegeTranscript_v1.4.0.xsd"/>
+            <xs:import namespace="urn:org:pesc:message:HighSchoolTranscript:v1.3.0" schemaLocation="xsd/HighSchoolTranscript_v1.3.0.xsd"/>
+
             <xs:element name="ServletException" type="xs:string" />
             
             <!--==============================================================-->

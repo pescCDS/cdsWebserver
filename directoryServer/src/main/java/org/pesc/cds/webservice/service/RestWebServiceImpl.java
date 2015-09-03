@@ -1,5 +1,6 @@
 package org.pesc.cds.webservice.service;
 
+import java.io.InputStream;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -12,9 +13,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.DeliveryMethodSearch;
@@ -23,6 +27,10 @@ import org.pesc.cds.webservice.service.request.DocumentFormatSearch;
 import org.pesc.cds.webservice.service.request.EntityCodeSearch;
 import org.pesc.cds.webservice.service.request.OrganizationContactSearch;
 import org.pesc.cds.webservice.service.request.OrganizationSearch;
+import org.pesc.cds.xml.Validator;
+import org.pesc.cds.xml.XmlFileType;
+import org.pesc.cds.xml.XmlSchemaVersion;
+import org.pesc.edexchange.v1_0.ContentCodeType;
 import org.pesc.edexchange.v1_0.DeliveryMethod;
 import org.pesc.edexchange.v1_0.DeliveryOption;
 import org.pesc.edexchange.v1_0.DocumentFormat;
@@ -164,23 +172,23 @@ public class RestWebServiceImpl {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public List<OrganizationContact> searchContactsGet(@JsonProperty OrganizationContactSearch contactSearch) {
 		return ((ContactsDao)DatasourceManagerUtil.getContacts()).search(
-				contactSearch.getCity(), 
-				contactSearch.getContactId(), 
-				contactSearch.getContactName(), 
-				contactSearch.getContactTitle(), 
-				contactSearch.getContactType(), 
-				contactSearch.getCountry(), 
-				contactSearch.getCreatedTime(), 
-				contactSearch.getDirectoryId(), 
-				contactSearch.getEmail(), 
-				contactSearch.getModifiedTime(), 
-				contactSearch.getPhone1(), 
-				contactSearch.getPhone2(), 
-				contactSearch.getState(), 
-				contactSearch.getStreetAddress1(), 
-				contactSearch.getStreetAddress2(), 
-				contactSearch.getStreetAddress3(), 
-				contactSearch.getStreetAddress4(), 
+				contactSearch.getCity(),
+				contactSearch.getContactId(),
+				contactSearch.getContactName(),
+				contactSearch.getContactTitle(),
+				contactSearch.getContactType(),
+				contactSearch.getCountry(),
+				contactSearch.getCreatedTime(),
+				contactSearch.getDirectoryId(),
+				contactSearch.getEmail(),
+				contactSearch.getModifiedTime(),
+				contactSearch.getPhone1(),
+				contactSearch.getPhone2(),
+				contactSearch.getState(),
+				contactSearch.getStreetAddress1(),
+				contactSearch.getStreetAddress2(),
+				contactSearch.getStreetAddress3(),
+				contactSearch.getStreetAddress4(),
 				contactSearch.getZip()
 		);
 	}
@@ -599,18 +607,18 @@ public class RestWebServiceImpl {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public List<Organization> searchOrganizations(@JsonProperty OrganizationSearch organizationSearch) {
 		return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).search(
-			organizationSearch.getDirectoryId(), 
-			organizationSearch.getOrganizationId(), 
-			organizationSearch.getOrganizationIdType(), 
-			organizationSearch.getOrganizationName(), 
-			organizationSearch.getOrganizationSubcode(), 
-			organizationSearch.getEntityId(), 
-			organizationSearch.getOrganizationEin(), 
-			organizationSearch.getCreatedTime(), 
-			organizationSearch.getModifiedTime()
+				organizationSearch.getDirectoryId(),
+				organizationSearch.getOrganizationId(),
+				organizationSearch.getOrganizationIdType(),
+				organizationSearch.getOrganizationName(),
+				organizationSearch.getOrganizationSubcode(),
+				organizationSearch.getEntityId(),
+				organizationSearch.getOrganizationEin(),
+				organizationSearch.getCreatedTime(),
+				organizationSearch.getModifiedTime()
 		);
 	}
-	
+
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/organizations/{id}")
 	@GET
@@ -618,7 +626,7 @@ public class RestWebServiceImpl {
 	public Organization getOrganization(@PathParam("id") Integer id) {
 		return DatasourceManagerUtil.getOrganizations().byId(id);
 	}
-	
+
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/organizations/save/")
 	@POST
@@ -659,5 +667,85 @@ public class RestWebServiceImpl {
 		//remove organization object from persistence layer
 		return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).remove(org);
 	}
-	
+
+    /**
+     * Validates a file specified by fileFormat
+     * @param uploadedInputStream the InputStream containing the file
+     * @param fileFormatStr Cast to a ContentCodeType
+     * @param xmlFileTypeStr Optional parameter, used for PESCXML validation, specifies whether HighSchool or College PESC Transcript.  Default: COLLEGE_TRANSCRIPT
+     * @param versionStr Optional parameter, used for PESCXML validation, specifies the version of the HS/College transcript schema to validate with.  Default: V1_4_0.
+     * @return Response containing a error message string if a validation error is encountered.
+     */
+    @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@POST
+	@Path("/validateFile")  //Your Path or URL to call this service
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response validateFile(
+            @Multipart("file") InputStream uploadedInputStream,
+            @Multipart("fileFormat") String fileFormatStr,
+			@Multipart(value="xmlType", required=false) String xmlFileTypeStr,
+			@Multipart(value="schemaVersion", required=false) String versionStr)
+
+	{
+		Response.Status status = Response.Status.OK;
+		ContentCodeType fileFormat = ContentCodeType.fromValue(fileFormatStr);
+		String errorMsg = "";
+		switch(fileFormat) {
+			case PESCXML:
+				try {
+					XmlFileType xmlFileType = getXmlFileTypeEnum(xmlFileTypeStr);
+					XmlSchemaVersion version = getXmlSchemaVersionEnum(versionStr);
+					Validator.validatePESCXMLTranscript(uploadedInputStream, xmlFileType, version);
+				}
+				catch (Exception e) {
+					errorMsg = e.getLocalizedMessage();
+				}
+				break;
+			case EDI:
+				break;
+			case TEXT:
+			case XML:
+			case PDF:
+			case IMAGE:
+			case BINARY:
+			case MUTUALLY_DEFINED:
+				// Return BAD_REQUEST and tell them why...
+				status = Response.Status.BAD_REQUEST;
+				errorMsg = ("File validation is currently only supported for PESC XML and EDI validation.");
+				break;
+		}
+		return Response.status(status.getStatusCode()).entity(errorMsg).build();
+	}
+
+    /**
+     * Null-/blank string-safe string converter to XmlSchemaVersion enum.  Will default to V1_4_0 if otherwise invalid.
+     * @param versionStr
+     * @return
+     */
+	private XmlSchemaVersion getXmlSchemaVersionEnum(String versionStr) {
+		XmlSchemaVersion version = XmlSchemaVersion.V1_4_0;
+		if(StringUtils.isNotBlank(versionStr)) {
+            try {
+                version = Enum.valueOf(XmlSchemaVersion.class, versionStr);
+            } catch(Throwable t) { /* eat it, and use the default v1.4.0 */ }
+        }
+		return version;
+	}
+
+    /**
+     * Null-/blank string-safe string converter to XmlFileType enum.  Will default to COLLEGE_TRANSCRIPT if otherwise invalid.
+     * @param xmlFileTypeStr
+     * @return
+     */
+    private XmlFileType getXmlFileTypeEnum(String xmlFileTypeStr) {
+		XmlFileType xmlFileType = XmlFileType.COLLEGE_TRANSCRIPT;
+		if(StringUtils.isNotBlank(xmlFileTypeStr)) {
+            try {
+                xmlFileType = Enum.valueOf(XmlFileType.class, xmlFileTypeStr);
+            } catch(Throwable t) { /* eat it, and use the default COLLEGE_TRANSCRIPT */ }
+        }
+		return xmlFileType;
+	}
+
+
 }
