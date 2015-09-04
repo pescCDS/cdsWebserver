@@ -15,7 +15,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	<parent>
 	  <groupId>org.cds.pesc.WebServices</groupId>
 	  <artifactId>EdExchange</artifactId>
-	  <version>0.1.1-SNAPSHOT</version>
+	  <version>0.1.2-SNAPSHOT</version>
 	</parent>
 	
 	<profiles>
@@ -211,12 +211,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 							<defaultOptions>
 								<extraargs>
 									<extraarg>-keep</extraarg>
-									<!--<extraarg>-nexclude</extraarg>
-									<extraarg>urn:org:pesc:core:CoreMain:v1.12.0=org.pesc.core.coremain.v1_12</extraarg>
-									<extraarg>-nexclude</extraarg>
-									<extraarg>urn:org:pesc:sector:AcademicRecord:v1.7.0=org.pesc.sector.academicrecord.v1_7</extraarg>
-									<extraarg>-nexclude</extraarg>
-									<extraarg>urn:org:pesc:EdExchange:v1.0.8=org.pesc.edexchange.v1_0</extraarg>-->
 								</extraargs>
 								<bindingFiles>
 									<bindingFile>${basedir}/src/main/resources/xsd/bindings.xjb.xml</bindingFile>

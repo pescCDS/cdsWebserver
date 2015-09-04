@@ -4,9 +4,9 @@
     targetNamespace="http://webservice.cds.pesc.org/"  
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
     xmlns:cds="http://webservice.cds.pesc.org/" 
-    xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
-    xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
-    xmlns:edex="urn:org:pesc:EdExchange:v1.0.8"
+    xmlns:core="urn:org:pesc:core:CoreMain:v1.13.0"
+    xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.8.0"
+    xmlns:edex="urn:org:pesc:EdExchange:v1.0.9"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xs="http://www.w3.org/2001/XMLSchema">
     
@@ -17,9 +17,9 @@
                              xmlns:xs="http://www.w3.org/2001/XMLSchema"
                               version="1.0">
             <!-- -->
-            <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="xsd/CoreMain_v1.12.0.xsd" />
-            <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="xsd/AcademicRecord_v1.7.0.xsd" />
-            <xs:import namespace="urn:org:pesc:EdExchange:v1.0.8" schemaLocation="xsd/EdExchangeEnvelope_v1.0.8.xsd" />
+            <xs:import namespace="urn:org:pesc:core:CoreMain:v1.13.0" schemaLocation="xsd/CoreMain_v1.13.0.xsd" />
+            <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.8.0" schemaLocation="xsd/AcademicRecord_v1.8.0.xsd" />
+            <xs:import namespace="urn:org:pesc:EdExchange:v1.0.9" schemaLocation="xsd/EdExchangeEnvelope_v1.0.9.xsd" />
             
             <xs:element name="ServletException" type="xs:string" />
             

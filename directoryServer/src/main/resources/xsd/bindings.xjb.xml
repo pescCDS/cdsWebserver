@@ -7,11 +7,11 @@
          xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
        xmlns:annox="http://annox.dev.java.net"
-        xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.8"
-xsi:schemaLocation="EdExchangeEnvelope_v1.0.8.xsd 
+        xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.9"
+xsi:schemaLocation="EdExchangeEnvelope_v1.0.9.xsd 
 					http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd">
     
-    <jaxb:bindings schemaLocation="EdExchangeEnvelope_v1.0.8.xsd">
+    <jaxb:bindings schemaLocation="EdExchangeEnvelope_v1.0.9.xsd">
     	
     	<jaxb:globalBindings>
     		

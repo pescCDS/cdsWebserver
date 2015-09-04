@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:core="urn:org:pesc:core:CoreMain:v1.12.0"
-           xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.7.0"
-           targetNamespace="urn:org:pesc:EdExchange:v1.0.8" 
-           xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.8" 
-           elementFormDefault="unqualified" attributeFormDefault="unqualified" version="v1.0.8">
-  <xs:import namespace="urn:org:pesc:core:CoreMain:v1.12.0" schemaLocation="CoreMain_v1.12.0.xsd"/>
-  <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.7.0" schemaLocation="AcademicRecord_v1.7.0.xsd"/>
+           xmlns:core="urn:org:pesc:core:CoreMain:v1.13.0"
+           xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.8.0"
+           targetNamespace="urn:org:pesc:EdExchange:v1.0.9" 
+           xmlns:EdEx="urn:org:pesc:EdExchange:v1.0.9" 
+           elementFormDefault="unqualified" attributeFormDefault="unqualified" version="v1.0.9">
+  <xs:import namespace="urn:org:pesc:core:CoreMain:v1.13.0" schemaLocation="CoreMain_v1.13.0.xsd"/>
+  <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.8.0" schemaLocation="AcademicRecord_v1.8.0.xsd"/>
   <!--==============================================================================================================================-->
   <!--Name:      EdExchangeEnvelope.xsd                                                                                             -->
-  <!--Version:   1.0.8                                                                                                              -->
-  <!--Date:      05-Feb-2015                                                                                                        -->
+  <!--Version:   1.0.9                                                                                                              -->
+  <!--Date:      04-Sep-2015                                                                                                        -->
   <!--                                                                                                                              -->
   <!--Change Log:                                                                                                                   -->
   <!--v1.0.0 18-Jan-2013 CDS technical workgroup                                                                                    -->
@@ -30,6 +30,7 @@
   <!--                   Added OrganizationContact                                                                                  -->
   <!--                   Added DeliveryMethod                                                                                       -->
   <!--                   Added DeliveryOption                                                                                       -->
+  <!--v1.0.9 04-Sep-2015 Updated Academic Record and CoreMain schema versions  -->
   <!--==============================================================================================================================-->
   
   <!--
