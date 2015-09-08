@@ -17,7 +17,6 @@ public class DeliveryOptionsDao implements DBDataSourceDao<DeliveryOption> {
 	
 	public DeliveryOptionsDao() {}
 	
-	
 	public List<DeliveryOption> search(
 			Integer id, 
 			Integer memberId, 

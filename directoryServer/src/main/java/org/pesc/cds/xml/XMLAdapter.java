@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 public class XMLAdapter {
 
 	// Parse/Print Date from string
@@ -27,7 +30,12 @@ public class XMLAdapter {
 	// Parse/Print Timestamp
 	public static Calendar parseTimestamp(String timestampString) {
 		// string format should be "yyyy-MM-dd HH:mm:ss"
-		return DatatypeConverter.parseDate(timestampString);
+		
+		Calendar c = DatatypeConverter.parseDate(timestampString);
+		DateTime conv = new DateTime(c.getTimeInMillis(), DateTimeZone.UTC);
+		return conv.toGregorianCalendar();
+		
+		//return DatatypeConverter.parseDate(timestampString);
 		//return Timestamp.valueOf(timestampString);
 		
 		// an alternative to just use the seconds

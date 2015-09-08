@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,19 +12,17 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
+import org.pesc.cds.datatables.FiltersToHQLUtil;
 import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.edexchange.v1_0.EntityCode;
 
 public class EntityCodesDao implements DBDataSourceDao<EntityCode> {
 	private static final Log log = LogFactory.getLog(EntityCodesDao.class);
 	
-	/**
-	 * Default no-arg constructor
-	 */
 	public EntityCodesDao() { }
 	
-	
-	public List<EntityCode> search(Integer id, Integer code, String description, Long createdTime, Long modifiedTime) {
+	public List<EntityCode> search(Integer id, Integer code, String description, 
+			Long createdTime, Long modifiedTime) {
 		List<EntityCode> retList = new ArrayList<EntityCode>();
 		try {
 			if(HibernateUtil.getSessionFactory().isClosed()) {
@@ -45,8 +44,12 @@ public class EntityCodesDao implements DBDataSourceDao<EntityCode> {
 				hasCriteria = true;
 			}
 			
-			if(description!=null) {
-				ct.add(Restrictions.ilike("description", description, MatchMode.ANYWHERE));
+			if(description!=null && description.trim().length()>0) {
+				StringTokenizer tokens = new StringTokenizer(description.trim());
+				while(tokens.hasMoreElements()) {
+					String token = tokens.nextToken();
+					ct.add(Restrictions.ilike("description", token, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
@@ -74,6 +77,13 @@ public class EntityCodesDao implements DBDataSourceDao<EntityCode> {
 		return retList;
 	}
 	
+	/**
+	 * Thymeleaf 2.1.4 will output Date/Calendar/Timestamp values as ISO8601 
+	 * date string literal from a script inline output
+	 * Thymeleaf < 2.1.4 would output the Date/Calendar/Timestamp value as a 
+	 * JSON object of that class
+	 * @return List&lt;HashMap&lt;String, Object&gt;&gt; format of EntityCodes
+	 */
 	public List<HashMap<String, Object>> forJson() {
 		List<HashMap<String, Object>> retList = new ArrayList<HashMap<String, Object>>();
 		
@@ -84,8 +94,8 @@ public class EntityCodesDao implements DBDataSourceDao<EntityCode> {
 			eobj.put("id", e.getId());
 			eobj.put("code", e.getCode());
 			eobj.put("description", e.getDescription());
-			eobj.put("createdTime", e.getCreatedTime().getTime());
-			eobj.put("modifiedTime", e.getModifiedTime().getTime());
+			eobj.put("createdTime", e.getCreatedTime().getTimeInMillis());
+			eobj.put("modifiedTime", e.getModifiedTime().getTimeInMillis());
 			retList.add(eobj);
 		}
 		return retList;
@@ -154,6 +164,10 @@ public class EntityCodesDao implements DBDataSourceDao<EntityCode> {
 			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
+			
+			// strip out created, modified because the database handles those values
+			entityCode.setCreatedTime(null);
+			entityCode.setModifiedTime(null);
 			
 			// save EntityCode to persistence layer
 			session.saveOrUpdate(entityCode);

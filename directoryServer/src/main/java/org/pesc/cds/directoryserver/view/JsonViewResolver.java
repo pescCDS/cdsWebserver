@@ -2,14 +2,19 @@ package org.pesc.cds.directoryserver.view;
 
 import java.sql.Timestamp;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.ext.JodaSerializers;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.map.ser.CustomSerializerFactory;
+import org.codehaus.jackson.map.ser.std.TimeZoneSerializer;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
@@ -30,19 +35,21 @@ public class JsonViewResolver implements ViewResolver {
 		view.setPrettyPrint(true);
 		
 		JSONMapper jmap = new JSONMapper();
-		
-		CustomSerializerFactory factory = new CustomSerializerFactory();
-		factory.addSpecificMapping(Timestamp.class, new JsonTimestampSerializer());
-		jmap.setSerializerFactory(factory);
-		
-		SimpleModule mod = new SimpleModule("JsonTimestampDeserializer", new Version(1, 0, 0, null));
-		mod.addDeserializer(Timestamp.class, new JsonTimestampDeserializer());
-		jmap.registerModule(mod);
-		
 		jmap.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		jmap.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 		jmap.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, true);
+		jmap.configure(SerializationConfig.Feature.WRITE_DATE_KEYS_AS_TIMESTAMPS, true);
 		jmap.setDateFormat(null);
+		
+		CustomSerializerFactory factory = new CustomSerializerFactory();
+		factory.addSpecificMapping(DateTime.class,  new JodaSerializers.DateTimeSerializer());
+		factory.addSpecificMapping(LocalDate.class,new JodaSerializers.LocalDateSerializer());
+		factory.addGenericMapping(TimeZone.class,new TimeZoneSerializer());
+		jmap.setSerializerFactory(factory);
+		
+		//SimpleModule mod = new SimpleModule("JsonTimestampDeserializer", new Version(1, 0, 0, null));
+		//mod.addDeserializer(Timestamp.class, new JsonTimestampDeserializer());
+		//jmap.registerModule(mod);
 		
 		view.setObjectMapper(jmap);
 		return view;

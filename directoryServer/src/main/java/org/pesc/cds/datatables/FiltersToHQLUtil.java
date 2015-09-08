@@ -86,7 +86,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 	 * @return <b><code>Calendar</code></b> A <code>Calendar</code> that can be used to compare 
 	 * against other <code>Calendar</code> instances in the same timezone.
 	 */
-	private static Calendar createCalendarFromTimestamp(long timestamp) {
+	public static Calendar createCalendarFromTimestamp(long timestamp) {
 		DateTime dtConverter = new DateTime(timestamp, DateTimeZone.UTC);
 		return dtConverter.toLocalDate().toDateTimeAtStartOfDay().toGregorianCalendar();
 	}

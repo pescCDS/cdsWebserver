@@ -7,7 +7,7 @@
         
         <div class="page-header"><h1 th:text="#{title.organizations}">Page Title</h1></div>
     	
-        <div id="orgView"></div>
+        <div id="dtView"></div>
     
     	<div th:replace="layout/footer :: layoutFooter"></div>
     </div>
@@ -20,10 +20,10 @@
 			dtView, tsConfig = {'format':'mm/dd/yyyy'};
 		
 		$(document).ready(function(e){
-			dtView = $('#orgView').DataTableView({
+			dtView = $('#dtView').DataTableView({
 			    'mode':$.fn.DataTableView.MODES.MODIFY,
 			    'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
-		        'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+		        'webServiceUrl':/*[[ @{/services/rest/organizations} ]]*/ '/services/rest/organizations',
 			    'tableData':{
 			        'name':'organizations',
 		            'class':'Organization',
@@ -164,7 +164,7 @@
 		                        'type':'timestamp',
 		                        'disabled':true
 		                    },
-						    'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						    'render':{'_':function(z){ return moment(z).format('l LTS'); }}
 						},
 						{
 						    'data':'modifiedTime',  
@@ -175,7 +175,7 @@
                                 'type':'timestamp',
                                 'disabled':true
                             },
-						    'render':{'_':function(z){ return moment(z).format('M/D/YYYY h:mm:ss a'); }}
+						    'render':{'_':function(z){ return moment(z).format('l LTS'); }}
 						}
 		            ]
 			    },

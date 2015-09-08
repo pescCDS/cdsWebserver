@@ -1,22 +1,18 @@
 package org.pesc.cds.webservice.service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
-import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.cds.webservice.WebServicesInterface;
 import org.pesc.cds.webservice.ServletException;
-import org.pesc.core.coremain.v1_12.UserDefinedExtensionsType;
+import org.pesc.core.coremain.v1_13.UserDefinedExtensionsType;
 import org.pesc.edexchange.v1_0.ContentTypeType;
 import org.pesc.edexchange.v1_0.DeliveryOptionType;
 import org.pesc.edexchange.v1_0.Organization;
-import org.pesc.sector.academicrecord.v1_7.OrganizationType;
-import org.pesc.sector.academicrecord.v1_7.SourceDestinationType;
+import org.pesc.sector.academicrecord.v1_8.OrganizationType;
+import org.pesc.sector.academicrecord.v1_8.SourceDestinationType;
 
 
 public class WebServiceImpl implements WebServicesInterface {
