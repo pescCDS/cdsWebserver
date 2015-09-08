@@ -7,7 +7,7 @@ public interface DBDataSourceDao<T> {
 	
 	public List<T> all();
 	
-	//public T save(T saveItem);
+	public T save(T saveItem);
 	
-	//public T remove(T removeItem);
+	public T remove(T removeItem);
 }

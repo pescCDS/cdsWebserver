@@ -24,13 +24,13 @@ public class JSONMapper extends ObjectMapper {
 	public JSONMapper() {
 		super();
 		
-		CustomSerializerFactory factory = new CustomSerializerFactory();
-		factory.addSpecificMapping(Timestamp.class, new JsonTimestampSerializer());
-		this.setSerializerFactory(factory);
+		//CustomSerializerFactory factory = new CustomSerializerFactory();
+		//factory.addSpecificMapping(Timestamp.class, new JsonTimestampSerializer());
+		//this.setSerializerFactory(factory);
 		
-		SimpleModule mod = new SimpleModule("JsonTimestampDeserializer", new Version(1, 0, 0, null));
-		mod.addDeserializer(Timestamp.class, new JsonTimestampDeserializer());
-		this.registerModule(mod);
+		//SimpleModule mod = new SimpleModule("JsonTimestampDeserializer", new Version(1, 0, 0, null));
+		//mod.addDeserializer(Timestamp.class, new JsonTimestampDeserializer());
+		//this.registerModule(mod);
 		
 		this.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		this.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);

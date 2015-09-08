@@ -3,8 +3,10 @@ package org.pesc.cds.webservice.service;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -17,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.pesc.cds.datatables.FiltersToHQLUtil;
 import org.pesc.cds.webservice.service.request.DeliveryMethodSearch;
 import org.pesc.cds.webservice.service.request.DeliveryOptionSearch;
 import org.pesc.cds.webservice.service.request.DocumentFormatSearch;
@@ -38,6 +41,7 @@ import org.pesc.edexchange.v1_0.dao.DeliveryOptionsDao;
 
 /**
  * REST web service class
+ * This endpoint is at /{webapp}/services/rest
  * @author owenwe
  * 
  */
@@ -67,26 +71,6 @@ public class RestWebServiceImpl {
 	// OrganizationContact
 	//////////////////////////////////////////////
 	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/contacts/{contactId}")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public OrganizationContact getContact(@PathParam("contactId") Integer id) {
-		return DatasourceManagerUtil.getContacts().byId(id);
-	}
-	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/contacts")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<OrganizationContact> getContacts(@QueryParam("query") String query) {
-		if(query!=null) {
-			return ((ContactsDao)DatasourceManagerUtil.getContacts()).filterByName(query);
-		} else {
-			return DatasourceManagerUtil.getContacts().all();
-		}
-	}
-	
 	/**
 	 * This is the GET version of /contacts/search<p>
 	 * Each parameter has a <code>QueryParam</code> annotation
@@ -111,7 +95,7 @@ public class RestWebServiceImpl {
 	 * @return
 	 */
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/contacts/search")
+	@Path("/contacts")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<OrganizationContact> searchContactsGet(
@@ -134,27 +118,35 @@ public class RestWebServiceImpl {
 			@QueryParam("streetAddress4") String streetAddress4,
 			@QueryParam("zip") String zip
 		) {
-		
-		return ((ContactsDao)DatasourceManagerUtil.getContacts()).search(
-				city, 
-				contactId, 
-				contactName, 
-				contactTitle, 
-				contactType, 
-				country, 
-				createdTime, 
-				directoryId, 
-				email, 
-				modifiedTime, 
-				phone1, 
-				phone2, 
-				state, 
-				streetAddress1, 
-				streetAddress2, 
-				streetAddress3, 
-				streetAddress4, 
-				zip
-		);
+		if(city!=null || contactId!=null || contactName!=null || 
+				contactTitle!=null || contactType!=null || country!=null || 
+				createdTime!=null || directoryId!=null || email!=null ||
+				modifiedTime!=null || phone1!=null || phone2!=null ||
+				state!=null || streetAddress1!=null || streetAddress2!=null ||
+				streetAddress3!=null || streetAddress4!=null || zip!=null) {
+			return ((ContactsDao)DatasourceManagerUtil.getContacts()).search(
+					city, 
+					contactId, 
+					contactName, 
+					contactTitle, 
+					contactType, 
+					country, 
+					createdTime, 
+					directoryId, 
+					email, 
+					modifiedTime, 
+					phone1, 
+					phone2, 
+					state, 
+					streetAddress1, 
+					streetAddress2, 
+					streetAddress3, 
+					streetAddress4, 
+					zip
+			);
+		} else {
+			return DatasourceManagerUtil.getContacts().all();
+		}
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -185,47 +177,43 @@ public class RestWebServiceImpl {
 		);
 	}
 	
-	
-	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/contacts/save/")
-	@POST
+	@Path("/contacts/{contactId}")
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public OrganizationContact saveContact(@JsonProperty OrganizationContact contact) {
-		log.debug("saving Contact {");
-		log.debug(String.format(" id: %s", contact.getContactId()));
-		log.debug(String.format(" name: %s", contact.getContactName()));
-		log.debug(String.format(" title: %s", contact.getContactTitle()));
-		log.debug(String.format(" type: %s", contact.getContactType()));
-		log.debug(String.format(" email: %s", contact.getEmail()));
-		log.debug(String.format(" phone1: %s", contact.getPhone1()));
-		log.debug(String.format(" phone2: %s", contact.getPhone2()));
-		log.debug(String.format(" streetAddress1: %s", contact.getStreetAddress1()));
-		log.debug(String.format(" streetAddress2: %s", contact.getStreetAddress2()));
-		log.debug(String.format(" streetAddress3: %s", contact.getStreetAddress3()));
-		log.debug(String.format(" streetAddress4: %s", contact.getStreetAddress4()));
-		log.debug(String.format(" city: %s", contact.getCity()));
-		log.debug(String.format(" zip: %s", contact.getZip()));
-		log.debug(String.format(" state: %s", contact.getState()));
-		log.debug(String.format(" country: %s", contact.getCountry()));
-		log.debug(String.format(" createdTime: %s", contact.getCreatedTime()));
-		log.debug(String.format(" modifiedTime: %s", contact.getModifiedTime()));
-		
-		log.debug("}");
-		
-		return ((ContactsDao)DatasourceManagerUtil.getContacts()).save(contact);
+	public OrganizationContact getContact(@PathParam("contactId") Integer id) {
+		return DatasourceManagerUtil.getContacts().byId(id);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/contacts/remove/")
+	@Path("/contacts")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public OrganizationContact removeContact(@JsonProperty OrganizationContact contact) {
-		log.debug(contact);
-		
-		return ((ContactsDao)DatasourceManagerUtil.getContacts()).remove(contact);
+	public OrganizationContact createContact(@JsonProperty OrganizationContact contact) {
+		return DatasourceManagerUtil.getContacts().save(contact);
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/contacts/{contactId}")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public OrganizationContact saveContact(@PathParam("contactId") Integer contactId, 
+			@JsonProperty OrganizationContact contact) {
+		return DatasourceManagerUtil.getContacts().save(contact);
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/contacts/{contactId}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeContact(@PathParam("contactId") Integer contactId) {
+		OrganizationContact contact = DatasourceManagerUtil.getContacts().byId(contactId);
+		if(contact!=null) {
+			DatasourceManagerUtil.getContacts().remove(contact);
+		}
 	}
 	
 	
@@ -237,16 +225,15 @@ public class RestWebServiceImpl {
 	@Path("/deliveryMethods")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DeliveryMethod> getDeliveryMethods() {
-		return DatasourceManagerUtil.getDeliveryMethods().all();
-	}
-	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryMethods/search")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<DeliveryMethod> searchDeliveryMethods(@QueryParam("id") Integer id, @QueryParam("method") String method) {
-		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).search(id, method);
+	public List<DeliveryMethod> searchDeliveryMethods(
+			@QueryParam("id") Integer id, 
+			@QueryParam("method") String method) {
+		if(id!=null || method!=null) {
+			return ((DeliveryMethodsDao)DatasourceManagerUtil
+					.getDeliveryMethods()).search(id, method);
+		} else {
+			return DatasourceManagerUtil.getDeliveryMethods().all();
+		}
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -254,8 +241,12 @@ public class RestWebServiceImpl {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<DeliveryMethod> searchDeliveryMethods(@JsonProperty DeliveryMethodSearch deliveryMethodSearch) {
-		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).search(deliveryMethodSearch.getId(), deliveryMethodSearch.getMethod());
+	public List<DeliveryMethod> searchDeliveryMethods(
+			@JsonProperty DeliveryMethodSearch deliveryMethodSearch) {
+		return ((DeliveryMethodsDao)DatasourceManagerUtil
+				.getDeliveryMethods()).search(
+						deliveryMethodSearch.getId(),
+						deliveryMethodSearch.getMethod());
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -267,25 +258,33 @@ public class RestWebServiceImpl {
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryMethods/save/")
+	@Path("/deliveryMethods")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public DeliveryMethod saveDeliveryMethod(@JsonProperty DeliveryMethod method) {
-		log.debug(String.format("saving DeliveryMethod { id: %s, method: %s }", method.getId(), method.getMethod()));
-		
-		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).save(method);
+	public DeliveryMethod createDeliveryMethod(@JsonProperty DeliveryMethod method) {
+		return DatasourceManagerUtil.getDeliveryMethods().save(method);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryMethods/remove/")
-	@POST
+	@Path("/deliveryMethods/{id}")
+	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public DeliveryMethod removeDeliveryMethod(@JsonProperty DeliveryMethod method) {
-		log.debug(method);
-		
-		return ((DeliveryMethodsDao)DatasourceManagerUtil.getDeliveryMethods()).remove(method);
+	public DeliveryMethod saveDeliveryMethod(@PathParam("id") Integer id, @JsonProperty DeliveryMethod method) {
+		return DatasourceManagerUtil.getDeliveryMethods().save(method);
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/deliveryMethods/{id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeDeliveryMethod(@PathParam("id") Integer id) {
+		DeliveryMethod method = DatasourceManagerUtil.getDeliveryMethods().byId(id);
+		if(method!=null) {
+			DatasourceManagerUtil.getDeliveryMethods().remove(method);
+		}
 	}
 	
 	
@@ -295,14 +294,6 @@ public class RestWebServiceImpl {
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/deliveryOptions")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<DeliveryOption> getDeliveryOptions() {
-		return DatasourceManagerUtil.getDeliveryOptions().all();
-	}
-	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryOptions/search")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DeliveryOption> searchDeliveryOptions(
@@ -315,8 +306,24 @@ public class RestWebServiceImpl {
 			@QueryParam("error") Boolean error,
 			@QueryParam("operationalStatus") String operationalStatus
 		) {
+		if(id!=null || memberId!=null || formatId!=null || 
+				webserviceUrl!=null || deliveryMethodId!=null || 
+				deliveryConfirm!=null || error!=null || 
+				operationalStatus!=null) {
+			return ((DeliveryOptionsDao)DatasourceManagerUtil
+					.getDeliveryOptions()).search(
+							id, 
+							memberId, 
+							formatId, 
+							webserviceUrl, 
+							deliveryMethodId, 
+							deliveryConfirm, 
+							error, 
+							operationalStatus);
+		} else {
+			return DatasourceManagerUtil.getDeliveryOptions().all();
+		}
 		
-		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).search(id, memberId, formatId, webserviceUrl, deliveryMethodId, deliveryConfirm, error, operationalStatus);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -346,34 +353,34 @@ public class RestWebServiceImpl {
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryOptions/save/")
+	@Path("/deliveryOptions")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public DeliveryOption saveDeliveryOptions(@JsonProperty DeliveryOption option) {
-		log.debug(String.format(
-			"saving DeliveryOption {%n id: %s,%n member: %s,%n format: %s,%n deliveryMethod: %s,%n deliveryConfirm: %s,%n error: %s,%n operationalStatus: %s%n}", 
-			option.getId(),
-			option.getMember().getOrganizationName(),
-			option.getFormat().getFormatName(),
-			option.getDeliveryMethod().getMethod(),
-			option.isDeliveryConfirm(),
-			option.isError(),
-			option.getOperationalStatus()
-		));
-		
-		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).save(option);
+	public DeliveryOption createDeliveryOptions(@JsonProperty DeliveryOption opt) {
+		return DatasourceManagerUtil.getDeliveryOptions().save(opt);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/deliveryOptions/remove/")
-	@POST
+	@Path("/deliveryOptions/{id}")
+	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public DeliveryOption removeDeliveryOptions(@JsonProperty DeliveryOption option) {
-		log.debug(option);
-		
-		return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).remove(option);
+	public DeliveryOption saveDeliveryOption(@PathParam("id") Integer id, 
+			@JsonProperty DeliveryOption opt) {
+		return DatasourceManagerUtil.getDeliveryOptions().save(opt);
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/deliveryOptions/{id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeDeliveryOptions(@PathParam("id") Integer id) {
+		DeliveryOption opt = DatasourceManagerUtil.getDeliveryOptions().byId(id);
+		if(opt!=null) {
+			DatasourceManagerUtil.getDeliveryOptions().remove(opt);
+		}
 	}
 	
 	
@@ -385,18 +392,6 @@ public class RestWebServiceImpl {
 	@Path("/documentFormats")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<DocumentFormat> getDocumentFormats(@QueryParam("query") String query) {
-		if(query!=null) {
-			return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).filterByName(query);
-		} else {
-			return DatasourceManagerUtil.getDocumentFormats().all();
-		}
-	}
-	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/documentFormats/search")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<DocumentFormat> searchDocumentFormat(
 			@QueryParam("id") Integer id, 
 			@QueryParam("formatName") String formatName,
@@ -405,8 +400,21 @@ public class RestWebServiceImpl {
 			@QueryParam("createdTime") Long createdTime,
 			@QueryParam("modifiedTime") Long modifiedTime
 		) {
-		
-		return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).search(id, formatName, formatDescription, formatInuseCount, createdTime, modifiedTime);
+		if(id!=null || formatName!=null || formatDescription!=null || 
+				formatInuseCount!=null || createdTime!=null || 
+				modifiedTime!=null) {
+			return ((DocumentFormatsDao)DatasourceManagerUtil
+					.getDocumentFormats()).search(
+					    id, 
+					    formatName, 
+					    formatDescription, 
+					    formatInuseCount, 
+					    createdTime, 
+					    modifiedTime
+					);
+		} else {
+			return DatasourceManagerUtil.getDocumentFormats().all();
+		}
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -414,8 +422,10 @@ public class RestWebServiceImpl {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<DocumentFormat> searchDocumentFormat(@JsonProperty DocumentFormatSearch documentFormatSearch) {
-		return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).search(
+	public List<DocumentFormat> searchDocumentFormat(
+			@JsonProperty DocumentFormatSearch documentFormatSearch) {
+		return ((DocumentFormatsDao)DatasourceManagerUtil
+				.getDocumentFormats()).search(
 			documentFormatSearch.getId(), 
 			documentFormatSearch.getFormatName(), 
 			documentFormatSearch.getFormatDescription(), 
@@ -433,44 +443,44 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getDocumentFormats().byId(id);
 	}
 	
-	// Document Formats
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/documentFormats/save/")
+	@Path("/documentFormats")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public DocumentFormat saveDocumentFormat(@JsonProperty DocumentFormat docFormat) {
+	public DocumentFormat createDocumentFormat(@JsonProperty DocumentFormat docFormat) {
 		// TODO validate document format object
-		log.debug(docFormat);
-		
 		//save document format
-		return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).save(docFormat);
+		return DatasourceManagerUtil.getDocumentFormats().save(docFormat);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/documentFormats/remove/")
-	@POST
+	@Path("/documentFormats/{id}")
+	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public DocumentFormat removeDocumentFormat(@JsonProperty DocumentFormat docFormat) {
-		log.debug(docFormat);
-		
-		//remove document format
-		return ((DocumentFormatsDao)DatasourceManagerUtil.getDocumentFormats()).remove(docFormat);
+	public DocumentFormat saveDocumentFormat(
+			@PathParam("id") Integer id, 
+			@JsonProperty DocumentFormat docFormat) {
+		return DatasourceManagerUtil.getDocumentFormats().save(docFormat);
+	}
+	
+	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+	@Path("/documentFormats/{id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void removeDocumentFormat(@PathParam("id") Integer id) {
+		DocumentFormat docFormat = DatasourceManagerUtil.getDocumentFormats().byId(id);
+		if(docFormat!=null) {
+			DatasourceManagerUtil.getDocumentFormats().remove(docFormat);
+		}
 	}
 	
 	
 	//////////////////////////////////////////////
 	// Entity Codes
 	//////////////////////////////////////////////
-	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/entityCodes")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<EntityCode> getEntityCodes() {
-		return DatasourceManagerUtil.getEntityCodes().all();
-	}
 	
 	/**
 	 * This  is the <code>GET</code> version of the <code>entityCodes/search</code> 
@@ -482,18 +492,21 @@ public class RestWebServiceImpl {
 	 * @return
 	 */
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/entityCodes/search/")
+	@Path("/entityCodes")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<EntityCode> searchEntityCodes(
+	public List<EntityCode> getEntityCodes(
 			@QueryParam("id") Integer id, 
 			@QueryParam("code") Integer code,
 			@QueryParam("description") String description, 
 			@QueryParam("createdTime") Long createdTime, 
 			@QueryParam("modifiedTime") Long modifiedTime
 		) {
-		
-		return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).search(id, code, description, createdTime, modifiedTime);
+		if(id!=null || code!=null || description !=null || createdTime!=null || modifiedTime!=null) {
+			return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).search(id, code, description, createdTime, modifiedTime);
+		} else {
+			return DatasourceManagerUtil.getEntityCodes().all();
+		}
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -501,7 +514,7 @@ public class RestWebServiceImpl {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<EntityCode> searchEntityCodes(@JsonProperty EntityCodeSearch entityCodeSearch) {
+	public List<EntityCode> getEntityCodes(@JsonProperty EntityCodeSearch entityCodeSearch) {
 		return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).search(
 				entityCodeSearch.getId(), 
 				entityCodeSearch.getCode(), 
@@ -511,6 +524,13 @@ public class RestWebServiceImpl {
 		);
 	}
 	
+	/**
+	 * The read (single) method to the EntityCodes REST API
+	 * Returning a single EntityCode that has an identifier matching the value in
+	 * the request path.
+	 * @param id An integer used as the EntityCode identifier
+	 * @return An EntityCode or nothing if not found.
+	 */
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 	@Path("/entityCodes/{id}")
 	@GET
@@ -519,31 +539,40 @@ public class RestWebServiceImpl {
 		return DatasourceManagerUtil.getEntityCodes().byId(id);
 	}
 	
+	/**
+	 * The create (single) method for the EntityCodes REST API
+	 * 
+	 * @param entityCode An <code>EntityCode</code> JSON object
+	 * @return The created <code>EntityCode</code>
+	 */
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/entityCodes/save/")
+	@Path("/entityCodes")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public EntityCode saveEntityCode(@JsonProperty EntityCode entityCode) {
+	public EntityCode createEntityCode(@JsonProperty EntityCode entityCode) {
 		// TODO validate document format object
-		log.debug(entityCode);
-		
-		//save document format object to persistence layer
-		EntityCode df = ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).save(entityCode);
-		log.debug(df);
-		return df;
+		return DatasourceManagerUtil.getEntityCodes().save(entityCode);
+	}
+	
+	@Path("/entityCodes/{id}")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public EntityCode saveEntityCode(@PathParam("id") Integer id, @JsonProperty EntityCode ec) {
+		// TODO server-side validation
+		return DatasourceManagerUtil.getEntityCodes().save(ec);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/entityCodes/remove/")
-	@POST
+	@Path("/entityCodes/{id}")
+	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public EntityCode removeEntityCode(@JsonProperty EntityCode entityCode) {
-		log.debug(entityCode);
-		
-		//remove document format object from persistence layer
-		return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).remove(entityCode);
+	public void removeEntityCode(@PathParam("id") Integer id) {
+		EntityCode ec = DatasourceManagerUtil.getEntityCodes().byId(id);
+		if(ec!=null) {
+			DatasourceManagerUtil.getEntityCodes().remove(ec);
+		}
 	}
 	
 	
@@ -555,19 +584,7 @@ public class RestWebServiceImpl {
 	@Path("/organizations")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Organization> getOrganizations(@QueryParam("query") String query) {
-		if(query!=null) {
-			return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).filterByName(query);
-		} else {
-			return DatasourceManagerUtil.getOrganizations().all();
-		}
-	}
-	
-	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/organizations/search")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<Organization> searchOrganizations(
+	public List<Organization> getOrganizations(
 			@QueryParam("directoryId") Integer directoryId, 
 			@QueryParam("organizationId") String organizationId,
 			@QueryParam("organizationIdType") String organizationIdType,
@@ -578,18 +595,25 @@ public class RestWebServiceImpl {
 			@QueryParam("createdTime") Long createdTime,
 			@QueryParam("modifiedTime") Long modifiedTime
 		) {
-		
-		return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).search(
-				directoryId, 
-				organizationId, 
-				organizationIdType, 
-				organizationName, 
-				organizationSubcode, 
-				entityId, 
-				organizationEin, 
-				createdTime, 
-				modifiedTime
-		);
+		if(directoryId!=null || organizationId!=null || 
+				organizationIdType!=null || organizationName!=null || 
+				organizationSubcode!=null || entityId!=null || 
+				organizationEin!=null || createdTime!=null || 
+				modifiedTime!=null) {
+			return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).search(
+					directoryId, 
+					organizationId, 
+					organizationIdType, 
+					organizationName, 
+					organizationSubcode, 
+					entityId, 
+					organizationEin, 
+					createdTime, 
+					modifiedTime
+			);
+		} else {
+			return DatasourceManagerUtil.getOrganizations().all();
+		}
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -597,7 +621,8 @@ public class RestWebServiceImpl {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public List<Organization> searchOrganizations(@JsonProperty OrganizationSearch organizationSearch) {
+	public List<Organization> searchOrganizations(
+			@JsonProperty OrganizationSearch organizationSearch) {
 		return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).search(
 			organizationSearch.getDirectoryId(), 
 			organizationSearch.getOrganizationId(), 
@@ -620,44 +645,33 @@ public class RestWebServiceImpl {
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/organizations/save/")
+	@Path("/organizations")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Organization saveOrganization(@JsonProperty Organization org) {
+	public Organization createOrganization(@JsonProperty Organization org) {
 		// TODO validate organization object
-		log.debug("Organization {");
-		log.debug(String.format("  directoryId:%s,", org.getDirectoryId()));
-		log.debug(String.format("  Id:%s,", org.getOrganizationId()));
-		log.debug(String.format("  Name:%s,", org.getOrganizationName()));
-		log.debug(String.format("  IdType:%s,", org.getOrganizationIdType()));
-		log.debug(String.format("  SubCode:%s,", org.getOrganizationSubcode()));
-		log.debug(String.format("  EIN:%s,", org.getOrganizationEin()));
-		log.debug(String.format("  EntityCode:%s,", org.getEntity().getCode()));
-		log.debug(String.format("  SiteUrl:%s,", org.getOrganizationSiteUrl()));
-		log.debug(String.format("  Description:%s,", org.getDescription()));
-		log.debug(String.format("  termsOfUser:%s,", org.getTermsOfUse()));
-		log.debug(String.format("  privacyPolicy:%s,", org.getPrivacyPolicy()));
-		log.debug(String.format("  createdTime:%s,", org.getCreatedTime()));
-		log.debug(String.format("  modifiedTime:%s", org.getModifiedTime()));
-		log.debug("}");
-		
 		//save organization object to persistence layer
-		Organization retOrg = ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).save(org);
-		log.debug(retOrg);
-		return retOrg;
+		return DatasourceManagerUtil.getOrganizations().save(org);
+	}
+	
+	@Path("/organizations/{directoryId}")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Organization saveOrganization(@PathParam("directoryId") Integer id, 
+			@JsonProperty Organization org) {
+		return DatasourceManagerUtil.getOrganizations().save(org);
 	}
 	
 	@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
-	@Path("/organizations/remove/")
-	@POST
+	@Path("/organizations/{directoryId}")
+	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Organization removeOrganization(@JsonProperty Organization org) {
-		log.debug(org);
-		
-		//remove organization object from persistence layer
-		return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).remove(org);
+	public void removeOrganization(@PathParam("directoryId") Integer directoryId) {
+		Organization org = DatasourceManagerUtil.getOrganizations().byId(directoryId);
+		if(org!=null) {
+			DatasourceManagerUtil.getOrganizations().remove(org);
+		}
 	}
-	
 }

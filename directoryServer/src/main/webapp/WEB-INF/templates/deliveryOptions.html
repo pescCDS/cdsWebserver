@@ -17,49 +17,24 @@
     <script src="../../resources/js/edex-form-controls.js" th:src="@{/resources/js/edex-form-controls.js}"></script>
     <script th:inline="javascript">
 		var organizations = new Bloodhound({
-			'name':'organizations',
-			'datumTokenizer':function(d) {
-				return Bloodhound.tokenizers.whitespace(d.value);
-			},
-			'queryTokenizer':Bloodhound.tokenizers.nonword,
-			'remote':{
-				'url':/*[[ @{/services/rest/organizations} ]]*/ '/EdExchange/services/rest/organizations',
-				'replace':function(url,query) {
-					return [url,query].join('?query=');
-				}
-			}
-		}),
-			documentFormats = new Bloodhound({
-			'name':'documentFormats',
-			'datumTokenizer':function(d) {
-				return Bloodhound.tokenizers.whitespace(d.value);
-			},
-			'queryTokenizer':Bloodhound.tokenizers.nonword,
-			'remote':{
-				'url':/*[[ @{/services/rest/documentFormats} ]]*/ '/EdExchange/services/rest/documentFormats',
-				'replace':function(url,query) {
-					return [url,query].join('?query=');
-				}
-			}
-		}),
+            'name':'organizations',
+            'datumTokenizer':$.fn.ColumnFilters.tokenizers.whitespace,
+            'queryTokenizer':Bloodhound.tokenizers.nonword,
+            'remote': {
+                'url':/*[[ @{/services/rest/organizations}+'?organizationName=%query' ]]*/ '/EdExchange/services/rest/organizations?organizationName=%query',
+                'wildcard':'%query'
+            }
+        }),
+			documentFormats = /*[[ ${@datasourceManager.byName("documentFormats").forJson()} ]]*/,
 			deliveryMethods = /*[[ ${@datasourceManager.byName("deliverymethods").all()} ]]*/ [],
 			deliveryConfirmations = [{'label':'&nbsp;','value':null},{'label':'Yes','value':true},{'label':'No','value':false}],
 			dtView;
 		
 		$(document).ready(function(e){
-			
-			// initialize the bloodhound objects
-			organizations.initialize().fail(function() {
-				console.error('organizations initialize fail');
-			});
-			documentFormats.initialize().fail(function() {
-				console.error('documentFormats initialize fail');
-			});
-			
 			dtView = $('#dtView').DataTableView({
                 'mode':$.fn.DataTableView.MODES.MODIFY,
                 'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
-                'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+                'webServiceUrl':/*[[ @{/services/rest/deliveryOptions} ]]*/ '/services/rest/deliveryOptions',
                 'tableData':{
                     'name':'deliveryOptions',
                     'class':'DeliveryOption',
@@ -88,16 +63,18 @@
 						},
 						{
 						    'data':'format',
-						    'type':'reference',
+						    'type':'object',
 						    'title':'Format',
 						    'required':true,
-						    'control':{
-                                'type':'typeahead'
-                            },
-                            'table':'documentFormats',
+						    'table':'documentFormats',
                             'datasource':documentFormats,
-						    'displayKey':'formatName',
-						    'valueKey':'id'
+                            'displayKey':'formatName',
+                            'valueKey':'id',
+						    'control':{
+                                'type':'select',
+                                'name':'format',
+                                'label':'Format'
+                            }
 						},
 						{
 						    'data':'webserviceUrl',  

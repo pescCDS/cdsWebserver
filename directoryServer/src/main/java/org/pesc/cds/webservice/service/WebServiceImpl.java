@@ -1,14 +1,10 @@
 package org.pesc.cds.webservice.service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
-import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.cds.webservice.WebServicesInterface;
 import org.pesc.cds.webservice.ServletException;
 import org.pesc.core.coremain.v1_13.UserDefinedExtensionsType;

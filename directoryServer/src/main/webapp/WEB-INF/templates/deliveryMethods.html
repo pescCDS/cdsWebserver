@@ -24,12 +24,11 @@
     <th:block th:replace="layout/resources :: resourceScripts"></th:block>
     <script th:inline="javascript">
 		var dtView;
-		
 		$(document).ready(function(e){
 			dtView = $('#dtView').DataTableView({
                 'mode':$.fn.DataTableView.MODES.MODIFY,
                 'url':/*[[ @{/datatableview} ]]*/ '/EdExchange/datatableview',
-                'webServiceUrl':/*[[ @{/services/rest} ]]*/ '/services/rest',
+                'webServiceUrl':/*[[ @{/services/rest/deliveryMethods} ]]*/ '/services/rest/deliveryMethods',
                 'tableData':{
                     'name':'deliveryMethods',
                     'class':'DeliveryMethod',

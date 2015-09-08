@@ -17,13 +17,7 @@ import org.pesc.edexchange.v1_0.Organization;
 public class OrganizationsDao implements DBDataSourceDao<Organization> {
 	private static final Log log = LogFactory.getLog(OrganizationsDao.class);
 	
-	
-	/**
-	 * Default no-arg constructor
-	 */
 	public OrganizationsDao() { }
-	
-	
 	
 	public List<Organization> search(
 			Integer directoryId, 
@@ -52,23 +46,33 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 				hasCriteria = true;
 			}
 			
-			if(organizationId!=null) {
-				ct.add(Restrictions.ilike("organizationId", organizationId, MatchMode.START));
+			if(organizationId!=null && organizationId.trim().length()>0) {
+				ct.add(Restrictions.ilike("organizationId", organizationId.trim(), MatchMode.START));
 				hasCriteria = true;
 			}
 			
-			if(organizationIdType!=null) {
-				ct.add(Restrictions.ilike("organizationIdType", organizationIdType, MatchMode.START));
+			if(organizationIdType!=null && organizationIdType.trim().length()>0) {
+				ct.add(Restrictions.ilike("organizationIdType", organizationIdType.trim(), MatchMode.START));
 				hasCriteria = true;
 			}
 			
-			if(organizationName!=null) {
-				ct.add(Restrictions.ilike("organizationName", organizationName, MatchMode.ANYWHERE));
+			if(organizationName!=null && organizationName.trim().length()>0) {
+				// tokenize string by whitespace and use each token as
+				// a LIKE clause for the organizationName column 
+				StringTokenizer orgNametokens = new StringTokenizer(organizationName.trim());
+				while(orgNametokens.hasMoreElements()) {
+					String orgNametoken = orgNametokens.nextToken();
+					ct.add( Restrictions.ilike("organizationName", orgNametoken, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
-			if(organizationSubcode!=null) {
-				ct.add(Restrictions.ilike("organizationSubcode", organizationSubcode, MatchMode.ANYWHERE));
+			if(organizationSubcode!=null && organizationSubcode.trim().length()>0) {
+				StringTokenizer subCodetokens = new StringTokenizer(organizationSubcode.trim());
+				while(subCodetokens.hasMoreElements()) {
+					String subCodetoken = subCodetokens.nextToken();
+					ct.add( Restrictions.ilike("organizationSubcode", subCodetoken, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
@@ -78,7 +82,7 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 				hasCriteria = true;
 			}
 			
-			if(organizationEin!=null) {
+			if(organizationEin!=null && organizationEin.trim().length()>0) {
 				ct.add(Restrictions.ilike("organizationEin", organizationEin, MatchMode.START));
 				hasCriteria = true;
 			}
@@ -100,38 +104,6 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 			
 			session.getTransaction().commit();
 			
-		} catch(Exception ex) {
-			log.error(ex.getMessage());
-			ex.printStackTrace();
-			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
-		}
-		return retList;
-	}
-	
-	
-	// 
-	public List<Organization> filterByName(String query) {
-		List<Organization> retList = new ArrayList<Organization>();
-		try {
-			if(HibernateUtil.getSessionFactory().isClosed()) {
-				HibernateUtil.getSessionFactory().openSession();
-			}
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			
-			Criteria ct = session.createCriteria(Organization.class);
-			
-			// tokenize string by whitespace and use each token as
-			// a LIKE clause for the organizationName column 
-			StringTokenizer tokens = new StringTokenizer(query);
-			while(tokens.hasMoreElements()) {
-				String token = tokens.nextToken();
-				ct.add( Restrictions.like("organizationName", token, MatchMode.ANYWHERE) );
-			}
-			
-			retList = ct.list();
-			
-			session.getTransaction().commit();
 		} catch(Exception ex) {
 			log.error(ex.getMessage());
 			ex.printStackTrace();
@@ -202,6 +174,10 @@ public class OrganizationsDao implements DBDataSourceDao<Organization> {
 			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
+			
+			// strip out created, modified because the database handles those values
+			org.setCreatedTime(null);
+			org.setModifiedTime(null);
 			
 			// save organization to persistence layer
 			session.saveOrUpdate(org);

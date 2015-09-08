@@ -19,7 +19,6 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 	
 	public ContactsDao() { }
 	
-	
 	public List<OrganizationContact> search(
 			String city,
 			Integer contactId,
@@ -52,8 +51,12 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			boolean hasCriteria = false;
 			
 			// City
-			if(city!=null && city.length()>1) {
-				ct.add(Restrictions.ilike("city", city, MatchMode.ANYWHERE));
+			if(city!=null && city.trim().length()>1) {
+				StringTokenizer cityTokens = new StringTokenizer(city.trim());
+				while(cityTokens.hasMoreElements()) {
+					String cityToken = cityTokens.nextToken();
+					ct.add(Restrictions.ilike("city", cityToken, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
@@ -64,26 +67,42 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			}
 			
 			// Contact Name
-			if(contactName!=null) {
-				ct.add(Restrictions.ilike("contactName", contactName, MatchMode.ANYWHERE));
+			if(contactName!=null && contactName.trim().length()>0) {
+				StringTokenizer nameTokens = new StringTokenizer(contactName.trim());
+				while(nameTokens.hasMoreElements()) {
+					String nameToken = nameTokens.nextToken();
+					ct.add(Restrictions.ilike("contactName", nameToken, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
 			// Contact Title
-			if(contactTitle!=null) {
-				ct.add(Restrictions.ilike("contactTitle", contactTitle, MatchMode.ANYWHERE));
+			if(contactTitle!=null && contactTitle.trim().length()>0) {
+				StringTokenizer titleTokens = new StringTokenizer(contactTitle.trim());
+				while(titleTokens.hasMoreElements()) {
+					String titleToken = titleTokens.nextToken();
+					ct.add(Restrictions.ilike("contactTitle", titleToken, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
 			// Contact Type
-			if(contactType!=null) {
-				ct.add(Restrictions.ilike("contactType", contactType, MatchMode.START));
+			if(contactType!=null && contactType.trim().length()>0) {
+				StringTokenizer typeTokens = new StringTokenizer(contactType.trim());
+				while(typeTokens.hasMoreElements()) {
+					String typeToken = typeTokens.nextToken();
+					ct.add(Restrictions.ilike("contactType", typeToken, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
 			// Country
-			if(country!=null) {
-				ct.add(Restrictions.ilike("country", country, MatchMode.START));
+			if(country!=null && country.trim().length()>0) {
+				StringTokenizer countryTokens = new StringTokenizer(country.trim());
+				while(countryTokens.hasMoreElements()) {
+					String countryToken = countryTokens.nextToken();
+					ct.add(Restrictions.ilike("country", countryToken, MatchMode.START));
+				}
 				hasCriteria = true;
 			}
 			
@@ -101,8 +120,8 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			}
 			
 			// Email
-			if(email!=null) {
-				ct.add(Restrictions.ilike("email", email, MatchMode.ANYWHERE));
+			if(email!=null && email.trim().length()>0) {
+				ct.add(Restrictions.ilike("email", email.trim(), MatchMode.ANYWHERE));
 				hasCriteria = true;
 			}
 			
@@ -113,47 +132,63 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			}
 			
 			// Phone1
-			if(phone1!=null) {
-				ct.add(Restrictions.ilike("phone1", phone1, MatchMode.ANYWHERE));
+			if(phone1!=null && phone1.trim().length()>0) {
+				ct.add(Restrictions.ilike("phone1", phone1.trim(), MatchMode.ANYWHERE));
 				hasCriteria = true;
 			}
 			
 			// Phone2
-			if(phone2!=null) {
-				ct.add(Restrictions.ilike("phone2", phone2, MatchMode.ANYWHERE));
+			if(phone2!=null && phone2.trim().length()>0) {
+				ct.add(Restrictions.ilike("phone2", phone2.trim(), MatchMode.ANYWHERE));
 				hasCriteria = true;
 			}
 			
 			// State
-			if(state!=null) {
-				ct.add(Restrictions.ilike("state", state, MatchMode.START));
+			if(state!=null && state.trim().length()>0) {
+				ct.add(Restrictions.ilike("state", state.trim(), MatchMode.START));
 				hasCriteria = true;
 			}
 			
 			// Street Address 1
-			if(streetAddress1!=null) {
-				ct.add(Restrictions.ilike("streetAddress1", streetAddress1, MatchMode.ANYWHERE));
+			if(streetAddress1!=null && streetAddress1.trim().length()>0) {
+				StringTokenizer addr1Tokens = new StringTokenizer(streetAddress1.trim());
+				while(addr1Tokens.hasMoreElements()) {
+					String addr1Token = addr1Tokens.nextToken();
+					ct.add(Restrictions.ilike("streetAddress1", addr1Token, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			// Street Address 2
-			if(streetAddress2!=null) {
-				ct.add(Restrictions.ilike("streetAddress2", streetAddress2, MatchMode.ANYWHERE));
+			if(streetAddress2!=null && streetAddress2.trim().length()>0) {
+				StringTokenizer addr2Tokens = new StringTokenizer(streetAddress2.trim());
+				while(addr2Tokens.hasMoreElements()) {
+					String addr2Token = addr2Tokens.nextToken();
+					ct.add(Restrictions.ilike("streetAddress2", addr2Token, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			// Street Address 3
-			if(streetAddress3!=null) {
-				ct.add(Restrictions.ilike("streetAddress3", streetAddress3, MatchMode.ANYWHERE));
+			if(streetAddress3!=null && streetAddress3.trim().length()>0) {
+				StringTokenizer addr3Tokens = new StringTokenizer(streetAddress3.trim());
+				while(addr3Tokens.hasMoreElements()) {
+					String addr3Token = addr3Tokens.nextToken();
+					ct.add(Restrictions.ilike("streetAddress3", addr3Token, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			// Street Address 4
-			if(streetAddress4!=null) {
-				ct.add(Restrictions.ilike("streetAddress4", streetAddress4, MatchMode.ANYWHERE));
+			if(streetAddress4!=null && streetAddress4.trim().length()>0) {
+				StringTokenizer addr4Tokens = new StringTokenizer(streetAddress4.trim());
+				while(addr4Tokens.hasMoreElements()) {
+					String addr4Token = addr4Tokens.nextToken();
+					ct.add(Restrictions.ilike("streetAddress4", addr4Token, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
 			// Zip
-			if(zip!=null) {
-				ct.add(Restrictions.ilike("zip", zip, MatchMode.START));
+			if(zip!=null && zip.trim().length()>0) {
+				ct.add(Restrictions.ilike("zip", zip.trim(), MatchMode.START));
 				hasCriteria = true;
 			}
 			
@@ -170,37 +205,6 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 		return retList;
 	}
 	
-	
-	// search for contact using a first and last name token
-	public List<OrganizationContact> filterByName(String query) {
-		List<OrganizationContact> retList = new ArrayList<OrganizationContact>();
-		try {
-			if(HibernateUtil.getSessionFactory().isClosed()) {
-				HibernateUtil.getSessionFactory().openSession();
-			}
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			
-			Criteria ct = session.createCriteria(OrganizationContact.class);
-			
-			// tokenize string by whitespace and use each token as
-			// a LIKE clause for the contactName column
-			StringTokenizer tokens = new StringTokenizer(query);
-			while(tokens.hasMoreElements()) {
-				String token = tokens.nextToken();
-				ct.add( Restrictions.like("contactName", token, MatchMode.ANYWHERE) );
-			}
-			
-			retList = ct.list();
-			
-			session.getTransaction().commit();
-		} catch(Exception ex) {
-			log.error(ex.getMessage());
-			ex.printStackTrace();
-			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
-		}
-		return retList;
-	}
 	
 	public OrganizationContact byId(Integer id) {
 		OrganizationContact retContact = null;
@@ -250,6 +254,10 @@ public class ContactsDao implements DBDataSourceDao<OrganizationContact> {
 			}
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
+			
+			// database handles create/modified values
+			contact.setCreatedTime(null);
+			contact.setModifiedTime(null);
 			
 			session.saveOrUpdate(contact);
 			// using .get now instead of .load

@@ -2,6 +2,7 @@ package org.pesc.edexchange.v1_0.dao;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
@@ -20,8 +21,13 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 	
 	public DocumentFormatsDao() { }
 	
-	
-	public List<DocumentFormat> search(Integer id, String formatName, String formatDescription, Integer formatInuseCount, Long createdTime, Long modifiedTime) {
+	public List<DocumentFormat> search(
+			Integer id, 
+			String formatName, 
+			String formatDescription, 
+			Integer formatInuseCount, 
+			Long createdTime, 
+			Long modifiedTime) {
 		List<DocumentFormat> retList = new ArrayList<DocumentFormat>();
 		try {
 			if(HibernateUtil.getSessionFactory().isClosed()) {
@@ -38,13 +44,21 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 				hasCriteria = true;
 			}
 			
-			if(formatName!=null) {
-				ct.add(Restrictions.ilike("formatName", formatName, MatchMode.ANYWHERE));
+			if(formatName!=null && formatName.trim().length()>0) {
+				StringTokenizer tokens = new StringTokenizer(formatName.trim());
+				while(tokens.hasMoreElements()) {
+					String token = tokens.nextToken();
+					ct.add(Restrictions.ilike("formatName", token, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
-			if(formatDescription!=null) {
-				ct.add(Restrictions.ilike("formatDescription", formatDescription, MatchMode.ANYWHERE));
+			if(formatDescription!=null && formatDescription.trim().length()>0) {
+				StringTokenizer tokens = new StringTokenizer(formatDescription.trim());
+				while(tokens.hasMoreElements()) {
+					String token = tokens.nextToken();
+					ct.add(Restrictions.ilike("formatDescription", token, MatchMode.ANYWHERE));
+				}
 				hasCriteria = true;
 			}
 			
@@ -80,36 +94,6 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 	}
 	
 	
-	public List<DocumentFormat> filterByName(String query) {
-		List<DocumentFormat> retList = new ArrayList<DocumentFormat>();
-		try {
-			if(HibernateUtil.getSessionFactory().isClosed()) {
-				HibernateUtil.getSessionFactory().openSession();
-			}
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			
-			Criteria ct = session.createCriteria(DocumentFormat.class);
-			
-			StringTokenizer tokens = new StringTokenizer(query);
-			while(tokens.hasMoreElements()) {
-				String token = tokens.nextToken();
-				ct.add( Restrictions.like("formatName", token, MatchMode.ANYWHERE) );
-			}
-			
-			retList = ct.list();
-			
-			session.getTransaction().commit();
-			
-		} catch(Exception ex) {
-			log.error(ex.getMessage());
-			ex.printStackTrace();
-			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
-		}
-		return retList;
-	}
-	
-	
 	/**
 	 * This instances <code>all()</code> method as required from the <code>DBDataSourceDao</code> interface
 	 * 
@@ -132,6 +116,29 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 			log.error(ex.getMessage());
 			ex.printStackTrace();
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
+		}
+		return retList;
+	}
+	
+	/**
+	 * Thymeleaf 2.1.4 will output Date/Calendar/Timestamp values as ISO8601 
+	 * date string literal from a script inline output
+	 * Thymeleaf < 2.1.4 would output the Date/Calendar/Timestamp value as a 
+	 * JSON object of that class
+	 * @return List&lt;HashMap&lt;String, Object&gt;&gt; format of DocumentFormats
+	 */
+	public List<HashMap<String, Object>> forJson() {
+		List<HashMap<String, Object>> retList = new ArrayList<HashMap<String, Object>>();
+		List<DocumentFormat> docFormats = all();
+		for(DocumentFormat df : docFormats) {
+			HashMap<String, Object> dfObj = new HashMap<String, Object>();
+			dfObj.put("id", df.getId());
+			dfObj.put("formatName", df.getFormatName());
+			dfObj.put("formatDescription", df.getFormatDescription());
+			dfObj.put("formatInuseCount", df.getFormatInuseCount());
+			dfObj.put("createdTime", df.getCreatedTime().getTimeInMillis());
+			dfObj.put("modifiedTime", df.getModifiedTime().getTimeInMillis());
+			retList.add(dfObj);
 		}
 		return retList;
 	}
@@ -174,6 +181,10 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			
+			// database handles create/modified values
+			docFormat.setCreatedTime(null);
+			docFormat.setModifiedTime(null);
+			
 			// save to persistence layer
 			session.saveOrUpdate(docFormat);
 			log.debug(String.format("Saved %s",docFormat.toString()));
@@ -181,12 +192,11 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 			// get the saved DocumentFormat object and put it into the return variable
 			retDf = (DocumentFormat)session.get(DocumentFormat.class, docFormat.getId());
 			
-			// TODO re-populate the local List
-			
 			session.getTransaction().commit();
 			
 		} catch(Exception ex) {
 			log.debug(ex.getMessage());
+			ex.printStackTrace();
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
 		}
 		return retDf;
@@ -212,6 +222,7 @@ public class DocumentFormatsDao implements DBDataSourceDao<DocumentFormat> {
 			
 		} catch(Exception ex) {
 			log.debug(ex.getMessage());
+			ex.printStackTrace();
 			HibernateUtil.getSessionFactory().getCurrentSession().getTransaction().rollback();
 		}
 		return docFormat;
