@@ -57,7 +57,11 @@ Technical Requirements:
 •	Wiki
 
 
-•	Documentation - Wiki 
+•	Documentation
+
+  o	Wiki
+
+  o	Swagger documentation for REST API (after authenticating, see <baseURL>/EdExchange/swagger-ui/index.html)
 
 
 •	Development Methodology

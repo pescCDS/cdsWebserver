@@ -11,11 +11,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	<description>
 		This web application acts as an info hub for EdExchange network servers.
 	</description>
-  
+
 	<parent>
 	  <groupId>org.cds.pesc.WebServices</groupId>
 	  <artifactId>EdExchange</artifactId>
-	  <version>0.1.3-SNAPSHOT</version>
+	  <version>0.1.4-SNAPSHOT</version>
 	</parent>
 	
 	<profiles>
@@ -245,8 +245,60 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<!-- This generates some static documentation from the Swagger annotations -->
+				<groupId>com.github.kongchen</groupId>
+				<artifactId>swagger-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<apiSources>
+						<apiSource>
+							<springmvc>false</springmvc>
+							<locations>org.pesc.cds.webservice.service</locations>
+							<schemes>http</schemes>
+							<host>localhost:8080</host>
+							<basePath>/EdExchange/services/rest/</basePath>
+							<info>
+								<title>Static REST Documentation</title>
+								<version>v1</version>
+								<description>
+									This is static documentation of the REST API generated from the Swagger output.
+								</description>
+								<termsOfService>
+									http://www.github.com/kongchen/swagger-maven-plugin
+								</termsOfService>
+								<license>
+									<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+									<name>Apache 2.0</name>
+								</license>
+							</info>
+							<templatePath>${basedir}/src/main/resources/swagger/strapdown.html.hbs</templatePath>
+							<outputPath>${basedir}/target/generated/static-docs/document.html</outputPath>
+							<swaggerDirectory>${basedir}/target/generated/static-docs/swagger-ui</swaggerDirectory>
+						</apiSource>
+					</apiSources>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>com.github.kongchen</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<dependencies>
         
@@ -453,6 +505,22 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
         	<groupId>org.slf4j</groupId>
         	<artifactId>slf4j-api</artifactId>
         </dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>1.5.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-jersey2-jaxrs</artifactId>
+			<version>1.5.3</version>
+		</dependency>
+		<dependency>
+			<!-- This was needed after introducing the swagger-jersey2-jaxrs to avoid a ValidationException -->
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>4.2.0.Final</version>
+		</dependency>
 	</dependencies>
 	
 </project>

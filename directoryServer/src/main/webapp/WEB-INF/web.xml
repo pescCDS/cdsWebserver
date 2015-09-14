@@ -13,7 +13,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
             /WEB-INF/contexts/applicationContext-security.xml
         </param-value>
     </context-param>
-    
+
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -59,12 +59,18 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
         <servlet-name>cxf</servlet-name>
         <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
-    
+
+    <servlet-mapping>
+        <!-- This will serve up the swagger-ui directory as static content -->
+        <servlet-name>default</servlet-name>
+        <url-pattern>/swagger-ui/*</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>dsServlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
-    
+
     <session-config>
         <session-timeout>60</session-timeout>
     </session-config>
@@ -77,7 +83,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
         <error-code>500</error-code>
         <location>/error.html</location>
     </error-page>
-    
+
     <resource-ref>
     	<description>database jndi connection</description>
     	<res-ref-name>jdbc/pesc</res-ref-name>

@@ -13,12 +13,33 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     
     <!-- Filters -->
     <bean id="cors-filter" class="org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter" />
-    
+
+    <!-- Swagger API listing resource -->
+    <bean id="swaggerResource"
+          class="io.swagger.jaxrs.listing.ApiListingResource" />
+
+    <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
+        <property name="resourcePackage" value="org.pesc.cds.webservice.service" />
+        <property name="version" value="0.1.4" />
+        <property name="title" value="PESC CDS REST Interface" />
+        <property name="description"
+                  value="Swagger UI to document and explore the REST interface provided by the PESC CDS." />
+        <property name="scan" value="true" />
+        <property name="basePath" value="EdExchange/services/rest" />
+    </bean>
+
     <!-- JAX-RS (REST) -->
     <jaxrs:server id="EdExchangeServiceRestHttp" address="/rest">
 		<jaxrs:serviceBeans>
-			<bean scope="prototype" class="org.pesc.cds.webservice.service.RestWebServiceImpl" />
-		</jaxrs:serviceBeans>
+            <ref bean="swaggerResource" />
+			<bean class="org.pesc.cds.webservice.service.UtilityRestController" />
+            <bean class="org.pesc.cds.webservice.service.ContactRestController" />
+            <bean class="org.pesc.cds.webservice.service.OrganizationRestController" />
+            <bean class="org.pesc.cds.webservice.service.DeliveryMethodRestController" />
+            <bean class="org.pesc.cds.webservice.service.DeliveryOptionRestController" />
+            <bean class="org.pesc.cds.webservice.service.EntityCodeRestController" />
+            <bean class="org.pesc.cds.webservice.service.DocumentFormatRestController" />
+        </jaxrs:serviceBeans>
 
 		<jaxrs:providers>
 			<ref bean="cors-filter" />
@@ -26,8 +47,8 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
 			<ref bean="wadlProvider" />
 		</jaxrs:providers>
 	</jaxrs:server>
-    
-    
+
+
     <!-- JAX-WS (SOAP) -->
     <jaxws:endpoint xmlns:service="http://service.cds.pesc.org/" 
                                id="EdExchangeServiceSoapHTTP" 
