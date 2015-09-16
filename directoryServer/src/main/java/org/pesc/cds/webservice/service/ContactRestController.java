@@ -10,7 +10,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.OrganizationContactSearch;
 import org.pesc.edexchange.v1_0.OrganizationContact;
 import org.pesc.edexchange.v1_0.dao.ContactsDao;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -35,10 +36,13 @@ import java.util.List;
 )
 @Api("/contacts")
 @Path("/contacts")
-@Component
+@Controller
 public class ContactRestController {
 
     private static final Log log = LogFactory.getLog(ContactRestController.class);
+
+    @Autowired
+    ContactsDao contactsDao;
 
     /***********************************************************************************
      * These are for AJAX web services
@@ -82,7 +86,7 @@ public class ContactRestController {
                 modifiedTime!=null || phone1!=null || phone2!=null ||
                 state!=null || streetAddress1!=null || streetAddress2!=null ||
                 streetAddress3!=null || streetAddress4!=null || zip!=null) {
-            return ((ContactsDao)DatasourceManagerUtil.getContacts()).search(
+            return contactsDao.search(
                     city,
                     contactId,
                     contactName,
@@ -103,7 +107,7 @@ public class ContactRestController {
                     zip
             );
         } else {
-            return DatasourceManagerUtil.getContacts().all();
+            return contactsDao.all();
         }
     }
 
@@ -114,7 +118,7 @@ public class ContactRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("Search OrganizationContact based on JSON object.  Empty fields will be ignored.")
     public List<OrganizationContact> searchContactsGet(@JsonProperty OrganizationContactSearch contactSearch) {
-        return ((ContactsDao)DatasourceManagerUtil.getContacts()).search(
+        return contactsDao.search(
                 contactSearch.getCity(),
                 contactSearch.getContactId(),
                 contactSearch.getContactName(),
@@ -143,7 +147,7 @@ public class ContactRestController {
     @ApiOperation("The read (single) method to the Contacts REST API Returning a single OrganizationContact that has an " +
             "identifier matching the value in the request path or nothing if not found.")
     public OrganizationContact getContact(@PathParam("contactId") @ApiParam("An integer used as the OrganizationContact identifier") Integer id) {
-        return DatasourceManagerUtil.getContacts().byId(id);
+        return contactsDao.byId(id);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -152,7 +156,7 @@ public class ContactRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The create (single) method for the Contacts REST API.")
     public OrganizationContact createContact(@JsonProperty OrganizationContact contact) {
-        return DatasourceManagerUtil.getContacts().save(contact);
+        return contactsDao.save(contact);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -163,7 +167,7 @@ public class ContactRestController {
     @ApiOperation("The update (single) method for the Contacts REST API.")
     public OrganizationContact saveContact(@PathParam("contactId") Integer contactId,
                                            @JsonProperty OrganizationContact contact) {
-        return DatasourceManagerUtil.getContacts().save(contact);
+        return contactsDao.save(contact);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -173,9 +177,9 @@ public class ContactRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The delete (single) method for the Contacts REST API.")
     public void removeContact(@PathParam("contactId") Integer contactId) {
-        OrganizationContact contact = DatasourceManagerUtil.getContacts().byId(contactId);
+        OrganizationContact contact = contactsDao.byId(contactId);
         if(contact!=null) {
-            DatasourceManagerUtil.getContacts().remove(contact);
+            contactsDao.remove(contact);
         }
     }
 

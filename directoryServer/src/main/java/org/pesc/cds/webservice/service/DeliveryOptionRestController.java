@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.DeliveryOptionSearch;
 import org.pesc.edexchange.v1_0.DeliveryOption;
 import org.pesc.edexchange.v1_0.dao.DeliveryOptionsDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Consumes;
@@ -38,6 +39,9 @@ import java.util.List;
 @Component
 public class DeliveryOptionRestController {
     private static final Log log = LogFactory.getLog(DeliveryOptionRestController.class);
+
+    @Autowired
+    DeliveryOptionsDao deliveryOptionsDao;
 
     /***********************************************************************************
      * These are for AJAX web services
@@ -69,8 +73,7 @@ public class DeliveryOptionRestController {
                 webserviceUrl!=null || deliveryMethodId!=null ||
                 deliveryConfirm!=null || error!=null ||
                 operationalStatus!=null) {
-            return ((DeliveryOptionsDao)DatasourceManagerUtil
-                    .getDeliveryOptions()).search(
+            return deliveryOptionsDao.search(
                     id,
                     memberId,
                     formatId,
@@ -80,7 +83,7 @@ public class DeliveryOptionRestController {
                     error,
                     operationalStatus);
         } else {
-            return DatasourceManagerUtil.getDeliveryOptions().all();
+            return deliveryOptionsDao.all();
         }
 
     }
@@ -92,7 +95,7 @@ public class DeliveryOptionRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("POST operation to search DeliveryOption using JSON object.  Empty fields will be ignored.")
     public List<DeliveryOption> searchDeliveryOptionsPost(@JsonProperty DeliveryOptionSearch deliveryOptionSearch) {
-        return ((DeliveryOptionsDao)DatasourceManagerUtil.getDeliveryOptions()).search(
+        return deliveryOptionsDao.search(
                 deliveryOptionSearch.getId(),
                 deliveryOptionSearch.getMemberId(),
                 deliveryOptionSearch.getFormatId(),
@@ -111,7 +114,7 @@ public class DeliveryOptionRestController {
     @ApiOperation("The read (single) method to the DeliveryOptions REST API Returning a single DeliveryOption that has an " +
             "identifier matching the value in the request path or nothing if not found.")
     public DeliveryOption getDeliveryOptions(@PathParam("id") @ApiParam("An integer used as the DeliveryOption identifier") Integer id) {
-        return DatasourceManagerUtil.getDeliveryOptions().byId(id);
+        return deliveryOptionsDao.byId(id);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -120,7 +123,7 @@ public class DeliveryOptionRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The create (single) method for the DeliveryOptions REST API.")
     public DeliveryOption createDeliveryOptions(@JsonProperty DeliveryOption opt) {
-        return DatasourceManagerUtil.getDeliveryOptions().save(opt);
+        return deliveryOptionsDao.save(opt);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -131,7 +134,7 @@ public class DeliveryOptionRestController {
     @ApiOperation("The update (single) method for the DeliveryOptions REST API.")
     public DeliveryOption saveDeliveryOption(@PathParam("id") Integer id,
                                              @JsonProperty DeliveryOption opt) {
-        return DatasourceManagerUtil.getDeliveryOptions().save(opt);
+        return deliveryOptionsDao.save(opt);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -141,9 +144,9 @@ public class DeliveryOptionRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The delete (single) method for the DeliveryOptions REST API.")
     public void removeDeliveryOptions(@PathParam("id") Integer id) {
-        DeliveryOption opt = DatasourceManagerUtil.getDeliveryOptions().byId(id);
+        DeliveryOption opt = deliveryOptionsDao.byId(id);
         if(opt!=null) {
-            DatasourceManagerUtil.getDeliveryOptions().remove(opt);
+            deliveryOptionsDao.remove(opt);
         }
     }
 

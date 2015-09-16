@@ -13,7 +13,8 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
     
     <mvc:annotation-driven />
     <context:component-scan base-package="org.pesc.cds.directoryserver.controller" />
-    
+    <context:component-scan base-package="org.pesc.edexchange.v1_0.dao" />
+
     <!-- auxiliary data from database -->
     <bean id="datasourceManager" class="org.pesc.cds.webservice.service.DatasourceManagerUtil" />
 

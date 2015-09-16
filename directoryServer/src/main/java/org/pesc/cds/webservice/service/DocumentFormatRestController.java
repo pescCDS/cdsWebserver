@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.DocumentFormatSearch;
 import org.pesc.edexchange.v1_0.DocumentFormat;
 import org.pesc.edexchange.v1_0.dao.DocumentFormatsDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Consumes;
@@ -38,6 +39,9 @@ import java.util.List;
 @Component
 public class DocumentFormatRestController {
     private static final Log log = LogFactory.getLog(DocumentFormatRestController.class);
+    
+    @Autowired
+    DocumentFormatsDao documentFormatsDao;
 
     /***********************************************************************************
      * These are for AJAX web services
@@ -66,8 +70,7 @@ public class DocumentFormatRestController {
         if(id!=null || formatName!=null || formatDescription!=null ||
                 formatInuseCount!=null || createdTime!=null ||
                 modifiedTime!=null) {
-            return ((DocumentFormatsDao)DatasourceManagerUtil
-                    .getDocumentFormats()).search(
+            return documentFormatsDao.search(
                     id,
                     formatName,
                     formatDescription,
@@ -76,7 +79,7 @@ public class DocumentFormatRestController {
                     modifiedTime
             );
         } else {
-            return DatasourceManagerUtil.getDocumentFormats().all();
+            return documentFormatsDao.all();
         }
     }
 
@@ -88,8 +91,7 @@ public class DocumentFormatRestController {
     @ApiOperation("POST operation to search DocumentFormat using JSON object.  Empty fields will be ignored.")
     public List<DocumentFormat> searchDocumentFormat(
             @JsonProperty DocumentFormatSearch documentFormatSearch) {
-        return ((DocumentFormatsDao)DatasourceManagerUtil
-                .getDocumentFormats()).search(
+        return documentFormatsDao.search(
                 documentFormatSearch.getId(),
                 documentFormatSearch.getFormatName(),
                 documentFormatSearch.getFormatDescription(),
@@ -106,7 +108,7 @@ public class DocumentFormatRestController {
     @ApiOperation("The read (single) method to the DocumentFormats REST API Returning a single DocumentFormat that has an \" +\n" +
             "            \"identifier matching the value in the request path or nothing if not found.")
     public DocumentFormat getDocumentFormat(@PathParam("id") @ApiParam("An integer used as the DocumentFormat identifier") Integer id) {
-        return DatasourceManagerUtil.getDocumentFormats().byId(id);
+        return documentFormatsDao.byId(id);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -117,7 +119,7 @@ public class DocumentFormatRestController {
     public DocumentFormat createDocumentFormat(@JsonProperty DocumentFormat docFormat) {
         // TODO validate document format object
         //save document format
-        return DatasourceManagerUtil.getDocumentFormats().save(docFormat);
+        return documentFormatsDao.save(docFormat);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -129,7 +131,7 @@ public class DocumentFormatRestController {
     public DocumentFormat saveDocumentFormat(
             @PathParam("id") Integer id,
             @JsonProperty DocumentFormat docFormat) {
-        return DatasourceManagerUtil.getDocumentFormats().save(docFormat);
+        return documentFormatsDao.save(docFormat);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -139,9 +141,9 @@ public class DocumentFormatRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The delete (single) method for the DocumentFormats REST API.")
     public void removeDocumentFormat(@PathParam("id") Integer id) {
-        DocumentFormat docFormat = DatasourceManagerUtil.getDocumentFormats().byId(id);
+        DocumentFormat docFormat = documentFormatsDao.byId(id);
         if(docFormat!=null) {
-            DatasourceManagerUtil.getDocumentFormats().remove(docFormat);
+            documentFormatsDao.remove(docFormat);
         }
     }
 

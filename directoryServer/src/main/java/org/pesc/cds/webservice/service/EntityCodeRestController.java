@@ -11,6 +11,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.EntityCodeSearch;
 import org.pesc.edexchange.v1_0.EntityCode;
 import org.pesc.edexchange.v1_0.dao.EntityCodesDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Consumes;
@@ -39,6 +40,9 @@ import java.util.List;
 @Component
 public class EntityCodeRestController {
     private static final Log log = LogFactory.getLog(EntityCodeRestController.class);
+    
+    @Autowired
+    EntityCodesDao entityCodesDao;
 
     /***********************************************************************************
      * These are for AJAX web services
@@ -64,9 +68,9 @@ public class EntityCodeRestController {
             @QueryParam("modifiedTime") Long modifiedTime
     ) {
         if(id!=null || code!=null || description !=null || createdTime!=null || modifiedTime!=null) {
-            return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).search(id, code, description, createdTime, modifiedTime);
+            return entityCodesDao.search(id, code, description, createdTime, modifiedTime);
         } else {
-            return DatasourceManagerUtil.getEntityCodes().all();
+            return entityCodesDao.all();
         }
     }
 
@@ -77,7 +81,7 @@ public class EntityCodeRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("POST operation to search EntityCode using JSON object.  Empty fields will be ignored.")
     public List<EntityCode> getEntityCodes(@JsonProperty EntityCodeSearch entityCodeSearch) {
-        return ((EntityCodesDao)DatasourceManagerUtil.getEntityCodes()).search(
+        return entityCodesDao.search(
                 entityCodeSearch.getId(),
                 entityCodeSearch.getCode(),
                 entityCodeSearch.getDescription(),
@@ -93,7 +97,7 @@ public class EntityCodeRestController {
     @ApiOperation("The read (single) method to the EntityCodes REST API Returning a single EntityCode that has an " +
             "identifier matching the value in the request path or nothing if not found.")
     public EntityCode getEntityCode(@PathParam("id") @ApiParam("An integer used as the EntityCode identifier") Integer id) {
-        return DatasourceManagerUtil.getEntityCodes().byId(id);
+        return entityCodesDao.byId(id);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -103,7 +107,7 @@ public class EntityCodeRestController {
     @ApiOperation("The create (single) method for the EntityCodes REST API")
     public EntityCode createEntityCode(@JsonProperty EntityCode entityCode) {
         // TODO validate document format object
-        return DatasourceManagerUtil.getEntityCodes().save(entityCode);
+        return entityCodesDao.save(entityCode);
     }
 
     @Path("/{id}")
@@ -113,7 +117,7 @@ public class EntityCodeRestController {
     @ApiOperation("The update (single) method for the EntityCodes REST API")
     public EntityCode saveEntityCode(@PathParam("id") Integer id, @JsonProperty EntityCode ec) {
         // TODO server-side validation
-        return DatasourceManagerUtil.getEntityCodes().save(ec);
+        return entityCodesDao.save(ec);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -122,9 +126,9 @@ public class EntityCodeRestController {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("The delete (single) method for the EntityCodes REST API")
     public void removeEntityCode(@PathParam("id") Integer id) {
-        EntityCode ec = DatasourceManagerUtil.getEntityCodes().byId(id);
+        EntityCode ec = entityCodesDao.byId(id);
         if(ec!=null) {
-            DatasourceManagerUtil.getEntityCodes().remove(ec);
+            entityCodesDao.remove(ec);
         }
     }
 

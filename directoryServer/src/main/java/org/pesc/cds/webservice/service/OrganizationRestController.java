@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.OrganizationSearch;
 import org.pesc.edexchange.v1_0.Organization;
 import org.pesc.edexchange.v1_0.dao.OrganizationsDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Consumes;
@@ -37,8 +38,10 @@ import java.util.List;
 @Path("/organizations")
 @Component
 public class OrganizationRestController {
-
     private static final Log log = LogFactory.getLog(OrganizationRestController.class);
+    
+    @Autowired
+    OrganizationsDao organizationsDao;
 
     /***********************************************************************************
      * These are for AJAX web services
@@ -72,7 +75,7 @@ public class OrganizationRestController {
                 organizationSubcode!=null || entityId!=null ||
                 organizationEin!=null || createdTime!=null ||
                 modifiedTime!=null) {
-            return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).search(
+            return organizationsDao.search(
                     directoryId,
                     organizationId,
                     organizationIdType,
@@ -84,7 +87,7 @@ public class OrganizationRestController {
                     modifiedTime
             );
         } else {
-            return DatasourceManagerUtil.getOrganizations().all();
+            return organizationsDao.all();
         }
     }
 
@@ -96,7 +99,7 @@ public class OrganizationRestController {
     @ApiOperation("POST operation to search Organization using JSON object.  Empty fields will be ignored.")
     public List<Organization> searchOrganizations(
             @JsonProperty OrganizationSearch organizationSearch) {
-        return ((OrganizationsDao)DatasourceManagerUtil.getOrganizations()).search(
+        return ((OrganizationsDao)organizationsDao).search(
                 organizationSearch.getDirectoryId(),
                 organizationSearch.getOrganizationId(),
                 organizationSearch.getOrganizationIdType(),
@@ -116,7 +119,7 @@ public class OrganizationRestController {
     @ApiOperation("The read (single) method to the Organizations REST API Returning a single Organization that has an \" +\n" +
             "            \"identifier matching the value in the request path or nothing if not found.")
     public Organization getOrganization(@PathParam("id") @ApiParam("An integer used as the EntityCode identifier") Integer id) {
-        return DatasourceManagerUtil.getOrganizations().byId(id);
+        return organizationsDao.byId(id);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -127,7 +130,7 @@ public class OrganizationRestController {
     public Organization createOrganization(@JsonProperty Organization org) {
         // TODO validate organization object
         //save organization object to persistence layer
-        return DatasourceManagerUtil.getOrganizations().save(org);
+        return organizationsDao.save(org);
     }
 
     @Path("/{directoryId}")
@@ -137,7 +140,7 @@ public class OrganizationRestController {
     @ApiOperation("The update (single) method for the Organizations REST API")
     public Organization saveOrganization(@PathParam("directoryId") Integer id,
                                          @JsonProperty Organization org) {
-        return DatasourceManagerUtil.getOrganizations().save(org);
+        return organizationsDao.save(org);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -146,9 +149,9 @@ public class OrganizationRestController {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("The delete (single) method for the Organizations REST API")
     public void removeOrganization(@PathParam("directoryId") Integer directoryId) {
-        Organization org = DatasourceManagerUtil.getOrganizations().byId(directoryId);
+        Organization org = organizationsDao.byId(directoryId);
         if(org!=null) {
-            DatasourceManagerUtil.getOrganizations().remove(org);
+            organizationsDao.remove(org);
         }
     }
 

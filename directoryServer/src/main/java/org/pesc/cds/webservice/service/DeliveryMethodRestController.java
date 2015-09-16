@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.pesc.cds.webservice.service.request.DeliveryMethodSearch;
 import org.pesc.edexchange.v1_0.DeliveryMethod;
 import org.pesc.edexchange.v1_0.dao.DeliveryMethodsDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Consumes;
@@ -39,6 +40,9 @@ import java.util.List;
 public class DeliveryMethodRestController {
     private static final Log log = LogFactory.getLog(DeliveryMethodRestController.class);
 
+    @Autowired
+    DeliveryMethodsDao deliveryMethodsDao;
+
     /***********************************************************************************
      * These are for AJAX web services
      * The only data served out should be auxilary tables where the total row count
@@ -59,10 +63,9 @@ public class DeliveryMethodRestController {
             @QueryParam("id") Integer id,
             @QueryParam("method") String method) {
         if(id!=null || method!=null) {
-            return ((DeliveryMethodsDao)DatasourceManagerUtil
-                    .getDeliveryMethods()).search(id, method);
+            return deliveryMethodsDao.search(id, method);
         } else {
-            return DatasourceManagerUtil.getDeliveryMethods().all();
+            return deliveryMethodsDao.all();
         }
     }
 
@@ -74,10 +77,7 @@ public class DeliveryMethodRestController {
     @ApiOperation("POST operation to search DeliveryMethod using JSON object.  Empty fields will be ignored.")
     public List<DeliveryMethod> searchDeliveryMethods(
             @JsonProperty DeliveryMethodSearch deliveryMethodSearch) {
-        return ((DeliveryMethodsDao)DatasourceManagerUtil
-                .getDeliveryMethods()).search(
-                deliveryMethodSearch.getId(),
-                deliveryMethodSearch.getMethod());
+        return deliveryMethodsDao.search(deliveryMethodSearch.getId(), deliveryMethodSearch.getMethod());
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -87,7 +87,7 @@ public class DeliveryMethodRestController {
     @ApiOperation("The read (single) method to the DeliveryMethods REST API Returning a single DeliveryMethod that has an " +
             "identifier matching the value in the request path or nothing if not found.")
     public DeliveryMethod getDeliveryMethod(@PathParam("id") @ApiParam("An integer used as the DeliveryMethod identifier") Integer id) {
-        return DatasourceManagerUtil.getDeliveryMethods().byId(id);
+        return deliveryMethodsDao.byId(id);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -96,7 +96,7 @@ public class DeliveryMethodRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The create (single) method for the DeliveryMethods REST API.")
     public DeliveryMethod createDeliveryMethod(@JsonProperty DeliveryMethod method) {
-        return DatasourceManagerUtil.getDeliveryMethods().save(method);
+        return deliveryMethodsDao.save(method);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -106,7 +106,7 @@ public class DeliveryMethodRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The update (single) method for the DeliveryMethods REST API.")
     public DeliveryMethod saveDeliveryMethod(@PathParam("id") Integer id, @JsonProperty DeliveryMethod method) {
-        return DatasourceManagerUtil.getDeliveryMethods().save(method);
+        return deliveryMethodsDao.save(method);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
@@ -116,9 +116,9 @@ public class DeliveryMethodRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("The delete (single) method for the DeliveryMethods REST API.")
     public void removeDeliveryMethod(@PathParam("id") Integer id) {
-        DeliveryMethod method = DatasourceManagerUtil.getDeliveryMethods().byId(id);
+        DeliveryMethod method = deliveryMethodsDao.byId(id);
         if(method!=null) {
-            DatasourceManagerUtil.getDeliveryMethods().remove(method);
+            deliveryMethodsDao.remove(method);
         }
     }
 

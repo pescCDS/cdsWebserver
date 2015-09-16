@@ -24,8 +24,8 @@ import org.pesc.cds.webservice.service.DatasourceManagerUtil;
 import org.pesc.edexchange.v1_0.dao.DBDataSourceDao;
 
 public class FiltersToHQLUtil {
-private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
-	
+	private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
+		
 	private static DateTimeFormatter dateFormat = ISODateTimeFormat.dateTime();
 	
 	private static enum NumberType {
@@ -604,7 +604,7 @@ private static final Log log = LogFactory.getLog(FiltersToHQLUtil.class);
 				for(Iterator inIter = filterInValues.iterator(); inIter.hasNext();) {
 					HashMap<String, Object> inVal = (HashMap<String, Object>)inIter.next();
 					Integer iCode = Integer.parseInt(inVal.get("code").toString());
-					inValues.add(((DBDataSourceDao)DatasourceManagerUtil.byName( filterValue.get("table").toString() )).byId(iCode));
+					inValues.add(((DBDataSourceDao) DatasourceManagerUtil.getInstance().byName(filterValue.get("table").toString())).byId(iCode));
 				}
 			} catch(NumberFormatException nfe) {
 				log.error(nfe.getMessage());

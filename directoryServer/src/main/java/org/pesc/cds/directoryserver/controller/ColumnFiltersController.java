@@ -22,10 +22,10 @@ import org.hibernate.criterion.Projections;
 import org.pesc.cds.datatables.DataTablesRequest;
 import org.pesc.cds.datatables.FilterSet;
 import org.pesc.cds.datatables.FiltersToHQLUtil;
-import org.pesc.cds.webservice.service.DatasourceManagerUtil;
 import org.pesc.cds.webservice.service.HibernateUtil;
 import org.pesc.cds.webservice.service.TableClassMap;
 import org.pesc.edexchange.v1_0.dao.FilterSetsDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +38,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class ColumnFiltersController {
 	private static final Log log = LogFactory.getLog(ColumnFiltersController.class);
+	
+	@Autowired
+	FilterSetsDao filterSetsDao;
 	
 	/* Column Filters REST Interface for the DataTables data
 	 * and the filter sets CRUD
@@ -72,10 +75,10 @@ public class ColumnFiltersController {
 		List<FilterSet> retList = new ArrayList<FilterSet>();
 		if(table==null) {
 			// this will still limit the results to the logged in user id
-			retList = ((FilterSetsDao)DatasourceManagerUtil.getFilterSets()).all();
+			retList = filterSetsDao.all();
 		} else {
 			// limits results by table and logged in user id
-			retList = ((FilterSetsDao)DatasourceManagerUtil.getFilterSets()).byTable(table);
+			retList = filterSetsDao.byTable(table);
 		}
 		
 		// TODO include any public filter sets
@@ -99,7 +102,7 @@ public class ColumnFiltersController {
 	@ResponseBody
 	public FilterSet bbSyncCreate(@RequestBody FilterSet fs) {
 		//log.debug(fs.toString());
-		return ((FilterSetsDao)DatasourceManagerUtil.getFilterSets()).save(fs);
+		return filterSetsDao.save(fs);
 	}
 	
 	/**
@@ -115,7 +118,7 @@ public class ColumnFiltersController {
 	@RequestMapping("/columnfilters/{id}")
 	@ResponseBody
 	public FilterSet bbSyncRead(@PathVariable("id") Integer id) {
-		return (FilterSet)DatasourceManagerUtil.getFilterSets().byId(id);
+		return filterSetsDao.byId(id);
 	}
 	
 	
@@ -133,7 +136,7 @@ public class ColumnFiltersController {
 	@RequestMapping(value="/columnfilters/{id}", method=RequestMethod.PUT)
 	@ResponseBody
 	public FilterSet bbSyncUpdate(@PathVariable("id") Integer id, @RequestBody FilterSet fs) {
-		return ((FilterSetsDao)DatasourceManagerUtil.getFilterSets()).save(fs);
+		return filterSetsDao.save(fs);
 	}
 	
 	
@@ -148,8 +151,8 @@ public class ColumnFiltersController {
 	@RequestMapping(value="/columnfilters/{id}", method=RequestMethod.DELETE)
 	@ResponseBody
 	public FilterSet bbSyncDelete(@PathVariable("id") Integer id) {
-		FilterSet removedFilterSet = ((FilterSetsDao)DatasourceManagerUtil.getFilterSets()).byId(id);
-		return ((FilterSetsDao)DatasourceManagerUtil.getFilterSets()).remove(removedFilterSet);
+		FilterSet removedFilterSet = filterSetsDao.byId(id);
+		return filterSetsDao.remove(removedFilterSet);
 	}
 	
 	

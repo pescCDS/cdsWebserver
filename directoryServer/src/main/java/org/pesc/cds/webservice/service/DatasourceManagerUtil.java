@@ -15,43 +15,36 @@ import org.pesc.edexchange.v1_0.dao.DocumentFormatsDao;
 import org.pesc.edexchange.v1_0.dao.EntityCodesDao;
 import org.pesc.edexchange.v1_0.dao.FilterSetsDao;
 import org.pesc.edexchange.v1_0.dao.OrganizationsDao;
-
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DatasourceManagerUtil {
-	private static DBDataSourceDao<EntityCode> entityCodes = buildEntityCodes();
-	private static DBDataSourceDao<DocumentFormat> docFormats = buildDocFormats();
-	private static DBDataSourceDao<Organization> organizations = buildOrganizations();
-	private static DBDataSourceDao<OrganizationContact> contacts = buildContacts();
-	private static DBDataSourceDao<DeliveryMethod> deliveryMethods = buildDeliveryMethods();
-	private static DBDataSourceDao<DeliveryOption> deliveryOptions = buildDeliveryOptions();
-	private static DBDataSourceDao<FilterSet> filterSets = buildFilterSets();
-	
-	
-	private static DBDataSourceDao<EntityCode> buildEntityCodes() {
-		return new EntityCodesDao();
+	private DatasourceManagerUtil() {}
+	private static DatasourceManagerUtil instance = null;
+
+	@Autowired
+	private EntityCodesDao entityCodes;
+	@Autowired
+	private DocumentFormatsDao docFormats;
+	@Autowired
+	private OrganizationsDao organizations;
+	@Autowired
+	private ContactsDao contacts;
+	@Autowired
+	private DeliveryMethodsDao deliveryMethods;
+	@Autowired
+	private DeliveryOptionsDao deliveryOptions;
+	@Autowired
+	private FilterSetsDao filterSets;
+
+	public static DatasourceManagerUtil getInstance() {
+		if(instance == null) {
+			instance = new DatasourceManagerUtil();
+		}
+		return instance;
 	}
-	private static DBDataSourceDao<DocumentFormat> buildDocFormats() {
-		return new DocumentFormatsDao();
-	}
-	private static DBDataSourceDao<Organization> buildOrganizations() {
-		return new OrganizationsDao();
-	}
-	private static DBDataSourceDao<OrganizationContact> buildContacts() {
-		return new ContactsDao();
-	}
-	private static DBDataSourceDao<DeliveryMethod> buildDeliveryMethods() {
-		return new DeliveryMethodsDao();
-	}
-	private static DBDataSourceDao<DeliveryOption> buildDeliveryOptions() {
-		return new DeliveryOptionsDao();
-	}
-	private static DBDataSourceDao<FilterSet> buildFilterSets() {
-		return new  FilterSetsDao();
-	}
-	
 	
 	// public class methods
-	public static DBDataSourceDao<?> byName(String dsName) {
+	public DBDataSourceDao<?> byName(String dsName) {
 		if(dsName.equalsIgnoreCase("entities")) {
 			return entityCodes;
 		} else if(dsName.equalsIgnoreCase("documentformats")) {
@@ -73,11 +66,11 @@ public class DatasourceManagerUtil {
 	
 	
 	// getter/setters for private properties
-	public static DBDataSourceDao<EntityCode> getEntityCodes() { return entityCodes; }
-	public static DBDataSourceDao<DocumentFormat> getDocumentFormats() { return docFormats; }
-	public static DBDataSourceDao<Organization> getOrganizations() { return organizations; }
-	public static DBDataSourceDao<OrganizationContact> getContacts() { return contacts; }
-	public static DBDataSourceDao<DeliveryMethod> getDeliveryMethods() { return deliveryMethods; }
-	public static DBDataSourceDao<DeliveryOption> getDeliveryOptions() { return deliveryOptions; }
-	public static DBDataSourceDao<FilterSet> getFilterSets() { return filterSets; }
+	public DBDataSourceDao<EntityCode> getEntityCodes() { return entityCodes; }
+	public DBDataSourceDao<DocumentFormat> getDocumentFormats() { return docFormats; }
+	public DBDataSourceDao<Organization> getOrganizations() { return organizations; }
+	public DBDataSourceDao<OrganizationContact> getContacts() { return contacts; }
+	public DBDataSourceDao<DeliveryMethod> getDeliveryMethods() { return deliveryMethods; }
+	public DBDataSourceDao<DeliveryOption> getDeliveryOptions() { return deliveryOptions; }
+	public DBDataSourceDao<FilterSet> getFilterSets() { return filterSets; }
 }

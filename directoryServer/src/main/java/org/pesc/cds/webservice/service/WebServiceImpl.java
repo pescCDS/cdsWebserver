@@ -26,7 +26,7 @@ public class WebServiceImpl implements WebServicesInterface {
 	/**/
 	public List<Organization> organizationListRequest(String organizationNameSearchString) throws ServletException {
 		try {
-			return DatasourceManagerUtil.getOrganizations().all();
+			return DatasourceManagerUtil.getInstance().getOrganizations().all();
 			
 		} catch(Exception ex) {
 			log.debug(ex.getMessage());
