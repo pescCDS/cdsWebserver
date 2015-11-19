@@ -25,8 +25,8 @@
                 'wildcard':'%query'
             }
         }),
-			documentFormats = /*[[ ${@datasourceManager.byName("documentFormats").forJson()} ]]*/,
-			deliveryMethods = /*[[ ${@datasourceManager.byName("deliverymethods").all()} ]]*/ [],
+			documentFormats = /*[[ ${@datasourceManager.getDocumentFormats().forJson()} ]]*/,
+			deliveryMethods = /*[[ ${@datasourceManager.getDeliverymethods().all()} ]]*/ [],
 			deliveryConfirmations = [{'label':'&nbsp;','value':null},{'label':'Yes','value':true},{'label':'No','value':false}],
 			dtView;
 		
@@ -137,12 +137,7 @@
 						    'cftype':'enum',
 						    'title':'Operational Status',
 						    'control':{
-						        'type':'buttonGroup',
-						        'buttons':[
-						            {'label':'ACTIVE', 'value':'ACTIVE'},
-						            {'label':'INACTIVE', 'value':'INACTIVE'},
-						            {'label':'OUTAGE', 'value':'OUTAGE'}
-						        ]
+						        'type':'buttonGroup'
 						    },
 						    'datasource':[{'id':'ACTIVE'},{'id':'INACTIVE'},{'id':'OUTAGE'}],
 						    'displayKey':'id',

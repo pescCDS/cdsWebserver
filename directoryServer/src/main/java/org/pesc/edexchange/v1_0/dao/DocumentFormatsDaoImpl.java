@@ -101,6 +101,7 @@ public class DocumentFormatsDaoImpl extends AbstractDaoImpl<DocumentFormat> impl
 	 * JSON object of that class
 	 * @return List&lt;HashMap&lt;String, Object&gt;&gt; format of DocumentFormats
 	 */
+	@Override
 	public List<HashMap<String, Object>> forJson() {
 		List<HashMap<String, Object>> retList = new ArrayList<HashMap<String, Object>>();
 		List<DocumentFormat> docFormats = all();

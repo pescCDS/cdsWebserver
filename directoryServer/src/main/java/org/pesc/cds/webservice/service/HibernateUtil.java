@@ -17,10 +17,12 @@ public class HibernateUtil {
         }
         catch (Throwable ex) {
             // Make sure you log the exception, as it might be swallowed
-            System.err.println("Initial SessionFactory creation failed." + ex);
+            System.err.println(String.format("Initial SessionFactory creation failed.%n%s", ex));
+            ex.printStackTrace();
             throw new ExceptionInInitializerError(ex);
         }
     }
+	
     public static SessionFactory getSessionFactory() { return sessionFactory; }
     
     /**
@@ -35,6 +37,7 @@ public class HibernateUtil {
     	map.put("modifiedTime", "modified_time");
     	return map;
     }
+    
     public static LinkedHashMap<String, String> getAliasMap() {
     	return aliasMap;
     }

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -600,11 +599,18 @@ public class FiltersToHQLUtil {
 		case EQUALS:
 			ArrayList inValues = new ArrayList();
 			ArrayList<Map> filterInValues = (ArrayList)filterValue.get("value");
+			Boolean valueOnly = filterValue.containsKey("valueOnly") ? 
+				Boolean.parseBoolean(filterValue.get("valueOnly").toString()) :
+				false;
+			String valueKey = filterValue.get("valueKey").toString();
 			try {
-				for(Iterator inIter = filterInValues.iterator(); inIter.hasNext();) {
-					HashMap<String, Object> inVal = (HashMap<String, Object>)inIter.next();
-					Integer iCode = Integer.parseInt(inVal.get("code").toString());
-					inValues.add(((DBDataSourceDao) DatasourceManagerUtil.getInstance().byName(filterValue.get("table").toString())).byId(iCode));
+				for(Map<String, Object> inVal : filterInValues) {
+					if(valueOnly) {
+						inValues.add(inVal.get(valueKey).toString());
+					} else {
+						Integer id = Integer.parseInt(inVal.get(valueKey).toString());
+						inValues.add(((DBDataSourceDao) DatasourceManagerUtil.getInstance().byName(filterValue.get("table").toString())).byId(id));
+					}
 				}
 			} catch(NumberFormatException nfe) {
 				log.error(nfe.getMessage());

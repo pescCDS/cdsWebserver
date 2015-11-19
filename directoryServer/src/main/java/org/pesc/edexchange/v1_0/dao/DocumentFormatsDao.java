@@ -2,6 +2,7 @@ package org.pesc.edexchange.v1_0.dao;
 
 import org.pesc.edexchange.v1_0.DocumentFormat;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,4 +16,7 @@ public interface DocumentFormatsDao extends DBDataSourceDao<DocumentFormat> {
 			Integer formatInuseCount,
 			Long createdTime,
 			Long modifiedTime);
+	
+	public List<HashMap<String, Object>> forJson();
 }
+
