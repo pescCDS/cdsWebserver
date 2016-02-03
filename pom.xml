@@ -35,7 +35,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	    ==================================================-->
 	    
 	    <!-- Apache CXF/JAXB -->
-	    <cxf.version>3.0.0</cxf.version>
+	    <cxf.version>3.0.3</cxf.version>
 		<cxf.xjc-utils.version>2.6.0</cxf.xjc-utils.version>
 		<cxf-rt-rs-extension-providers.version>3.0.2</cxf-rt-rs-extension-providers.version>
 		<cxf-rt-frontend-jaxrs.version>3.0.0</cxf-rt-frontend-jaxrs.version>
@@ -208,14 +208,15 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	            <artifactId>spring-webmvc</artifactId>
 	            <version>${spring.web.version}</version>
 	        </dependency>
-            
+
+
             <dependency>
             	<groupId>org.mariadb.jdbc</groupId>
             	<artifactId>mariadb-java-client</artifactId>
             	<version>${mariadb.version}</version>
             </dependency>
-            
-            <dependency>
+
+			<dependency>
 	            <groupId>org.apache.commons</groupId>
 	            <artifactId>commons-lang3</artifactId>
 	            <version>${commons-lang3.version}</version>
