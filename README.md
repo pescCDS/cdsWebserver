@@ -1,74 +1,156 @@
-Post Secondary Electronic Standards Council - Common Data Exchange Standards
+# EdExchange Directory Server docker configuration.
 
-Description:
+This README file provide a description of how to get started development work on the Ed Exchange project.
 
-Any provider using the Common Data Services Standards (CDS) and registered in the service network could communicate directly with the appropriate exchange host for a targeted institution. The services would be 'payload agnostic' and while the immediate interest is for transcript exchange, the network could be used for the exchange of other existing or future PESC standard transactions.
+The Ed Exchange project contains 2 modules:  the Directory Server module and the Network Server module.
+The Network Server module is the project that vendors and institutions use to exchange documents.  The
+Directory Server module is the project that maintains a directory of network servers and facilitates
+communication between the network servers.
 
-As the technological landscape has evolved significantly over the years, web services standards are now available to enable automated directory lookup and efficient machine-to-machine communication in a highly secure transmission environment. The PESC CDS Task Force looks to maximize the use of this new technology to meet the emerging needs of schools, institutions, states and other service provider organizations to exchange student records, accounts and educational data.
+Both the Network and Directory servers are implmented as Spring Boot applications.  This means that when they
+are compiled and packaged, the result is an executable JAR file that can be invoked from the command line like
+any other Java executable.
 
-The mission of the PESC CDS taskforce is to improve security, reliability, efficiency and speed in the transfer of all educational data types by developing an open web services network and associated standards to benefit the education of students, streamline processes for institutions, and facilitate the advancement of services offered for education.  Please refer to http://www.pesc.org for more information on PESC.
+Docker has been utilized to streamline and automate development and testing efforts.
 
+PROJECT STRUCTURE
+This section describes the Ed Exchange project with brief descriptions in parentheses.
 
-
-Technical Requirements:
-
-•	Language – Java
-
-
-•	Framework – Apache CXF web services; Spring
-
-
-•	Deployment target – Tomcat
-
-
-•	Configuration of services – Spring
-
-
-•	Security – Spring
-
-
-•	Persistence layer – DataNucleus or Hibernate
-
-
-•	Database schema changes - Liquibase
-
-
-•	 Build system – Maven
-
-
-•	Database – MySQL 
-
-
-•	Development Environment
-
-  o	Eclipse (free) - preference or 
-
-  o	IntellinJ (free – community edition or commercial version)
-
-
-•	Source Control
-
-  o	GitHub (are components free?)
-
-
-•	Issue Tracking
-
-
-•	Wiki
-
-
-•	Documentation
-
-  o	Wiki
-
-  o	Swagger documentation for REST API (after authenticating, see <baseURL>/EdExchange/swagger-ui/index.html)
+edex
+|-- docker-compose.yml  ( docker compose config intended for QA and integration tests. )
+|-- network-server-dev-setup.sh  ( shell script use to prepare for network server development )
+|-- docker-compose-network-dev.yml ( docker compose config use with the shell script to setup a dev environment )
+|-- pom.xml (Maven config for Ed Exchange project)
+|-- README.md ( this README file )
+|-- docker ( Docker related resources )
+|   |-- container-data ( container mapped volumes )
+|   |   |-- edex-proxy ( mapped proxy/Apache log files )
+|   |   |   |-- logs
+|   |   |   |   |-- access.log ( Apache access log )
+|   |   |   |   |-- error.log  ( Apache error log )
+|   |   |   |   |-- other_vhosts_access.log
+|   |-- proxy-server-image ( Docker configs for the proxy server used in the QA docker environment )
+|   |   |-- 000-default.conf
+|   |   |-- Dockerfile
+|-- directoryServer ( the code and resources that make up the Ed Exchange Directory Server )
+|   |-- pom.xml
+|   |-- src
+|   |   |-- main
+|   |   |   |-- docker ( docker configs for the directory server and the directory server's database )
+|   |   |   |   |-- database
+|   |   |   |   |   |-- Dockerfile
+|   |   |   |   |-- Dockerfile
+|   |   |   |   |-- directory-server.sh (/opt/directory-server -- used to start in normal and debug mode, stop and restart the server)
+|   |   |   |   |-- redeploy.sh ( /opt/redeploy.sh -- used to redeploy the JAR and restart the server)
+|   |   |   |-- java ( Java source code )
+|   |-- target (compiled code and resources after "mvn package docker:build")
+|-- networkServer
+|   |-- pom.xml
+|   |-- src
+|   |   |-- main
+|   |   |   |-- docker
+|   |   |   |   |-- database
+|   |   |   |   |   |-- Dockerfile
+|   |   |   |   |-- Dockerfile
+|   |   |   |   |-- network-server.sh
+|   |   |   |   |-- redeploy.sh
+|   |-- target (compiled code after "mvn package docker:build")
 
 
-•	Development Methodology
 
-  o	Specifications for initial release – as per defined on project site
+-----------------------------
+DEVELOPMENT PREREQUISITES
+-----------------------------
+Linux or MAC OS.  Windows will also work but windows build scripts have not been created yet.
+Java
+Docker
+Docker compose
 
-  o	Code review (less important on initial efforts – depends on size of development team and allocation of member’s time)
 
-  o	Bi-weekly review for development progress during regular scheduled CDS meetings
+-----------------------------
+NETWORK SERVER DEVELOPMENT
+-----------------------------
+To prepare you development environment, invoke "network-server-dev-setup.sh" from the root directory.  The script can
+take a while to run on the first execution, so be patient.  This is because the script is compiling the packages and
+downloading, building and starting the docker images.  When the script completes, you are ready to begin development.
+
+You should see output similar to the following where the IP address may differ from system to system:
+
+> OK - network-db is running. IP: 172.17.0.2, StartedAt: 2016-03-15T22:46:14.341949823Z
+> OK - network-app is running. IP: 172.17.0.3, StartedAt: 2016-03-15T22:46:14.553862761Z
+> OK - directory-db is running. IP: 172.17.0.4, StartedAt: 2016-03-15T22:46:14.821677929Z
+> OK - directory-app is running. IP: 172.17.0.5, StartedAt: 2016-03-15T22:46:18.158739391Z
+> OK - dev-network-db is running. IP: 172.17.0.6, StartedAt: 2016-03-15T22:46:18.61340071Z
+> You can start your development network server app using the following command:
+> java -Dspring.profiles.active=dev -Ddb.server=172.17.0.6 -Ddirectory.server=172.17.0.5 -Ddirectory.port=8080 -jar ./target/network-server.jar
+> or use your favorite IDE to develop and run
+> A reference network server is running at 172.17.0.3 on port 8080
+
+The output shows that several docker containers are running in the dev environment:
+
+"network-db" is the database server that is used by a "test" network server intended to be used to test document
+exchange.
+"network-app" is the network server application intended to be used to test document exchange.
+"directory-db" and "directory-app" provide a running directory server.
+"dev-network-db" is a database server intended to be used by the network server running on the host.  I.e. Your dev
+host.  The intent here is that you'll develop your code on your host dev machine and point it at the database server
+so that you are not required to install and configure a database instance.
+
+As the output indicates, you can run your local network server on the host machine using the following command:
+
+java -Dspring.profiles.active=dev -Ddb.server=172.17.0.6 -Ddirectory.server=172.17.0.5 -Ddirectory.port=8080 -jar ./target/network-server.jar
+
+or alternatively
+
+./networkServer/target/network-server.jar --spring.profiles.active=dev --db.server=172.17.0.6 --directory.server=172.17.0.5 --directory.port=8080
+
+Note: the network server utilizes Spring's dev tools.  With dev tools, whenever a class in the class path changes,the
+application is automatically restarted.  In other words, if you change a class and invoke "mvn compile", your changes
+will automatically be deployed to the running server.
+
+------------------------------
+DIRECTORY SERVER DEVELOPMENT
+------------------------------
+To prepare you development environment, invoke "dev-setup.sh" from the directoryServer directory.  The script can
+take a while to run on the first execution, so be patient.  This is because the script is compiling the packages and
+downloading, building and starting the docker images.  When the script completes, you are ready to begin development.
+
+
+You should see output similar to the following where the IP address may differ from system to system:
+
+OK - directory-db is running. IP: 172.17.0.4, StartedAt: 2016-03-15T22:46:14.821677929Z
+You can start the directory server app using the following command:
+java -Dspring.profiles.active=dev -Ddb.server=172.17.0.4 -jar ./target/directory-server.jar
+or use your favorite IDE to develop and run
+
+You can alternatively run the directory server with
+
+./target/directory-server.jar --spring.profiles.active=dev --db.server=172.17.0.4
+
+
+-------------------------------
+QA Environment
+-------------------------------
+
+The QA environment is configured in the docker-compose.yml file.  You can build the required docker containers with
+
+> docker-compose -f docker-compose-qa.yml build
+
+You can run the QA environment using
+
+> docker-compose -f docker-compose-qa.yml up
+
+You can stop the QA environment using
+
+> docker-compose -f docker-compose-qa.yml stop
+
+TODO: Create automated integration and unit tests to leverage the QA Environment.
+
+
+
+
+
+
+
+
 

@@ -319,7 +319,7 @@
             <soap:address location="http://pesc.cccnext.net/EdExchange/services/soap"/>
             -->
             <!-- for local dev -->
-            <soap:address location="http://localhost:8080/EdExchange/services/soap" />
+            <soap:address location="http://localhost:8080/services/soap" />
             
         </wsdl:port>
     </wsdl:service>

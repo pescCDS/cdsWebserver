@@ -3,6 +3,10 @@ out/
 *.iml
 directoryServer/target/
 directoryServer/src/main/webapp/WEB-INF/jetty-env.xml
+docker/container-data/
+networkServer/target/
+node/
+directoryServer/node_modules/
 
 
 
