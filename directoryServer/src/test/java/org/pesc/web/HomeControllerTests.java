@@ -2,9 +2,12 @@ package org.pesc.web;
 
 import java.util.Map;
 
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pesc.DirectoryApplication;
+import org.pesc.DockerContainerRule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -28,6 +31,10 @@ import static org.junit.Assert.assertEquals;
 @DirtiesContext
 public class HomeControllerTests {
 
+    @ClassRule
+    public static DockerContainerRule dockerContainerRule = new DockerContainerRule("directoryserver_db_image");
+
+
     @Value("${local.server.port}")
     private int port;
 
@@ -37,6 +44,8 @@ public class HomeControllerTests {
                 "http://localhost:" + this.port + "/", String.class);
         assertEquals(HttpStatus.OK, entity.getStatusCode());
     }
+
+
 
 }
 

@@ -66,6 +66,10 @@ Java
 Docker
 Docker compose
 
+For the integration tests, TCP must be enabled for the docker daemon.
+https://docs.docker.com/engine/reference/commandline/daemon/
+You can verify that the docker daemon is operating over TCP by browsing to http://localhsot:2375/images/json
+
 
 -----------------------------
 NETWORK SERVER DEVELOPMENT
@@ -118,10 +122,10 @@ downloading, building and starting the docker images.  When the script completes
 
 You should see output similar to the following where the IP address may differ from system to system:
 
-OK - directory-db is running. IP: 172.17.0.4, StartedAt: 2016-03-15T22:46:14.821677929Z
-You can start the directory server app using the following command:
-java -Dspring.profiles.active=dev -Ddb.server=172.17.0.4 -jar ./target/directory-server.jar
-or use your favorite IDE to develop and run
+> OK - directory-db is running. IP: 172.17.0.4, StartedAt: 2016-03-15T22:46:14.821677929Z
+> You can start the directory server app using the following command:
+> java -Dspring.profiles.active=dev -Ddb.server=172.17.0.4 -jar ./target/directory-server.jar
+> or use your favorite IDE to develop and run
 
 You can alternatively run the directory server with
 

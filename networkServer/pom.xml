@@ -114,6 +114,13 @@
 		</dependency>
         -->
 
+		<dependency>
+			<groupId>com.spotify</groupId>
+			<artifactId>docker-client</artifactId>
+			<version>3.5.12</version>
+			<scope>test</scope>
+		</dependency>
+
 
 	</dependencies>
 	
