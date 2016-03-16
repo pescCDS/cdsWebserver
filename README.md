@@ -132,11 +132,13 @@ You can alternatively run the directory server with
 QA Environment
 -------------------------------
 
-The QA environment is configured in the docker-compose.yml file.  You can build the required docker containers with
+The QA environment is configured in the docker-compose.yml file. This environment can be initialized with the following steps. 
 
-> docker-compose -f docker-compose-qa.yml build
+Build the prerequisite maven packages
 
-You can run the QA environment using
+> mvn -DskipTests -pl networkServer,directoryServer package docker:build
+
+Build and run the docker containers for the QA environment 
 
 > docker-compose -f docker-compose-qa.yml up
 
