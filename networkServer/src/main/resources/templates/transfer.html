@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+	<title>EdExchange Document Transfer</title>
+	<meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="shortcut icon" type="image/png" href="images/edex-favicon-16.png" sizes="16x16" />
+	<link rel="shortcut icon" type="image/png" href="images/edex-favicon-24.png" sizes="24x24" />
+	<link rel="shortcut icon" type="image/png" href="images/edex-favicon-32.png" sizes="32x32" />
+	<link rel="shortcut icon" type="image/png" href="images/edex-favicon-48.png" sizes="48x48" />
+	<link rel="shortcut icon" type="image/png" href="images/edex-favicon-64.png" sizes="64x64" />
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
+	<link rel="stylesheet" href="css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" href="css/dataTables.bootstrap.css" />
+	<link rel="stylesheet" href="css/datepicker.css" />
+	<link rel="stylesheet" href="css/datepicker3.css" />
+	<link rel="stylesheet" href="css/fuelux.min.css" />
+	<link rel="stylesheet" href="css/typeahead-ext.css" />
+	<style>
+		body { padding-top: 50px; }
+	</style>
+</head>
+<body>
+
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">Ed Exchange Network</a>
+		</div>
+		<div id="navbar" class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><a href="home">Home</a></li>
+				<li><a th:href="'http://' + ${directoryServer} + '/swagger-ui/index.html'">Documentation</a></li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span th:inline="text">[[${#httpServletRequest.remoteUser}]]</span><span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li>
+							<div style="width: 60%;margin: auto; padding: 5px;">
+								<form th:action="@{logout}" method="post">
+									<input type="submit" value="Sign Out" class="btn btn-default" />
+								</form>
+							</div>
+						</li>
+					</ul>
+				</li>
+
+			</ul>
+		</div>
+	</div>
+</nav>
+
+<div class="container">
+	<h2>Transfer</h2>
+	<div id="transferForm">
+		<form action="sendFile" method="post" enctype="multipart/form-data" accept-charset="utf-8">
+			<div class="form-horizontal row">
+				<div class="form-group">
+					<label class="control-label col-lg-2 col-md-2 col-sm-4 col-xs-4">Recipient</label>
+					<div class="col-lg-3 col-md-3 col-sm-8 col-xs-8">
+						<input type="text" name="recipientId" class="form-control" placeholder="Where is this file going?" />
+					</div>
+
+					<label class="control-label col-lg-2 col-md-2 col-sm-4 col-xs-4">Network Server</label>
+					<div class="col-lg-3 col-md-3 col-sm-8 col-xs-8">
+						<input type="text" name="networkServerId" class="form-control" placeholder="This should be assigned by the web application" />
+					</div>
+				</div>
+			</div>
+			<div class="form-horizontal row">
+				<div class="form-group">
+					<label class="control-label col-lg-2 col-md-2 col-sm-4 col-xs-4">Sender</label>
+					<div class="col-lg-3 col-md-3 col-sm-8 col-xs-8">
+						<input type="text" name="senderId" class="form-control" placeholder="This might be different than this network server" />
+					</div>
+
+					<label class="control-label col-lg-2 col-md-2 col-sm-4 col-xs-4">Transcript File</label>
+					<div class="col-lg-3 col-md-3 col-sm-8 col-xs-8">
+						<input type="file" name="file" />
+					</div>
+				</div>
+			</div>
+			<div class="form-horizontal row">
+				<div class="form-group">
+					<label class="control-label col-lg-2 col-lg-offset-6 col-md-4 col-md-offset-4 col-sm-4 col-xs-4">File Format</label>
+					<div class="col-lg-3 col-md-3 col-sm-8 col-xs-8">
+						<input type="text" name="fileFormat" class="form-control" placeholder="What type of file to transfer" />
+					</div>
+				</div>
+			</div>
+			<div class="form-horizontal row">
+				<div class="form-group text-center">
+					<input type="hidden" name="webServiceUrl" value="" />
+					<button type="submit" class="btn btn-default">SEND</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="js/backbone-min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/moment.min.js"></script>
+<script src="js/typeahead.bundle.js"></script>
+<script src="js/jquery.dataTables.min.js"></script>
+<script src="js/dataTables.bootstrap.js"></script>
+<script src="js/bootstrap-datepicker.js"></script>
+<script src="js/spinbox.js"></script>
+<script src="js/transferPageAssets.js"></script>
+<script th:inline="javascript">
+	var directoryServer = [[${directoryServer}]];
+</script>
+
+</body>
+</html>

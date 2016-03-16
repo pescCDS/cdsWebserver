@@ -1,0 +1,61 @@
+directoryserver_db_image:
+  build: ./directoryServer/target/docker/database
+  expose:
+   - "3306"
+  container_name: directory-db
+networkserver_db_image:
+    build: ./directoryServer/target/docker/database
+    expose:
+     - "3306"
+    container_name: network-db
+networkserver2_db_image:
+    build: ./directoryServer/target/docker/database
+    expose:
+     - "3306"
+    container_name: network2-db
+directoryserver_app_image:
+  image: edex/directory-server
+  volumes:
+     - ./directoryServer/target:/opt/edexchange
+  expose:
+   - "8009"
+  environment:
+   - SPRING_PROFILES_ACTIVE=qa
+  links:
+   - directoryserver_db_image
+  container_name: directory-app
+networkserver_app_image:
+      image: edex/network-server
+      volumes:
+         - ./networkServer/target:/opt/edexchange
+      expose:
+       - "8009"
+      environment:
+       - SPRING_PROFILES_ACTIVE=qa
+       - DB_SERVER=network-db
+      links:
+       - networkserver_db_image
+      container_name: network-app
+networkserver2_app_image:
+      image: edex/network-server
+      volumes:
+         - ./networkServer/target:/opt/edexchange
+      expose:
+       - "8009"
+      environment:
+       - SPRING_PROFILES_ACTIVE=qa
+       - DB_SERVER=network2-db
+      links:
+       - networkserver2_db_image
+      container_name: network2-app
+edex_proxy_image:
+    build: ./docker/proxy-server-image
+    ports:
+      - "80:80"
+    links:
+      - directoryserver_app_image
+      - networkserver_app_image
+      - networkserver2_app_image
+    volumes:
+     - ./docker/container-data/edex-proxy/logs:/var/log/apache2
+    container_name: edex-proxy

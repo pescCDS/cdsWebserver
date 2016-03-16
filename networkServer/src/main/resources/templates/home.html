@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <title>EdExchange Network Server Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="shortcut icon" type="image/png" href="images/edex-favicon-16.png" sizes="16x16"/>
+    <link rel="shortcut icon" type="image/png" href="images/edex-favicon-24.png" sizes="24x24"/>
+    <link rel="shortcut icon" type="image/png" href="images/edex-favicon-32.png" sizes="32x32"/>
+    <link rel="shortcut icon" type="image/png" href="images/edex-favicon-48.png" sizes="48x48"/>
+    <link rel="shortcut icon" type="image/png" href="images/edex-favicon-64.png" sizes="64x64"/>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css"/>
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Ed Exchange Network</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a th:href="'http://' + ${directoryServer} + '/swagger-ui/index.html'">Docs</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <ul class="nav navbar-nav">
+                    <li><a href="admin">Login</a></li>
+                </ul>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+</div>
+
+</body>
+</html>
