@@ -173,6 +173,14 @@
         </dependency>
          -->
 
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-client</artifactId>
+            <version>3.5.12</version>
+            <scope>test</scope>
+        </dependency>
+
+
 
     </dependencies>
 	
@@ -280,6 +288,12 @@
                         <groupId>junit</groupId>
                         <artifactId>junit</artifactId>
                         <version>${junit.version}</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>docker-client</artifactId>
+                        <version>3.5.12</version>
                     </dependency>
                 </dependencies>
             </plugin>
