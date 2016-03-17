@@ -112,6 +112,8 @@ Note: the network server utilizes Spring's dev tools.  With dev tools, whenever 
 application is automatically restarted.  In other words, if you change a class and invoke "mvn compile", your changes
 will automatically be deployed to the running server.
 
+Login Credentials: when required to login, the default login is "user" / "password"
+
 ------------------------------
 DIRECTORY SERVER DEVELOPMENT
 ------------------------------
@@ -131,6 +133,7 @@ You can alternatively run the directory server with
 
 ./target/directory-server.jar --spring.profiles.active=dev --db.server=172.17.0.4
 
+Login Credentials: when required to login, the default login is "admin" / "password"
 
 -------------------------------
 QA Environment
