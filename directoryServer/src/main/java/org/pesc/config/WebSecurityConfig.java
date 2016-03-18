@@ -18,9 +18,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+
                 .antMatchers("/", "/home", "/ui/**", "/assets/**", "/css/**", "favicon.ico").permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .csrf().disable()   //TODO: enable CSRF??
                 .formLogin()
                 .loginPage("/login")
                 .defaultSuccessUrl("/admin")
@@ -28,7 +30,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout()
                 .permitAll();
-
 
 
     }

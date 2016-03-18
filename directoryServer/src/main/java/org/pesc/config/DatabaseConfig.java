@@ -92,6 +92,20 @@ public class DatabaseConfig {
         return new PersistenceExceptionTranslationPostProcessor();
     }
 
+    /**
+     * DataSource definition for database connection. Settings are read from
+     * the application.properties file (using the env object).
+     */
+    @Bean
+    public DataSource dataSource(Environment env) {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(env.getProperty("db.driver"));
+        dataSource.setUrl(env.getProperty("db.url"));
+        dataSource.setUsername(env.getProperty("db.username"));
+        dataSource.setPassword(env.getProperty("db.password"));
+        return dataSource;
+    }
+
 
 
 } // class DatabaseConfig

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
+      ng-app="admin">
 <head>
     <title>Education Exchange - a standards based system for exchanging documents.</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -39,7 +40,7 @@
             <ul class="nav navbar-nav navbar-right">
 
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span th:inline="text">[[${#httpServletRequest.remoteUser}]]</span><span class="caret"></span></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span th:text="${activeUser.name}">Name</span><span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li>
                             <div style="width: 60%;margin: auto; padding: 5px;">
@@ -59,25 +60,61 @@
 
 
 <div class="container" style="margin-top: 5em">
-    <div id="organization"></div>
+    <div ng-controller="OrganizationController as admin">
+        <div ng-repeat="org in admin.organizations | orderBy:'name'">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h1>{{org.name}}</h1>
+                    <div>{{org.type}}</div>
+                    <div>{{org.contactName}}</div>
+                    <div>{{org.creationDate | date:'MM/dd/yyyy @ h:mma'}}</div>
+                    <div th:if="${activeUser.hasSystemAdminRole}">
+                        <button class="btn btn-default" ng-show="org.hasAdminRole">Update</button>
+                        <section ng-controller="MenuController as panel">
+                            <ul class="nav nav-pills">
+                                <li ng-class="{ active: panel.isSelected(1) }">
+                                    <a href="#" ng-click="panel.selectTab(1)">Description</a>
+                                </li>
+                                <li ng-class="{ active: panel.isSelected(2) }">
+                                    <a href="#" ng-click="panel.selectTab(2)">Reviews</a>
+                                </li>
+                                <li ng-class="{ active: panel.isSelected(3) }">
+                                    <a href="#" ng-click="panel.selectTab(3)">Specifications</a>
+                                </li>
+                            </ul>
+                            <div class="panel" ng-show="panel.isSelected(1)">
+                                <div>Description Panel</div>
+                            </div>
+                            <div class="panel" ng-show="panel.isSelected(2)">
+                                <div>Reviews Panel</div>
+                            </div>
+                            <div class="panel" ng-show="panel.isSelected(3)">
+                                <div>Specifications Panel</div>
+                            </div>
+                        </section>
+                    </div>
+
+                </li>
+
+            </ul>
+        </div>
+
+    </div>
 </div>
 
 
 
-
-
 <th:block th:replace="fragments/resources :: resourceScripts"></th:block>
-<script src="js/admin.js"></script>
+<script src="js/app.js"></script>
 
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
 
-    $(document).ready(function(){
+    var user = /*[[${activeUser}]]*/ null;
 
-    });
-
-
-
-
+    /*]]>*/
 </script>
+
+
 </body>
 </html>
