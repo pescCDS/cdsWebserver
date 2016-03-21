@@ -1,6 +1,7 @@
 package org.pesc.service;
 
 import org.pesc.web.model.Organization;
+import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
 import javax.ws.rs.GET;
@@ -13,6 +14,7 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("/document")
 @WebService
+@Component
 public class DocumentResource {
 
     // The Java method will process HTTP GET requests
