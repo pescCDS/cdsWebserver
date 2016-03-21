@@ -12,6 +12,7 @@ import org.pesc.service.rs.request.EntityCodeSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 @Api("/entityCodes")
 @Path("/entityCodes")
 @Component
+@WebService
 public class EntityCodeRestController {
     private static final Log log = LogFactory.getLog(EntityCodeRestController.class);
     

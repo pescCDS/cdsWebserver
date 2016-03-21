@@ -12,6 +12,7 @@ import org.pesc.service.rs.request.DeliveryOptionSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 @Path("/deliveryOptions")
 @Api("/deliveryOptions")
 @Component
+@WebService
 public class DeliveryOptionRestController {
     private static final Log log = LogFactory.getLog(DeliveryOptionRestController.class);
 

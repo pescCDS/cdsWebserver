@@ -12,6 +12,7 @@ import org.pesc.service.xml.XmlSchemaVersion;
 import org.pesc.edexchange.v1_0.ContentCodeType;
 import org.springframework.stereotype.Component;
 
+import javax.jws.WebService;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -31,6 +32,7 @@ import java.io.InputStream;
 @Api("/utility")
 @Path("/utility")
 @Component
+@WebService
 public class UtilityRestController {
 
     private static final Log log = LogFactory.getLog(OrganizationRestController.class);

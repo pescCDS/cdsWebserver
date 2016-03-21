@@ -12,6 +12,7 @@ import org.pesc.service.rs.request.DocumentFormatSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 @Path("/documentFormats")
 @Api("/documentFormats")
 @Component
+@WebService
 public class DocumentFormatRestController {
     private static final Log log = LogFactory.getLog(DocumentFormatRestController.class);
     

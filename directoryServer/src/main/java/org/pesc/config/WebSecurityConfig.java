@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 /**
  * Created by james on 2/17/16.
@@ -16,21 +17,26 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
 
-                .antMatchers("/", "/home", "/ui/**", "/assets/**", "/css/**", "favicon.ico").permitAll()
+        http
+                .csrf()
+                .disable()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+                .enableSessionUrlRewriting(false)
+                .and()
+                .authorizeRequests()
+                .antMatchers("/static/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .csrf().disable()   //TODO: enable CSRF??
                 .formLogin()
                 .loginPage("/login")
-                .defaultSuccessUrl("/admin")
                 .permitAll()
                 .and()
                 .logout()
                 .permitAll();
 
+        http.httpBasic();
 
     }
 

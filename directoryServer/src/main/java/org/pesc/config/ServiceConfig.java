@@ -3,14 +3,21 @@ package org.pesc.config;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jersey.listing.ApiListingResourceJSON;
+import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
+import org.apache.cxf.jaxws.EndpointImpl;
+import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
+import org.pesc.service.DocumentResource;
+import org.pesc.service.OrganizationResource;
 import org.pesc.service.rs.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.ws.config.annotation.EnableWs;
 
+import javax.xml.ws.Endpoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,8 +25,9 @@ import java.util.List;
 /**
  * Created by james on 2/25/16.
  */
+@EnableWs
 @Configuration
-public class RESTConfig {
+public class ServiceConfig {
 
     @Autowired
     private ContactRestController contactRestController;
@@ -73,7 +81,95 @@ public class RESTConfig {
     private String restApiPackageToScan;
 
 
+    @Bean(name = "cxf")
+    public SpringBus springBus() {
+        return new SpringBus();
+    }
 
+    /**
+     * The SOAP services are spread out accross several endpoints.  There doesn't seem to be a way to
+     * combine them into a single endpoint without refactory the code to use a single class for all
+     * resources.
+     */
+
+
+    /**
+     * SOAP endpoint for organizations
+     * @return
+     */
+    @Bean
+    public Server organizationEndpoint() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(OrganizationRestController.class);
+        sf.setAddress("/soap/organizations");
+        return sf.create();
+    }
+
+    /**
+     * SOAP endpoint for contacts
+     * @return
+     */
+    @Bean
+    public Server contactEndpoint() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(ContactRestController.class);
+        sf.setAddress("/soap/contacts");
+        return sf.create();
+    }
+
+    /**
+     * SOAP endpoints for delivery methods
+     * @return
+     */
+    @Bean
+    public Server deliveryMethodEndpoint() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(DeliveryMethodRestController.class);
+        sf.setAddress("/soap/deliveryMethods");
+        return sf.create();
+    }
+
+    /**
+     * SOAP endpoint for delivery options
+     * @return
+     */
+    @Bean
+    public Server deliveryOptionsEndpoint() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(DeliveryOptionRestController.class);
+        sf.setAddress("/soap/deliveryOptions");
+        return sf.create();
+    }
+
+    /**
+     * SOAP endpoint for entity codes
+     * @return
+     */
+    @Bean
+    public Server entityCodesEndpoint() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(EntityCodeRestController.class);
+        sf.setAddress("/soap/entityCodes");
+        return sf.create();
+    }
+
+    /**
+     * SOAP endpoint for document formats
+     * @return
+     */
+    @Bean
+    public Server documentFormatEndpoint() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(DocumentFormatRestController.class);
+        sf.setAddress("/soap/documentFormats");
+        return sf.create();
+    }
+
+
+    /**
+     * Create the REST endpoint
+     * @return
+     */
     @Bean
     public Server rsServer() {
         JAXRSServerFactoryBean endpoint = new JAXRSServerFactoryBean();

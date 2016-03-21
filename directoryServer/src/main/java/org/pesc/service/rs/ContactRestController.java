@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
+import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.List;
 @Api("/contacts")
 @Path("/contacts")
 @Component
+@WebService
 public class ContactRestController {
 
     private static final Log log = LogFactory.getLog(ContactRestController.class);
@@ -109,7 +111,7 @@ public class ContactRestController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("Search OrganizationContact based on JSON object.  Empty fields will be ignored.")
-    public List<OrganizationContact> searchContactsGet(OrganizationContactSearch contactSearch) {
+    public List<OrganizationContact> searchContacts(OrganizationContactSearch contactSearch) {
         return contactsDao.search(
                 contactSearch.getCity(),
                 contactSearch.getContactId(),

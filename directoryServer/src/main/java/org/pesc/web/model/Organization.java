@@ -3,6 +3,9 @@ package org.pesc.web.model;
 /**
  * Created by james on 2/23/16.
  */
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "Organization")
 public class Organization {
     String name;
     String id;
