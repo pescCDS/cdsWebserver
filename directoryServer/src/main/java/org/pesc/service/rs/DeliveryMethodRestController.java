@@ -68,7 +68,7 @@ public class DeliveryMethodRestController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("POST operation to search DeliveryMethod using JSON object.  Empty fields will be ignored.")
-    public List<DeliveryMethod> searchDeliveryMethods(
+    public List<DeliveryMethod> searchDeliveryMethodsByObject(
             DeliveryMethodSearch deliveryMethodSearch) {
         return deliveryMethodsDao.search(deliveryMethodSearch.getId(), deliveryMethodSearch.getMethod());
     }

@@ -82,7 +82,7 @@ public class DocumentFormatRestController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("POST operation to search DocumentFormat using JSON object.  Empty fields will be ignored.")
-    public List<DocumentFormat> searchDocumentFormat(
+    public List<DocumentFormat> searchDocumentFormatByJSON(
             DocumentFormatSearch documentFormatSearch) {
         return documentFormatsDao.search(
                 documentFormatSearch.getId(),

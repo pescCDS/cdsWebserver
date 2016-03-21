@@ -72,7 +72,7 @@ public class EntityCodeRestController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation("POST operation to search EntityCode using JSON object.  Empty fields will be ignored.")
-    public List<EntityCode> getEntityCodes(EntityCodeSearch entityCodeSearch) {
+    public List<EntityCode> getEntityCodesByJSON(EntityCodeSearch entityCodeSearch) {
         return entityCodesDao.search(
                 entityCodeSearch.getId(),
                 entityCodeSearch.getCode(),
