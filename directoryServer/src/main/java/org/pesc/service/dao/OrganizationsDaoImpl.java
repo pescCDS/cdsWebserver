@@ -6,7 +6,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
-import org.pesc.edexchange.v1_0.Organization;
+import org.pesc.api.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -164,7 +164,7 @@ public class OrganizationsDaoImpl extends AbstractDaoImpl<Organization> implemen
 			session.saveOrUpdate(org);
 			
 			// load the saved organization into the return variable
-			retOrg = (Organization)session.get(Organization.class, org.getDirectoryId());
+			retOrg = (Organization)session.get(Organization.class, org.getId());
 			
 			session.getTransaction().commit();
 			
@@ -186,7 +186,7 @@ public class OrganizationsDaoImpl extends AbstractDaoImpl<Organization> implemen
 			session.beginTransaction();
 			
 			// load the Organization from the persistence layer and then delete it
-			Organization remOrg = (Organization)session.get(Organization.class, org.getDirectoryId());
+			Organization remOrg = (Organization)session.get(Organization.class, org.getId());
 			session.delete(remOrg);
 			
 			session.getTransaction().commit();

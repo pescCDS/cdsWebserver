@@ -18,7 +18,7 @@ public class LoginController {
     private static final Log log = LogFactory.getLog(LoginController.class);
     private final String templateView = "login";
 
-    @RequestMapping({ "/", "/login"} )
+    @RequestMapping({"/login"} )
     public String login(@RequestParam(value = "error", required = false) String error,
                         @RequestParam(value = "logout", required = false) String logout) {
         return templateView;

@@ -2,8 +2,20 @@
 
     var app = angular.module('admin', []);
     app.controller('OrganizationController', function () {
+        console.log("Getting organizations") ;
         this.organizations = organizationsMockData;
     });
+
+    app.controller("NavController", function() {
+        this.selectedMenu = 1;
+        this.selectMenu = function(menu) {
+            this.selectedMenu = menu;
+        };
+        this.isSelected = function(menu) {
+            return this.selectedMenu === menu;
+        }
+    });
+
 
     app.controller("MenuController", function() {
         this.tab = 1;

@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
-import org.pesc.edexchange.v1_0.Organization;
+import org.pesc.api.model.Organization;
 import org.pesc.service.dao.OrganizationsDao;
 import org.pesc.service.rs.request.OrganizationSearch;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,10 +6,8 @@ import io.swagger.jersey.listing.ApiListingResourceJSON;
 import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
-import org.apache.cxf.jaxws.EndpointImpl;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
-import org.pesc.service.DocumentResource;
-import org.pesc.service.OrganizationResource;
+import org.pesc.api.OrganizationResource;
 import org.pesc.service.rs.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ws.config.annotation.EnableWs;
 
-import javax.xml.ws.Endpoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +46,10 @@ public class ServiceConfig {
 
     @Autowired
     UtilityRestController utilityRestController;
+
+
+    @Autowired
+    private OrganizationResource organizationResource;
 
 
     @Bean
@@ -206,6 +207,41 @@ public class ServiceConfig {
         endpoint.setServiceBeans(beans);
 
         endpoint.setAddress("/rest");
+
+        return endpoint.create();
+    }
+
+    /**
+     * Create the REST endpoint
+     * @return
+     */
+    @Bean
+    public Server restServer() {
+        JAXRSServerFactoryBean endpoint = new JAXRSServerFactoryBean();
+
+        List<Object> beans  = new ArrayList<Object>();
+
+        BeanConfig beanConfig = new BeanConfig();
+        beanConfig.setVersion(restAPIVersion);
+        beanConfig.setTitle("PESC CDS REST Interface");
+        beanConfig.setDescription("Swagger UI to document and explore the REST interface provided by the PESC CDS.");
+        beanConfig.setSchemes(new String[]{"http"});
+        beanConfig.setHost(restApiHost);
+        beanConfig.setBasePath("/services/rest2");   //TODO: change path after completion
+        beanConfig.setPrettyPrint(true);
+        beanConfig.setScan(true);
+
+        beans.add(beanConfig);
+        beans.add(apiListingResourceJSON());
+        //beans.add(wadlResource());
+
+        beans.add(organizationResource);
+
+        endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
+
+        endpoint.setServiceBeans(beans);
+
+        endpoint.setAddress("/rest2");  //TODO: change path after completion
 
         return endpoint.create();
     }

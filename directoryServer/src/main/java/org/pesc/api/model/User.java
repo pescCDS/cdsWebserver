@@ -1,4 +1,4 @@
-package org.pesc.web.model;
+package org.pesc.api.model;
 
 /**
  * Created by james on 3/17/16.

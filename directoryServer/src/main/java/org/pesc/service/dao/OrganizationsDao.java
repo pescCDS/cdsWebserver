@@ -1,6 +1,6 @@
 package org.pesc.service.dao;
 
-import org.pesc.edexchange.v1_0.Organization;
+import org.pesc.api.model.Organization;
 
 import java.util.List;
 
