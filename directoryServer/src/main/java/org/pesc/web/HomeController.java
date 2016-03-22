@@ -33,12 +33,10 @@ public class HomeController {
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
                 //when Anonymous Authentication is enabled
-                !(SecurityContextHolder.getContext().getAuthentication()
-                        instanceof AnonymousAuthenticationToken) ) {
+                !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) ) {
+
             User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Collection<GrantedAuthority> authorities = auth.getAuthorities();
-
-
             isAuthenticated = true;
             cdsUser.setName("James Whetstone");
             cdsUser.setUsername(auth.getUsername());

@@ -64,6 +64,13 @@
     <div class="container" style="margin-top: 5em">
 
         <div class="panel" ng-show="nav.isSelected(1)">
+            <div th:if="${activeUser.hasSystemAdminRole}">
+                <div class="sub-nav">
+                    <button type="button" class="btn btn-default">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create
+                    </button>
+                </div>
+            </div>
             <div ng-controller="OrganizationController as admin">
                 <div ng-repeat="org in admin.organizations | orderBy:'name'">
                     <ul class="list-group">
