@@ -320,7 +320,7 @@
                             <locations>org.pesc.cds.webservice.service</locations>
                             <schemes>http</schemes>
                             <host>localhost:8080</host>
-                            <basePath>/services/rest/</basePath>
+                            <basePath>/services/rest/v1</basePath>
                             <info>
                                 <title>Static REST Documentation</title>
                                 <version>v1</version>

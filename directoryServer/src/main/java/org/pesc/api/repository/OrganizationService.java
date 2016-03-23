@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Created by james on 3/21/16.
  */
@@ -31,7 +33,7 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    public Organization findByName(String name)  {
+    public List<Organization> findByName(String name)  {
         return this.organizationRepository.findByName(name);
     }
 

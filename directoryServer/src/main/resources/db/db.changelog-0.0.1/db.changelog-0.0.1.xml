@@ -9,15 +9,13 @@
 		This changeSet is the initial creation of the required base tables for the Directory Server.
 		</comment>
 		
-		<sqlFile encoding="utf8" path="1-organization_entity_code.sql" relativeToChangelogFile="true" />
-		<sqlFile encoding="utf8" path="2-organization_directory.sql" relativeToChangelogFile="true" />
-		<sqlFile encoding="utf8" path="3-organization_credential.sql" relativeToChangelogFile="true" />
-		<sqlFile encoding="utf8" path="4-organization_contact.sql" relativeToChangelogFile="true" />
-		<sqlFile encoding="utf8" path="5-filter_sets.sql" relativeToChangelogFile="true" />
-		<sqlFile encoding="utf8" path="6-document_format.sql" relativeToChangelogFile="true" />
-		<sqlFile encoding="utf8" path="7-delivery_methods.sql" relativeToChangelogFile="true" />
-		<sqlFile encoding="utf8" path="8-delivery_options.sql" relativeToChangelogFile="true" />
-		
+		<sqlFile encoding="utf8" path="1-organization.sql" relativeToChangelogFile="true" />
+		<sqlFile encoding="utf8" path="2-credential.sql" relativeToChangelogFile="true" />
+		<sqlFile encoding="utf8" path="3-contact.sql" relativeToChangelogFile="true" />
+		<sqlFile encoding="utf8" path="4-document_format.sql" relativeToChangelogFile="true" />
+		<sqlFile encoding="utf8" path="5-delivery_methods.sql" relativeToChangelogFile="true" />
+		<sqlFile encoding="utf8" path="6-endpoint.sql" relativeToChangelogFile="true" />
+
 	</changeSet>
 
 </databaseChangeLog>

@@ -37,7 +37,7 @@
 
         self.organizations = [];
 
-        $http.get('/services/rest2/organizations').success(function(data){
+        $http.get('/services/rest/v1/organizations').success(function(data){
            self.organizations = data;
         });
 

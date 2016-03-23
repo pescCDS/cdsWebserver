@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Created by james on 3/21/16.
  */
@@ -12,5 +14,5 @@ import org.springframework.stereotype.Repository;
 public interface OrganizationRepository extends CrudRepository<Organization, Integer> {
 
     @Query("from Organization where name = ?1")
-    Organization findByName(String name);
+    List<Organization> findByName(String name);
 }

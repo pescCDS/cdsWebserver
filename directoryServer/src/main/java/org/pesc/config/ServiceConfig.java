@@ -7,8 +7,7 @@ import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
-import org.pesc.api.OrganizationResource;
-import org.pesc.service.rs.*;
+import org.pesc.api.OrganizationsResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +25,7 @@ import java.util.List;
 @Configuration
 public class ServiceConfig {
 
+    /*
     @Autowired
     private ContactRestController contactRestController;
 
@@ -47,9 +47,10 @@ public class ServiceConfig {
     @Autowired
     UtilityRestController utilityRestController;
 
+    */
 
     @Autowired
-    private OrganizationResource organizationResource;
+    private OrganizationsResource organizationsResource;
 
 
     @Bean
@@ -94,83 +95,29 @@ public class ServiceConfig {
      */
 
 
+
     /**
      * SOAP endpoint for organizations
      * @return
      */
     @Bean
-    public Server organizationEndpoint() {
+    public Server organizationsEndpoint() {
         JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
-        sf.setServiceClass(OrganizationRestController.class);
-        sf.setAddress("/soap/organizations");
+        sf.setServiceClass(OrganizationsResource.class);
+        sf.setAddress("/soap/v1/organizations");
         return sf.create();
     }
 
-    /**
-     * SOAP endpoint for contacts
-     * @return
-     */
-    @Bean
-    public Server contactEndpoint() {
-        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
-        sf.setServiceClass(ContactRestController.class);
-        sf.setAddress("/soap/contacts");
-        return sf.create();
-    }
 
-    /**
-     * SOAP endpoints for delivery methods
-     * @return
-     */
-    @Bean
-    public Server deliveryMethodEndpoint() {
-        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
-        sf.setServiceClass(DeliveryMethodRestController.class);
-        sf.setAddress("/soap/deliveryMethods");
-        return sf.create();
-    }
 
-    /**
-     * SOAP endpoint for delivery options
-     * @return
-     */
-    @Bean
-    public Server deliveryOptionsEndpoint() {
-        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
-        sf.setServiceClass(DeliveryOptionRestController.class);
-        sf.setAddress("/soap/deliveryOptions");
-        return sf.create();
-    }
 
-    /**
-     * SOAP endpoint for entity codes
-     * @return
-     */
-    @Bean
-    public Server entityCodesEndpoint() {
-        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
-        sf.setServiceClass(EntityCodeRestController.class);
-        sf.setAddress("/soap/entityCodes");
-        return sf.create();
-    }
 
-    /**
-     * SOAP endpoint for document formats
-     * @return
-     */
-    @Bean
-    public Server documentFormatEndpoint() {
-        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
-        sf.setServiceClass(DocumentFormatRestController.class);
-        sf.setAddress("/soap/documentFormats");
-        return sf.create();
-    }
 
 
     /**
      * Create the REST endpoint
      * @return
-     */
+
     @Bean
     public Server rsServer() {
         JAXRSServerFactoryBean endpoint = new JAXRSServerFactoryBean();
@@ -211,6 +158,9 @@ public class ServiceConfig {
         return endpoint.create();
     }
 
+     */
+
+
     /**
      * Create the REST endpoint
      * @return
@@ -227,7 +177,8 @@ public class ServiceConfig {
         beanConfig.setDescription("Swagger UI to document and explore the REST interface provided by the PESC CDS.");
         beanConfig.setSchemes(new String[]{"http"});
         beanConfig.setHost(restApiHost);
-        beanConfig.setBasePath("/services/rest2");   //TODO: change path after completion
+        beanConfig.setBasePath("/services/rest/v1");   //TODO: change path after completion
+        beanConfig.setResourcePackage(restApiPackageToScan);
         beanConfig.setPrettyPrint(true);
         beanConfig.setScan(true);
 
@@ -235,13 +186,13 @@ public class ServiceConfig {
         beans.add(apiListingResourceJSON());
         //beans.add(wadlResource());
 
-        beans.add(organizationResource);
+        beans.add(organizationsResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 
         endpoint.setServiceBeans(beans);
 
-        endpoint.setAddress("/rest2");  //TODO: change path after completion
+        endpoint.setAddress("/rest/v1");  //TODO: change path after completion
 
         return endpoint.create();
     }
