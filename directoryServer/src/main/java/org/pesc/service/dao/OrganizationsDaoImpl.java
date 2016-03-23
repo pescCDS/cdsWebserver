@@ -44,7 +44,7 @@ public class OrganizationsDaoImpl extends AbstractDaoImpl<Organization> implemen
 			}
 			Session session = hibernateFactory.getCurrentSession();
 			session.beginTransaction();
-			
+
 			Criteria ct = session.createCriteria(Organization.class);
 			boolean hasCriteria = false;
 			

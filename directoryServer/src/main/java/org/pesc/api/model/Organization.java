@@ -28,11 +28,11 @@ public class Organization implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_time")
-    private Date created_time;
+    private Date createdTime;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "modified_time")
-    private Date modified_time;
+    private Date modifiedTime;
 
     @Column(name = "website")
     private String website;
@@ -53,7 +53,7 @@ public class Organization implements Serializable {
     private String telephone;
 
     @Column(name = "short_description")
-    private String short_description;
+    private String shortDescription;
 
     @Column(name="type")
     private int type;
@@ -64,6 +64,17 @@ public class Organization implements Serializable {
     @Column(name="active")
     private boolean active;
 
+    @Column(name="ein")
+    private String ein;
+
+    @Column(name="organization_id")
+    private String organizationCode;
+
+    @Column(name="organization_id_type")
+    private String organizationCodeType;
+
+    @Column(name="subcode")
+    private String subcode;
 
     public String getName() {
         return this.name;
@@ -81,19 +92,19 @@ public class Organization implements Serializable {
     }
 
     public Date getCreatedTime() {
-        return created_time;
+        return createdTime;
     }
 
-    public void setCreatedTime(Date created_time) {
-        this.created_time = created_time;
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
     }
 
     public Date getModifiedTime() {
-        return modified_time;
+        return modifiedTime;
     }
 
-    public void setModifiedTime(Date modified_time) {
-        this.modified_time = modified_time;
+    public void setModifiedTime(Date modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
 
     public String getWebsite() {
@@ -145,11 +156,11 @@ public class Organization implements Serializable {
     }
 
     public String getShortDescription() {
-        return short_description;
+        return shortDescription;
     }
 
-    public void setShortDescription(String short_description) {
-        this.short_description = short_description;
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
     }
 
     public int getType() {
@@ -174,6 +185,38 @@ public class Organization implements Serializable {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getEin() {
+        return ein;
+    }
+
+    public void setEin(String ein) {
+        this.ein = ein;
+    }
+
+    public String getOrganizationCodeType() {
+        return organizationCodeType;
+    }
+
+    public void setOrganizationCodeType(String organizationCodeType) {
+        this.organizationCodeType = organizationCodeType;
+    }
+
+    public String getOrganizationCode() {
+        return organizationCode;
+    }
+
+    public void setOrganizationCode(String organizationCode) {
+        this.organizationCode = organizationCode;
+    }
+
+    public String getSubcode() {
+        return subcode;
+    }
+
+    public void setSubcode(String subcode) {
+        this.subcode = subcode;
     }
 
     @Override
