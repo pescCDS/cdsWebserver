@@ -1,10 +1,83 @@
 (function() {
 
-    var app = angular.module('admin', []);
-    app.controller('OrganizationController', function () {
-        console.log("Getting organizations") ;
-        this.organizations = organizationsMockData;
+    var app = angular.module('directoryServer', []).filter('organizationType', function() {
+        return function(input) {
+
+            var type = '';
+
+            switch (input) {
+                case 0:
+                    type = "System";
+                    break;
+                case 1:
+                    type = "Institution";
+                    break;
+                case 2:
+                    type = "Service Provider";
+                    break;
+                default:
+                    type = "Unknown"
+            }
+
+            return type;
+        };
     });
+
+    app.controller('AccountController', [ '$http', function($http){
+        var self = this;
+
+        self.show = function(user) {
+           console.log(user);
+        };
+    }]);
+
+    app.controller('OrganizationController', [ '$http','$log', function ($http, $log) {
+
+        var self = this;
+
+        self.organizations = [];
+
+        $http.get('/services/rest2/organizations').success(function(data){
+           self.organizations = data;
+        });
+
+        self.selectedOrganization = {};
+
+        self.viewOrg = function(org) {
+            self.selectedOrganization = org;
+            self.tab = 3;
+            $log.info(org);
+        };
+
+        self.createOrg = function() {
+            self.selectedOrganization = {};
+            self.tab = 2;
+        };
+
+        self.cancelOrgCreate = function() {
+            self.tab = 1;
+        };
+
+        this.submitOrg = function() {
+           $log.info(self.selectedOrganization);
+
+            if (self.selectedOrganization.hasOwnProperty('id')) {
+                //update
+            }
+            else {
+                //create
+            }
+
+            self.tab = 1;
+        } ;
+
+        this.isSelected = function(tabNum) {
+            return self.tab === tabNum;
+        }
+
+        self.tab = 1;
+
+    }]);
 
     app.controller("NavController", function() {
         this.selectedMenu = 1;
@@ -13,7 +86,7 @@
         };
         this.isSelected = function(menu) {
             return this.selectedMenu === menu;
-        }
+        };
     });
 
 
@@ -26,21 +99,5 @@
             return this.tab === tabNum;
         }
     });
-
-    var organizationsMockData = [ {
-        name: 'Parchment',
-        type: 'Vendor',
-        contactName: 'Rajeev Arora',
-        address:  '3000 Lava Ridge Ct, Roseville, CA 95661',
-        creationDate: 1388123412323,
-        hasAdminRole: true
-    }, {
-        name: 'Butte Community College',
-        type: 'Institution',
-        contactName: 'James Whetstone',
-        address:  '3536 Butte Campus Dr, Oroville, CA 95965',
-        creationDate: 1388123412323,
-        hasAdminRole: true
-    } ];
 
 })();

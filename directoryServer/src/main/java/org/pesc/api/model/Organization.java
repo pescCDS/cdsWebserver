@@ -27,8 +27,8 @@ public class Organization implements Serializable {
     private Integer id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "create_time")
-    private Date create_time;
+    @Column(name = "created_time")
+    private Date created_time;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "modified_time")
@@ -55,11 +55,19 @@ public class Organization implements Serializable {
     @Column(name = "short_description")
     private String short_description;
 
-    @Column(name = "name")
-    public String getName() {
-        return name;
-    }
+    @Column(name="type")
+    private int type;
 
+    @Column(name="enabled")
+    private boolean enabled;
+
+    @Column(name="active")
+    private boolean active;
+
+
+    public String getName() {
+        return this.name;
+    }
     public void setName(String name) {
         this.name = name;
     }
@@ -73,11 +81,11 @@ public class Organization implements Serializable {
     }
 
     public Date getCreatedTime() {
-        return create_time;
+        return created_time;
     }
 
-    public void setCreatedTime(Date create_time) {
-        this.create_time = create_time;
+    public void setCreatedTime(Date created_time) {
+        this.created_time = created_time;
     }
 
     public Date getModifiedTime() {
@@ -128,14 +136,6 @@ public class Organization implements Serializable {
         this.zip = zip;
     }
 
-    public String getShort_description() {
-        return short_description;
-    }
-
-    public void setShort_description(String short_description) {
-        this.short_description = short_description;
-    }
-
     public String getTelephone() {
         return telephone;
     }
@@ -150,6 +150,30 @@ public class Organization implements Serializable {
 
     public void setShortDescription(String short_description) {
         this.short_description = short_description;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override
