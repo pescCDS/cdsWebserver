@@ -23,6 +23,20 @@
         };
     });
 
+    app.directive('toNumber', function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, element, attrs, ngModel) {
+                ngModel.$parsers.push(function(val) {
+                    return parseInt(val, 10);
+                });
+                ngModel.$formatters.push(function(val) {
+                    return '' + val;
+                });
+            }
+        }
+    });
+
     app.controller('AccountController', [ '$http', function($http){
         var self = this;
 
@@ -50,15 +64,27 @@
         };
 
         self.createOrg = function() {
-            self.selectedOrganization = {};
-            self.tab = 2;
+
+            var organization = {
+                name: '',
+                type: 1,
+                street: '',
+                city: '',
+                state: '',
+                zip: '',
+                telephone: '',
+                website: 'http://',
+                editing: true
+            } ;
+            self.organizations.push(organization);
+
         };
 
         self.cancelOrgCreate = function() {
             self.tab = 1;
         };
 
-        this.submitOrg = function() {
+        self.submitOrg = function() {
            $log.info(self.selectedOrganization);
 
             if (self.selectedOrganization.hasOwnProperty('id')) {
@@ -75,7 +101,50 @@
             return self.tab === tabNum;
         }
 
+        self.searchInput = '';
+
+        self.findOrganizations = function() {
+
+            $http.get('/services/rest/v1/organizations', { params: { name: self.searchInput} } ).success(function(data){
+                self.organizations = data;
+            });
+        };
+
+        self.editOrg = function(org) {
+            org['editing'] = true;
+            console.log(org);
+        };
+
+        self.deleteOrg = function(org) {
+
+            //If it's an existing org we need to delete it on the server
+            if (org.hasOwnProperty('id')) {
+
+            }
+            else {
+                //it's a new organization that hasn't been persisted.
+                var index = self.organizations.indexOf(org);
+                if (index > -1) {
+                    self.organizations.splice(index, 1);
+                }
+
+            }
+            console.log(org);
+        };
+
+        self.saveOrg = function(org) {
+            delete org.editing;
+
+            console.log(org);
+        };
+
+        self.showOrgForm = function(org) {
+            return org.hasOwnProperty('editing') && org.editing === true;
+        };
+
         self.tab = 1;
+
+
 
     }]);
 

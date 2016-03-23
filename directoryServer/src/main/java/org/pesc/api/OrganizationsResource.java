@@ -43,7 +43,7 @@ public class OrganizationsResource {
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @ApiOperation("Get a list of organizations based on the optional search parameters.  All organizations are returned" +
+    @ApiOperation("Search organizations based on the optional search parameters.  All organizations are returned" +
             " when no search criteria are provided.")
     public List<Organization> findOrganization(
             @QueryParam("id") @ApiParam("The directory identifier for the organization.") Integer id,

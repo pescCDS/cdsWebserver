@@ -19,10 +19,21 @@ a:hover
     margin: 0 0 1em 0;
 }
 
-.ng-invalid.ng-dirty {
+/* All immediate children of sub-nav are inline */
+.sub-nav > * {
+    display: inline-block;
+    vertical-align: top;
+}
+
+form .ng-invalid.ng-dirty {
     border-color: #FA787E;
 }
 
-.ng-valid.ng-dirty {
+form .ng-valid.ng-dirty {
     border-color: #78FA89;
+}
+
+.inner-margin7 > * {
+    margin-bottom:7px;
+    box-sizing: border-box;
 }

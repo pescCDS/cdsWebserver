@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.criteria.CriteriaBuilder;
-import java.lang.reflect.ParameterizedType;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +26,6 @@ import java.util.StringTokenizer;
 public class OrganizationService {
 
     private static final Log log = LogFactory.getLog(OrganizationService.class);
-
-    @Autowired
-    private EntityManager entityManager;
 
     protected SessionFactory hibernateFactory;
 
@@ -61,13 +55,13 @@ public class OrganizationService {
         this.organizationRepository.delete(organization);
     }
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<Organization> findByName(String name)  {
         return this.organizationRepository.findByName(name);
     }
 
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public Organization findById(Integer id)  {
 
         return this.organizationRepository.findOne(id);
@@ -86,7 +80,7 @@ public class OrganizationService {
      * @param modifiedTime
      * @return
      */
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<Organization> search(
             Integer directoryId,
             String organizationId,
@@ -164,7 +158,6 @@ public class OrganizationService {
                 ct.add(Restrictions.eq("modifiedTime", new Timestamp(modifiedTime)));
                 hasCriteria = true;
             }
-
 
             if(hasCriteria) {
                 retList = ct.list();
