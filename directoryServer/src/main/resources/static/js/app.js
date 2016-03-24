@@ -1,6 +1,6 @@
 (function() {
 
-    var app = angular.module('directoryServer', []).filter('organizationType', function() {
+    var app = angular.module('directoryServer',  ['ui.bootstrap']).filter('organizationType', function() {
         return function(input) {
 
             var type = '';
@@ -22,6 +22,17 @@
             return type;
         };
     });
+
+    app.directive('backButton', ['$window', function($window) {
+        return {
+            restrict: 'A',
+            link: function (scope, elem, attrs) {
+                elem.bind('click', function () {
+                    $window.history.back();
+                });
+            }
+        };
+    }]);
 
     app.directive('toNumber', function() {
         return {
@@ -84,18 +95,6 @@
             self.tab = 1;
         };
 
-        self.submitOrg = function() {
-           $log.info(self.selectedOrganization);
-
-            if (self.selectedOrganization.hasOwnProperty('id')) {
-                //update
-            }
-            else {
-                //create
-            }
-
-            self.tab = 1;
-        } ;
 
         this.isSelected = function(tabNum) {
             return self.tab === tabNum;
@@ -115,27 +114,49 @@
             console.log(org);
         };
 
+        self.removeOrgFromModel = function(org) {
+            var index = self.organizations.indexOf(org);
+            if (index > -1) {
+                self.organizations.splice(index, 1);
+            }
+        } ;
+
         self.deleteOrg = function(org) {
 
             //If it's an existing org we need to delete it on the server
             if (org.hasOwnProperty('id')) {
-
+                 $http.delete('/services/rest/v1/organizations/' + org.id).success(function(response){
+                     console.log(response);
+                     self.removeOrgFromModel(org);
+                 });
             }
             else {
                 //it's a new organization that hasn't been persisted.
-                var index = self.organizations.indexOf(org);
-                if (index > -1) {
-                    self.organizations.splice(index, 1);
-                }
+                self.removeOrgFromModel(org);
 
             }
             console.log(org);
         };
 
         self.saveOrg = function(org) {
+
+            $log.info(self.selectedOrganization);
             delete org.editing;
 
-            console.log(org);
+            if (org.hasOwnProperty('id')) {
+                //update
+                $http.put('/services/rest/v1/organizations/' + org.id, org).error(function(response){
+                    $log.error(response);
+                });
+            }
+            else {
+                //create
+            }
+
+            self.tab = 1;
+
+
+
         };
 
         self.showOrgForm = function(org) {

@@ -49,9 +49,14 @@
                     </ul>
                 </ul>
                 <ul th:if="${isAuthenticated}==true" class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span th:text="${activeUser.name}">Name</span><span class="caret"></span></a>
-                        <ul class="dropdown-menu">
+                    <li uib-dropdown>
+
+                        <a href="#" class="dropdown-toggle" uib-dropdown-toggle="" aria-haspopup="true" aria-expanded="false">
+                            <span th:text="${activeUser.name}">Name</span>
+                            <span class="caret"></span>
+                        </a>
+
+                        <ul uib-dropdown-menu>
                             <li ng-controller="AccountController as accountCtrl">
                                 <div style="width: 60%;margin: auto; padding: 5px;">
                                     <button class="btn btn-primary" ng-click="accountCtrl.show(activeUser)">Account</button>
@@ -66,6 +71,8 @@
                                 </div>
                             </li>
                         </ul>
+
+
                     </li>
                 </ul>
             </div>
@@ -105,11 +112,11 @@
                                 <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate">
                                     <div class="sub-nav">
                                         <div class="inner-margin7">
-                                            <h1 ng-show="!orgCtrl.showOrgForm(org)"><a ng-click="orgCtrl.viewOrg(org)">{{org.name}}</a></h1>
+                                            <h1 ng-show="!orgCtrl.showOrgForm(org)"><a href="#organizaion-details" ng-click="orgCtrl.viewOrg(org)">{{org.name}}</a></h1>
 
                                             <div ng-show="orgCtrl.showOrgForm(org)">
                                                 <h1>
-                                                    <input type="text" placeholder="Name" required="required" ng-model="org.name"> </input>
+                                                    <input type="text" placeholder="Name" required="required" ng-model="org.name" ng-class="{ jw : orgForm.$submitted === true}"> </input>
                                                 </h1>
                                             </div>
 
@@ -225,9 +232,10 @@
                                                 <button ng-show="orgCtrl.showOrgForm(org)" type="submit" class="btn btn-default">
                                                     <span class="glyphicon glyphicon-floppy-disk"></span> Save
                                                 </button>
-                                                <button type="button" class="btn btn-default" ng-click="orgCtrl.deleteOrg(org)">
+                                                <button type="button" uib-popover-template="'delete-org.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
                                                     <span class="glyphicon glyphicon-remove-circle"></span> Delete
                                                 </button>
+
                                             </div>
                                         </div>
                                     </div>
@@ -257,6 +265,7 @@
                     </form>
                 </div>
                 <div ng-show="orgCtrl.isSelected(3)">
+                    <button type="button" class="btn btn-default" back-button>Back</button>
                     <h1>{{orgCtrl.selectedOrganization.name}}</h1>
                     <a ng-href="{{org.website}}" target="_blank">Website</a>
                     <div><strong>Address: </strong> {{orgCtrl.selectedOrganization.street}} {{org.city}} {{org.state}} {{org.zip}}</div>
@@ -274,11 +283,17 @@
 
 </div>
 
-<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
 <script src="js/angular.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script src="js/ui-bootstrap-tpls-1.2.5.min.js"></script>
 
 <script src="js/app.js"></script>
+
+<script type="text/ng-template" id="delete-org.html">
+    <div>
+        <p>Delete?</p>
+        <button type="button" class="btn btn-sm btn-success" ng-click="orgCtrl.deleteOrg(org)">Yes</button>
+    </div>
+</script>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
