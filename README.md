@@ -117,7 +117,7 @@ Login Credentials: when required to login, the default login is "user" / "passwo
 ------------------------------
 DIRECTORY SERVER DEVELOPMENT
 ------------------------------
-To prepare you development environment, invoke "dev-setup.sh" from the directoryServer directory.  The script can
+To prepare your development environment, invoke "dev-setup.sh" from the directoryServer directory.  The script can
 take a while to run on the first execution, so be patient.  This is because the script is compiling the packages and
 downloading, building and starting the docker images.  When the script completes, you are ready to begin development.
 
@@ -136,30 +136,23 @@ You can alternatively run the directory server with
 Login Credentials: when required to login, the default login is "admin" / "password"
 
 -------------------------------
-QA Environment
+Full Stack Environment
 -------------------------------
 
-The QA environment is configured in the docker-compose.yml file. This environment can be initialized with the following steps. 
+The full stack environment is configured in the docker-compose.yml file. It comprises of a network server, a directory server, and a separate mysql database for each. This environment can be initialized with the following steps. 
 
-Build the prerequisite maven packages
+Build the prerequisite maven packages and run the docker containers. Supply a valid springboot profile as a single argument to the scripts. If no argument is specified, the default profile "dev" will be used.
 
-> mvn -DskipTests -pl networkServer,directoryServer package docker:build
+```. ./setup.sh [qa|dev]```
 
-Build and run the docker containers for the QA environment 
+These resources can be accessed locally at the following locations:
+Network server -- http://localhost:8081/home 
+Directory server -- http://localhost:8080/home 
 
-> docker-compose -f docker-compose-qa.yml up
+You can stop the environment using the following 
 
-You can stop the QA environment using
-
-> docker-compose -f docker-compose-qa.yml stop
+```. ./shutdown.sh [qa|dev]```
 
 TODO: Create automated integration and unit tests to leverage the QA Environment.
-
-
-
-
-
-
-
 
 
