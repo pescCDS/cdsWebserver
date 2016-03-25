@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.ws.config.annotation.EnableWs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +20,6 @@ import java.util.List;
 /**
  * Created by james on 2/25/16.
  */
-@EnableWs
 @Configuration
 public class ServiceConfig {
 

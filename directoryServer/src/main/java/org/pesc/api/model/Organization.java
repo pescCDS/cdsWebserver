@@ -87,8 +87,9 @@ public class Organization implements Serializable {
         return id;
     }
 
-    public long setId(Integer id) {
-        return id;
+
+    public Integer setId(Integer id) {
+        return this.id = id;
     }
 
     public Date getCreatedTime() {
@@ -219,6 +220,22 @@ public class Organization implements Serializable {
         this.subcode = subcode;
     }
 
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (id == null || obj == null || getClass() != obj.getClass())
+            return false;
+        Organization that = (Organization) obj;
+        return id.equals(that.id);
+    }
+    @Override
+    public int hashCode() {
+        return id == null ? 0 : id.hashCode();
+    }
+
+    /*
     @Override
     public boolean equals(Object obj) {
         if (obj == null) { return false; }
@@ -242,5 +259,6 @@ public class Organization implements Serializable {
     public int hashCode() {
         return new HashCodeBuilder().append(id).append(name).append(street).append(city).append(state).append(zip).append(website).toHashCode();
     }
+    */
 
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Collection;
 
@@ -18,14 +19,11 @@ import java.util.Collection;
  */
 
 @Controller
-public class HomeController {
+public class AppController {
 
-    private static final Log log = LogFactory.getLog(HomeController.class);
+    private static final Log log = LogFactory.getLog(AppController.class);
 
-    @RequestMapping({ "/", "/home", "/admin"})
-    public String getHomePage(Model model) {
-
-        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+    private boolean getCDSUser(org.pesc.api.model.User cdsUser) {
         boolean isAuthenticated = false;
 
 
@@ -33,7 +31,7 @@ public class HomeController {
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
                 //when Anonymous Authentication is enabled
-                !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) ) {
+                !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
 
             User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Collection<GrantedAuthority> authorities = auth.getAuthorities();
@@ -45,14 +43,65 @@ public class HomeController {
 
         }
 
+        return isAuthenticated;
+
+    }
+
+
+    @RequestMapping(value="/",method = RequestMethod.GET)
+    public String gotoHomePage(Model model){
+        return "redirect:home";
+    }
+
+    @RequestMapping({"/docs"})
+    public String getDocs(Model model) {
+         return "swagger";
+    }
+
+    @RequestMapping({"/home", "/admin"})
+    public String getHomePage(Model model) {
+
+        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+
+        boolean isAuthenticated = getCDSUser(cdsUser);
+
         model.addAttribute("isAuthenticated", isAuthenticated);
         model.addAttribute("activeUser", cdsUser);
 
         return "home";
     }
 
+
+    @RequestMapping({"/organizations"})
+    public String getOrganizationsTemplate(Model model) {
+        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+
+        boolean isAuthenticated = getCDSUser(cdsUser);
+
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("activeUser", cdsUser);
+
+
+        return "fragments :: organizations";
+    }
+
+    @RequestMapping({"/settings"})
+    public String getSettingsFragment(Model model) {
+        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+
+        boolean isAuthenticated = getCDSUser(cdsUser);
+
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("activeUser", cdsUser);
+
+
+        return "fragments :: settings";
+    }
+
+
+
     private void getUserDetails() {
-        UserDetails userDetails = (UserDetails)SecurityContextHolder.getContext().
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().
                 getAuthentication().getPrincipal();
         log.info(userDetails.getUsername());
         log.info(userDetails.isEnabled());
