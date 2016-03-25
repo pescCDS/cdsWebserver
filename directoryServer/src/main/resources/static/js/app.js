@@ -141,6 +141,14 @@
             }
             else {
                 //create
+                $http.post('/services/rest/v1/organizations/', org).success(function(data){
+
+                    angular.extend(org, data);
+                    console.log("Successfully created organization.");
+
+                }).error(function(response){
+                    $log.error(response);
+                });
             }
 
             self.tab = 1;
