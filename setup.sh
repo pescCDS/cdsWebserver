@@ -18,7 +18,7 @@ echo "OK - directory-db is running. Internal IP: $NETWORK, StartedAt: $STARTED"
 
 STARTED=$(docker inspect --format="{{ .State.StartedAt }}" directory-app)
 DIRECTORY_SERVER_IP=$(docker inspect --format="{{ .NetworkSettings.IPAddress }}" directory-app)
-echo "OK - directory-app is running. IP: $DIRECTORY_SERVER_IP, StartedAt: $STARTED"
+echo "OK - directory-app is running. Internal IP: $DIRECTORY_SERVER_IP, StartedAt: $STARTED"
 
 echo "Ed Exchange servers can be accessed with the following URLs: "
 echo "Network server   -- http://$(hostname):8081/home "
