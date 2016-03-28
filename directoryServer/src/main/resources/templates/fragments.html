@@ -15,50 +15,30 @@
         Settings Fragment
     </div>
 
-    <div th:fragment="organizations">
+    <div th:fragment="organization-details">
+        Organization Details
+    </div>
 
-        <div>
+    <div th:fragment="organization">
+        <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate" class="glow">
             <div class="sub-nav">
-                <button th:if="${activeUser.hasSystemAdminRole}" type="button" class="btn btn-default" ng-click="orgCtrl.createOrg()">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Organization
-                </button>
+                <div class="inner-margin7">
+                    <h1 ng-show="!orgCtrl.showOrgForm(org)"><a ng-href="#organization/{{org.id}}">{{org.name}}</a></h1>
 
-                <div class="form-inline">
-                    <div class="form-group">
-                        <input class="form-control" type="text" ng-model="orgCtrl.searchInput" placeholder="Organization Name"> </input>
-                        <button class="btn btn-default" ng-click="orgCtrl.findOrganizations()">
-                            <i class="glyphicon glyphicon-search"></i> Search
-                        </button>
+                    <div ng-show="orgCtrl.showOrgForm(org)">
+                        <h1>
+                            <input type="text" placeholder="Name" required="required" ng-model="org.name" ng-class="{ jw : orgForm.$submitted === true}"> </input>
+                        </h1>
                     </div>
 
-                </div>
+                    <div ng-show="!orgCtrl.showOrgForm(org)">
+                        <a ng-href="{{org.website}}" target="_blank">Website</a>
+                    </div>
 
-            </div>
-        </div>
-
-        <div ng-repeat="org in orgCtrl.organizations | orderBy:'name'">
-            <ul class="list-group">
-                <li class="list-group-item">
-
-                    <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate">
-                        <div class="sub-nav">
-                            <div class="inner-margin7">
-                                <h1 ng-show="!orgCtrl.showOrgForm(org)"><a href="#organizaion-details" ng-click="orgCtrl.viewOrg(org)">{{org.name}}</a></h1>
-
-                                <div ng-show="orgCtrl.showOrgForm(org)">
-                                    <h1>
-                                        <input type="text" placeholder="Name" required="required" ng-model="org.name" ng-class="{ jw : orgForm.$submitted === true}"> </input>
-                                    </h1>
-                                </div>
-
-                                <div ng-show="!orgCtrl.showOrgForm(org)">
-                                    <a ng-href="{{org.website}}" target="_blank">Website</a>
-                                </div>
-
-                                <div ng-show="orgCtrl.showOrgForm(org)">
-                                    <input type="url" placeholder="http://" required="required" ng-model="org.website" > </input>
-                                </div>
-                                <div><strong>Address: </strong>
+                    <div ng-show="orgCtrl.showOrgForm(org)">
+                        <input type="url" placeholder="http://" required="required" ng-model="org.website" > </input>
+                    </div>
+                    <div><strong>Address: </strong>
                                             <span ng-show="!orgCtrl.showOrgForm(org)">
                                                 <span>{{org.street}} </span>
                                                 <span>{{org.city}} </span>
@@ -129,17 +109,17 @@
                                                 <span><input type="text" placeholder="Zip Code" required="required" ng-model="org.zip" style="max-width: 80px;"> </input></span>
 
                                             </span>
-                                </div>
+                    </div>
 
-                                <div><strong>Phone: </strong>
-                                    <span ng-show="!orgCtrl.showOrgForm(org)">{{org.telephone}}</span>
+                    <div><strong>Phone: </strong>
+                        <span ng-show="!orgCtrl.showOrgForm(org)">{{org.telephone}}</span>
                                             <span ng-show="orgCtrl.showOrgForm(org)">
                                                 <input type="tel" placeholder="Telephone" required="required" ng-model="org.telephone">
                                             </span>
-                                </div>
+                    </div>
 
-                                <div><strong>Type: </strong>
-                                    <span ng-show="!orgCtrl.showOrgForm(org)">{{org.type | organizationType}}</span>
+                    <div><strong>Type: </strong>
+                        <span ng-show="!orgCtrl.showOrgForm(org)">{{org.type | organizationType}}</span>
                                             <span ng-show="orgCtrl.showOrgForm(org)">
                                                  <select ng-model="org.type" required="required" to-number>
                                                      <option value="0">System</option>
@@ -147,30 +127,60 @@
                                                      <option value="2">Service Provider</option>
                                                  </select>
                                             </span>
-                                </div>
+                    </div>
 
-                                <div ng-show="orgCtrl.showOrgForm(org)">
-                                </div>
+                    <div ng-show="orgCtrl.showOrgForm(org)">
+                    </div>
 
-                                <div><strong>Member Since: </strong>{{org.createdTime | date:'MM/dd/yyyy'}}</div>
-                            </div>
+                    <div><strong>Member Since: </strong>{{org.createdTime | date:'MM/dd/yyyy'}}</div>
+                </div>
 
-                            <div th:if="${activeUser.hasSystemAdminRole}" style="float: right;">
-                                <div class="btn-group">
-                                    <button ng-show="!orgCtrl.showOrgForm(org)" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg(org)">
-                                        <span class="glyphicon glyphicon-edit"></span> Edit
-                                    </button>
-                                    <button ng-show="orgCtrl.showOrgForm(org)" type="submit" class="btn btn-default">
-                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
-                                    </button>
-                                    <button type="button" uib-popover-template="'delete-org.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
-                                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                                    </button>
+                <div th:if="${activeUser.hasSystemAdminRole}" style="float: right;">
+                    <div class="btn-group">
+                        <button ng-show="!orgCtrl.showOrgForm(org)" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg(org)">
+                            <span class="glyphicon glyphicon-edit"></span> Edit
+                        </button>
+                        <button ng-show="orgCtrl.showOrgForm(org)" type="submit" class="btn btn-default">
+                            <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                        </button>
+                        <button type="button" uib-popover-template="'delete-org.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
+                            <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                        </button>
 
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div th:fragment="organizations">
+
+        <div>
+            <div class="sub-nav">
+                <button th:if="${activeUser.hasSystemAdminRole}" type="button" class="btn btn-default" ng-click="orgCtrl.createOrg()">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Organization
+                </button>
+
+                <div class="form-inline">
+                    <div class="form-group">
+                        <input class="form-control" type="text" ng-model="orgCtrl.searchInput" placeholder="Organization Name"> </input>
+                        <button class="btn btn-default" ng-click="orgCtrl.findOrganizations()">
+                            <i class="glyphicon glyphicon-search"></i> Search
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div ng-repeat="org in orgCtrl.organizations | orderBy:'name'">
+            <ul class="list-group">
+                <li class="list-group-item">
+
+                    <div th:include="::organization"></div>
+
+
 
                 </li>
             </ul>

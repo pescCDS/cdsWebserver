@@ -53,9 +53,28 @@ public class AppController {
         return "redirect:home";
     }
 
-    @RequestMapping({"/docs"})
+    @RequestMapping({"/organization"})
     public String getDocs(Model model) {
-         return "swagger";
+        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+
+        boolean isAuthenticated = getCDSUser(cdsUser);
+
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("activeUser", cdsUser);
+
+        return "fragments :: organization";
+    }
+
+    @RequestMapping({"/organization-details"})
+    public String getOrganizationDetails(Model model) {
+        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+
+        boolean isAuthenticated = getCDSUser(cdsUser);
+
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("activeUser", cdsUser);
+
+        return "fragments :: organization-details";
     }
 
     @RequestMapping({"/home", "/admin"})

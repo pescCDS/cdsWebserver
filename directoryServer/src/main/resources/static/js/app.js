@@ -1,10 +1,359 @@
-(function() {
+(function () {
 
-    var app = angular.module('directoryServer',  ['ui.bootstrap', 'ngRoute'])
+    var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute'])
+        .filter('organizationType', organizationType)
+        .filter('getByProperty', getByProperty)
+        .directive('toNumber', toNumber)
+        .service('organizationService', organizationService)
+        .controller('AccountController', AccountController)
+        .controller('DirectoryController', DirectoryController)
+        .controller("NavController", NavController)
+        .controller("SettingsController", SettingsController)
+        .controller("MyOrgController", MyOrgController)
+        .controller("OrgController", OrgController)
+        .config(config);
 
 
-    .filter('organizationType', function() {
-        return function(input) {
+    function config($routeProvider) {
+        $routeProvider
+            .when("/directory", {
+                templateUrl: "organizations",
+                controller: "DirectoryController",
+                controllerAs: 'orgCtrl'
+            }).when("/settings", {
+                templateUrl: "settings",
+                controller: "SettingsController",
+                controllerAs: "settings"
+            }).
+            when("/organization/:org_id", {
+                templateUrl: "organization-details",
+                controller: "OrgController",
+                controllerAs: "orgCtrl"
+            }).
+            otherwise({
+                redirectTo: 'home'
+            });
+    }
+
+
+    function MyOrgController() {
+        var self = this;
+
+    }
+
+    function SettingsController() {
+        var self = this;
+
+    }
+
+    OrgController.$inject = [ '$routeParams', 'organizationService'];
+
+    function OrgController($routeParams, organizationService) {
+        var self = this;
+
+        self.org = {};
+
+        activate();
+
+
+        function activate() {
+
+            organizationService.find($routeParams.org_id).then(function(data){
+                self.org = data;
+            });
+
+            console.log($routeParams.org_id);
+        }
+
+    }
+
+
+    NavController.$inject = ['$location'];
+
+    function NavController($location) {
+        var self = this;
+
+        self.isActive = function (viewLocation) {
+            return viewLocation === $location.path();
+        };
+    }
+
+    DirectoryController.$inject = ['$http', '$log', 'organizationService'];
+
+    function DirectoryController($http, $log, organizationService) {
+
+        var self = this;
+
+        self.organizations = [];
+
+        activate();
+
+        function activate() {
+            return getOrganizations().then(function() {
+
+                console.log('Activated Organizations View');
+            });
+        }
+
+        function getOrganizations() {
+            return organizationService.getOrganizations().then(function(data){
+                self.organizations = data;
+            });
+        }
+
+        self.selectedOrganization = {};
+
+        self.viewOrg = function (org) {
+            self.selectedOrganization = org;
+            $log.info(org);
+        };
+
+        self.createOrg = function () {
+
+            var organization = {
+                name: '',
+                type: 1,
+                street: '',
+                city: '',
+                state: '',
+                zip: '',
+                telephone: '',
+                website: 'http://',
+                editing: true
+            };
+            self.organizations.push(organization);
+
+        };
+
+
+        self.searchInput = '';
+
+        self.findOrganizations = function () {
+            organizationService.getByName(self.searchInput).then(function(data){
+                self.organizations = data;
+            });
+        };
+
+        self.editOrg = function (org) {
+            org['editing'] = true;
+            console.log(org);
+        };
+
+        self.removeOrgFromModel = function (org) {
+            var index = self.organizations.indexOf(org);
+            if (index > -1) {
+                self.organizations.splice(index, 1);
+            }
+        };
+
+        self.deleteOrg = function (org) {
+
+            //If it's an existing org we need to delete it on the server
+            if (org.hasOwnProperty('id')) {
+
+                organizationService.deleteOrg(org).then(function(data){
+                    self.removeOrgFromModel(org);
+                });
+
+            }
+            else {
+                //it's a new organization that hasn't been persisted.
+                self.removeOrgFromModel(org);
+
+            }
+            console.log(org);
+        };
+
+        self.saveOrg = function (org) {
+
+            $log.info(self.selectedOrganization);
+            delete org.editing;
+
+            if (org.hasOwnProperty('id')) {
+                //update
+
+                organizationService.updateOrg(org).then(function(data){
+                    $log.info("Successfully update org.");
+                });
+
+            }
+            else {
+                //create
+                organizationService.createOrg(org).then(function(data){
+                    $log.info("Successfully created org with id " + data.id);
+                });
+
+            }
+
+
+
+        };
+
+        self.showOrgForm = function (org) {
+            return org.hasOwnProperty('editing') && org.editing === true;
+        };
+
+    };
+
+    AccountController.$inject = ['$http', '$location', '$window'];
+
+    function AccountController($http, $location, $window) {
+        var self = this;
+
+        self.myAccount = function () {
+            console.log($window.activeUser);
+        };
+    };
+
+    organizationService.$inject = ['$http', '$q', '$cacheFactory', '$filter' ];
+
+    function organizationService ($http, $q, $cacheFactory, $filter) {
+
+
+        var service = {
+            getOrganizations: getOrganizations,
+            getById: getById,
+            getByName: getByName,
+            deleteOrg: deleteOrg,
+            updateOrg: updateOrg,
+            createOrg: createOrg,
+            find: find
+        };
+
+        return service;
+
+        function deleteOrg(org) {
+            var deferred = $q.defer();
+
+            $http.delete('/services/rest/v1/organizations/' + org.id).success(function (data) {
+
+                removeOrganization(org);
+
+                deferred.resolve(org);
+            }).error(function(){
+                deferred.reject("An error occured while deleting an organization.");
+            });
+
+            return deferred.promise;
+        }
+
+        function updateOrg(org) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/organizations/' + org.id, org).success(function (data) {
+                deferred.resolve(org);
+            }).error(function(){
+                deferred.reject("An error occured while updating an organization.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function createOrg(org) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/organizations/', org).success(function (data) {
+                angular.extend(org, data);
+                deferred.resolve(org);
+            }).error(function(){
+                deferred.reject("An error occured while updating an organization.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function getOrganizations() {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations', {
+                cache: false
+            }).success(function (data) {
+                organizations = data;
+                deferred.resolve(organizations);
+            }).error(function(){
+                deferred.reject("An error occured while fetching organizations.");
+            });
+
+            return deferred.promise;
+        };
+
+        function getById(id) {
+            var org = $filter('getByProperty')('id', id,  organizations);
+
+            if (org == null) {
+                org = find(id);
+            }
+
+            return org;
+        };
+
+        function find(id) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations/' + id, {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(){
+                deferred.reject("An error occured while fetching the organization.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getByName(name) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations', {
+                'params': {'name': name},
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(){
+                deferred.reject("An error occured while fetching the organization.");
+            });
+
+            return deferred.promise;
+        }
+
+    }
+
+
+    function toNumber() {
+        return {
+            require: 'ngModel',
+            link: function (scope, element, attrs, ngModel) {
+                ngModel.$parsers.push(function (val) {
+                    return parseInt(val, 10);
+                });
+                ngModel.$formatters.push(function (val) {
+                    return '' + val;
+                });
+            }
+        }
+    }
+
+    function getByProperty() {
+        return function(propertyName, propertyValue, collection) {
+            var i=0, len=collection.length;
+            for (; i<len; i++) {
+                if (collection[i][propertyName] == +propertyValue) {
+                    return collection[i];
+                }
+            }
+            return null;
+        }
+    }
+
+    function organizationType() {
+        return function (input) {
 
             var type = '';
 
@@ -24,175 +373,7 @@
 
             return type;
         };
-    })
+    }
 
-    .directive('toNumber', function() {
-        return {
-            require: 'ngModel',
-            link: function(scope, element, attrs, ngModel) {
-                ngModel.$parsers.push(function(val) {
-                    return parseInt(val, 10);
-                });
-                ngModel.$formatters.push(function(val) {
-                    return '' + val;
-                });
-            }
-        }
-    })
-     .controller('AccountController', [ '$http', '$location', '$window', function($http, $location, $window){
-        var self = this;
-
-        self.myAccount = function() {
-           console.log($window.activeUser);
-        };
-    }])
-        .controller('OrganizationController', [ '$http','$log', function ($http, $log) {
-
-        var self = this;
-
-        self.organizations = [];
-
-        $http.get('/services/rest/v1/organizations').success(function(data){
-           self.organizations = data;
-        });
-
-        self.selectedOrganization = {};
-
-        self.viewOrg = function(org) {
-            self.selectedOrganization = org;
-            self.tab = 3;
-            $log.info(org);
-        };
-
-        self.createOrg = function() {
-
-            var organization = {
-                name: '',
-                type: 1,
-                street: '',
-                city: '',
-                state: '',
-                zip: '',
-                telephone: '',
-                website: 'http://',
-                editing: true
-            } ;
-            self.organizations.push(organization);
-
-        };
-
-        self.cancelOrgCreate = function() {
-            self.tab = 1;
-        };
-
-
-        this.isSelected = function(tabNum) {
-            return self.tab === tabNum;
-        }
-
-        self.searchInput = '';
-
-        self.findOrganizations = function() {
-
-            $http.get('/services/rest/v1/organizations', { params: { name: self.searchInput} } ).success(function(data){
-                self.organizations = data;
-            });
-        };
-
-        self.editOrg = function(org) {
-            org['editing'] = true;
-            console.log(org);
-        };
-
-        self.removeOrgFromModel = function(org) {
-            var index = self.organizations.indexOf(org);
-            if (index > -1) {
-                self.organizations.splice(index, 1);
-            }
-        } ;
-
-        self.deleteOrg = function(org) {
-
-            //If it's an existing org we need to delete it on the server
-            if (org.hasOwnProperty('id')) {
-                 $http.delete('/services/rest/v1/organizations/' + org.id).success(function(response){
-                     console.log(response);
-                     self.removeOrgFromModel(org);
-                 });
-            }
-            else {
-                //it's a new organization that hasn't been persisted.
-                self.removeOrgFromModel(org);
-
-            }
-            console.log(org);
-        };
-
-        self.saveOrg = function(org) {
-
-            $log.info(self.selectedOrganization);
-            delete org.editing;
-
-            if (org.hasOwnProperty('id')) {
-                //update
-                $http.put('/services/rest/v1/organizations/' + org.id, org).error(function(response){
-                    $log.error(response);
-                });
-            }
-            else {
-                //create
-                $http.post('/services/rest/v1/organizations/', org).success(function(data){
-
-                    angular.extend(org, data);
-                    console.log("Successfully created organization.");
-
-                }).error(function(response){
-                    $log.error(response);
-                });
-            }
-
-            self.tab = 1;
-
-
-
-        };
-
-        self.showOrgForm = function(org) {
-            return org.hasOwnProperty('editing') && org.editing === true;
-        };
-
-        self.tab = 1;
-
-
-
-    }]).controller("NavController", [ '$location', function($location){
-            var self = this;
-
-            self.isActive = function (viewLocation) {
-                return viewLocation === $location.path();
-            };
-    }])
-        .controller("SettingsController", function(){
-            var self = this;
-
-        })
-
-
-        .config(['$routeProvider', function ($routeProvider) {
-
-        $routeProvider
-            .when("/directory", {
-                templateUrl: "organizations",
-                controller: "OrganizationController",
-                controllerAs: 'orgCtrl'
-            }).when("/settings", {
-                templateUrl: "settings",
-                controller: "SettingsController",
-                controllerAs: "settings"
-            }).
-            otherwise({
-                redirectTo: 'home'
-            });
-    }]);
 
 })();
