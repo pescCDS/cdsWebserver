@@ -6,8 +6,12 @@ package org.pesc.api.model;
 public class User {
     private String username;
     private String name;
+    private String address;
+    private String phone;
+    private String title;
     private boolean hasSystemAdminRole;
     private boolean hasOrgAdminRole;
+    private boolean hasSupportRole;
 
     public String getUsername() {
         return username;
@@ -33,11 +37,43 @@ public class User {
         this.hasSystemAdminRole = hasSystemAdminRole;
     }
 
+    public boolean isHasSupportRole() {
+        return hasSupportRole;
+    }
+
+    public void setHasSupportRole(boolean hasSupportRole) {
+        this.hasSupportRole = hasSupportRole;
+    }
+
     public boolean isHasOrgAdminRole() {
         return hasOrgAdminRole;
     }
 
     public void setHasOrgAdminRole(boolean hasOrgAdminRole) {
         this.hasOrgAdminRole = hasOrgAdminRole;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

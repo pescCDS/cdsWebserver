@@ -28,7 +28,12 @@
             when("/organization/:org_id", {
                 templateUrl: "organization-details",
                 controller: "OrgController",
-                controllerAs: "orgCtrl"
+                controllerAs: "orgCtrl",
+                resolve: {
+                    org: ['$route', 'organizationService', function ($route, organizationService) {
+                        return organizationService.find($route.current.params.org_id);
+                    }]
+                }
             }).
             otherwise({
                 redirectTo: 'home'
@@ -46,24 +51,41 @@
 
     }
 
-    OrgController.$inject = [ '$routeParams', 'organizationService'];
+    OrgController.$inject = [ '$routeParams', 'organizationService', 'org'];
 
-    function OrgController($routeParams, organizationService) {
+    function OrgController($routeParams, organizationService, org) {
         var self = this;
 
-        self.org = {};
-
-        activate();
-
+        self.org = org[0];  //should be an array with a single element
+        self.editOrg = editOrg;
+        self.showOrgForm = showOrgForm;
+        self.saveOrg = saveOrg;
 
         function activate() {
 
             organizationService.find($routeParams.org_id).then(function(data){
                 self.org = data;
             });
-
-            console.log($routeParams.org_id);
         }
+
+        function editOrg() {
+            self.org['editing'] = true;
+        };
+
+        function showOrgForm() {
+            return self.org.hasOwnProperty('editing') && self.org.editing === true;
+        };
+
+        function saveOrg() {
+
+            delete self.org.editing;
+
+            organizationService.updateOrg(self.org).then(function(data){
+                console.log("Successfully update org.");
+            });
+
+
+        };
 
     }
 
@@ -78,13 +100,14 @@
         };
     }
 
-    DirectoryController.$inject = ['$http', '$log', 'organizationService'];
+    DirectoryController.$inject = ['$log', 'organizationService'];
 
-    function DirectoryController($http, $log, organizationService) {
+    function DirectoryController($log, organizationService) {
 
         var self = this;
 
         self.organizations = [];
+
 
         activate();
 
@@ -134,17 +157,13 @@
             });
         };
 
-        self.editOrg = function (org) {
-            org['editing'] = true;
-            console.log(org);
-        };
-
         self.removeOrgFromModel = function (org) {
             var index = self.organizations.indexOf(org);
             if (index > -1) {
                 self.organizations.splice(index, 1);
             }
         };
+
 
         self.deleteOrg = function (org) {
 
@@ -184,10 +203,13 @@
                 });
 
             }
-
-
-
         };
+
+        self.editOrg = function (org) {
+            org['editing'] = true;
+            console.log(org);
+        };
+
 
         self.showOrgForm = function (org) {
             return org.hasOwnProperty('editing') && org.editing === true;
