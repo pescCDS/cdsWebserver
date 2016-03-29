@@ -16,12 +16,16 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <link rel="stylesheet" type="text/css" href="css/toaster.min.css" />
 
 </head>
 <body>
 
+<toaster-container toaster-options="{'close-button': true}"></toaster-container>
 
 <div ng-controller="NavController as nav">
+
+
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -95,6 +99,8 @@
 
 <script src="js/angular.min.js"></script>
 <script src="js/angular-route.min.js"></script>
+<script src="js/angular-animate.min.js"></script>
+<script src="js/toaster.min.js"></script>
 <script src="js/ui-bootstrap-tpls-1.2.5.min.js"></script>
 
 <script src="js/app.js"></script>

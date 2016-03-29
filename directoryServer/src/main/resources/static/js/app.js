@@ -1,9 +1,10 @@
 (function () {
 
-    var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute'])
+    var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate'])
         .filter('organizationType', organizationType)
         .filter('getByProperty', getByProperty)
         .directive('toNumber', toNumber)
+        .service('notificationService', notificationService)
         .service('organizationService', organizationService)
         .controller('AccountController', AccountController)
         .controller('DirectoryController', DirectoryController)
@@ -227,9 +228,37 @@
         };
     };
 
-    organizationService.$inject = ['$http', '$q', '$cacheFactory', '$filter' ];
 
-    function organizationService ($http, $q, $cacheFactory, $filter) {
+
+    notificationService.$inject = [ 'toaster'] ;
+
+    function notificationService(toaster) {
+        var service = {
+            success: success,
+            error: error,
+            ajaxInfo: ajaxInfo
+        } ;
+
+        return service;
+
+        function success(text) {
+            toaster.pop('success', "Success", text);
+        }
+
+        function ajaxInfo(responseObject) {
+            toaster.pop('info', responseObject.error, responseObject.message);
+        }
+
+        function error(text) {
+            toaster.pop('error', "Error", text);
+        }
+    }
+
+
+
+    organizationService.$inject = ['$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
+
+    function organizationService ($http, $q, $cacheFactory, $filter, notificationService) {
 
 
         var service = {
@@ -252,7 +281,8 @@
                 removeOrganization(org);
 
                 deferred.resolve(org);
-            }).error(function(){
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while deleting an organization.");
             });
 
@@ -265,7 +295,8 @@
 
             $http.put('/services/rest/v1/organizations/' + org.id, org).success(function (data) {
                 deferred.resolve(org);
-            }).error(function(){
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while updating an organization.");
             });
 
@@ -280,7 +311,8 @@
             $http.post('/services/rest/v1/organizations/', org).success(function (data) {
                 angular.extend(org, data);
                 deferred.resolve(org);
-            }).error(function(){
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while updating an organization.");
             });
 
@@ -297,7 +329,8 @@
             }).success(function (data) {
                 organizations = data;
                 deferred.resolve(organizations);
-            }).error(function(){
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching organizations.");
             });
 
@@ -322,7 +355,8 @@
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(){
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the organization.");
             });
 
@@ -338,7 +372,8 @@
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(){
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the organization.");
             });
 
