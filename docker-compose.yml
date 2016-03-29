@@ -1,53 +1,40 @@
 directoryserver_db_image:
   build: ./directoryServer/target/docker/database
   expose:
-   - "3306"
+   - 3306
   container_name: directory-db
+
 networkserver_db_image:
     build: ./directoryServer/target/docker/database
     expose:
-     - "3306"
+     - 3306
     container_name: network-db
-networkserver2_db_image:
-    build: ./directoryServer/target/docker/database
-    expose:
-     - "3306"
-    container_name: network2-db
+
 directoryserver_app_image:
   image: edex/directory-server
   volumes:
      - ./directoryServer/target:/opt/edexchange
-  expose:
-   - "8080"
+  ports:
+   - 8080:8080
   environment:
-   - SPRING_PROFILES_ACTIVE=qa
+   - SPRING_PROFILES_ACTIVE=${profile}
    - DB_SERVER=directory-db
   links:
    - directoryserver_db_image
   container_name: directory-app
+
 networkserver_app_image:
   image: edex/network-server
   volumes:
      - ./networkServer/target:/opt/edexchange
-  expose:
-   - "8080"
+  ports:
+   - 8081:8080
   environment:
-   - SPRING_PROFILES_ACTIVE=qa
+   - SPRING_PROFILES_ACTIVE=${profile}
    - DB_SERVER=network-db
+   - DIRECTORY_SERVER=directory-app
+   - DIRECTORY_SERVER_PORT=8080
   links:
    - networkserver_db_image
-   - directoryserver_app_image
+   - directoryserver_app_image 
   container_name: network-app
-networkserver2_app_image:
-  image: edex/network-server
-  volumes:
-     - ./networkServer/target:/opt/edexchange
-  expose:
-   - "8080"
-  environment:
-   - SPRING_PROFILES_ACTIVE=qa
-   - DB_SERVER=network2-db
-  links:
-   - networkserver2_db_image
-   - directoryserver_app_image
-  container_name: network2-app
