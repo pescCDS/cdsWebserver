@@ -109,7 +109,7 @@ public class OrganizationsResource {
     @ApiOperation("Delete the organization with the given ID.")
     public void removeOrganization(@PathParam("id") @ApiParam("The directory identifier for the organization.") Integer id) {
 
-        organizationRepository.delete(id);
+        organizationService.delete(id);
 
     }
 

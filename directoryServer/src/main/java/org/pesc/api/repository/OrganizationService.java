@@ -9,6 +9,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.pesc.api.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +52,15 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+
     public void delete(Organization organization)  {
         this.organizationRepository.delete(organization);
+    }
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("#id == 77")  //TODO: replace with something like   @PreAuthorize("#id == authentication.organization_id || hasRole('ROLE_SYSTEM_ADMIN')")
+    public void delete(Integer id)  {
+        this.organizationRepository.delete(id);
     }
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
@@ -66,6 +74,8 @@ public class OrganizationService {
 
         return this.organizationRepository.findOne(id);
     }
+
+
 
     /**
      *

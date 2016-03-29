@@ -9,6 +9,7 @@ public class User {
     private String address;
     private String phone;
     private String title;
+    private Integer organization_id;
     private boolean hasSystemAdminRole;
     private boolean hasOrgAdminRole;
     private boolean hasSupportRole;
@@ -75,5 +76,13 @@ public class User {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Integer getOrganization_id() {
+        return organization_id;
+    }
+
+    public void setOrganization_id(Integer organization_id) {
+        this.organization_id = organization_id;
     }
 }
