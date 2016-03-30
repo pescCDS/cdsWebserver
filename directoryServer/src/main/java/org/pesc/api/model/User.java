@@ -9,7 +9,7 @@ public class User {
     private String address;
     private String phone;
     private String title;
-    private Integer organization_id;
+    private Integer organizationId;
     private boolean hasSystemAdminRole;
     private boolean hasOrgAdminRole;
     private boolean hasSupportRole;
@@ -78,11 +78,11 @@ public class User {
         this.title = title;
     }
 
-    public Integer getOrganization_id() {
-        return organization_id;
+    public Integer getOrganizationId() {
+        return organizationId;
     }
 
-    public void setOrganization_id(Integer organization_id) {
-        this.organization_id = organization_id;
+    public void setOrganizationId(Integer organizationId) {
+        this.organizationId = organizationId;
     }
 }

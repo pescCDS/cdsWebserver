@@ -47,8 +47,8 @@
                     <li th:if="${activeUser.hasSystemAdminRole}" ng-class="{ active: nav.isActive('/settings')}">
                         <a class="item" href="#settings">Settings</a>
                     </li>
-                    <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/my')}">
-                        <a class="item" href="#my">My Organization</a>
+                    <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/myorg')}">
+                        <a class="item" href="#myorg">My Organization</a>
                     </li>
                     <li>
                         <a class="item" href="swagger-ui/index.html" target="_blank">Docs</a>

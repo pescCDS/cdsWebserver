@@ -21,18 +21,29 @@
                 templateUrl: "organizations",
                 controller: "DirectoryController",
                 controllerAs: 'orgCtrl'
-            }).when("/settings", {
+            })
+            .when("/settings", {
                 templateUrl: "settings",
                 controller: "SettingsController",
                 controllerAs: "settings"
-            }).
-            when("/organization/:org_id", {
+            })
+            .when("/organization/:org_id", {
                 templateUrl: "organization-details",
                 controller: "OrgController",
                 controllerAs: "orgCtrl",
                 resolve: {
                     org: ['$route', 'organizationService', function ($route, organizationService) {
                         return organizationService.find($route.current.params.org_id);
+                    }]
+                }
+            })
+            .when("/myorg", {
+                templateUrl: "organization-details",
+                controller: "OrgController",
+                controllerAs: "orgCtrl",
+                resolve: {
+                    org: ['$window', 'organizationService', function ($window, organizationService) {
+                        return organizationService.find($window.activeUser.organizationId);
                     }]
                 }
             }).

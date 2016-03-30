@@ -40,6 +40,7 @@ public class AppController {
             cdsUser.setUsername(auth.getUsername());
             cdsUser.setHasOrgAdminRole(hasRole(authorities, "ROLE_ORG_ADMIN"));
             cdsUser.setHasSystemAdminRole(hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
+            cdsUser.setOrganizationId(14);
 
         }
 

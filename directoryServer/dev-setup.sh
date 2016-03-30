@@ -24,8 +24,8 @@ NETWORK=$(docker inspect --format="{{ .NetworkSettings.IPAddress }}" $CONTAINER)
 echo "OK - $CONTAINER is running. IP: $NETWORK, StartedAt: $STARTED"
 
 if [[ $1 == Start ]]; then
-  echo "Staring directory server application..."
-  java -Dspring.profiles.active=dev -Ddirectory.db.server=$NETWORK -jar ./target/directory-server.jar
+  echo "Starting directory server application..."
+  java -Dspring.profiles.active=dev -Ddb.server=$NETWORK -jar ./target/directory-server.jar
 else
   echo "You can start the directory server app using the following command: "
   echo "java -Dspring.profiles.active=dev -Ddb.server=$NETWORK -jar ./target/directory-server.jar"
