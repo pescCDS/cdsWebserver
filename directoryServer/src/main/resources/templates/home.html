@@ -21,6 +21,7 @@
 </head>
 <body>
 
+
 <toaster-container toaster-options="{'close-button': true}"></toaster-container>
 
 <div ng-controller="NavController as nav">
@@ -44,15 +45,19 @@
                     <li ng-class="{ active: nav.isActive('/directory')}">
                         <a href="#directory" class="item">Directory</a>
                     </li>
+                    <li>
+                        <a class="item" href="swagger-ui/index.html" target="_blank">Docs</a>
+                    </li>
                     <li th:if="${activeUser.hasSystemAdminRole}" ng-class="{ active: nav.isActive('/settings')}">
                         <a class="item" href="#settings">Settings</a>
                     </li>
                     <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/myorg')}">
                         <a class="item" href="#myorg">My Organization</a>
                     </li>
-                    <li>
-                        <a class="item" href="swagger-ui/index.html" target="_blank">Docs</a>
+                    <li th:if="${isAuthenticated}==true" ng-class="{ active: nav.isActive('/users')}">
+                        <a class="item" href="#users">Users</a>
                     </li>
+
                 </ul>
                 <ul th:if="${isAuthenticated}==false" class="nav navbar-nav navbar-right">
                     <ul class="nav navbar-nav">
@@ -97,7 +102,7 @@
 
 </div>
 
-<script src="js/angular.min.js"></script>
+<script src="js/angular.js"></script>
 <script src="js/angular-route.min.js"></script>
 <script src="js/angular-animate.min.js"></script>
 <script src="js/toaster.min.js"></script>
@@ -109,6 +114,13 @@
     <div>
         <p>Delete?</p>
         <button type="button" class="btn btn-sm btn-success" ng-click="orgCtrl.deleteOrg(org)">Yes</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="delete-user.html">
+    <div>
+        <p>Delete?</p>
+        <button type="button" class="btn btn-sm btn-success" ng-click="usersCtrl.delete(user)">Yes</button>
     </div>
 </script>
 

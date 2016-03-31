@@ -8,6 +8,7 @@ import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
 import org.pesc.api.OrganizationsResource;
+import org.pesc.api.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,6 +50,8 @@ public class ServiceConfig {
 
     @Autowired
     private OrganizationsResource organizationsResource;
+    @Autowired
+    private UserResource userResource;
 
 
     @Bean
@@ -103,6 +106,19 @@ public class ServiceConfig {
         JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
         sf.setServiceClass(OrganizationsResource.class);
         sf.setAddress("/soap/v1/organizations");
+        return sf.create();
+    }
+
+
+    /**
+     * SOAP endpoint for organizations
+     * @return
+     */
+    @Bean
+    public Server usersEndpoint() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(UserResource.class);
+        sf.setAddress("/soap/v1/users");
         return sf.create();
     }
 
@@ -185,6 +201,7 @@ public class ServiceConfig {
         //beans.add(wadlResource());
 
         beans.add(organizationsResource);
+        beans.add(userResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

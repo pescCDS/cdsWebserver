@@ -23,7 +23,7 @@ public class AppController {
 
     private static final Log log = LogFactory.getLog(AppController.class);
 
-    private boolean getCDSUser(org.pesc.api.model.User cdsUser) {
+    private boolean getCDSUser(org.pesc.api.model.TempUser cdsUser) {
         boolean isAuthenticated = false;
 
 
@@ -36,11 +36,12 @@ public class AppController {
             User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Collection<GrantedAuthority> authorities = auth.getAuthorities();
             isAuthenticated = true;
+            cdsUser.setId(1);
             cdsUser.setName("James Whetstone");
             cdsUser.setUsername(auth.getUsername());
             cdsUser.setHasOrgAdminRole(hasRole(authorities, "ROLE_ORG_ADMIN"));
             cdsUser.setHasSystemAdminRole(hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
-            cdsUser.setOrganizationId(14);
+            cdsUser.setOrganizationId(1);
 
         }
 
@@ -56,7 +57,7 @@ public class AppController {
 
     @RequestMapping({"/organization"})
     public String getDocs(Model model) {
-        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
 
         boolean isAuthenticated = getCDSUser(cdsUser);
 
@@ -68,7 +69,7 @@ public class AppController {
 
     @RequestMapping({"/organization-details"})
     public String getOrganizationDetails(Model model) {
-        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
 
         boolean isAuthenticated = getCDSUser(cdsUser);
 
@@ -81,7 +82,7 @@ public class AppController {
     @RequestMapping({"/home", "/admin"})
     public String getHomePage(Model model) {
 
-        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
 
         boolean isAuthenticated = getCDSUser(cdsUser);
 
@@ -94,7 +95,7 @@ public class AppController {
 
     @RequestMapping({"/organizations"})
     public String getOrganizationsTemplate(Model model) {
-        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
 
         boolean isAuthenticated = getCDSUser(cdsUser);
 
@@ -105,9 +106,23 @@ public class AppController {
         return "fragments :: organizations";
     }
 
+
+    @RequestMapping({"/users"})
+    public String getUsersTemplate(Model model) {
+        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
+
+        boolean isAuthenticated = getCDSUser(cdsUser);
+
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("activeUser", cdsUser);
+
+
+        return "fragments :: users";
+    }
+
     @RequestMapping({"/settings"})
     public String getSettingsFragment(Model model) {
-        org.pesc.api.model.User cdsUser = new org.pesc.api.model.User();
+        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
 
         boolean isAuthenticated = getCDSUser(cdsUser);
 

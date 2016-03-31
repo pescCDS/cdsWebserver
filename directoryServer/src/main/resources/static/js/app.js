@@ -6,12 +6,14 @@
         .directive('toNumber', toNumber)
         .service('notificationService', notificationService)
         .service('organizationService', organizationService)
+        .service('userService', userService)
         .controller('AccountController', AccountController)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
-        .controller("MyOrgController", MyOrgController)
         .controller("OrgController", OrgController)
+        .controller("UserController", UserController)
+        .controller("UsersController", UsersController)
         .config(config);
 
 
@@ -46,6 +48,26 @@
                         return organizationService.find($window.activeUser.organizationId);
                     }]
                 }
+            })
+            .when("/user/:user_id", {
+                templateUrl: "user-details",
+                controller: "UserController",
+                controllerAs: "userCtrl",
+                resolve: {
+                    user: ['$route', 'userService', function ($route, userService) {
+                        return userService.find($route.current.params.user_id);
+                    }]
+                }
+            })
+            .when("/users", {
+                templateUrl: "users",
+                controller: "UsersController",
+                controllerAs: "usersCtrl",
+                resolve: {
+                    users: ['$window', 'userService', function ($window, userService) {
+                        return userService.getUsers($window.activeUser.organizationId);
+                    }]
+                }
             }).
             otherwise({
                 redirectTo: 'home'
@@ -53,13 +75,123 @@
     }
 
 
-    function MyOrgController() {
+    function SettingsController() {
         var self = this;
 
     }
 
-    function SettingsController() {
+    UsersController.$inject = [ 'userService', 'users'];
+    function UsersController(userService, users) {
         var self = this;
+        self.users = users;
+
+        self.getUsers = userService.getUsers;
+
+        self.create = function () {
+
+            var user = {
+                name: '',
+                address: '',
+                editing: true
+            };
+            self.users.push(user);
+
+        };
+
+
+        self.searchInput = '';
+
+        self.find = function () {
+            userService.getByName(self.searchInput).then(function(data){
+                self.users = data;
+            });
+        };
+
+        self.removeFromModel = function (user) {
+            var index = self.users.indexOf(user);
+            if (index > -1) {
+                self.users.splice(index, 1);
+            }
+        };
+
+
+        self.delete = function (user) {
+
+            //If it's an existing user we need to delete it on the server
+            if (user.hasOwnProperty('id')) {
+
+                userService.deleteUser(user).then(function(data){
+                    self.removeFromModel(user);
+                });
+
+            }
+            else {
+                //it's a new user that hasn't been persisted.
+                self.removeFromModel(user);
+
+            }
+        };
+
+        self.save = function (user) {
+
+            delete user.editing;
+
+            if (user.hasOwnProperty('id')) {
+                //update
+
+                userService.updateUser(user).then(function(data){
+                    $log.info("Successfully update user.");
+                });
+
+            }
+            else {
+                //create
+                userService.createUser(user).then(function(data){
+                    $log.info("Successfully created user with id " + data.id);
+                });
+
+            }
+        };
+
+        self.edit = function (user) {
+            user['editing'] = true;
+            console.log(user);
+        };
+
+
+        self.showForm = function (user) {
+            return user.hasOwnProperty('editing') && user.editing === true;
+        };
+
+    }
+
+    UserController.$inject = [ 'userService', 'user'];
+    function UserController(userService, user) {
+        var self = this;
+        self.user = user;
+        self.edit = edit;
+        self.showForm = showForm;
+        self.save = save;
+
+        function edit() {
+            self.user['editing'] = true;
+        }
+
+        function showForm() {
+            return self.user.hasOwnProperty('editing') && self.user.editing === true;
+        }
+
+        function save() {
+            delete self.user.editing;
+
+            userService.updateUser(self.user).then(function(data){
+                console.log("Successfully updated user.");
+            });
+        }
+
+        function getUsers() {
+            console.log("Getting users.");
+        }
 
     }
 
@@ -72,12 +204,18 @@
         self.editOrg = editOrg;
         self.showOrgForm = showOrgForm;
         self.saveOrg = saveOrg;
+        self.getUsers = getUsers;
+
 
         function activate() {
 
             organizationService.find($routeParams.org_id).then(function(data){
                 self.org = data;
             });
+        }
+
+        function getUsers() {
+
         }
 
         function editOrg() {
@@ -136,13 +274,6 @@
             });
         }
 
-        self.selectedOrganization = {};
-
-        self.viewOrg = function (org) {
-            self.selectedOrganization = org;
-            $log.info(org);
-        };
-
         self.createOrg = function () {
 
             var organization = {
@@ -197,7 +328,6 @@
 
         self.saveOrg = function (org) {
 
-            $log.info(self.selectedOrganization);
             delete org.editing;
 
             if (org.hasOwnProperty('id')) {
@@ -386,6 +516,136 @@
             }).error(function(data){
                 notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the organization.");
+            });
+
+            return deferred.promise;
+        }
+
+    }
+
+
+
+    /* User Service */
+
+    userService.$inject = ['$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
+
+    function userService ($http, $q, $cacheFactory, $filter, notificationService) {
+
+
+        var service = {
+            getUsers: getUsers,
+            getById: getById,
+            getByName: getByName,
+            deleteUser: deleteUser,
+            updateUser: updateUser,
+            createUser: createUser,
+            find: find
+        };
+
+        return service;
+
+        function deleteUser(user) {
+            var deferred = $q.defer();
+
+            $http.delete('/services/rest/v1/users/' + user.id).success(function (data) {
+
+                removeUser(user);
+
+                deferred.resolve(user);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while deleting a user.");
+            });
+
+            return deferred.promise;
+        }
+
+        function updateUser(user) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/users/' + user.id, user).success(function (data) {
+                deferred.resolve(user);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while updating a user.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function createUser(user) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/users/', user).success(function (data) {
+                angular.extend(user, data);
+                deferred.resolve(user);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while updating a user.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function getUsers(orgID) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/users', {
+                'params': {'organizationId': orgID},
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching users.");
+            });
+
+            return deferred.promise;
+        };
+
+        function getById(id) {
+            var user = $filter('getByProperty')('id', id,  users);
+
+            if (user == null) {
+                user = find(id);
+            }
+
+            return user;
+        };
+
+        function find(id) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/users/' + id, {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching the user.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getByName(name) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/users', {
+                'params': {'name': name},
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching the user.");
             });
 
             return deferred.promise;

@@ -4,9 +4,14 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-	<include file="db/db.changelog-0.0.1/db.changelog-0.0.1.xml"/>
-	<include file="db/db.changelog-0.0.2/db.changelog-0.0.2.xml"/>
-    <include file="db/db.changelog-0.0.3/db.changelog-0.0.3.xml"/>
-
+	
+	<changeSet id="4" author="james">
+		<comment>
+		This changeSet adds the user table.
+		</comment>
+		
+		<sqlFile encoding="utf8" path="1-user.sql" relativeToChangelogFile="true" />
+		
+	</changeSet>
 
 </databaseChangeLog>

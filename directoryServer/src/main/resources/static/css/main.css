@@ -48,3 +48,10 @@ form .ng-valid.ng-dirty {
     border: solid 1px #707070;
     box-shadow: 0 0 5px 1px #969696;
 }
+
+.tab-pane {
+    border-bottom: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+}
