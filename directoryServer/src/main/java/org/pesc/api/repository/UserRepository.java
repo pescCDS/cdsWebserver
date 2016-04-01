@@ -1,6 +1,6 @@
 package org.pesc.api.repository;
 
-import org.pesc.api.model.User;
+import org.pesc.api.model.DirectoryUser;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,8 +12,12 @@ import java.util.List;
  * Created by james on 3/21/16.
  */
 @Repository
-public interface UserRepository extends CrudRepository<User, Integer>, JpaSpecificationExecutor {
+public interface UserRepository extends CrudRepository<DirectoryUser, Integer>, JpaSpecificationExecutor {
 
-    @Query("from User where name = ?1")
-    List<User> findByName(String name);
+    @Query("from DirectoryUser where name = ?1")
+    List<DirectoryUser> findByName(String name);
+
+    @Query("from DirectoryUser where username = ?1")
+    List<DirectoryUser> findByUserName(String username);
+
 }

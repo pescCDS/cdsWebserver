@@ -2,6 +2,9 @@ package org.pesc.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.api.model.DirectoryUser;
+import org.pesc.api.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by james on 2/18/16.
@@ -24,10 +28,13 @@ public class AppController {
 
     private static final Log log = LogFactory.getLog(AppController.class);
 
-    private Model buildUserModel(Model model) {
+    @Autowired
+    private UserRepository userRepo;
+
+    private boolean buildUserModel(Model model) {
         boolean isAuthenticated = false;
 
-        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
+
         //Check if the user is autenticated
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
@@ -37,12 +44,6 @@ public class AppController {
             User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Collection<GrantedAuthority> authorities = auth.getAuthorities();
             isAuthenticated = true;
-            cdsUser.setId(1);
-            cdsUser.setName("James Whetstone");
-            cdsUser.setUsername(auth.getUsername());
-            cdsUser.setHasOrgAdminRole(hasRole(authorities, "ROLE_ORG_ADMIN"));
-            cdsUser.setHasSystemAdminRole(hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
-            cdsUser.setOrganizationId(1);
 
             model.addAttribute("hasSystemAdminRole", hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
             model.addAttribute("hasOrgAdminRole", hasRole(authorities, "ROLE_ORG_ADMIN"));
@@ -53,9 +54,8 @@ public class AppController {
         }
 
         model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("activeUser", cdsUser);
 
-        return model;
+        return isAuthenticated;
 
     }
 
@@ -87,7 +87,14 @@ public class AppController {
     @RequestMapping({"/home", "/admin"})
     public String getHomePage(Model model) {
 
-        buildUserModel(model);
+        if (buildUserModel(model) == true) {
+            User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            List<DirectoryUser> dirUser = userRepo.findByUserName(auth.getUsername());
+
+            if (dirUser.size() == 1) {
+                model.addAttribute("activeUser", dirUser.get(0));
+            }
+        }
 
         return "home";
     }

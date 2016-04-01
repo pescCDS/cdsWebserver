@@ -7,18 +7,17 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
-import org.pesc.api.model.User;
+import org.pesc.api.model.DirectoryUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManagerFactory;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * Created by james on 3/21/16.
@@ -42,35 +41,36 @@ public class UserService {
     private UserRepository userRepository;
 
     @Transactional(readOnly=true)
-    public Iterable<User> findAll(){
+    public Iterable<DirectoryUser> findAll(){
         return this.userRepository.findAll();
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    public void persist(User user){
+    public void persist(DirectoryUser user){
         this.userRepository.save(user);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
 
-    public void delete(User user)  {
+    public void delete(DirectoryUser user)  {
         this.userRepository.delete(user);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("#id == 77")  //TODO: replace with something like   @PreAuthorize("#id == authentication.user_id && hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_SYSTEM_ROLE') ")
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(Integer id)  {
         this.userRepository.delete(id);
     }
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    public List<User> findByName(String name)  {
+    public List<DirectoryUser> findByName(String name)  {
         return this.userRepository.findByName(name);
     }
 
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    public User findById(Integer id)  {
+    @PostAuthorize("returnObject.organization_id == principal.organizationId and (principal.id == returnObject.id or hasRole('ROLE_ORG_ADMIN'))")
+    public DirectoryUser findById(Integer id)  {
 
         return this.userRepository.findOne(id);
     }
@@ -85,12 +85,12 @@ public class UserService {
      * @return
      */
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    public List<User> search(
+    public List<DirectoryUser> search(
             Integer userId,
             Integer organizationId,
             String name
     ) {
-        List<User> retList = new ArrayList<User>();
+        List<DirectoryUser> retList = new ArrayList<DirectoryUser>();
         try {
 
             //TODO: implement the search criteria using JPA 2.0 standard instead of the
@@ -98,7 +98,7 @@ public class UserService {
             //from Hibernate and enforce type safety on the criteria.
             Session session = hibernateFactory.getCurrentSession();
 
-            Criteria ct = session.createCriteria(User.class);
+            Criteria ct = session.createCriteria(DirectoryUser.class);
             boolean hasCriteria = false;
 
             if(userId!=null) {
@@ -123,7 +123,7 @@ public class UserService {
                 retList = ct.list();
             }
             else {
-                retList = (List<User>)this.userRepository.findAll();
+                retList = (List<DirectoryUser>)this.userRepository.findAll();
             }
 
         } catch(Exception ex) {

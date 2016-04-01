@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
-import org.pesc.api.model.User;
+import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.repository.UserRepository;
 import org.pesc.api.repository.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class UserResource {
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Search users based on the search parameters.")
-    public List<User> findUser(
+    public List<DirectoryUser> findUser(
             @QueryParam("id") @ApiParam("The identifier for the user.") Integer id,
             @QueryParam("name") @ApiParam("A code such as CEEB code that identifies the user.") String name,
             @QueryParam("organizationId") @ApiParam(value = "The user's organization ID.", required = true) Integer organizationId
@@ -73,10 +73,10 @@ public class UserResource {
     @Path("/{id}")
     @ApiOperation("Return the user with the given id.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<User> getUser(@PathParam("id") @ApiParam("The directory identifier for the user.") Integer id) {
-        ArrayList<User> results = new ArrayList<User>();
+    public List<DirectoryUser> getUser(@PathParam("id") @ApiParam("The directory identifier for the user.") Integer id) {
+        ArrayList<DirectoryUser> results = new ArrayList<DirectoryUser>();
 
-        User user = userRepository.findOne(id);
+        DirectoryUser user = userRepository.findOne(id);
 
         if (user != null) {
             //TODO: verify the calling user has access rights to view this user.
@@ -90,7 +90,7 @@ public class UserResource {
     @POST
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Create a user.")
-    public User createUser(User user) {
+    public DirectoryUser createUser(DirectoryUser user) {
         // TODO validate user object and that the calling user has access rights to create a user account
         // for the organization identified by user.organizationId.
         return userRepository.save(user);
@@ -100,7 +100,7 @@ public class UserResource {
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the user with the given ID.")
-    public User saveUser(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, User user) {
+    public DirectoryUser saveUser(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, DirectoryUser user) {
         // TODO verify that the calling user has access rights to update this user account
         return userRepository.save(user);
     }

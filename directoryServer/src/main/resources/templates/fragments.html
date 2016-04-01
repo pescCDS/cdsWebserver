@@ -23,7 +23,7 @@
                         <input type="text" placeholder="Address" ng-model="user.address" > </input>
                     </div>
                 </div>
-                <div th:if="${activeUser.hasOrgAdminRole}" style="float: right;">
+                <div th:if="${hasOrgAdminRole}" style="float: right;">
                     <div class="btn-group">
                         <button ng-show="!usersCtrl.showForm(user)" type="button" class="btn btn-default" ng-click="usersCtrl.edit()">
                             <span class="glyphicon glyphicon-edit"></span> Edit
@@ -161,7 +161,7 @@
                 <div><strong>Member Since: </strong>{{orgCtrl.org.createdTime | date:'MM/dd/yyyy'}}</div>
             </div>
 
-            <div th:if="${activeUser.hasSystemAdminRole}" style="float: right;">
+            <div th:if="${hasSystemAdminRole}" style="float: right;">
                 <div class="btn-group">
                     <button ng-show="!orgCtrl.showOrgForm()" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg()">
                         <span class="glyphicon glyphicon-edit"></span> Edit
@@ -187,7 +187,7 @@
 
     <div>
         <div class="sub-nav">
-            <button th:if="${activeUser.hasOrgAdminRole}" type="button" class="btn btn-default" ng-click="usersCtrl.create()">
+            <button th:if="${hasOrgAdminRole}" type="button" class="btn btn-default" ng-click="usersCtrl.create()">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> User
             </button>
 
@@ -332,7 +332,7 @@
                 <div><strong>Member Since: </strong>{{org.createdTime | date:'MM/dd/yyyy'}}</div>
             </div>
 
-            <div th:if="${activeUser.hasSystemAdminRole}" style="float: right;">
+            <div th:if="${hasSystemAdminRole}" style="float: right;">
                 <div class="btn-group">
                     <button ng-show="!orgCtrl.showOrgForm(org)" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg(org)">
                         <span class="glyphicon glyphicon-edit"></span> Edit
@@ -354,7 +354,7 @@
 
     <div>
         <div class="sub-nav">
-            <button th:if="${activeUser.hasSystemAdminRole}" type="button" class="btn btn-default" ng-click="orgCtrl.createOrg()">
+            <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default" ng-click="orgCtrl.createOrg()">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Organization
             </button>
 

@@ -30,9 +30,6 @@ public class OrganizationsResource {
 
     private static final Log log = LogFactory.getLog(OrganizationsResource.class);
 
-    @Autowired
-    private OrganizationRepository organizationRepository;
-
     //The service wraps a OrganizationRepository, but not all of the repository methods are exposed,
     //so both the repository and the service are wired here for convenience.
     //TODO: expose all repository methods using the service or refactory the respository implementation
@@ -76,7 +73,7 @@ public class OrganizationsResource {
     public List<Organization> getOrganization(@PathParam("id") @ApiParam("The directory identifier for the organization.") Integer id) {
         ArrayList<Organization> results = new ArrayList<Organization>();
 
-        Organization organization = organizationRepository.findOne(id);
+        Organization organization = organizationService.findById(id);
 
         if (organization != null) {
             results.add(organization);
@@ -90,8 +87,8 @@ public class OrganizationsResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Create an organization.")
     public Organization createOrganization(Organization org) {
-        // TODO validate organization object
-        return organizationRepository.save(org);
+
+        return organizationService.create(org);
     }
 
     @Path("/{id}")
@@ -99,7 +96,7 @@ public class OrganizationsResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the organization with the given ID.")
     public Organization saveOrganization(@PathParam("id") @ApiParam("The directory identifier for the organization.") Integer id, Organization org) {
-        return organizationRepository.save(org);
+        return organizationService.update(org);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)

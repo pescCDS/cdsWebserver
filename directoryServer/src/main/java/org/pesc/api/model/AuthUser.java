@@ -1,20 +1,28 @@
 package org.pesc.api.model;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+
+import java.util.Collection;
+
 /**
  * Created by james on 3/17/16.
  */
-public class TempUser {
+public class AuthUser extends User {
     private Integer id;
-    private String username;
     private String name;
-    private String address;
-    private String phone;
-    private String title;
     private Integer organizationId;
     private boolean hasSystemAdminRole;
     private boolean hasOrgAdminRole;
     private boolean hasSupportRole;
 
+    public AuthUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        super(username, password, authorities);
+    }
+
+    public AuthUser(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
+        super(username,password,enabled,accountNonExpired,credentialsNonExpired,accountNonLocked,authorities);
+    }
 
     public Integer getId() {
         return id;
@@ -22,14 +30,6 @@ public class TempUser {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getName() {
@@ -62,30 +62,6 @@ public class TempUser {
 
     public void setHasOrgAdminRole(boolean hasOrgAdminRole) {
         this.hasOrgAdminRole = hasOrgAdminRole;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public Integer getOrganizationId() {

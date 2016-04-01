@@ -11,7 +11,7 @@ import java.util.List;
 @XmlRootElement(name = "User")
 @Entity
 @Table(name = "users")
-public class User {
+public class DirectoryUser {
 
     @Column(name="address")
     private String address;
@@ -58,7 +58,7 @@ public class User {
     @JoinTable(
             name = "roles",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role")
+            inverseJoinColumns = @JoinColumn(name = "id")
     )
     private List<Role> roles;
 

@@ -47,18 +47,24 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    public void persist(Organization organization){
-        this.organizationRepository.save(organization);
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ROLE') ")
+    public Organization create(Organization organization){
+        return this.organizationRepository.save(organization);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-
+    @PreAuthorize("( (#organization.id == principal.organizationId and hasRole('ROLE_ORG_ADMIN')) or hasRole('ROLE_SYSTEM_ADMIN') )")
+    public Organization update(Organization organization){
+        return this.organizationRepository.save(organization);
+    }
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(Organization organization)  {
         this.organizationRepository.delete(organization);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("#id == 77")  //TODO: replace with something like   @PreAuthorize("#id == authentication.organization_id && hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_SYSTEM_ROLE') ")
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(Integer id)  {
         this.organizationRepository.delete(id);
     }

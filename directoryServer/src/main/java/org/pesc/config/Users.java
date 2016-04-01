@@ -1,6 +1,8 @@
 package org.pesc.config;
 
-import org.pesc.api.model.User;
+import org.pesc.api.model.AuthUser;
+import org.pesc.api.model.DirectoryUser;
+import org.pesc.api.model.Role;
 import org.pesc.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,27 +34,68 @@ class Users implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
+        /*
         //TODO: remove the code below that authenticate "admin" and move into a properties file where the password
         //will be encrypted.
         if ("admin".equals(username))   {
-            List<GrantedAuthority> auth = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_SYSTEM_ADMIN,ROLE_ORG_ADMIN");
+            List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_SYSTEM_ADMIN,ROLE_ORG_ADMIN");
 
-            return new org.springframework.security.core.userdetails.User(username, passwordEncoder.encode("password"),auth);
+            AuthUser authUser = new AuthUser(username, passwordEncoder.encode("password"), true,true,true,true, authorities);
 
+            authUser.setName("James Whetstone");
+            authUser.setId(0);
+            authUser.setOrganizationId(1);
+            authUser.setHasOrgAdminRole(hasRole(authorities, "ROLE_ORG_ADMIN"));
+            authUser.setHasSystemAdminRole(hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
+
+            return authUser;
         }
-        List<User> users = userRepo.findByName(username);
+        */
+
+
+        List<DirectoryUser> users = userRepo.findByUserName(username);
         if (users.isEmpty()) {
             return null;
         }
 
-        User cdsUser = users.get(0);
 
-        List<GrantedAuthority> auth = AuthorityUtils.createAuthorityList(cdsUser.getRoles().toArray(new String[0]));
+        DirectoryUser cdsUser = users.get(0);
+
+        List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(buildAuthorities(cdsUser));
 
         String password = users.get(0).getPassword();
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, password, cdsUser.isEnabled(),true,true,true, auth);
+        AuthUser authUser = new AuthUser(username, password, cdsUser.isEnabled(),true,true,true, authorities);
+        authUser.setName(cdsUser.getName());
+        authUser.setId(cdsUser.getId());
+        authUser.setOrganizationId(cdsUser.getOrganizationId());
 
-        return userDetails;
+
+        authUser.setHasOrgAdminRole(hasRole(authorities, "ROLE_ORG_ADMIN"));
+        authUser.setHasSystemAdminRole(hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
+
+        return authUser;
+    }
+
+    private String[] buildAuthorities(DirectoryUser user) {
+
+        String[] roles = new String[user.getRoles().size()];
+
+
+        for(int i=0; i<user.getRoles().size(); i++) {
+            roles[i] = user.getRoles().get(i).getRole();
+        }
+        return roles;
+    }
+
+    private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
+        boolean hasRole = false;
+        for (GrantedAuthority authority : authorities) {
+            hasRole = authority.getAuthority().equals(role);
+            if (hasRole) {
+                break;
+            }
+        }
+        return hasRole;
     }
 
 }
