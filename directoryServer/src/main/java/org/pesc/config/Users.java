@@ -63,18 +63,16 @@ class Users implements UserDetailsService {
 
         List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(buildAuthorities(cdsUser));
 
+        //List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList((String[])cdsUser.getRoles().toArray());
+
         String password = users.get(0).getPassword();
         AuthUser authUser = new AuthUser(username, password, cdsUser.isEnabled(),true,true,true, authorities);
-        authUser.setName(cdsUser.getName());
         authUser.setId(cdsUser.getId());
         authUser.setOrganizationId(cdsUser.getOrganizationId());
 
-
-        authUser.setHasOrgAdminRole(hasRole(authorities, "ROLE_ORG_ADMIN"));
-        authUser.setHasSystemAdminRole(hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
-
         return authUser;
     }
+
 
     private String[] buildAuthorities(DirectoryUser user) {
 
@@ -82,20 +80,9 @@ class Users implements UserDetailsService {
 
 
         for(int i=0; i<user.getRoles().size(); i++) {
-            roles[i] = user.getRoles().get(i).getRole();
+            roles[i] = user.getRoles().get(i).getName();
         }
         return roles;
-    }
-
-    private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
-        boolean hasRole = false;
-        for (GrantedAuthority authority : authorities) {
-            hasRole = authority.getAuthority().equals(role);
-            if (hasRole) {
-                break;
-            }
-        }
-        return hasRole;
     }
 
 }

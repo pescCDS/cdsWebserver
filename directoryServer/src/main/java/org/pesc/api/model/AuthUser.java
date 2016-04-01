@@ -6,15 +6,13 @@ import org.springframework.security.core.userdetails.User;
 import java.util.Collection;
 
 /**
+ * Extending the Spring User, which is used as the principal during and after authentication so that the additional
+ * properties can be used in method level security SpEL expressions.
  * Created by james on 3/17/16.
  */
 public class AuthUser extends User {
     private Integer id;
-    private String name;
     private Integer organizationId;
-    private boolean hasSystemAdminRole;
-    private boolean hasOrgAdminRole;
-    private boolean hasSupportRole;
 
     public AuthUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
@@ -30,38 +28,6 @@ public class AuthUser extends User {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isHasSystemAdminRole() {
-        return hasSystemAdminRole;
-    }
-
-    public void setHasSystemAdminRole(boolean hasSystemAdminRole) {
-        this.hasSystemAdminRole = hasSystemAdminRole;
-    }
-
-    public boolean isHasSupportRole() {
-        return hasSupportRole;
-    }
-
-    public void setHasSupportRole(boolean hasSupportRole) {
-        this.hasSupportRole = hasSupportRole;
-    }
-
-    public boolean isHasOrgAdminRole() {
-        return hasOrgAdminRole;
-    }
-
-    public void setHasOrgAdminRole(boolean hasOrgAdminRole) {
-        this.hasOrgAdminRole = hasOrgAdminRole;
     }
 
     public Integer getOrganizationId() {

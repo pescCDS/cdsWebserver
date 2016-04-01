@@ -53,7 +53,7 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("( (#organization.id == principal.organizationId and hasRole('ROLE_ORG_ADMIN')) or hasRole('ROLE_SYSTEM_ADMIN') )")
+    @PreAuthorize("( (#organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public Organization update(Organization organization){
         return this.organizationRepository.save(organization);
     }
