@@ -48,7 +48,7 @@ class Users implements UserDetailsService {
         List<GrantedAuthority> auth = AuthorityUtils.createAuthorityList(cdsUser.getRoles().toArray(new String[0]));
 
         String password = users.get(0).getPassword();
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, password, auth);
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, password, cdsUser.isEnabled(),true,true,true, auth);
 
         return userDetails;
     }

@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 /**
@@ -23,10 +24,10 @@ public class AppController {
 
     private static final Log log = LogFactory.getLog(AppController.class);
 
-    private boolean getCDSUser(org.pesc.api.model.TempUser cdsUser) {
+    private Model buildUserModel(Model model) {
         boolean isAuthenticated = false;
 
-
+        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
         //Check if the user is autenticated
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
@@ -43,9 +44,18 @@ public class AppController {
             cdsUser.setHasSystemAdminRole(hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
             cdsUser.setOrganizationId(1);
 
+            model.addAttribute("hasSystemAdminRole", hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
+            model.addAttribute("hasOrgAdminRole", hasRole(authorities, "ROLE_ORG_ADMIN"));
+        }
+        else {
+            model.addAttribute("hasSystemAdminRole", false);
+            model.addAttribute("hasOrgAdminRole", false);
         }
 
-        return isAuthenticated;
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("activeUser", cdsUser);
+
+        return model;
 
     }
 
@@ -57,24 +67,19 @@ public class AppController {
 
     @RequestMapping({"/organization"})
     public String getDocs(Model model) {
-        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
-
-        boolean isAuthenticated = getCDSUser(cdsUser);
-
-        model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("activeUser", cdsUser);
+        buildUserModel(model);
 
         return "fragments :: organization";
     }
 
     @RequestMapping({"/organization-details"})
-    public String getOrganizationDetails(Model model) {
-        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
+    public String getOrganizationDetails(HttpServletRequest request, Model model) {
 
-        boolean isAuthenticated = getCDSUser(cdsUser);
+        boolean isSystemAdmin = request.isUserInRole("ROLE_SYSTEM_ADMIN");
 
-        model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("activeUser", cdsUser);
+        getUserDetails();
+
+        buildUserModel(model);
 
         return "fragments :: organization-details";
     }
@@ -82,12 +87,7 @@ public class AppController {
     @RequestMapping({"/home", "/admin"})
     public String getHomePage(Model model) {
 
-        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
-
-        boolean isAuthenticated = getCDSUser(cdsUser);
-
-        model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("activeUser", cdsUser);
+        buildUserModel(model);
 
         return "home";
     }
@@ -95,13 +95,7 @@ public class AppController {
 
     @RequestMapping({"/organizations"})
     public String getOrganizationsTemplate(Model model) {
-        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
-
-        boolean isAuthenticated = getCDSUser(cdsUser);
-
-        model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("activeUser", cdsUser);
-
+        buildUserModel(model);
 
         return "fragments :: organizations";
     }
@@ -109,12 +103,7 @@ public class AppController {
 
     @RequestMapping({"/users"})
     public String getUsersTemplate(Model model) {
-        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
-
-        boolean isAuthenticated = getCDSUser(cdsUser);
-
-        model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("activeUser", cdsUser);
+        buildUserModel(model);
 
 
         return "fragments :: users";
@@ -122,12 +111,7 @@ public class AppController {
 
     @RequestMapping({"/settings"})
     public String getSettingsFragment(Model model) {
-        org.pesc.api.model.TempUser cdsUser = new org.pesc.api.model.TempUser();
-
-        boolean isAuthenticated = getCDSUser(cdsUser);
-
-        model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("activeUser", cdsUser);
+        buildUserModel(model);
 
 
         return "fragments :: settings";
@@ -136,10 +120,11 @@ public class AppController {
 
 
     private void getUserDetails() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().
-                getAuthentication().getPrincipal();
-        log.info(userDetails.getUsername());
-        log.info(userDetails.isEnabled());
+        Object details = SecurityContextHolder.getContext().
+                getAuthentication().getDetails();
+
+        log.debug(details.toString());
+
     }
 
     private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
