@@ -20,7 +20,7 @@ import java.util.List;
 class Users implements UserDetailsService {
 
     @Autowired
-    private UserRepository repo;
+    private UserRepository userRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -30,13 +30,15 @@ class Users implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
+        //TODO: remove the code below that authenticate "admin" and move into a properties file where the password
+        //will be encrypted.
         if ("admin".equals(username))   {
             List<GrantedAuthority> auth = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_SYSTEM_ADMIN,ROLE_ORG_ADMIN");
 
             return new org.springframework.security.core.userdetails.User(username, passwordEncoder.encode("password"),auth);
 
         }
-        List<User> users = repo.findByName(username);
+        List<User> users = userRepo.findByName(username);
         if (users.isEmpty()) {
             return null;
         }

@@ -42,6 +42,16 @@ public class UserResource {
     private UserService userService;
 
 
+    private void checkOrganizationParameter(Integer organizationId) {
+        if (organizationId == null) {
+            throw new WebApplicationException(
+                    Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                            .entity("The organizationID parameter is mandatory.")
+                            .build()
+            );
+        }
+    }
+
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Search users based on the search parameters.")
@@ -51,13 +61,7 @@ public class UserResource {
             @QueryParam("organizationId") @ApiParam(value = "The user's organization ID.", required = true) Integer organizationId
     ) {
 
-        if (organizationId == null) {
-            throw new WebApplicationException(
-                    Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
-                            .entity("The organizationID parameter is mandatory.")
-                            .build()
-            );
-        }
+        checkOrganizationParameter(organizationId);
 
         return userService.search(
                 id,
@@ -75,6 +79,7 @@ public class UserResource {
         User user = userRepository.findOne(id);
 
         if (user != null) {
+            //TODO: verify the calling user has access rights to view this user.
             results.add(user);
         }
 
@@ -86,7 +91,8 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Create a user.")
     public User createUser(User user) {
-        // TODO validate user object
+        // TODO validate user object and that the calling user has access rights to create a user account
+        // for the organization identified by user.organizationId.
         return userRepository.save(user);
     }
 
@@ -94,7 +100,8 @@ public class UserResource {
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the user with the given ID.")
-    public User saveUser(@PathParam("id") @ApiParam("The directory identifier for the user.") Integer id, User user) {
+    public User saveUser(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, User user) {
+        // TODO verify that the calling user has access rights to update this user account
         return userRepository.save(user);
     }
 
@@ -104,7 +111,7 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Delete the user with the given ID.")
     public void removeUser(@PathParam("id") @ApiParam("The directory identifier for the user.") Integer id) {
-
+        // TODO validate user object and that the calling user has access rights to update this user account
         userService.delete(id);
 
     }
