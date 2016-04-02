@@ -14,4 +14,14 @@
 		
 	</changeSet>
 
+
+	<changeSet id="5" author="james">
+		<comment>
+			This change set adds a default super user to the users and roles..
+		</comment>
+
+		<sqlFile encoding="utf8" path="2-default-users.sql" relativeToChangelogFile="true" />
+
+	</changeSet>
+
 </databaseChangeLog>

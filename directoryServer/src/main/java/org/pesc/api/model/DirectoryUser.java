@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by james on 3/17/16.
@@ -37,9 +38,6 @@ public class DirectoryUser {
     @Column(name = "username", unique=true)
     private String username;
 
-    @Column(name = "password")
-    private String password;
-
 
     @Id
     @Column(name = "id")
@@ -54,18 +52,19 @@ public class DirectoryUser {
     @Column(name = "modified_time")
     private Date modifiedTime;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "id")
-    )
-    private List<Role> roles;
 
-    public List<Role> getRoles() {
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
+
+    public Set<Role> getRoles() {
         return roles;
     }
-    public void setRoles(List<Role> roles) {
+    public void setRoles(Set<Role> roles) {
          this.roles = roles;
 
     }
@@ -158,11 +157,4 @@ public class DirectoryUser {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

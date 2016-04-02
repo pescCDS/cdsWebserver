@@ -19,9 +19,16 @@ CREATE TABLE users (
 
 CREATE TABLE roles (
   id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(45) NOT NULL,
+  PRIMARY KEY (id));
+  
+  
+  CREATE TABLE user_roles (
   user_id int(11) NOT NULL,
-  role varchar(45) NOT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY unique_userid_role (role,id),
-  KEY fk_roles_user_idx (user_id),
-  CONSTRAINT fk_roles_user_idx FOREIGN KEY (user_id) REFERENCES users(id));
+  role_id int(11) NOT NULL,
+  PRIMARY KEY (user_id,role_id),
+  KEY fk_roles (role_id),
+  KEY fk_users (user_id),
+  CONSTRAINT fk_roles FOREIGN KEY (role_id) REFERENCES roles (id),
+  CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (id)
+);
