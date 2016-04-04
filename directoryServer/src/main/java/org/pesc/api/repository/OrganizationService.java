@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
+import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,9 +15,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -28,14 +36,14 @@ public class OrganizationService {
 
     private static final Log log = LogFactory.getLog(OrganizationService.class);
 
-    protected SessionFactory hibernateFactory;
+    private EntityManager entityManager;
 
     @Autowired
     public OrganizationService(EntityManagerFactory factory) {
         if (factory.unwrap(SessionFactory.class) == null) {
             throw new NullPointerException("Expected Hibernate factory doesn't exist.");
         }
-        this.hibernateFactory = factory.unwrap(SessionFactory.class);
+        this.entityManager = factory.createEntityManager();
     }
 
     @Autowired
@@ -86,8 +94,8 @@ public class OrganizationService {
     /**
      *
      * @param directoryId
-     * @param organizationId
-     * @param organizationIdType
+     * @param organizationCode
+     * @param organizationCodeType
      * @param organizationName
      * @param organizationSubcode
      * @param organizationType
@@ -99,8 +107,8 @@ public class OrganizationService {
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<Organization> search(
             Integer directoryId,
-            String organizationId,
-            String organizationIdType,
+            String organizationCode,
+            String organizationCodeType,
             String organizationName,
             String organizationSubcode,
             Integer organizationType,
@@ -108,30 +116,27 @@ public class OrganizationService {
             Long createdTime,
             Long modifiedTime
     ) {
-        List<Organization> retList = new ArrayList<Organization>();
+
         try {
 
-            //TODO: implement the search criteria using JPA 2.0 standard instead of the
-            //Hibernate specific criteria.  This additional abstraction will decouple the service
-            //from Hibernate and enforce type safety on the criteria.
-            Session session = hibernateFactory.getCurrentSession();
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-            Criteria ct = session.createCriteria(Organization.class);
-            boolean hasCriteria = false;
+            CriteriaQuery<Organization> cq = cb.createQuery(Organization.class);
+            Root<Organization> org = cq.from(Organization.class);
+            cq.select(org);
+
+            List<Predicate> predicates = new LinkedList<Predicate>();
 
             if(directoryId!=null) {
-                ct.add(Restrictions.idEq(directoryId));
-                hasCriteria = true;
+                predicates.add(cb.equal(org.get("id"), directoryId));
             }
 
-            if(organizationId!=null && organizationId.trim().length()>0) {
-                ct.add(Restrictions.ilike("organizationCode", organizationId.trim(), MatchMode.START));
-                hasCriteria = true;
+            if(organizationCode!=null && organizationCode.trim().length()>0) {
+                predicates.add(cb.like(cb.lower(org.get("organizationCode")), "%" + organizationCode.trim().toLowerCase()));
             }
 
-            if(organizationIdType!=null && organizationIdType.trim().length()>0) {
-                ct.add(Restrictions.ilike("organizationCodeType", organizationIdType.trim(), MatchMode.START));
-                hasCriteria = true;
+            if(organizationCodeType!=null && organizationCodeType.trim().length()>0) {
+                predicates.add(cb.like(cb.lower(org.get("organizationCodeType")), "%" + organizationCodeType.trim().toLowerCase()));
             }
 
             if(organizationName!=null && organizationName.trim().length()>0) {
@@ -139,53 +144,55 @@ public class OrganizationService {
                 // a LIKE clause for the organizationName column
                 StringTokenizer orgNametokens = new StringTokenizer(organizationName.trim());
                 while(orgNametokens.hasMoreElements()) {
-                    String orgNametoken = orgNametokens.nextToken();
-                    ct.add( Restrictions.ilike("name", orgNametoken, MatchMode.ANYWHERE));
+
+                    String orgNametoken = orgNametokens.nextToken().toLowerCase();
+
+                    predicates.add(cb.like(cb.lower(org.get("name")), "%" + orgNametoken + "%"));
+
                 }
-                hasCriteria = true;
+
             }
 
             if(organizationSubcode!=null && organizationSubcode.trim().length()>0) {
                 StringTokenizer subCodetokens = new StringTokenizer(organizationSubcode.trim());
                 while(subCodetokens.hasMoreElements()) {
-                    String subCodetoken = subCodetokens.nextToken();
-                    ct.add( Restrictions.ilike("subcode", subCodetoken, MatchMode.ANYWHERE));
+                    String subCodetoken = subCodetokens.nextToken().toLowerCase();
+                    predicates.add(cb.like(cb.lower(org.get("subcode")), "%" + subCodetoken + "%"));
                 }
-                hasCriteria = true;
             }
 
             if(organizationType!=null) {
-
-                ct.add(Restrictions.eq("type", organizationType));
-                hasCriteria = true;
+                predicates.add(cb.equal(org.get("type"), organizationType));
             }
 
             if(organizationEin!=null && organizationEin.trim().length()>0) {
-                ct.add(Restrictions.ilike("ein", organizationEin, MatchMode.START));
-                hasCriteria = true;
+
+                predicates.add(cb.like(cb.lower(org.get("ein")), "%" + organizationEin.trim().toLowerCase()));
+
             }
 
             if(createdTime!=null) {
-                ct.add(Restrictions.eq("createdTime", new Timestamp(createdTime)));
-                hasCriteria = true;
+                predicates.add(cb.equal(org.get("createdTime"), new Timestamp(createdTime)));
             }
 
             if(modifiedTime!=null) {
-                ct.add(Restrictions.eq("modifiedTime", new Timestamp(modifiedTime)));
-                hasCriteria = true;
+                predicates.add(cb.equal(org.get("modifiedTime"), new Timestamp(modifiedTime)));
             }
 
-            if(hasCriteria) {
-                retList = ct.list();
-            }
-            else {
-                retList = (List<Organization>)this.organizationRepository.findAll();
-            }
+
+            Predicate[] predicateArray = new Predicate[predicates.size()];
+            predicates.toArray(predicateArray);
+
+            cq.where(predicateArray);
+            TypedQuery<Organization> q = entityManager.createQuery(cq);
+
+            return q.getResultList();
+
 
         } catch(Exception ex) {
             log.error("Failed to execute organization search query.", ex);
         }
-        return retList;
+        return new ArrayList<Organization>();
     }
 
 }

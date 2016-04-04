@@ -27,21 +27,17 @@ public class Credentials {
     @Column(name = "enabled")
     private boolean enabled;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @ManyToMany (fetch = FetchType.EAGER)
     private Set<Role> roles;
 
     public Set<Role> getRoles() {
         return roles;
     }
+
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
-
     }
+
 
     public String getUsername() {
         return username;

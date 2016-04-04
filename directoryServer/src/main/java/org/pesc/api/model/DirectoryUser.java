@@ -26,7 +26,7 @@ public class DirectoryUser {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "organization_id")
+    @Column(name = "organization_id", unique = true)
     private Integer organizationId;
 
     @Column(name = "name")
@@ -52,22 +52,17 @@ public class DirectoryUser {
     @Column(name = "modified_time")
     private Date modifiedTime;
 
-
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @ManyToMany (fetch = FetchType.LAZY)
     private Set<Role> roles;
 
     public Set<Role> getRoles() {
         return roles;
     }
-    public void setRoles(Set<Role> roles) {
-         this.roles = roles;
 
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
+
 
     public String getName() {
         return name;

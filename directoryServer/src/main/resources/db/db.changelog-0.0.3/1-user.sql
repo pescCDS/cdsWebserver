@@ -23,12 +23,12 @@ CREATE TABLE roles (
   PRIMARY KEY (id));
   
   
-  CREATE TABLE user_roles (
-  user_id int(11) NOT NULL,
-  role_id int(11) NOT NULL,
-  PRIMARY KEY (user_id,role_id),
-  KEY fk_roles (role_id),
-  KEY fk_users (user_id),
-  CONSTRAINT fk_roles FOREIGN KEY (role_id) REFERENCES roles (id),
-  CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (id)
+  CREATE TABLE users_roles (
+  users_id int(11) NOT NULL,
+  roles_id int(11) NOT NULL,
+  PRIMARY KEY (users_id,roles_id),
+  KEY fk_roles (roles_id),
+  KEY fk_users (users_id),
+  CONSTRAINT fk_roles FOREIGN KEY (roles_id) REFERENCES roles (id),
+  CONSTRAINT fk_users FOREIGN KEY (users_id) REFERENCES users (id)
 );

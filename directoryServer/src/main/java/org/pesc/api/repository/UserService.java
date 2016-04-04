@@ -15,8 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -27,14 +33,14 @@ public class UserService {
 
     private static final Log log = LogFactory.getLog(UserService.class);
 
-    protected SessionFactory hibernateFactory;
+    protected EntityManager em;
 
     @Autowired
     public UserService(EntityManagerFactory factory) {
         if (factory.unwrap(SessionFactory.class) == null) {
             throw new NullPointerException("Expected Hibernate factory doesn't exist.");
         }
-        this.hibernateFactory = factory.unwrap(SessionFactory.class);
+        this.em = factory.createEntityManager();
     }
 
     @Autowired
@@ -90,46 +96,40 @@ public class UserService {
             Integer organizationId,
             String name
     ) {
-        List<DirectoryUser> retList = new ArrayList<DirectoryUser>();
+
         try {
 
-            //TODO: implement the search criteria using JPA 2.0 standard instead of the
-            //Hibernate specific criteria.  This additional abstraction will decouple the service
-            //from Hibernate and enforce type safety on the criteria.
-            Session session = hibernateFactory.getCurrentSession();
+            CriteriaBuilder cb = em.getCriteriaBuilder();
 
-            Criteria ct = session.createCriteria(DirectoryUser.class);
-            boolean hasCriteria = false;
+            CriteriaQuery<DirectoryUser> cq = cb.createQuery(DirectoryUser.class);
+            Root<DirectoryUser> user = cq.from(DirectoryUser.class);
+            cq.select(user);
 
-            if(userId!=null) {
-                ct.add(Restrictions.idEq(userId));
-                hasCriteria = true;
+            List<Predicate> predicates = new LinkedList<Predicate>();
+
+            if (organizationId != null) {
+                predicates.add(cb.equal(user.get("organizationId"), organizationId));
+            }
+            if (userId != null) {
+                predicates.add(cb.and(cb.equal(user.get("id"), userId)));
+            }
+            if (name != null) {
+                predicates.add(cb.and(cb.like(cb.lower(user.get("name")), "%" + name.trim().toLowerCase() + "%")));
             }
 
-            if(name!=null && name.trim().length()>0) {
-                ct.add(Restrictions.ilike("name", name.trim(), MatchMode.START));
-                hasCriteria = true;
-            }
+            Predicate[] predicateArray = new Predicate[predicates.size()];
+            predicates.toArray(predicateArray);
 
-            if(organizationId!=null) {
+            cq.where(predicateArray);
+            TypedQuery<DirectoryUser> q = em.createQuery(cq);
 
-                ct.add(Restrictions.eq("organizationId", organizationId));
-                hasCriteria = true;
-            }
+            return q.getResultList();
 
-
-
-            if(hasCriteria) {
-                retList = ct.list();
-            }
-            else {
-                retList = (List<DirectoryUser>)this.userRepository.findAll();
-            }
 
         } catch(Exception ex) {
             log.error("Failed to execute user search query.", ex);
         }
-        return retList;
+        return new ArrayList<DirectoryUser>();
     }
 
 }

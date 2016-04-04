@@ -80,8 +80,8 @@
 
     }
 
-    UsersController.$inject = [ 'userService', 'users'];
-    function UsersController(userService, users) {
+    UsersController.$inject = [ $window, 'userService', 'users'];
+    function UsersController($window, userService, users) {
         var self = this;
         self.users = users;
 
@@ -102,7 +102,7 @@
         self.searchInput = '';
 
         self.find = function () {
-            userService.getByName(self.searchInput).then(function(data){
+            userService.getByName(self.searchInput,$window.activeUser.organizationId ).then(function(data){
                 self.users = data;
             });
         };
@@ -634,12 +634,15 @@
             return deferred.promise;
         }
 
-        function getByName(name) {
+        function getByName(name, orgID) {
 
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/users', {
-                'params': {'name': name},
+                'params': {
+                    'organizationId': orgID,
+                    'name': name
+                },
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
