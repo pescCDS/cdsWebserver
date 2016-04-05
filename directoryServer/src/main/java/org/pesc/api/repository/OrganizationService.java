@@ -2,12 +2,6 @@ package org.pesc.api.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
-import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,14 +30,12 @@ public class OrganizationService {
 
     private static final Log log = LogFactory.getLog(OrganizationService.class);
 
-    private EntityManager entityManager;
+    private EntityManagerFactory entityManagerFactory;
 
     @Autowired
-    public OrganizationService(EntityManagerFactory factory) {
-        if (factory.unwrap(SessionFactory.class) == null) {
-            throw new NullPointerException("Expected Hibernate factory doesn't exist.");
-        }
-        this.entityManager = factory.createEntityManager();
+    public OrganizationService(EntityManagerFactory entityManagerFactory) {
+       this.entityManagerFactory = entityManagerFactory;
+
     }
 
     @Autowired
@@ -119,6 +111,7 @@ public class OrganizationService {
 
         try {
 
+            EntityManager entityManager =  entityManagerFactory.createEntityManager();
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
             CriteriaQuery<Organization> cq = cb.createQuery(Organization.class);

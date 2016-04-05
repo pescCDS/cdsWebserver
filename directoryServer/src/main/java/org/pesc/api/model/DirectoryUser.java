@@ -2,8 +2,8 @@ package org.pesc.api.model;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,7 +12,7 @@ import java.util.Set;
 @XmlRootElement(name = "User")
 @Entity
 @Table(name = "users")
-public class DirectoryUser {
+public class DirectoryUser implements Serializable {
 
     @Column(name="address")
     private String address;
@@ -26,7 +26,7 @@ public class DirectoryUser {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "organization_id", unique = true)
+    @Column(name = "organization_id")
     private Integer organizationId;
 
     @Column(name = "name")
@@ -52,7 +52,14 @@ public class DirectoryUser {
     @Column(name = "modified_time")
     private Date modifiedTime;
 
-    @ManyToMany (fetch = FetchType.LAZY)
+    @JoinTable(
+            name="users_roles",
+            joinColumns=
+            @JoinColumn(name="users_id", referencedColumnName="id"),
+            inverseJoinColumns=
+            @JoinColumn(name="roles_id", referencedColumnName="id")
+    )
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Role> roles;
 
     public Set<Role> getRoles() {
@@ -150,6 +157,20 @@ public class DirectoryUser {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (id == null || obj == null || getClass() != obj.getClass())
+            return false;
+        DirectoryUser that = (DirectoryUser) obj;
+        return id.equals(that.id);
+    }
+    @Override
+    public int hashCode() {
+        return id == null ? 0 : id.hashCode();
     }
 
 }

@@ -29,8 +29,6 @@ public class UserResource {
 
     private static final Log log = LogFactory.getLog(UserResource.class);
 
-    @Autowired
-    private UserRepository userRepository;
 
     //The service wraps a UserRepository, but not all of the repository methods are exposed,
     //so both the repository and the service are wired here for convenience.
@@ -70,7 +68,7 @@ public class UserResource {
     public List<DirectoryUser> getUser(@PathParam("id") @ApiParam("The directory identifier for the user.") Integer id) {
         ArrayList<DirectoryUser> results = new ArrayList<DirectoryUser>();
 
-        DirectoryUser user = userRepository.findOne(id);
+        DirectoryUser user = userService.findById(id);
 
         if (user != null) {
             //TODO: verify the calling user has access rights to view this user.
@@ -87,7 +85,7 @@ public class UserResource {
     public DirectoryUser createUser(DirectoryUser user) {
         // TODO validate user object and that the calling user has access rights to create a user account
         // for the organization identified by user.organizationId.
-        return userRepository.save(user);
+        return userService.create(user);
     }
 
     @Path("/{id}")
@@ -96,7 +94,7 @@ public class UserResource {
     @ApiOperation("Update the user with the given ID.")
     public DirectoryUser saveUser(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, DirectoryUser user) {
         // TODO verify that the calling user has access rights to update this user account
-        return userRepository.save(user);
+        return userService.update(user);
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)

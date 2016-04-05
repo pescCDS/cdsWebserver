@@ -2,11 +2,7 @@ package org.pesc.api.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
 import org.pesc.api.model.DirectoryUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -18,9 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,14 +30,11 @@ public class UserService {
 
     private static final Log log = LogFactory.getLog(UserService.class);
 
-    protected EntityManager em;
+    protected EntityManagerFactory entityManagerFactory;
 
     @Autowired
-    public UserService(EntityManagerFactory factory) {
-        if (factory.unwrap(SessionFactory.class) == null) {
-            throw new NullPointerException("Expected Hibernate factory doesn't exist.");
-        }
-        this.em = factory.createEntityManager();
+    public UserService(EntityManagerFactory entityManagerFactory) {
+        this.entityManagerFactory = entityManagerFactory;
     }
 
     @Autowired
@@ -49,11 +43,6 @@ public class UserService {
     @Transactional(readOnly=true)
     public Iterable<DirectoryUser> findAll(){
         return this.userRepository.findAll();
-    }
-
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    public void persist(DirectoryUser user){
-        this.userRepository.save(user);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
@@ -81,6 +70,19 @@ public class UserService {
         return this.userRepository.findOne(id);
     }
 
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    public DirectoryUser create(DirectoryUser user)  {
+
+        return this.userRepository.save(user);
+    }
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    public DirectoryUser update(DirectoryUser user)  {
+
+        return this.userRepository.save(user);
+    }
 
 
     /**
@@ -99,7 +101,9 @@ public class UserService {
 
         try {
 
-            CriteriaBuilder cb = em.getCriteriaBuilder();
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
             CriteriaQuery<DirectoryUser> cq = cb.createQuery(DirectoryUser.class);
             Root<DirectoryUser> user = cq.from(DirectoryUser.class);
@@ -111,17 +115,17 @@ public class UserService {
                 predicates.add(cb.equal(user.get("organizationId"), organizationId));
             }
             if (userId != null) {
-                predicates.add(cb.and(cb.equal(user.get("id"), userId)));
+                predicates.add(cb.equal(user.get("id"), userId));
             }
             if (name != null) {
-                predicates.add(cb.and(cb.like(cb.lower(user.get("name")), "%" + name.trim().toLowerCase() + "%")));
+                predicates.add(cb.like(cb.lower(user.get("name")), "%" + name.trim().toLowerCase() + "%"));
             }
 
             Predicate[] predicateArray = new Predicate[predicates.size()];
             predicates.toArray(predicateArray);
 
             cq.where(predicateArray);
-            TypedQuery<DirectoryUser> q = em.createQuery(cq);
+            TypedQuery<DirectoryUser> q = entityManager.createQuery(cq);
 
             return q.getResultList();
 

@@ -80,7 +80,7 @@
 
     }
 
-    UsersController.$inject = [ $window, 'userService', 'users'];
+    UsersController.$inject = [ '$window', 'userService', 'users'];
     function UsersController($window, userService, users) {
         var self = this;
         self.users = users;
@@ -140,14 +140,14 @@
                 //update
 
                 userService.updateUser(user).then(function(data){
-                    $log.info("Successfully update user.");
+                    console.log("Successfully update user.");
                 });
 
             }
             else {
                 //create
                 userService.createUser(user).then(function(data){
-                    $log.info("Successfully created user with id " + data.id);
+                    console.log("Successfully created user with id " + data.id);
                 });
 
             }
@@ -493,7 +493,7 @@
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/organizations/' + id, {
-                cache: true
+                cache: false
             }).success(function (data) {
                 deferred.resolve(data);
             }).error(function(data){
@@ -510,7 +510,7 @@
 
             $http.get('/services/rest/v1/organizations', {
                 'params': {'name': name},
-                cache: true
+                cache: false
             }).success(function (data) {
                 deferred.resolve(data);
             }).error(function(data){
@@ -623,7 +623,7 @@
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/users/' + id, {
-                cache: true
+                cache: false
             }).success(function (data) {
                 deferred.resolve(data);
             }).error(function(data){
@@ -643,7 +643,7 @@
                     'organizationId': orgID,
                     'name': name
                 },
-                cache: true
+                cache: false
             }).success(function (data) {
                 deferred.resolve(data);
             }).error(function(data){
