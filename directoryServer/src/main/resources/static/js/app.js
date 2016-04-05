@@ -2,6 +2,7 @@
 
     var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate'])
         .filter('organizationType', organizationType)
+        .filter('friendlyRoleName', friendlyRoleName)
         .filter('getByProperty', getByProperty)
         .directive('toNumber', toNumber)
         .service('notificationService', notificationService)
@@ -84,6 +85,7 @@
     function UsersController($window, userService, users) {
         var self = this;
         self.users = users;
+        self.roles = $window.roles;
 
         self.getUsers = userService.getUsers;
 
@@ -162,6 +164,36 @@
         self.showForm = function (user) {
             return user.hasOwnProperty('editing') && user.editing === true;
         };
+
+
+        self.hasRole = function(user, role) {
+            var found = false;
+
+            for (var i=0; i < user.roles.length; i++) {
+                if (user.roles[i].id == role.id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+
+        self.updateRole = function($event, role, user){
+
+            var checkbox = $event.target;
+
+            if(checkbox.checked === true){
+                user.roles.push(role);
+            } else {
+                // remove item
+                for(var i=0 ; i < user.roles.length; i++) {
+                    if(user.roles[i].id == role.id){
+                        user.roles.splice(i,1);
+                    }
+                }
+            }
+        };
+
 
     }
 
@@ -364,8 +396,10 @@
     function AccountController($http, $location, $window) {
         var self = this;
 
-        self.myAccount = function () {
-            console.log($window.activeUser);
+        self.showAccount = showAccount;
+
+        function showAccount(){
+
         };
     };
 
@@ -703,6 +737,29 @@
             }
 
             return type;
+        };
+    }
+
+    function friendlyRoleName() {
+        return function (input) {
+
+            var friendlyName = '';
+
+            switch (input) {
+                case 'ROLE_SYSTEM_ADMIN':
+                    friendlyName = "System Administrator";
+                    break;
+                case 'ROLE_ORG_ADMIN':
+                    friendlyName = "Organization Administrator";
+                    break;
+                case 'ROLE_SUPPORT':
+                    friendlyName = "Support Technician";
+                    break;
+                default:
+                    friendlyName = "Unknown Role"
+            }
+
+            return friendlyName;
         };
     }
 

@@ -3,6 +3,7 @@ package org.pesc.web;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.DirectoryUser;
+import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -31,6 +32,9 @@ public class AppController {
     @Autowired
     private UserRepository userRepo;
 
+    @Autowired
+    private RolesRepository roleRepo;
+
     private boolean buildUserModel(Model model) {
         boolean isAuthenticated = false;
 
@@ -47,6 +51,8 @@ public class AppController {
 
             model.addAttribute("hasSystemAdminRole", hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
             model.addAttribute("hasOrgAdminRole", hasRole(authorities, "ROLE_ORG_ADMIN"));
+
+            model.addAttribute("roles", roleRepo.findAll() );
         }
         else {
             model.addAttribute("hasSystemAdminRole", false);
@@ -75,9 +81,9 @@ public class AppController {
     @RequestMapping({"/organization-details"})
     public String getOrganizationDetails(HttpServletRequest request, Model model) {
 
-        boolean isSystemAdmin = request.isUserInRole("ROLE_SYSTEM_ADMIN");
+        //boolean isSystemAdmin = request.isUserInRole("ROLE_SYSTEM_ADMIN");
 
-        getUserDetails();
+        //getUserDetails();
 
         buildUserModel(model);
 

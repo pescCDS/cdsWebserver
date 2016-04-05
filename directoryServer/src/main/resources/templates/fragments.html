@@ -8,53 +8,96 @@
 <body>
 <div th:fragment="user">
 
-        <form name="userForm"  ng-submit="userForm.$valid && usersCtrl.save(user)" novalidate="novalidate" class="glow">
-            <div class="sub-nav">
-                <div class="inner-margin7">
-                    <div ng-show="!usersCtrl.showForm(user)">
+    <form name="userForm"  ng-submit="userForm.$valid && usersCtrl.save(user)" novalidate="novalidate" class="glow">
+        <div class="sub-nav">
+            <div class="inner-margin7">
+                <div ng-show="!usersCtrl.showForm(user)">
 
-                        <h1><a ng-href="#user/{{user.id}}">{{user.name}}</a></h1>
-                        <div>
-                            <span><b>Title:</b></span>
-                            <span>{{user.title}}</span>
-                        </div>
-                        <div>
-                            <span><b>Phone:</b></span>
-                            <span>{{user.phone}}</span>
-                        </div>
-                        <div>
-                            <span><b>Email:</b></span>
-                            <span>{{user.email}}</span>
-                        </div>
+                    <h1><a ng-href="#user/{{user.id}}">{{user.name}}</a></h1>
+                    <div>
+                        <label><b>Title:</b></label>
+                        <span>{{user.title}}</span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                        <span>{{user.address}}</span>
                     </div>
 
-                    <div ng-show="usersCtrl.showForm(user)">
-                        <h1>
-                            <input type="text" placeholder="Name" required="required" ng-model="user.name" ng-class="{ jw : userForm.$submitted === true}"> </input>
-                        </h1>
+                    <div>
+                        <label><b>Phone:</b></label>
+                        <span>{{user.phone}}</span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                        <span>{{user.email}}</span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                            <span ng-repeat="role in user.roles | orderBy:'name'">
+                                <span>{{role.name  | friendlyRoleName}}{{$last ? '' : ', '}}</span>
+                            </span>
                     </div>
 
-                    <div ng-show="usersCtrl.showForm(user)">
-                        <input type="text" placeholder="Address" ng-model="user.address" > </input>
-                    </div>
-                </div>
-                <div th:if="${hasOrgAdminRole}" style="float: right;">
-                    <div class="btn-group">
-                        <button ng-show="!usersCtrl.showForm(user)" type="button" class="btn btn-default" ng-click="usersCtrl.edit(user)">
-                            <span class="glyphicon glyphicon-edit"></span> Edit
-                        </button>
-                        <button ng-show="usersCtrl.showForm(user)" type="submit" class="btn btn-default">
-                            <span class="glyphicon glyphicon-floppy-disk"></span> Save
-                        </button>
-                        <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
-                            <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                        </button>
-
-                    </div>
                 </div>
 
+                <div ng-show="usersCtrl.showForm(user)">
+                    <h1>
+                        <input type="text" placeholder="Name" required="required" ng-model="user.name" ng-class="{ jw : userForm.$submitted === true}"> </input>
+                    </h1>
+                    <div>
+                        <label><b>Title:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Title" ng-model="user.title" > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Address" ng-model="user.address" style="min-width: 375px;" > </input>
+                            </span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="user.phone" > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                            <span>
+                                 <input type="email" placeholder="Email" ng-model="user.email" style="min-width: 375px;"  > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                              <span ng-repeat="role in usersCtrl.roles">
+                           <span  class="checkbox-inline"> <input
+                                    type="checkbox"
+                                    ng-checked="usersCtrl.hasRole(user, role)"
+                                    name="roles"
+                                    ng-click="usersCtrl.updateRole($event, role, user)"> {{role.name | friendlyRoleName}} </span>
+                        </span>
+                    </div>
+                </div>
             </div>
-        </form>
+            <div th:if="${hasOrgAdminRole}" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!usersCtrl.showForm(user)" type="button" class="btn btn-default" ng-click="usersCtrl.edit(user)">
+                        <span class="glyphicon glyphicon-edit"></span> Edit
+                    </button>
+                    <button ng-show="usersCtrl.showForm(user)" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </form>
 
 </div>
 
@@ -218,15 +261,15 @@
 
         </div>
     </div>
-        <div ng-repeat="user in usersCtrl.users | orderBy:'name'">
-            <ul class="list-group">
-                <li class="list-group-item">
+    <div ng-repeat="user in usersCtrl.users | orderBy:'name'">
+        <ul class="list-group">
+            <li class="list-group-item">
 
-                    <div th:include="::user"></div>
+                <div th:include="::user"></div>
 
-                </li>
-            </ul>
-        </div>
+            </li>
+        </ul>
+    </div>
 
 
 

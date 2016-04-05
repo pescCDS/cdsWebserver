@@ -2,17 +2,14 @@ package org.pesc.config;
 
 import org.pesc.api.model.AuthUser;
 import org.pesc.api.model.Credentials;
-import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Role;
 import org.pesc.api.repository.CredentialsRepository;
-import org.pesc.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,14 +20,10 @@ import java.util.Set;
  * Created by james on 3/30/16.
  */
 @Service
-class Users implements UserDetailsService {
+class CredentialsService implements UserDetailsService {
 
     @Autowired
     private CredentialsRepository credentialsRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
 
     @Override
     public UserDetails loadUserByUsername(String username)
@@ -42,6 +35,9 @@ class Users implements UserDetailsService {
             return null;
         }
 
+        if (credentials.size() != 1) {
+            throw new RuntimeException( String.format("Only one user record should exist for the given username %s.", username));
+        }
 
         Credentials principal = credentials.get(0);
 
@@ -63,10 +59,7 @@ class Users implements UserDetailsService {
         for (Role userRole : userRoles) {
             setAuths.add(new SimpleGrantedAuthority(userRole.getName()));
         }
-
-        List<GrantedAuthority> Result = new ArrayList<GrantedAuthority>(setAuths);
-
-        return Result;
+        return setAuths;
     }
 
 

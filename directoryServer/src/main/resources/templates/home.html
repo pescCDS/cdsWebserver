@@ -75,7 +75,7 @@
                         <ul uib-dropdown-menu>
                             <li ng-controller="AccountController as accountCtrl">
                                 <div style="width: 60%;margin: auto; padding: 5px;">
-                                    <button class="btn btn-primary" ng-click="accountCtrl.myAccount()">Account</button>
+                                    <button class="btn btn-primary" ng-click="accountCtrl.showAccount()">Account</button>
                                 </div>
                             </li>
 
@@ -128,6 +128,8 @@
     /*<![CDATA[*/
 
     var activeUser = /*[[${activeUser}]]*/ null;
+
+    var roles = /*[[${roles}]]*/ null;
 
     /*]]>*/
 </script>

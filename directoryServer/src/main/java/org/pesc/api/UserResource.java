@@ -7,7 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.DirectoryUser;
-import org.pesc.api.repository.UserRepository;
 import org.pesc.api.repository.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,10 +29,7 @@ public class UserResource {
     private static final Log log = LogFactory.getLog(UserResource.class);
 
 
-    //The service wraps a UserRepository, but not all of the repository methods are exposed,
-    //so both the repository and the service are wired here for convenience.
-    //TODO: expose all repository methods using the service or refactory the respository implementation
-    //to allow for custom query logic.
+    //Security is enforced using method level annotations on the service.
     @Autowired
     private UserService userService;
 
@@ -49,7 +45,7 @@ public class UserResource {
     @ApiOperation("Search users based on the search parameters.")
     public List<DirectoryUser> findUser(
             @QueryParam("id") @ApiParam("The identifier for the user.") Integer id,
-            @QueryParam("name") @ApiParam("A code such as CEEB code that identifies the user.") String name,
+            @QueryParam("name") @ApiParam("Case insensitive search for name and parts of name.") String name,
             @QueryParam("organizationId") @ApiParam(value = "The user's organization ID.", required = true) Integer organizationId
     ) {
 
@@ -65,7 +61,7 @@ public class UserResource {
     @Path("/{id}")
     @ApiOperation("Return the user with the given id.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<DirectoryUser> getUser(@PathParam("id") @ApiParam("The directory identifier for the user.") Integer id) {
+    public List<DirectoryUser> getUser(@PathParam("id") @ApiParam("The unique identifier for the user.") Integer id) {
         ArrayList<DirectoryUser> results = new ArrayList<DirectoryUser>();
 
         DirectoryUser user = userService.findById(id);

@@ -55,3 +55,7 @@ form .ng-valid.ng-dirty {
     border-right: 1px solid #ddd;
     padding: 10px;
 }
+
+form[name="userForm"] label {
+    width: 65px;
+}
