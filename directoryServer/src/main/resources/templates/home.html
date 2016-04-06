@@ -73,9 +73,9 @@
                         </a>
 
                         <ul uib-dropdown-menu>
-                            <li ng-controller="AccountController as accountCtrl">
+                            <li>
                                 <div style="width: 60%;margin: auto; padding: 5px;">
-                                    <button class="btn btn-primary" ng-click="accountCtrl.showAccount()">Account</button>
+                                    <a class="btn btn-primary" th:href="@{'#user/' + ${activeUser.id}}">Account</a>
                                 </div>
                             </li>
 

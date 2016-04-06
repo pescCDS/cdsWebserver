@@ -115,7 +115,108 @@
 </div>
 
 <div th:fragment="user-details">
-    <div th:include="::user"></div>
+    <form name="userForm"  ng-submit="userForm.$valid && userCtrl.save()" novalidate="novalidate" class="glow">
+        <div class="sub-nav">
+            <div class="inner-margin7">
+                <div ng-show="!userCtrl.showForm()">
+
+                    <h1>{{userCtrl.user.name}}</h1>
+                    <div>
+                        <label><b>Title:</b></label>
+                        <span>{{userCtrl.user.title}}</span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                        <span>{{userCtrl.user.address}}</span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                        <span>{{userCtrl.user.phone}}</span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                        <span>{{userCtrl.user.email}}</span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                            <span ng-repeat="role in userCtrl.user.roles | orderBy:'name'">
+                                <span>{{role.name  | friendlyRoleName}}{{$last ? '' : ', '}}</span>
+                            </span>
+                    </div>
+
+                </div>
+
+                <div ng-show="userCtrl.showForm()">
+                    <h1>
+                        <input type="text" placeholder="Name" required="required" ng-model="userCtrl.user.name" ng-class="{ jw : userForm.$submitted === true}"> </input>
+                    </h1>
+                    <div>
+                        <label><b>Title:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Title" ng-model="userCtrl.user.title" > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Address" ng-model="userCtrl.user.address" style="min-width: 375px;" > </input>
+                            </span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="userCtrl.user.phone" > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                            <span>
+                                 <input type="email" placeholder="Email" ng-model="userCtrl.user.email" style="min-width: 375px;"  > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                              <span ng-repeat="role in userCtrl.roles">
+                           <span  class="checkbox-inline"> <input
+                                   type="checkbox"
+                                   ng-checked="userCtrl.hasRole(role)"
+                                   name="roles"
+                                   ng-click="userCtrl.updateRole($event, role)"> {{role.name | friendlyRoleName}} </span>
+                        </span>
+                    </div>
+                    <div ng-show="userCtrl.isNewAccount()">
+                        <div>
+                            <label><b>Username:</b></label>
+                            <input type="text" placeholder="Username" ng-model="userCtrl.user.username" style="min-width: 375px;"  > </input>
+
+                        </div>
+                        <div>
+                            <label><b>Password:</b></label>
+                            <input type="password" placeholder="Password" ng-model="userCtrl.user.password" style="min-width: 375px;"  > </input>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${hasOrgAdminRole}" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!userCtrl.showForm()" type="button" class="btn btn-default" ng-click="userCtrl.edit()">
+                        <span class="glyphicon glyphicon-edit"></span> Edit
+                    </button>
+                    <button ng-show="userCtrl.showForm()" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </form>
 </div>
 
 <div th:fragment="settings">

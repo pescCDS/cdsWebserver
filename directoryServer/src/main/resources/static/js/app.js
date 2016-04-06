@@ -8,7 +8,6 @@
         .service('notificationService', notificationService)
         .service('organizationService', organizationService)
         .service('userService', userService)
-        .controller('AccountController', AccountController)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
@@ -55,7 +54,7 @@
                 controller: "UserController",
                 controllerAs: "userCtrl",
                 resolve: {
-                    user: ['$route', 'userService', function ($route, userService) {
+                    users: ['$route', 'userService', function ($route, userService) {
                         return userService.find($route.current.params.user_id);
                     }]
                 }
@@ -217,13 +216,21 @@
 
     }
 
-    UserController.$inject = [ 'userService', 'user'];
-    function UserController(userService, user) {
+    UserController.$inject = [ '$window', 'notificationService', 'userService', 'users'];
+    function UserController($window, notificationService, userService, users) {
+
+        if (users.length != 1) {
+            notificationService.error("An error occurred while processing a user record: only one record should be provided.");
+        }
         var self = this;
-        self.user = user;
+        self.user = users[0];
         self.edit = edit;
         self.showForm = showForm;
         self.save = save;
+        self.isNewAccount = isNewAccount;
+        self.roles = $window.roles;
+        self.updateRole = updateRole;
+        self.hasRole = hasRole;
 
         function edit() {
             self.user['editing'] = true;
@@ -241,9 +248,37 @@
             });
         }
 
-        function getUsers() {
-            console.log("Getting users.");
+        function isNewAccount() {
+            return ! self.user.hasOwnProperty('id');
         }
+
+        function hasRole(role) {
+            var found = false;
+
+            for (var i=0; i < self.user.roles.length; i++) {
+                if (self.user.roles[i].id == role.id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+
+        function updateRole($event, role){
+
+            var checkbox = $event.target;
+
+            if(checkbox.checked === true){
+                self.user.roles.push(role);
+            } else {
+                // remove item
+                for(var i=0 ; i < self.user.roles.length; i++) {
+                    if(self.user.roles[i].id == role.id){
+                        self.user.roles.splice(i,1);
+                    }
+                }
+            }
+        };
 
     }
 
@@ -416,18 +451,6 @@
 
     };
 
-    AccountController.$inject = ['$http', '$location', '$window'];
-
-    function AccountController($http, $location, $window) {
-        var self = this;
-
-        self.showAccount = showAccount;
-
-        function showAccount(){
-
-        };
-    };
-
 
 
     notificationService.$inject = [ 'toaster'] ;
@@ -586,9 +609,9 @@
 
     /* User Service */
 
-    userService.$inject = ['$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
+    userService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
 
-    function userService ($http, $q, $cacheFactory, $filter, notificationService) {
+    function userService ($window, $http, $q, $cacheFactory, $filter, notificationService) {
 
 
         var service = {
@@ -598,7 +621,8 @@
             deleteUser: deleteUser,
             updateUser: updateUser,
             createUser: createUser,
-            find: find
+            find: find,
+            activeUser: $window.activeUser
         };
 
         return service;
