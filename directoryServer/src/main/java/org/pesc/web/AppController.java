@@ -90,6 +90,15 @@ public class AppController {
         return "fragments :: organization-details";
     }
 
+    @RequestMapping({"/user-details"})
+    public String getUserDetails(HttpServletRequest request, Model model) {
+
+
+        buildUserModel(model);
+
+        return "fragments :: user-details";
+    }
+
     @RequestMapping({"/home", "/admin"})
     public String getHomePage(Model model) {
 

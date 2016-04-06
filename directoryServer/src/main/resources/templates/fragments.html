@@ -6,6 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
+
 <div th:fragment="user">
 
     <form name="userForm"  ng-submit="userForm.$valid && usersCtrl.save(user)" novalidate="novalidate" class="glow">
@@ -111,6 +112,10 @@
         </div>
     </form>
 
+</div>
+
+<div th:fragment="user-details">
+    <div th:include="::user"></div>
 </div>
 
 <div th:fragment="settings">

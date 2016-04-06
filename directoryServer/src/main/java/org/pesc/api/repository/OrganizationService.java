@@ -47,7 +47,7 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_SYSTEM_ROLE') ")
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
     public Organization create(Organization organization){
         return this.organizationRepository.save(organization);
     }
