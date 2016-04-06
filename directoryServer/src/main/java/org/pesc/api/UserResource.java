@@ -67,7 +67,6 @@ public class UserResource {
         DirectoryUser user = userService.findById(id);
 
         if (user != null) {
-            //TODO: verify the calling user has access rights to view this user.
             results.add(user);
         }
 
@@ -79,8 +78,7 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Create a user.")
     public DirectoryUser createUser(DirectoryUser user) {
-        // TODO validate user object and that the calling user has access rights to create a user account
-        // for the organization identified by user.organizationId.
+
         return userService.create(user);
     }
 
@@ -89,7 +87,6 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the user with the given ID.")
     public DirectoryUser saveUser(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, DirectoryUser user) {
-        // TODO verify that the calling user has access rights to update this user account
         return userService.update(user);
     }
 
@@ -99,7 +96,6 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Delete the user with the given ID.")
     public void removeUser(@PathParam("id") @ApiParam("The directory identifier for the user.") Integer id) {
-        // TODO validate user object and that the calling user has access rights to update this user account
         userService.delete(id);
 
     }

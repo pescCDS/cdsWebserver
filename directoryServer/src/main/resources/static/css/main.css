@@ -57,5 +57,5 @@ form .ng-valid.ng-dirty {
 }
 
 form[name="userForm"] label {
-    width: 65px;
+    width: 75px;
 }

@@ -86,6 +86,7 @@
         var self = this;
         self.users = users;
         self.roles = $window.roles;
+        self.isNewAccount = isNewAccount;
 
         self.getUsers = userService.getUsers;
 
@@ -94,6 +95,13 @@
             var user = {
                 name: '',
                 address: '',
+                title: '',
+                phone: '',
+                email: '',
+                roles: [],
+                username: '',
+                password: '',
+                organizationId: $window.activeUser.organizationId,
                 editing: true
             };
             self.users.push(user);
@@ -134,6 +142,10 @@
             }
         };
 
+        function isNewAccount(user) {
+            return user.hasOwnProperty('password');
+        }
+
         self.save = function (user) {
 
             delete user.editing;
@@ -150,14 +162,15 @@
                 //create
                 userService.createUser(user).then(function(data){
                     console.log("Successfully created user with id " + data.id);
-                });
+                }).catch(function(e){
+                    self.edit(user);
+                });;
 
             }
         };
 
         self.edit = function (user) {
             user['editing'] = true;
-            console.log(user);
         };
 
 

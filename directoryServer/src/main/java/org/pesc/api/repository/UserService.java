@@ -7,6 +7,7 @@ import org.pesc.api.model.DirectoryUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,9 @@ public class UserService {
     private static final Log log = LogFactory.getLog(UserService.class);
 
     protected EntityManagerFactory entityManagerFactory;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(EntityManagerFactory entityManagerFactory) {
@@ -66,13 +70,17 @@ public class UserService {
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     @PostAuthorize("returnObject.organizationId == principal.organizationId AND (principal.id == returnObject.id OR hasRole('ROLE_ORG_ADMIN'))")
     public DirectoryUser findById(Integer id)  {
-
         return this.userRepository.findOne(id);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public DirectoryUser create(DirectoryUser user)  {
+
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        user.setEnabled(true);
 
         return this.userRepository.save(user);
     }

@@ -79,6 +79,18 @@
                                     ng-click="usersCtrl.updateRole($event, role, user)"> {{role.name | friendlyRoleName}} </span>
                         </span>
                     </div>
+                    <div ng-show="usersCtrl.isNewAccount(user)">
+                        <div>
+                            <label><b>Username:</b></label>
+                            <input type="text" placeholder="Username" ng-model="user.username" style="min-width: 375px;"  > </input>
+
+                        </div>
+                        <div>
+                            <label><b>Password:</b></label>
+                            <input type="password" placeholder="Password" ng-model="user.password" style="min-width: 375px;"  > </input>
+
+                        </div>
+                    </div>
                 </div>
             </div>
             <div th:if="${hasOrgAdminRole}" style="float: right;">

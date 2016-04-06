@@ -39,6 +39,9 @@ public class DirectoryUser implements Serializable {
     private String username;
 
 
+    @Column(name = "password")
+    private String password;
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -59,7 +62,7 @@ public class DirectoryUser implements Serializable {
             inverseJoinColumns=
             @JoinColumn(name="roles_id", referencedColumnName="id")
     )
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.MERGE)
     private Set<Role> roles;
 
     public Set<Role> getRoles() {
@@ -157,6 +160,14 @@ public class DirectoryUser implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
