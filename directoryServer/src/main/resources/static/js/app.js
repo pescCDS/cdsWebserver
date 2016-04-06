@@ -87,10 +87,17 @@
         self.users = users;
         self.roles = $window.roles;
         self.isNewAccount = isNewAccount;
-
         self.getUsers = userService.getUsers;
+        self.create = create;
+        self.find = find;
+        self.delete = deleteUser;
+        self.hasRole = hasRole;
+        self.save = save;
+        self.edit = edit;
+        self.showForm = showForm;
+        self.updateRole = updateRole;
 
-        self.create = function () {
+        function create() {
 
             var user = {
                 name: '',
@@ -111,13 +118,13 @@
 
         self.searchInput = '';
 
-        self.find = function () {
+        function find() {
             userService.getByName(self.searchInput,$window.activeUser.organizationId ).then(function(data){
                 self.users = data;
             });
         };
 
-        self.removeFromModel = function (user) {
+        function removeFromModel(user) {
             var index = self.users.indexOf(user);
             if (index > -1) {
                 self.users.splice(index, 1);
@@ -125,7 +132,7 @@
         };
 
 
-        self.delete = function (user) {
+        function deleteUser(user) {
 
             //If it's an existing user we need to delete it on the server
             if (user.hasOwnProperty('id')) {
@@ -146,7 +153,7 @@
             return ! user.hasOwnProperty('id');
         }
 
-        self.save = function (user) {
+        function save(user) {
 
             delete user.editing;
 
@@ -169,17 +176,17 @@
             }
         };
 
-        self.edit = function (user) {
+        function edit(user) {
             user['editing'] = true;
         };
 
 
-        self.showForm = function (user) {
+        function showForm(user) {
             return user.hasOwnProperty('editing') && user.editing === true;
         };
 
 
-        self.hasRole = function(user, role) {
+        function hasRole(user, role) {
             var found = false;
 
             for (var i=0; i < user.roles.length; i++) {
@@ -191,7 +198,7 @@
             return found;
         }
 
-        self.updateRole = function($event, role, user){
+        function updateRole($event, role, user){
 
             var checkbox = $event.target;
 
@@ -302,6 +309,12 @@
         var self = this;
 
         self.organizations = [];
+        self.saveOrg = save;
+        self.editOrg = edit;
+        self.showOrgForm = showForm;
+        self.createOrg = create;
+        self.deleteOrg = deleteOrg;
+        self.findOrganizations = findOrganizations;
 
 
         activate();
@@ -319,7 +332,7 @@
             });
         }
 
-        self.createOrg = function () {
+        function create() {
 
             var organization = {
                 name: '',
@@ -339,21 +352,20 @@
 
         self.searchInput = '';
 
-        self.findOrganizations = function () {
+        function findOrganizations() {
             organizationService.getByName(self.searchInput).then(function(data){
                 self.organizations = data;
             });
         };
 
-        self.removeOrgFromModel = function (org) {
+        function removeOrgFromModel(org) {
             var index = self.organizations.indexOf(org);
             if (index > -1) {
                 self.organizations.splice(index, 1);
             }
         };
 
-
-        self.deleteOrg = function (org) {
+        function deleteOrg(org) {
 
             //If it's an existing org we need to delete it on the server
             if (org.hasOwnProperty('id')) {
@@ -371,7 +383,7 @@
             console.log(org);
         };
 
-        self.saveOrg = function (org) {
+        function save(org) {
 
             delete org.editing;
 
@@ -392,13 +404,13 @@
             }
         };
 
-        self.editOrg = function (org) {
+        function edit(org) {
             org['editing'] = true;
             console.log(org);
         };
 
 
-        self.showOrgForm = function (org) {
+        function showForm(org) {
             return org.hasOwnProperty('editing') && org.editing === true;
         };
 
