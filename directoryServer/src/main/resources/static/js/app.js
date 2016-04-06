@@ -143,7 +143,7 @@
         };
 
         function isNewAccount(user) {
-            return user.hasOwnProperty('password');
+            return ! user.hasOwnProperty('id');
         }
 
         self.save = function (user) {
