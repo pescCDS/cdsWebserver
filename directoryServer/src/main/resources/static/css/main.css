@@ -74,3 +74,12 @@ form[name="userForm"] label {
     letter-spacing: .02em;
     border-bottom: 1px dotted #CCCCCC;
 }
+
+.ed-icon-btn {
+    opacity: 0.5;
+}
+
+.ed-icon-btn:hover {
+    cursor: pointer;
+    opacity: 1.0;
+}

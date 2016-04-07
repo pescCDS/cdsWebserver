@@ -52,6 +52,10 @@ public class Endpoint {
     @Column(name = "error")
     private boolean error;
 
+    @Column(name="instructions")
+    private String instructions;
+
+
     @JoinTable(
             name="endpoint_document_format",
             joinColumns=
@@ -127,5 +131,13 @@ public class Endpoint {
 
     public void setDeliveryMethods(Set<DeliveryMethod> deliveryMethods) {
         this.deliveryMethods = deliveryMethods;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions;
     }
 }

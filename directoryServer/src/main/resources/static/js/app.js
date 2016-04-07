@@ -9,6 +9,7 @@
         .service('organizationService', organizationService)
         .service('userService', userService)
         .service('settingsService', settingsService)
+        .service('endpointService', endpointService)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
@@ -110,7 +111,7 @@
         self.create = create;
         self.find = find;
         self.delete = deleteUser;
-        self.hasRole = hasRole;
+        self.hasRole = userService.hasRole;
         self.save = save;
         self.edit = edit;
         self.showForm = showForm;
@@ -206,18 +207,6 @@
         };
 
 
-        function hasRole(user, role) {
-            var found = false;
-
-            for (var i=0; i < user.roles.length; i++) {
-                if (user.roles[i].id == role.id) {
-                    found = true;
-                    break;
-                }
-            }
-            return found;
-        }
-
         function updateRole($event, role, user){
 
             var checkbox = $event.target;
@@ -285,6 +274,7 @@
             return found;
         }
 
+
         function updateRole($event, role){
 
             var checkbox = $event.target;
@@ -303,9 +293,9 @@
 
     }
 
-    OrgController.$inject = [ '$routeParams', 'organizationService', 'org'];
+    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService'];
 
-    function OrgController($routeParams, organizationService, org) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -313,6 +303,42 @@
         self.showOrgForm = showOrgForm;
         self.saveOrg = saveOrg;
         self.getUsers = getUsers;
+        self.isEditableByUser = isEditableByUser;
+        self.createEndpoint = createEndpoint;
+        self.getEndpoints = getEndpoints;
+
+
+        getEndpoints();
+
+        function getEndpoints() {
+            endpointService.getEndpoints(self.org).then(function(data){
+                self.org.endpoints = data;
+            });
+        }
+
+        function createEndpoint() {
+            var endpoint = {
+                organizationId:  self.org.id,
+                confirmDelivery: false,
+                address: '',
+                error: false,
+                documentFormats: [],
+                deliveryMethods: [],
+                instructions: ''
+            }
+
+            self.org.endpoints.push(endpoint);
+
+        }
+
+        function isEditableByUser() {
+
+            if (self.org.id === userService.activeUser.organizationId) {
+                return userService.hasRoleByName(userService.activeUser, 'ROLE_ORG_ADMIN');
+            }
+
+            return userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN');
+        }
 
 
         function activate() {
@@ -500,6 +526,32 @@
     }
 
 
+    endpointService.$inject = [ '$http', '$q', '$cacheFactory', 'notificationService'];
+
+    function endpointService($http, $q, $cacheFactory, notificationService) {
+        var service = {
+            getEndpoints: getEndpoints
+        };
+
+        return service;
+
+        function getEndpoints(org) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/endpoints', {
+                'params': {'organizationId': org.id},
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching endpoints for " + org.name);
+            });
+
+            return deferred.promise;
+        }
+    }
 
     organizationService.$inject = ['$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
 
@@ -689,6 +741,8 @@
             updateUser: updateUser,
             createUser: createUser,
             find: find,
+            hasRole: hasRole,
+            hasRoleByName: hasRoleByName,
             activeUser: $window.activeUser
         };
 
@@ -708,6 +762,31 @@
             });
 
             return deferred.promise;
+        }
+
+        function hasRole(user,role) {
+
+            var found = false;
+
+            for (var i=0; i < user.roles.length; i++) {
+                if (user.roles[i].id == role.id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+
+        function hasRoleByName(user, roleName) {
+            var found = false;
+
+            for (var i=0; i < user.roles.length; i++) {
+                if (user.roles[i].name === roleName) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
         }
 
         function updateUser(user) {
