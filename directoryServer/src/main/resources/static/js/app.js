@@ -115,6 +115,7 @@
         self.edit = edit;
         self.showForm = showForm;
         self.updateRole = updateRole;
+        self.removeFromModel = removeFromModel;
 
         function create() {
 
@@ -370,6 +371,7 @@
         self.createOrg = create;
         self.deleteOrg = deleteOrg;
         self.findOrganizations = findOrganizations;
+        self.removeOrgFromModel = removeOrgFromModel;
 
 
         activate();
