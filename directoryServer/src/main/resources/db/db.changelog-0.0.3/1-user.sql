@@ -23,7 +23,7 @@ CREATE TABLE roles (
   PRIMARY KEY (id));
   
   
-  CREATE TABLE users_roles (
+CREATE TABLE users_roles (
   users_id int(11) NOT NULL,
   roles_id int(11) NOT NULL,
   PRIMARY KEY (users_id,roles_id),

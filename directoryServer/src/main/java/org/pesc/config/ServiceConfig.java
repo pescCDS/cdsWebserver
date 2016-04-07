@@ -7,6 +7,8 @@ import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
+import org.pesc.api.DeliveryMethodsResource;
+import org.pesc.api.DocumentFormatResource;
 import org.pesc.api.OrganizationsResource;
 import org.pesc.api.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,10 @@ public class ServiceConfig {
     private OrganizationsResource organizationsResource;
     @Autowired
     private UserResource userResource;
+    @Autowired
+    private DocumentFormatResource documentFormatResource;
+    @Autowired
+    private DeliveryMethodsResource deliveryMethodsResource;
 
 
     @Bean
@@ -111,7 +117,7 @@ public class ServiceConfig {
 
 
     /**
-     * SOAP endpoint for organizations
+     * SOAP endpoint for users
      * @return
      */
     @Bean
@@ -123,56 +129,29 @@ public class ServiceConfig {
     }
 
 
-
-
-
-
-
     /**
-     * Create the REST endpoint
+     * SOAP endpoint for document formats
      * @return
-
+     */
     @Bean
-    public Server rsServer() {
-        JAXRSServerFactoryBean endpoint = new JAXRSServerFactoryBean();
-
-        List<Object> beans  = new ArrayList<Object>();
-
-        BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setVersion(restAPIVersion);
-        beanConfig.setTitle("PESC CDS REST Interface");
-        beanConfig.setDescription("Swagger UI to document and explore the REST interface provided by the PESC CDS.");
-        beanConfig.setSchemes(new String[]{"http"});
-        beanConfig.setHost(restApiHost);
-        beanConfig.setBasePath("/services/rest");
-        beanConfig.setResourcePackage(restApiPackageToScan);
-        beanConfig.setPrettyPrint(true);
-        beanConfig.setScan(true);
-
-        beans.add(beanConfig);
-        beans.add(apiListingResourceJSON());
-        //beans.add(wadlResource());
-
-        beans.add(contactRestController);
-        beans.add(deliveryMethodRestController);
-        beans.add(deliveryOptionRestController);
-        beans.add(documentFormatRestController);
-        beans.add(entityCodeRestController);
-        beans.add(organizationRestController);
-        beans.add(utilityRestController);
-
-
-
-        endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
-
-        endpoint.setServiceBeans(beans);
-
-        endpoint.setAddress("/rest");
-
-        return endpoint.create();
+    public Server documentFormats() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(DocumentFormatResource.class);
+        sf.setAddress("/soap/v1/document-formats");
+        return sf.create();
     }
 
+    /**
+     * SOAP endpoint for delivery methods
+     * @return
      */
+    @Bean
+    public Server deliveryMethods() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(DeliveryMethodsResource.class);
+        sf.setAddress("/soap/v1/delivery-methods");
+        return sf.create();
+    }
 
 
     /**
@@ -202,6 +181,8 @@ public class ServiceConfig {
 
         beans.add(organizationsResource);
         beans.add(userResource);
+        beans.add(documentFormatResource);
+        beans.add(deliveryMethodsResource) ;
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

@@ -8,6 +8,7 @@
         .service('notificationService', notificationService)
         .service('organizationService', organizationService)
         .service('userService', userService)
+        .service('settingsService', settingsService)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
@@ -27,7 +28,7 @@
             .when("/settings", {
                 templateUrl: "settings",
                 controller: "SettingsController",
-                controllerAs: "settings"
+                controllerAs: "settingsCtrl"
             })
             .when("/organization/:org_id", {
                 templateUrl: "organization-details",
@@ -74,9 +75,28 @@
             });
     }
 
-
-    function SettingsController() {
+    SettingsController.$inject = ['settingsService'];
+    function SettingsController(settingsService) {
         var self = this;
+
+        self.deliveryMethods = [];
+        self.documentFormats = [];
+        self.getDeliveryMethods = getDeliveryMethods;
+        self.getDocumentFormats = getDocumentFormats;
+
+        getDeliveryMethods();
+
+
+        function getDeliveryMethods() {
+            settingsService.getDeliveryMethods().then(function(data){
+                self.deliveryMethods = data;
+            });
+        }
+        function getDocumentFormats() {
+            settingsService.getDocumentFormats().then(function(data){
+                self.documentFormats = data;
+            });
+        }
 
     }
 
@@ -605,6 +625,51 @@
 
     }
 
+
+    settingsService.$inject = ['$http', '$q', '$cacheFactory', 'notificationService'];
+
+    function settingsService ($http, $q, $cacheFactory, notificationService) {
+
+
+        var service = {
+            getDeliveryMethods: getDeliveryMethods,
+            getDocumentFormats: getDocumentFormats
+        };
+
+        return service;
+
+        function getDeliveryMethods() {
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/delivery-methods', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching delivery methods.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDocumentFormats() {
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/document-formats', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching document formats.");
+            });
+
+            return deferred.promise;
+        }
+
+
+    }
 
 
     /* User Service */
