@@ -9,9 +9,7 @@
 		<comment>
 		This changeSet adds the user table.
 		</comment>
-		
 		<sqlFile encoding="utf8" path="1-user.sql" relativeToChangelogFile="true" />
-		
 	</changeSet>
 
 
@@ -19,9 +17,14 @@
 		<comment>
 			This change set adds a default super user to the users and roles..
 		</comment>
-
 		<sqlFile encoding="utf8" path="2-default-users.sql" relativeToChangelogFile="true" />
+	</changeSet>
 
+	<changeSet id="6" author="james">
+		<comment>
+			This change set adds the ability to associate a school code like a ATP or FICE with an organization.
+		</comment>
+		<sqlFile encoding="utf8" path="3-school-codes.sql" relativeToChangelogFile="true" />
 	</changeSet>
 
 </databaseChangeLog>

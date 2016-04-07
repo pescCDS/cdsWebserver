@@ -59,3 +59,10 @@ form .ng-valid.ng-dirty {
 form[name="userForm"] label {
     width: 75px;
 }
+
+
+.ed-inline-box {
+    border: 1px solid #ddd;
+    margin: 5px;
+    padding: 3px;
+}

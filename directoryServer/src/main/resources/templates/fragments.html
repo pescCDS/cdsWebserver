@@ -357,6 +357,14 @@
                                             </span>
                 </div>
 
+                <div ng-show="orgCtrl.org.schoolCodes.length > 0">
+                    <span><strong>School Codes: </strong></span>
+                    <span ng-repeat="schoolCode in orgCtrl.org.schoolCodes | orderBy:'codeType'" class="ed-inline-box">
+                                <span>{{schoolCode.codeType}}</span>
+                                <span>{{schoolCode.code}}</span>
+                    </span>
+                </div>
+
 
                 <div><strong>Member Since: </strong>{{orgCtrl.org.createdTime | date:'MM/dd/yyyy'}}</div>
             </div>
@@ -525,10 +533,6 @@
                                                  </select>
                                             </span>
                 </div>
-
-                <div ng-show="orgCtrl.showOrgForm(org)">
-                </div>
-
                 <div><strong>Member Since: </strong>{{org.createdTime | date:'MM/dd/yyyy'}}</div>
             </div>
 
