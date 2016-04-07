@@ -7,10 +7,7 @@ import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
-import org.pesc.api.DeliveryMethodsResource;
-import org.pesc.api.DocumentFormatResource;
-import org.pesc.api.OrganizationsResource;
-import org.pesc.api.UserResource;
+import org.pesc.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +55,8 @@ public class ServiceConfig {
     private DocumentFormatResource documentFormatResource;
     @Autowired
     private DeliveryMethodsResource deliveryMethodsResource;
+    @Autowired
+    private EndpointResource endpointResource;
 
 
     @Bean
@@ -153,6 +152,18 @@ public class ServiceConfig {
         return sf.create();
     }
 
+    /**
+     * SOAP endpoint for delivery methods
+     * @return
+     */
+    @Bean
+    public Server endpoints() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(EndpointResource.class);
+        sf.setAddress("/soap/v1/endpoints");
+        return sf.create();
+    }
+
 
     /**
      * Create the REST endpoint
@@ -183,6 +194,7 @@ public class ServiceConfig {
         beans.add(userResource);
         beans.add(documentFormatResource);
         beans.add(deliveryMethodsResource) ;
+        beans.add(endpointResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

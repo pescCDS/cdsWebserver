@@ -1,11 +1,13 @@
 package org.pesc.api.model;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Set;
 
 /**
  * Created by james on 4/6/16.
  */
+@XmlRootElement(name="Endpoint")
 @Entity
 @Table(name="endpoint")
 public class Endpoint {
