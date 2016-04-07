@@ -74,10 +74,10 @@
                         <label><b>Roles:</b></label>
                               <span ng-repeat="role in usersCtrl.roles">
                            <span  class="checkbox-inline"> <input
-                                    type="checkbox"
-                                    ng-checked="usersCtrl.hasRole(user, role)"
-                                    name="roles"
-                                    ng-click="usersCtrl.updateRole($event, role, user)"> {{role.name | friendlyRoleName}} </span>
+                                   type="checkbox"
+                                   ng-checked="usersCtrl.hasRole(user, role)"
+                                   name="roles"
+                                   ng-click="usersCtrl.updateRole($event, role, user)"> {{role.name | friendlyRoleName}} </span>
                         </span>
                     </div>
                     <div ng-show="usersCtrl.isNewAccount(user)">
@@ -248,8 +248,23 @@
 </div>
 
 <div th:fragment="organization-details">
-    <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow">
-        <div class="sub-nav">
+    <div>
+
+        <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow">
+            <div th:if="${hasSystemAdminRole}" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!orgCtrl.showOrgForm()" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg()">
+                        <span class="glyphicon glyphicon-edit"></span> Edit
+                    </button>
+                    <button ng-show="orgCtrl.showOrgForm()" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
             <div class="inner-margin7">
                 <h1 ng-show="!orgCtrl.showOrgForm()">{{orgCtrl.org.name}}</h1>
 
@@ -356,38 +371,27 @@
                                                  </select>
                                             </span>
                 </div>
+                <div><strong>Member Since: </strong>{{orgCtrl.org.createdTime | date:'MM/dd/yyyy'}}</div>
 
-                <div ng-show="orgCtrl.org.schoolCodes.length > 0">
-                    <span><strong>School Codes: </strong></span>
+                <div ng-show="orgCtrl.org.type === 1">
+                    <div class="ed-title">School Codes</div>
+
                     <span ng-repeat="schoolCode in orgCtrl.org.schoolCodes | orderBy:'codeType'" class="ed-inline-box">
                                 <span>{{schoolCode.codeType}}</span>
                                 <span>{{schoolCode.code}}</span>
                     </span>
                 </div>
 
-
-                <div><strong>Member Since: </strong>{{orgCtrl.org.createdTime | date:'MM/dd/yyyy'}}</div>
-            </div>
-
-            <div th:if="${hasSystemAdminRole}" style="float: right;">
-                <div class="btn-group">
-                    <button ng-show="!orgCtrl.showOrgForm()" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg()">
-                        <span class="glyphicon glyphicon-edit"></span> Edit
-                    </button>
-                    <button ng-show="orgCtrl.showOrgForm()" type="submit" class="btn btn-default">
-                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
-                    </button>
-                    <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
-                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                    </button>
-
+                <div ng-show="orgCtrl.org.type === 2">
+                    <div class="ed-title">Represented Schools</div>
                 </div>
+
+
+                <div class="ed-title">Endpoints</div>
+
             </div>
-
-
-        </div>
-    </form>
-
+        </form>
+    </div>
 </div>
 
 

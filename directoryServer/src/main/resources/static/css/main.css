@@ -62,7 +62,15 @@ form[name="userForm"] label {
 
 
 .ed-inline-box {
-    border: 1px solid #ddd;
-    margin: 5px;
+    margin: 5px 5px 5px 0;
     padding: 3px;
+}
+
+.ed-title {
+    margin: 30px 0 10px 0;
+    font: 16px/20px 'ProximaNova Semibold', ProximaNova Semi-Bold, Helvetica, Arial, sans-serif;
+    text-transform: uppercase;
+    color: #787878;
+    letter-spacing: .02em;
+    border-bottom: 1px dotted #CCCCCC;
 }
