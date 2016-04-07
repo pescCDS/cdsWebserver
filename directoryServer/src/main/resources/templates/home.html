@@ -37,7 +37,7 @@
                     <span class="icon-bar"></span>
                 </button>
 
-                <a class="navbar-brand" href="#" >Ed Exchange</a>
+                <a class="navbar-brand" href="#about" >Ed Exchange</a>
 
             </div>
             <div id="navbar" class="navbar-collapse collapse">
@@ -123,6 +123,14 @@
         <button type="button" class="btn btn-sm btn-success" ng-click="usersCtrl.delete(user)">Yes</button>
     </div>
 </script>
+
+<script type="text/ng-template" id="delete-endpoint.html">
+    <div>
+        <p>Delete?</p>
+        <button type="button" class="btn btn-sm btn-success" ng-click="orgCtrl.deleteEndpoint(endpoint)">Yes</button>
+    </div>
+</script>
+
 
 <script th:inline="javascript">
     /*<![CDATA[*/

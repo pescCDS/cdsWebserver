@@ -16,6 +16,7 @@
         .controller("OrgController", OrgController)
         .controller("UserController", UserController)
         .controller("UsersController", UsersController)
+        .controller("EndpointController", EndpointController)
         .config(config);
 
 
@@ -70,9 +71,12 @@
                         return userService.getUsers($window.activeUser.organizationId);
                     }]
                 }
-            }).
-            otherwise({
-                redirectTo: 'home'
+            })
+            .when("/home", {
+                templateUrl: "about"
+            })
+            .otherwise({
+                redirectTo: "home"
             });
     }
 
@@ -293,6 +297,42 @@
 
     }
 
+    EndpointController.$inject = ['endpointService', 'notificationService'];
+
+    function EndpointController(endpointService, notificationService) {
+        var self = this;
+        self.showForm = showForm;
+        self.save = save;
+        self.edit = edit;
+
+        function showForm(endpoint) {
+            return endpoint.hasOwnProperty('editing') && endpoint.editing === true;
+        };
+
+        function edit(endpoint) {
+            endpoint['editing'] = true;
+        }
+
+        function save(endpoint) {
+
+            delete endpoint.editing;
+
+            if (endpoint.hasOwnProperty('id')) {
+                endpointService.update(endpoint).then(function(data){
+                    notificationService.success("Successfully updated endpoint.");
+                });
+
+            }
+            else {
+                //create
+                endpointService.create(endpoint).then(function(data){
+                    notificationService.success("Successfully created endpoint.");
+                });
+
+            }
+        };
+    }
+
     OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService'];
 
     function OrgController($routeParams, organizationService, org, userService, endpointService) {
@@ -306,6 +346,7 @@
         self.isEditableByUser = isEditableByUser;
         self.createEndpoint = createEndpoint;
         self.getEndpoints = getEndpoints;
+        self.deleteEndpoint = deleteEndpoint;
 
 
         getEndpoints();
@@ -324,12 +365,38 @@
                 error: false,
                 documentFormats: [],
                 deliveryMethods: [],
-                instructions: ''
+                instructions: '',
+                editing: true
             }
 
             self.org.endpoints.push(endpoint);
 
         }
+
+        function removeEndpointFromModel(endpoint) {
+            var index = self.org.endpoints.indexOf(endpoint);
+            if (index > -1) {
+                self.org.endpoints.splice(index, 1);
+            }
+        }
+
+        function deleteEndpoint(endpoint) {
+
+            //If it's an existing org we need to delete it on the server
+            if (endpoint.hasOwnProperty('id')) {
+
+                endpointService.deleteEndpoint(endpoint).then(function(data){
+                    removeEndpointFromModel(endpoint);
+                });
+
+            }
+            else {
+                //it's a new organization that hasn't been persisted.
+                removeEndpointFromModel(endpoint);
+
+            }
+        }
+
 
         function isEditableByUser() {
 
@@ -530,10 +597,59 @@
 
     function endpointService($http, $q, $cacheFactory, notificationService) {
         var service = {
-            getEndpoints: getEndpoints
+            getEndpoints: getEndpoints,
+            update: update,
+            create: create,
+            deleteEndpoint: deleteEndpoint
+
         };
 
         return service;
+
+        function deleteEndpoint(endpoint) {
+            var deferred = $q.defer();
+
+            $http.delete('/services/rest/v1/endpoints/' + endpoint.id).success(function (data) {
+                deferred.resolve(org);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while deleting an organization.");
+            });
+
+            return deferred.promise;
+        }
+
+        function update(endpoint) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/endpoints/' + endpoint.id, endpoint).success(function (data) {
+                deferred.resolve(endpoint);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while updating an endpoint.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function create(endpoint) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/endpoints/', endpoint).success(function (data) {
+                angular.extend(endpoint, data);
+                deferred.resolve(endpoint);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while creating an endpoint.");
+            });
+
+            return deferred.promise;
+        }
+
+
 
         function getEndpoints(org) {
 
@@ -574,9 +690,6 @@
             var deferred = $q.defer();
 
             $http.delete('/services/rest/v1/organizations/' + org.id).success(function (data) {
-
-                removeOrganization(org);
-
                 deferred.resolve(org);
             }).error(function(data){
                 notificationService.ajaxInfo(data);

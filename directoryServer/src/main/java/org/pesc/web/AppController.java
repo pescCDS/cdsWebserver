@@ -99,6 +99,15 @@ public class AppController {
         return "fragments :: user-details";
     }
 
+
+    @RequestMapping({"/about"})
+    public String getAboutPage(Model model) {
+
+        buildUserModel(model);
+
+        return "fragments :: about";
+    }
+
     @RequestMapping({"/home", "/admin"})
     public String getHomePage(Model model) {
 
