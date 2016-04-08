@@ -40,8 +40,8 @@ public class Endpoint {
             inverseJoinColumns=
             @JoinColumn(name="document_format_id", referencedColumnName="id")
     )
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = DocumentFormat.class, cascade = CascadeType.MERGE)
-    private Set<DocumentFormat> documentFormats;
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = DocumentFormat.class, cascade = CascadeType.MERGE)
+    private DocumentFormat documentFormat;
 
     @JoinTable(
             name="endpoint_delivery_methods",
@@ -50,8 +50,8 @@ public class Endpoint {
             inverseJoinColumns=
             @JoinColumn(name="delivery_methods_id", referencedColumnName="id")
     )
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = DeliveryMethod.class, cascade = CascadeType.MERGE)
-    private Set<DeliveryMethod> deliveryMethods;
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = DeliveryMethod.class, cascade = CascadeType.MERGE)
+    private DeliveryMethod deliveryMethod;
 
 
     public Integer getId() {
@@ -94,20 +94,20 @@ public class Endpoint {
         this.error = error;
     }
 
-    public Set<DocumentFormat> getDocumentFormats() {
-        return documentFormats;
+    public DocumentFormat getDocumentFormat() {
+        return documentFormat;
     }
 
-    public void setDocumentFormats(Set<DocumentFormat> documentFormats) {
-        this.documentFormats = documentFormats;
+    public void setDocumentFormat(DocumentFormat documentFormat) {
+        this.documentFormat = documentFormat;
     }
 
-    public Set<DeliveryMethod> getDeliveryMethods() {
-        return deliveryMethods;
+    public DeliveryMethod getDeliveryMethod() {
+        return deliveryMethod;
     }
 
-    public void setDeliveryMethods(Set<DeliveryMethod> deliveryMethods) {
-        this.deliveryMethods = deliveryMethods;
+    public void setDeliveryMethod(DeliveryMethod deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
     }
 
     public String getInstructions() {

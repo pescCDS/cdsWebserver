@@ -306,10 +306,6 @@
         self.edit = edit;
         self.documentFormats = [];
         self.deliveryMethods = [];
-        self.documentFormat = null;
-        self.deliveryMethod = null;
-        self.updateDeliveryMethod = updateDeliveryMethod;
-        self.updateDocumentFormat = updateDocumentFormat;
 
         initialize();
 
@@ -320,14 +316,6 @@
             settingsService.getDeliveryMethods().then(function(data){
                 self.deliveryMethods = data;
             });
-        }
-
-        function updateDeliveryMethod(endpoint) {
-            endpoint.deliveryMethods = [ self.deliveryMethod ];
-        }
-
-        function updateDocumentFormat(endpoint) {
-            endpoint.documentFormats = [ self.documentFormat ];
         }
 
 
@@ -389,8 +377,8 @@
                 confirmDelivery: false,
                 address: '',
                 error: false,
-                documentFormats: [],
-                deliveryMethods: [],
+                documentFormat: {},
+                deliveryMethod: {},
                 instructions: '',
                 editing: true
             }
@@ -491,7 +479,7 @@
         self.deleteOrg = deleteOrg;
         self.findOrganizations = findOrganizations;
         self.removeOrgFromModel = removeOrgFromModel;
-
+        self.createUser = createUser;
 
         activate();
 
@@ -507,6 +495,15 @@
                 self.organizations = data;
             });
         }
+
+        function createUser(org) {
+            console.log(organizationService.activeOrg);
+
+            organizationService.activeOrg = org;
+
+            console.log(organizationService.activeOrg );
+        };
+
 
         function create() {
 
@@ -695,9 +692,9 @@
         }
     }
 
-    organizationService.$inject = ['$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
+    organizationService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
 
-    function organizationService ($http, $q, $cacheFactory, $filter, notificationService) {
+    function organizationService ($window, $http, $q, $cacheFactory, $filter, notificationService) {
 
 
         var service = {
@@ -707,10 +704,21 @@
             deleteOrg: deleteOrg,
             updateOrg: updateOrg,
             createOrg: createOrg,
-            find: find
+            find: find,
+            activeOrg: null
         };
 
+        initialize();
+
         return service;
+
+
+
+        function initialize() {
+            find($window.activeUser.organizationId).then(function(orgs){
+               service.activeOrg = orgs[0];
+            });
+        }
 
         function deleteOrg(org) {
             var deferred = $q.defer();

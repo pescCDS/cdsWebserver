@@ -150,3 +150,9 @@ form[name="userForm"] label {
     cursor: pointer;
     opacity: 1.0;
 }
+
+.ed-endpoint {
+    margin: 20px 0 0 0;
+    padding-bottom:20px;
+    border-bottom: 1px dotted #CCCCCC;
+}

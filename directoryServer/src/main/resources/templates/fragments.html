@@ -403,57 +403,56 @@
                     </div>
                 </div>
                 <div ng-show="endpointCtrl.showForm(endpoint)">
+                    <div style="width: 80%;">
                     <h4>
-                        <input type="text" placeholder="Address" required="required" ng-model="endpoint.address"> </input>
+                        <input class="form-control" type="text" placeholder="Address" required="required" ng-model="endpoint.address"> </input>
                     </h4>
                     <p>
-                        <textarea type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
+                        <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
                     </p>
                     <div>
                         <strong>Document Format</strong>
                         <div>
 
-                            <select required="required"
-                                    ng-change="endpointCtrl.updateDocumentFormat(endpoint)"
-                                    ng-model="endpointCtrl.documentFormat"
+                            <select class="form-control" style="width: 160px;" required="required"
+                                    ng-model="endpoint.documentFormat"
                                     ng-options="documentFormat.name for documentFormat in endpointCtrl.documentFormats track by documentFormat.id">
 
                             </select>
+                            <p>
+                                {{endpoint.documentFormat.description}}
+                            </p>
                         </div>
                     </div>
                     <div>
                         <strong>Delivery Methods</strong>
                         <div>
-                            <select required="required"
-                                    ng-change="endpointCtrl.updateDeliveryMethod(endpoint)"
-                                    ng-model="endpointCtrl.deliveryMethod"
+                            <select class="form-control" style="width: 160px;"  required="required"
+                                    ng-model="endpoint.deliveryMethod"
                                     ng-options="deliveryMethod.name for deliveryMethod in endpointCtrl.deliveryMethods track by deliveryMethod.id">
 
                             </select>
+                            <p>
+                                {{endpoint.deliveryMethod.description}}
+                            </p>
                         </div>
                     </div>
-
+                    </div>
                 </div>
                 <div ng-show="!endpointCtrl.showForm(endpoint)">
                     <h4>{{endpoint.address}}</h4>
                     <p>{{endpoint.instructions}}</p>
                     <div><strong>Document Format</strong></div>
-                    <div ng-repeat="documentFormat in endpoint.documentFormats |  orderBy:'name'">
-                        <div style="display: inline-block; margin: 5px 5px 5px 0;">
-                            <h5>{{documentFormat.name}}</h5>
-                            <p>{{documentFormat.description}}</p>
-                        </div>
 
-                    </div>
+
+                            <h5>{{endpoint.documentFormat.name}}</h5>
+                            <p>{{endpoint.documentFormat.description}}</p>
+
 
                     <div><strong>Delivery Method</strong></div>
-                    <div ng-repeat="deliveryMethod in endpoint.deliveryMethods |  orderBy:'name'">
-                        <div style="display: inline-block; margin: 5px 5px 5px 0;">
-                            <h5>{{deliveryMethod.name}}</h5>
-                            <p>{{deliveryMethod.description}}</p>
-                        </div>
 
-                    </div>
+                            <h5>{{endpoint.deliveryMethod.name}}</h5>
+                            <p>{{endpoint.deliveryMethod.description}}</p>
                 </div>
 
             </form>
@@ -617,11 +616,11 @@
             </div>
             <div class="ed-title">Endpoints</div>
             <div ng-repeat="endpoint in orgCtrl.org.endpoints">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <div th:include="::endpoint"></div>
-                    </li>
-                </ul>
+
+                <div class="ed-endpoint">
+                    <div th:include="::endpoint"></div>
+                </div>
+
             </div>
 
         </div>
@@ -777,6 +776,9 @@
 
             <div th:if="${hasSystemAdminRole}" style="float: right;">
                 <div class="btn-group">
+                    <button type="button" class="btn btn-default" ng-click="orgCtrl.createUser(org)">
+                        <span class="glyphicon glyphicon-user"></span> Create User
+                    </button>
                     <button ng-show="!orgCtrl.showOrgForm(org)" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg(org)">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
                     </button>
