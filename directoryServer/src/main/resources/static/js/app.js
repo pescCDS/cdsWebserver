@@ -17,7 +17,11 @@
         .controller("UserController", UserController)
         .controller("UsersController", UsersController)
         .controller("EndpointController", EndpointController)
-        .config(config);
+        .config(config)
+        .run(['organizationService', function(organizationService) {
+            organizationService.initialize();
+        }]);
+
 
 
     function config($routeProvider) {
@@ -712,13 +716,22 @@
             createOrg: createOrg,
             find: find,
             getActiveOrg: getActiveOrg,
-            setActiveOrg: setActiveOrg
+            setActiveOrg: setActiveOrg,
+            initialize: initialize
         };
 
         return service;
 
         var activeOrg;
 
+        function initialize() {
+            if ($window.activeUser !== null) {
+                find($window.activeUser.organizationId).then(function(orgArray){
+                    activeOrg = orgArray[0];
+                });
+
+            }
+        }
         function getActiveOrg() {
             return activeOrg;
         }
@@ -1111,6 +1124,7 @@
             return friendlyName;
         };
     }
+
 
 
 })();
