@@ -297,13 +297,39 @@
 
     }
 
-    EndpointController.$inject = ['endpointService', 'notificationService'];
+    EndpointController.$inject = ['endpointService', 'notificationService', 'settingsService'];
 
-    function EndpointController(endpointService, notificationService) {
+    function EndpointController(endpointService, notificationService, settingsService) {
         var self = this;
         self.showForm = showForm;
         self.save = save;
         self.edit = edit;
+        self.documentFormats = [];
+        self.deliveryMethods = [];
+        self.documentFormat = null;
+        self.deliveryMethod = null;
+        self.updateDeliveryMethod = updateDeliveryMethod;
+        self.updateDocumentFormat = updateDocumentFormat;
+
+        initialize();
+
+        function initialize() {
+            settingsService.getDocumentFormats().then(function(data){
+                self.documentFormats = data;
+            });
+            settingsService.getDeliveryMethods().then(function(data){
+                self.deliveryMethods = data;
+            });
+        }
+
+        function updateDeliveryMethod(endpoint) {
+            endpoint.deliveryMethods = [ self.deliveryMethod ];
+        }
+
+        function updateDocumentFormat(endpoint) {
+            endpoint.documentFormats = [ self.documentFormat ];
+        }
+
 
         function showForm(endpoint) {
             return endpoint.hasOwnProperty('editing') && endpoint.editing === true;
@@ -610,7 +636,7 @@
             var deferred = $q.defer();
 
             $http.delete('/services/rest/v1/endpoints/' + endpoint.id).success(function (data) {
-                deferred.resolve(org);
+                deferred.resolve(endpoint);
             }).error(function(data){
                 notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while deleting an organization.");
