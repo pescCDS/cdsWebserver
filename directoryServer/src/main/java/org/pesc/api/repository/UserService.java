@@ -67,7 +67,7 @@ public class UserService {
 
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    @PostAuthorize("returnObject.organizationId == principal.organizationId AND (principal.id == returnObject.id OR hasRole('ROLE_ORG_ADMIN'))")
+    @PostAuthorize("( (returnObject.organizationId == principal.organizationId OR principal.id == returnObject.id) OR hasRole('ROLE_ORG_ADMIN'))")
     public DirectoryUser findById(Integer id)  {
         return this.userRepository.findOne(id);
     }

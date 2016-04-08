@@ -67,8 +67,8 @@
                 controller: "UsersController",
                 controllerAs: "usersCtrl",
                 resolve: {
-                    users: ['$window', 'userService', function ($window, userService) {
-                        return userService.getUsers($window.activeUser.organizationId);
+                    users: ['$window', 'userService', 'organizationService', function ($window, userService, organizationService) {
+                        return userService.getUsers(organizationService.getActiveOrg().id);
                     }]
                 }
             })
@@ -105,8 +105,8 @@
 
     }
 
-    UsersController.$inject = [ '$window', 'userService', 'users'];
-    function UsersController($window, userService, users) {
+    UsersController.$inject = [ 'organizationService', '$window', 'userService', 'users'];
+    function UsersController(organizationService, $window, userService, users) {
         var self = this;
         self.users = users;
         self.roles = $window.roles;
@@ -133,7 +133,7 @@
                 roles: [],
                 username: '',
                 password: '',
-                organizationId: $window.activeUser.organizationId,
+                organizationId: organizationService.getActiveOrg().id,
                 editing: true
             };
             self.users.push(user);
@@ -144,7 +144,7 @@
         self.searchInput = '';
 
         function find() {
-            userService.getByName(self.searchInput,$window.activeUser.organizationId ).then(function(data){
+            userService.getByName(self.searchInput,organizationService.getActiveOrg.id ).then(function(data){
                 self.users = data;
             });
         };
@@ -414,6 +414,10 @@
 
         function isEditableByUser() {
 
+            if (userService.activeUser === null) {
+                return false;
+            }
+
             if (self.org.id === userService.activeUser.organizationId) {
                 return userService.hasRoleByName(userService.activeUser, 'ROLE_ORG_ADMIN');
             }
@@ -465,9 +469,9 @@
         };
     }
 
-    DirectoryController.$inject = ['$log', 'organizationService'];
+    DirectoryController.$inject = ['$log', 'organizationService', '$location'];
 
-    function DirectoryController($log, organizationService) {
+    function DirectoryController($log, organizationService, $location) {
 
         var self = this;
 
@@ -497,11 +501,13 @@
         }
 
         function createUser(org) {
-            console.log(organizationService.activeOrg);
+            console.log(organizationService.getActiveOrg());
 
-            organizationService.activeOrg = org;
+            organizationService.setActiveOrg(org);
 
-            console.log(organizationService.activeOrg );
+            console.log(organizationService.getActiveOrg() );
+
+            $location.path( "users" );
         };
 
 
@@ -705,19 +711,20 @@
             updateOrg: updateOrg,
             createOrg: createOrg,
             find: find,
-            activeOrg: null
+            getActiveOrg: getActiveOrg,
+            setActiveOrg: setActiveOrg
         };
-
-        initialize();
 
         return service;
 
+        var activeOrg;
 
+        function getActiveOrg() {
+            return activeOrg;
+        }
 
-        function initialize() {
-            find($window.activeUser.organizationId).then(function(orgs){
-               service.activeOrg = orgs[0];
-            });
+        function setActiveOrg(orgObj) {
+            activeOrg = orgObj;
         }
 
         function deleteOrg(org) {
