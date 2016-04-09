@@ -2,7 +2,9 @@ package org.pesc.api.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.api.StringUtils;
 import org.pesc.api.model.Organization;
+import org.pesc.api.model.SchoolCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -12,10 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -124,15 +123,8 @@ public class OrganizationService {
                 predicates.add(cb.equal(org.get("id"), directoryId));
             }
 
-            if(organizationCode!=null && organizationCode.trim().length()>0) {
-                predicates.add(cb.like(cb.lower(org.get("organizationCode")), "%" + organizationCode.trim().toLowerCase()));
-            }
 
-            if(organizationCodeType!=null && organizationCodeType.trim().length()>0) {
-                predicates.add(cb.like(cb.lower(org.get("organizationCodeType")), "%" + organizationCodeType.trim().toLowerCase()));
-            }
-
-            if(organizationName!=null && organizationName.trim().length()>0) {
+            if(!StringUtils.isEmpty(organizationName)) {
                 // tokenize string by whitespace and use each token as
                 // a LIKE clause for the organizationName column
                 StringTokenizer orgNametokens = new StringTokenizer(organizationName.trim());
@@ -146,7 +138,7 @@ public class OrganizationService {
 
             }
 
-            if(organizationSubcode!=null && organizationSubcode.trim().length()>0) {
+            if( !StringUtils.isEmpty(organizationSubcode)) {
                 StringTokenizer subCodetokens = new StringTokenizer(organizationSubcode.trim());
                 while(subCodetokens.hasMoreElements()) {
                     String subCodetoken = subCodetokens.nextToken().toLowerCase();
@@ -158,11 +150,26 @@ public class OrganizationService {
                 predicates.add(cb.equal(org.get("type"), organizationType));
             }
 
-            if(organizationEin!=null && organizationEin.trim().length()>0) {
+            if(!StringUtils.isEmpty(organizationEin)) {
 
                 predicates.add(cb.like(cb.lower(org.get("ein")), "%" + organizationEin.trim().toLowerCase()));
 
             }
+
+            if ( !StringUtils.isEmpty(organizationCode) ) {
+
+                Join<SchoolCode, Organization> join = org.join("schoolCodes");
+                predicates.add(cb.equal(join.get("code"), organizationCode));
+
+                if (organizationCodeType != null) {
+                    predicates.add(cb.and(cb.equal(join.get("codeType"), organizationCodeType)));
+                }
+
+            }
+
+
+
+
 
             if(createdTime!=null) {
                 predicates.add(cb.equal(org.get("createdTime"), new Timestamp(createdTime)));

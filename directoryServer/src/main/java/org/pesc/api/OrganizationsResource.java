@@ -30,10 +30,6 @@ public class OrganizationsResource {
 
     private static final Log log = LogFactory.getLog(OrganizationsResource.class);
 
-    //The service wraps a OrganizationRepository, but not all of the repository methods are exposed,
-    //so both the repository and the service are wired here for convenience.
-    //TODO: expose all repository methods using the service or refactory the respository implementation
-    //to allow for custom query logic.
     @Autowired
     private OrganizationService organizationService;
 
@@ -44,8 +40,8 @@ public class OrganizationsResource {
             " when no search criteria are provided.")
     public List<Organization> findOrganization(
             @QueryParam("id") @ApiParam("The directory identifier for the organization.") Integer id,
-            @QueryParam("organizationCode") @ApiParam("A code such as CEEB code that identifies the organization.") String organizationCode,
-            @QueryParam("organizationCodeType") @ApiParam("Indicates the type of organization code, I.e. CEEB") String organizationCodeType,
+            @QueryParam("organizationCode") @ApiParam("A code such as ATP code that identifies the organization.") String organizationCode,
+            @QueryParam("organizationCodeType") @ApiParam("Indicates the type of organization code and should be one of the following: ACT, ATP, FICE, IPEDS.") String organizationCodeType,
             @QueryParam("name") @ApiParam("The case insensitive organization name or partial name.") String name,
             @QueryParam("subcode") @ApiParam("A proprietary code used to identify an organization.") String subcode,
             @QueryParam("type") @ApiParam("The type of organization (1 = Institution, 2 = Service Provider).") Integer type,

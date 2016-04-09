@@ -84,6 +84,7 @@ public class EndpointService {
      */
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<Endpoint> search(
+            String documentFormat,
             Integer endpointId,
             Integer organizationId
     ) {
@@ -105,6 +106,9 @@ public class EndpointService {
             }
             if (endpointId != null) {
                 predicates.add(cb.equal(endpoint.get("id"), endpointId));
+            }
+            if (documentFormat != null) {
+                predicates.add(cb.equal(endpoint.get("documentFormat").get("name"), documentFormat));
             }
 
 

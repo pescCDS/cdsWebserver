@@ -44,6 +44,7 @@ public class EndpointResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Search endpoints based on the search parameters.")
     public List<Endpoint> findEndpoint(
+            @QueryParam("documentFormat") String documentFormat,
             @QueryParam("id") @ApiParam("The identifier for the endpoint.") Integer id,
             @QueryParam("organizationId") @ApiParam(value = "The endpoint's organization ID.", required = true) Integer organizationId
     ) {
@@ -51,6 +52,7 @@ public class EndpointResource {
         checkOrganizationParameter(organizationId);
 
         return endpointService.search(
+                documentFormat,
                 id,
                 organizationId);
     }

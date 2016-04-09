@@ -488,6 +488,10 @@
         self.findOrganizations = findOrganizations;
         self.removeOrgFromModel = removeOrgFromModel;
         self.createUser = createUser;
+        self.schoolCodeType = '';
+        self.schoolCode = '';
+        self.orgName = '';
+        self.resetSearch = resetSearch;
 
         activate();
 
@@ -497,6 +501,13 @@
                 console.log('Activated Organizations View');
             });
         }
+
+        function resetSearch() {
+            self.orgName = '';
+            self.schoolCode = '';
+            self.schoolCodeType = '';
+        }
+
 
         function getOrganizations() {
             return organizationService.getOrganizations().then(function(data){
@@ -532,11 +543,8 @@
 
         };
 
-
-        self.searchInput = '';
-
         function findOrganizations() {
-            organizationService.getByName(self.searchInput).then(function(data){
+            organizationService.search(self.orgName, self.schoolCode, self.schoolCodeType).then(function(data){
                 self.organizations = data;
             });
         };
@@ -717,6 +725,7 @@
             find: find,
             getActiveOrg: getActiveOrg,
             setActiveOrg: setActiveOrg,
+            search: search,
             initialize: initialize
         };
 
@@ -833,6 +842,28 @@
 
             $http.get('/services/rest/v1/organizations', {
                 'params': {'name': name},
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching the organization.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function search(name,organizationCode,organizationCodeType) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations', {
+                'params': {
+                    'name': name,
+                    'organizationCode': organizationCode,
+                    'organizationCodeType': organizationCodeType
+                },
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);

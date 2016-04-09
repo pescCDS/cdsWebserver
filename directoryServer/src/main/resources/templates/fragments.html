@@ -805,11 +805,30 @@
 
             <div class="form-inline">
                 <div class="form-group">
-                    <input class="form-control" type="text" ng-model="orgCtrl.searchInput" placeholder="Organization Name"> </input>
-                    <button class="btn btn-default" ng-click="orgCtrl.findOrganizations()">
-                        <i class="glyphicon glyphicon-search"></i> Search
-                    </button>
+                    <input class="form-control" type="text" ng-model="orgCtrl.orgName" placeholder="Organization Name"> </input>
                 </div>
+
+                <div class="form-group">
+
+                    <div class="btn-group">
+                        <label class="btn btn-primary" ng-model="orgCtrl.schoolCodeType" uib-btn-radio="'ATP'">ATP</label>
+                        <label class="btn btn-primary" ng-model="orgCtrl.schoolCodeType" uib-btn-radio="'FICE'">FICE</label>
+                        <label class="btn btn-primary" ng-model="orgCtrl.schoolCodeType" uib-btn-radio="'ACT'">ACT</label>
+                        <label class="btn btn-primary" ng-model="orgCtrl.schoolCodeType" uib-btn-radio="'IPEDS'">IPEDS</label>
+                    </div>
+
+                    <input class="form-control" type="text" ng-model="orgCtrl.schoolCode" placeholder="Code"> </input>
+
+                </div>
+
+                <button class="btn btn-default" ng-click="orgCtrl.resetSearch()">
+                    <i class="glyphicon glyphicon-refresh"></i> Reset
+                </button>
+
+                <button class="btn btn-default" ng-click="orgCtrl.findOrganizations()">
+                    <i class="glyphicon glyphicon-search"></i> Search
+                </button>
+
 
             </div>
 
