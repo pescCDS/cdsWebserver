@@ -3,11 +3,10 @@ package org.pesc.api.model;
 /**
  * Created by james on 2/23/16.
  */
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -80,6 +79,12 @@ public class Organization implements Serializable {
     @OneToMany(fetch = FetchType.EAGER, targetEntity = SchoolCode.class, cascade = CascadeType.MERGE)
     @JoinColumn(name="organization_id")
     private List<SchoolCode> schoolCodes;
+
+
+    @OneToMany(fetch = FetchType.EAGER, targetEntity = Endpoint.class,  cascade = CascadeType.MERGE)
+    @JoinColumn(name="organization_id")
+    @XmlTransient
+    private List<Endpoint> endpoints;
 
     public String getName() {
         return this.name;
@@ -231,6 +236,14 @@ public class Organization implements Serializable {
 
     public void setSchoolCodes(List<SchoolCode> schoolCodes) {
         this.schoolCodes = schoolCodes;
+    }
+
+    public List<Endpoint> getEndpoints() {
+        return endpoints;
+    }
+
+    public void setEndpoints(List<Endpoint> endpoints) {
+        this.endpoints = endpoints;
     }
 
     @Override

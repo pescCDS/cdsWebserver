@@ -464,7 +464,7 @@
     <div>
 
         <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow">
-            <div th:if="${hasSystemAdminRole}" style="float: right;">
+            <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
                 <div class="btn-group">
                     <button ng-show="!orgCtrl.showOrgForm()" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg()">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
@@ -812,7 +812,7 @@
                     <input class="form-control" type="text" ng-model="orgCtrl.schoolCode" placeholder="Code"> </input>
 
 
-                    <select class="form-control" style="width: 160px;" required="required"
+                    <select class="form-control" style="width: 110px;" required="required"
                             ng-model="orgCtrl.schoolCodeType">
                         <option value="">Code Type</option>
                         <option value="ACT">ACT</option>

@@ -148,7 +148,7 @@
         self.searchInput = '';
 
         function find() {
-            userService.getByName(self.searchInput,organizationService.getActiveOrg.id ).then(function(data){
+            userService.getByName(self.searchInput,organizationService.getActiveOrg().id ).then(function(data){
                 self.users = data;
             });
         };
@@ -360,7 +360,6 @@
         self.editOrg = editOrg;
         self.showOrgForm = showOrgForm;
         self.saveOrg = saveOrg;
-        self.getUsers = getUsers;
         self.isEditableByUser = isEditableByUser;
         self.createEndpoint = createEndpoint;
         self.getEndpoints = getEndpoints;
@@ -437,9 +436,6 @@
             });
         }
 
-        function getUsers() {
-
-        }
 
         function editOrg() {
             self.org['editing'] = true;
