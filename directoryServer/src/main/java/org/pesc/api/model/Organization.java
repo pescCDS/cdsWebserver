@@ -83,7 +83,6 @@ public class Organization implements Serializable {
 
     @OneToMany(fetch = FetchType.EAGER, targetEntity = Endpoint.class,  cascade = CascadeType.MERGE)
     @JoinColumn(name="organization_id")
-    @XmlTransient
     private List<Endpoint> endpoints;
 
     public String getName() {
@@ -238,6 +237,7 @@ public class Organization implements Serializable {
         this.schoolCodes = schoolCodes;
     }
 
+    @XmlTransient
     public List<Endpoint> getEndpoints() {
         return endpoints;
     }
