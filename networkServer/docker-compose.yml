@@ -1,0 +1,17 @@
+db_image:
+  build: ./target/docker/database
+  expose:
+   - "3306"
+  container_name: network-db
+app_image:
+  build: ./target/docker
+  volumes:
+     - ./target:/opt/edexchange
+  ports:
+   - "8080:8080"
+   - "8000:8000"
+  links:
+   - db_image
+  environment:
+   - SPRING_PROFILES_ACTIVE=qa
+  container_name: network-app

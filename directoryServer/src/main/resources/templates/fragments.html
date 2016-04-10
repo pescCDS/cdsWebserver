@@ -797,12 +797,13 @@
 
 <div th:fragment="organizations">
 
-    <div>
-        <div class="sub-nav">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-sm-3">
             <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default" ng-click="orgCtrl.createOrg()">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Organization
             </button>
-
+        </div>
+        <div class="col-sm-9">
             <div class="pull-right form-inline">
                 <div class="form-group">
                     <input class="form-control" type="text" ng-model="orgCtrl.orgName" placeholder="Organization Name"> </input>
@@ -849,6 +850,7 @@
         </ul>
     </div>
 </div>
+
 </body>
 </html>
 
