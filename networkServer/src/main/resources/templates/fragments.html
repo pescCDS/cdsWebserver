@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>An Error Occurred</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+<div th:fragment="transactions">
+
+    <form name="transactionFrom"  ng-submit="transactionForm.$valid && transactionCtrl.getTransactions()" novalidate="novalidate" class="glow">
+
+        <div class="form-group">
+            <strong>Status</strong>
+            <div class="btn-group">
+                <label class="btn btn-primary" ng-model="transactionCtrl.status" uib-btn-radio="'Incomplete'">Incomplete</label>
+                <label class="btn btn-primary" ng-model="transactionCtrl.status" uib-btn-radio="'Complete'">Complete</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <strong>From/To</strong>
+            <div class="row">
+                <div class="col-md-3">
+                    <p class="input-group">
+                        <input type="text" class="form-control" placeholder="MM/DD/YYYY"  uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.startDate" is-open="transactionCtrl.startDatePopup.opened" datepicker-options="dateOptions" ng-required="true" close-text="Close"  />
+                          <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="transactionCtrl.openStartDatePopup()"><i class="glyphicon glyphicon-calendar"></i></button>
+                          </span>
+                    </p>
+                </div>
+
+                <div class="col-md-3">
+                    <p class="input-group">
+                        <input type="text" class="form-control" placeholder="MM/DD/YYYY" uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.endDate" is-open="transactionCtrl.endDatePopup.opened" datepicker-options="dateOptions" ng-required="true" close-text="Close" />
+                        <span class="input-group-btn">
+                           <button type="button" class="btn btn-default" ng-click="transactionCtrl.openEndDatePopup()"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <strong>Fetch Size</strong>
+            <div>
+                <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.fetchSize" min="1" max="99" required>
+            </div>
+        </div>
+
+
+
+        <div class="btn-group">
+
+            <button type="submit" class="btn btn-default">
+                <span class="glyphicon glyphicon-cloud-download"></span> Get Transactions
+            </button>
+        </div>
+
+    </form>
+
+    <div style="margin-top: 20px;">
+        <table st-table="transactionCtrl.transactions" class="table table-striped">
+            <thead>
+            <tr>
+                <th>Recipient ID</th>
+                <th>Network Server ID</th>
+                <th>Sender ID</th>
+                <th>Direction</th>
+                <th>File Format</th>
+                <th>File Size</th>
+                <th>File Path</th>
+                <th>Sent</th>
+                <th>Received</th>
+                <th>Error</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="tran in transactionCtrl.transactions">
+                <td>{{tran.recipientID}}</td>
+                <td>{{tran.networkServerID}}</td>
+                <td>{{tran.direction}}</td>
+                <td>{{tran.recipientID}}</td>
+                <td>{{tran.documentFormat}}</td>
+                <td>{{tran.fileSize}}</td>
+                <td>{{tran.filePath}}</td>
+                <td>{{tran.sent}}</td>
+                <td>{{tran.received}}</td>
+                <td>{{tran.error}}</td>
+                <td>{{tran.status}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+
+</div>
+
+<div th:fragment="transfers">
+    <form name="transferForm"  ng-submit="transferForm.$valid && transferCtrl.transferFile()" novalidate="novalidate">
+
+
+        <div>
+
+            <div class="form-group">
+                <strong>Recipient</strong>
+                    <span>
+                         <input class="form-control" type="text" placeholder="Recipient Name" ng-model="transferCtrl.recipientName" > </input>
+                    </span>
+            </div>
+            <div  class="form-group">
+                <strong>Sender</strong>
+                    <span>
+                         <input class="form-control" type="text" placeholder="Sender Name" ng-model="transferCtrl.senderName" > </input>
+                    </span>
+            </div>
+
+            <div  class="form-group">
+                <strong>Endpoint</strong>
+                    <span>
+                         <input class="form-control" type="url" placeholder="Endpoint URL" ng-model="transferCtrl.endpointURL" > </input>
+                    </span>
+            </div>
+
+
+            <div class="form-group">
+                <strong>Document Format</strong>
+                <select class="form-control" style="width: 160px;" required="required"
+                        ng-model="transferCtrl.documentFormat"
+                        ng-options="documentFormat.name for documentFormat in transferCtrl.documentFormats track by documentFormat.id">
+
+                </select>
+                <p>
+                    {{documentFormat.description}}
+                </p>
+            </div>
+
+            <div class="form-group">
+                <div><strong>Transcript File</strong></div>
+                <div class="btn btn-default btn-file">
+                    Browse <input type="file" name="file" />
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn btn-default">
+                <span class="glyphicon glyphicon-send"></span> Send
+            </button>
+        </div>
+    </form>
+</div>
+
+<div th:fragment="about">
+    <div>
+
+        <!-- Marketing Icons Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">
+                    <a href="http://www.pesc.org/interior.php?page_id=217">EDExchange by the Common Data Services (CDS) Task Force</a>
+                </h1>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4><i class="fa fa-fw fa-check"></i>EDExchange</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            The mission of the PESC Common Data Services taskforce is to improve security, reliability, efficiency and speed in the transfer of all educational data types by developing an open web services network and associated standards to benefit the education of students, streamline processes for institutions, and facilitate the advancement of services offered for education. (12.2011)
+                        </p>
+                        <a href="#about" class="btn btn-default">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4><i class="fa fa-fw fa-gift"></i> Free &amp; Open Source</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>The establishment of an open, data exchange network for the education community.</p>
+                        <a href="#about" class="btn btn-default">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4><i class="fa fa-fw fa-compass"></i> Easy to Use</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque, optio corporis quae nulla aspernatur in alias at numquam rerum ea excepturi expedita tenetur assumenda voluptatibus eveniet incidunt dicta nostrum quod?</p>
+                        <a href="#about" class="btn btn-default">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- Portfolio Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-header">Portfolio Heading</h2>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <a href="portfolio-item.html">
+                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+                </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <a href="portfolio-item.html">
+                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+                </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <a href="portfolio-item.html">
+                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+                </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <a href="portfolio-item.html">
+                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+                </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <a href="portfolio-item.html">
+                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+                </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <a href="portfolio-item.html">
+                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+                </a>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- Features Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-header">EDExchange Features</h2>
+            </div>
+            <div class="col-md-6">
+                <p>EDExchange project features:</p>
+                <ul class="list-unstyled">
+                    <li>
+                        <strong>Open Source</strong>
+                    </li>
+                    <li>Directory Server</li>
+                    <li>Network Server</li>
+                    <li>Exchange any type of document with member organizations.</li>
+                </ul>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis, omnis doloremque non cum id reprehenderit, quisquam totam aspernatur tempora minima unde aliquid ea culpa sunt. Reiciendis quia dolorum ducimus unde.</p>
+            </div>
+            <div class="col-md-6">
+                <img class="img-responsive" src="http://placehold.it/700x450" alt="">
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <hr>
+
+        <!-- Call to Action Section -->
+        <div class="well">
+            <div class="row">
+                <div class="col-md-8">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias, expedita, saepe, vero rerum deleniti beatae veniam harum neque nemo praesentium cum alias asperiores commodi.</p>
+                </div>
+                <div class="col-md-4">
+                    <a class="btn btn-lg btn-default btn-block" href="#directory">Directory</a>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>EDExchange by the Common Data Services (CDS) Task Force</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+</div>
+
+</body>
+</html>
+
