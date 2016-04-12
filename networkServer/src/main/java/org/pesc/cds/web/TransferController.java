@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,6 +46,30 @@ public class TransferController {
 	@Value("${directory.server.port}")
 	private String directortyServerPort;
 
+
+	@Value("${networkServer.id}")
+	private String localServerId;
+
+	@Value("${networkServer.name}")
+	private String localServerName;
+
+	@Value("${networkServer.subcode}")
+	private String localServerSubcode;
+
+	@Value("${networkServer.ein}")
+	private String localServerEIN;
+
+	@Value("${networkServer.webServiceURL}")
+	private String localServerWebServiceURL;
+
+	@Value("${networkServer.outbox.path}")
+	private String localServerOutboxPath;
+
+	@Value("${networkServer.inbox.path}")
+	private String localServerInboxPath;
+
+	@Value("${networkServer.file.path}")
+	private String localServerFilePath;
 
 	@Autowired
 	private TransactionsDao transactionsDao;
@@ -68,7 +93,7 @@ public class TransferController {
 	 * </ul>
 	 * 
 	 * @param recipientId     Will use the recipientId to send to end point 
-	 * @param file            <code>MultipartFile (required)</code> 
+	 * @param multipartFile            <code>MultipartFile (required)</code>
 	 * @param networkServerId id of sending network server 
 	 * @param senderId        id of sending organization 
 	 * @param fileFormat      compliant file format 
@@ -78,8 +103,9 @@ public class TransferController {
 	 */
 	@RequestMapping(value="/sendFile", method= RequestMethod.POST)
 	public ModelAndView sendFile(
+			HttpServletRequest request,
 			@RequestParam(value="recipientId", required=true) Integer recipientId,
-			@RequestParam(value="file") MultipartFile file,
+			@RequestParam(value="file") MultipartFile multipartFile,
 			@RequestParam(value="networkServerId", required=true) Integer networkServerId,
 			@RequestParam(value="senderId") Integer senderId,
 			@RequestParam(value="fileFormat", required=true) String fileFormat,
@@ -90,17 +116,26 @@ public class TransferController {
 		
 		ModelAndView mav = new ModelAndView("redirect:/transfer");
 
-		if (!file.isEmpty()) {
+		if (!multipartFile.isEmpty()) {
 	        try {
-	        	
+
+
+				File outboxDirectory = new File( request.getServletContext().getRealPath("/") + localServerOutboxPath);
+				outboxDirectory.mkdirs();
+
+				File outboxFile =  File.createTempFile(multipartFile.getOriginalFilename(), fileFormat, outboxDirectory);
+
+				multipartFile.transferTo(outboxFile);
+
 	        	// write action to database
 	            // [RECEIVED FILE] recipientId:p1, neworkServerId:p3, senderId:p4, fileFormat:p5, fileSize:p6
 	            Transaction tx = new Transaction();
 	            tx.setRecipientId(recipientId);
 	            tx.setNetworkServerId(networkServerId);
-	            tx.setSenderId(senderId==null ? networkServerId : senderId);
+	            tx.setSenderId(senderId == null ? networkServerId : senderId);
 	            tx.setFileFormat(fileFormat);
-	            tx.setFileSize(file.getSize());
+				tx.setFilePath(outboxFile.getAbsolutePath());
+	            tx.setFileSize(multipartFile.getSize());
 	            tx.setDirection("SEND");
 	            tx.setSent(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 	        	
@@ -124,12 +159,12 @@ public class TransferController {
 	            	HttpPost post = new HttpPost(webServiceUrl);
 	            	
 	            	HttpEntity reqEntity = MultipartEntityBuilder.create()
-            			.addPart("recipientId", new StringBody(DatasourceManagerUtil.getIdentification().getId().toString()))
+            			.addPart("recipientId", new StringBody(localServerId))
             			.addPart("networkServerId", new StringBody(recipientId.toString()))
             			.addPart("fileFormat", new StringBody(fileFormat))
             			.addPart("transactionId", new StringBody(tx.getId().toString()))
-            			.addPart("webServiceUrl", new StringBody(DatasourceManagerUtil.getIdentification().getWebServiceUrl()))
-            			.addPart("file", new FileBody((File)file))
+            			.addPart("webServiceUrl", new StringBody(localServerWebServiceURL))
+            			.addPart("file", new FileBody(outboxFile))
             			.build();
 	            	post.setEntity(reqEntity);
 	            	
@@ -141,10 +176,12 @@ public class TransferController {
 	            
 	            
 	        } catch (Exception e) {
+				log.error(e);
 	        	redir.addAttribute("error", true);
 	        	redir.addAttribute("status", String.format("upload failed: %s", e.getMessage()));
 	        }
 	    } else {
+
 	    	redir.addAttribute("error", true);
 	    	redir.addAttribute("status", "missing file");
 	    }
@@ -156,47 +193,55 @@ public class TransferController {
 	 * When another network server sends a file
 	 * 
 	 * @param recipientId    In this case this is the network server that we need to send the response to
-	 * @param file           The transferred file
+	 * @param multipartFile           The transferred file
 	 * @param fileFormat     The expected format of the file
 	 * @param transactionId  This is the identifier of the transaction record from the sending network server, we send it back
 	 * @param webServiceUrl  This is the url to the network server that we will send the response back to
 	 */
 	@RequestMapping(value="/receiveFile", method= RequestMethod.POST)
 	public void receiveFile(
+			HttpServletRequest request,
 			@RequestParam(value="recipientId", required=true) Integer recipientId,
 			@RequestParam(value="networkServerId", required=true) Integer networkServerId,
-			@RequestParam(value="file") MultipartFile file,
+			@RequestParam(value="file") MultipartFile multipartFile,
 			@RequestParam(value="fileFormat", required=true) String fileFormat,
 			@RequestParam(value="transactionId", required=true) Integer transactionId,
 			@RequestParam(value="webServiceUrl", required=true) String webServiceUrl
 		) {
 		
 		log.debug(String.format("received file from network server " + recipientId));
-		
+
 		Transaction tx = new Transaction();
 		// we need the directoryId for this organization in the organizations table
 		tx.setRecipientId(networkServerId);
         tx.setNetworkServerId(recipientId);
         tx.setFileFormat(fileFormat);
-        tx.setFileSize(file.getSize());
+        tx.setFileSize(multipartFile.getSize());
         tx.setDirection("RECEIVE");
         tx.setReceived(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         tx.setStatus(true);
 		
         Transaction savedTx = transactionsDao.save(tx);
-        
-        //save file to network server save directory
-        Path path = Paths.get( String.format("%s/%s/%s", DatasourceManagerUtil.getSystemProperties().getFilePath(), tx.getId(), file.getOriginalFilename()) );
+
+		File inboxDirectory = new File(request.getServletContext().getRealPath("/") + localServerInboxPath);
+		inboxDirectory.mkdirs();
+
+
+
 		try {
-	        byte[] bytes = file.getBytes();
-	    	File f = new File( path.toString() );
+
+			File f =  File.createTempFile(multipartFile.getOriginalFilename(), fileFormat, inboxDirectory);
+
+
+			byte[] bytes = multipartFile.getBytes();
+
 	    	File fp = f.getParentFile();
 	    	if(!fp.exists() && !fp.mkdirs()) {
 	    		tx.setError("Could not create directory: " + fp);
 			} else {
 				try {
 					if(!f.createNewFile()) {
-						tx.setError(String.format("file %s already exists", file.getOriginalFilename()));
+						tx.setError(String.format("file %s already exists", multipartFile.getOriginalFilename()));
 					} else {
 						tx.setFilePath(f.getPath());
 						BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(f));
@@ -212,7 +257,7 @@ public class TransferController {
 		} catch(Exception ex) {
 			tx.setError(ex.getMessage());
 		}
-		
+
 		transactionsDao.save(tx);
 		
 		// send response back to sending network server

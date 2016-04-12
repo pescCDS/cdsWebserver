@@ -4,8 +4,10 @@
         .filter('friendlyRoleName', friendlyRoleName)
         .filter('getByProperty', getByProperty)
         .directive('toNumber', toNumber)
+        .directive('fileModel', fileModel)
         .service('transactionService', transactionService)
         .service('notificationService', notificationService)
+        .service('fileUpload', fileUpload)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
         .controller("TransferController", TransferController)
@@ -97,8 +99,8 @@
     }
 
 
-    TransferController.$inject = ['$http'];
-    function TransferController($http) {
+    TransferController.$inject = ['fileUpload'];
+    function TransferController(fileUpload) {
         var self = this;
 
         self.transfers = [];
@@ -109,10 +111,11 @@
         self.recipientName = '';
         self.senderName = '';
         self.endpointURL = 'http://';
+        self.fileToUpload = '';
 
         function transferFile() {
             console.log("Transfer file.");
-
+            fileUpload.uploadFileToUrl(self.fileToUpload, self.endpointURL);
         }
 
         function getSupportedDocumentFormatsForEndpoint() {
@@ -161,6 +164,39 @@
     }
 
 
+    fileUpload.$inject = [ '$http', 'notificationService'] ;
+
+    function fileUpload($http, notificationService) {
+        var service = {
+            uploadFileToUrl: uploadFileToUrl
+        } ;
+
+        return service;
+
+        function uploadFileToUrl(file, uploadUrl){
+            var fd = new FormData();
+            fd.append('file', file);
+            fd.append('recipientId', 1);
+            fd.append('networkServerId', 2);
+            fd.append('senderId', 3);
+            fd.append('fileFormat', 'PDF');
+            fd.append('webServiceUrl', uploadUrl);
+
+            $http.post('/sendFile', fd, {
+                transformRequest: angular.identity,
+                headers: {'Content-Type': undefined}
+            })
+            .success(function(data){
+                notificationService.success("Successfully uploaded file.");
+            })
+            .error(function(data){
+                notificationService.error("Failed to upload file.");
+            });
+        }
+
+    }
+
+
     transactionService.$inject = [ '$http', '$q', '$cacheFactory', 'notificationService'];
 
     function transactionService($http, $q, $cacheFactory, notificationService) {
@@ -180,7 +216,7 @@
 
             var deferred = $q.defer();
 
-            $http.get('/services/rest/v1/transactions', {
+            $http.get('/getTransactions', {
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
@@ -192,6 +228,24 @@
             return deferred.promise;
         }
     }
+
+    fileModel.$inject = [ '$parse' ];
+
+    function fileModel($parse) {
+        return {
+            restrict: 'A',
+            link: function(scope, element, attrs) {
+                var model = $parse(attrs.fileModel);
+                var modelSetter = model.assign;
+
+                element.bind('change', function(){
+                    scope.$apply(function(){
+                        modelSetter(scope, element[0].files[0]);
+                    });
+                });
+            }
+        };
+    };
 
 
     function toNumber() {
