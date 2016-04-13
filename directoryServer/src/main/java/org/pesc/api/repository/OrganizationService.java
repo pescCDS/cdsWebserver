@@ -169,8 +169,6 @@ public class OrganizationService {
 
 
 
-
-
             if(createdTime!=null) {
                 predicates.add(cb.equal(org.get("createdTime"), new Timestamp(createdTime)));
             }

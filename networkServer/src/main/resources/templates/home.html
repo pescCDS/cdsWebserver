@@ -46,7 +46,7 @@
                         <a th:href="'http://' + ${directoryServer} + '/swagger-ui/index.html'">Docs</a>
                     </li>
                     <li th:if="${isAuthenticated}" ng-class="{ active: nav.isActive('/settings')}">
-                        <a class="item" href="#transactions">Transactions</a>
+                        <a class="item" href="#transaction-report">Transactions</a>
                     </li>
                     <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/myorg')}">
                         <a class="item" href="#transfers">Transfers</a>

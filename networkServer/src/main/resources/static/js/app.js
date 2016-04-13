@@ -3,6 +3,19 @@
     var app = angular.module('networkServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate'])
         .filter('friendlyRoleName', friendlyRoleName)
         .filter('getByProperty', getByProperty)
+            .filter('bytes', function() {
+            return function(bytes, precision) {
+                if (bytes === 0) { return '0 bytes' }
+                if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
+                if (typeof precision === 'undefined') precision = 1;
+
+                var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
+                    number = Math.floor(Math.log(bytes) / Math.log(1024)),
+                    val = (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision);
+
+                return  (val.match(/\.0*$/) ? val.substr(0, val.indexOf('.')) : val) +  ' ' + units[number];
+            }
+        })
         .directive('toNumber', toNumber)
         .directive('fileModel', fileModel)
         .service('transactionService', transactionService)
@@ -20,10 +33,15 @@
 
     function config($routeProvider) {
         $routeProvider
-            .when("/transactions", {
-                templateUrl: "transactions",
+            .when("/transaction-report", {
+                templateUrl: "transaction-report",
                 controller: "TransactionController",
-                controllerAs: 'transactionCtrl'
+                controllerAs: 'transactionCtrl',
+                resolve: {
+                    transactions: ['transactionService', function (transactionService) {
+                        return transactionService.getTransactions(null,null,null,100);
+                    }]
+                }
             })
             .when("/transfers", {
                 templateUrl: "transfers",
@@ -33,23 +51,24 @@
             .when("/home", {
                 templateUrl: "about"
             })
+
             .otherwise({
                 redirectTo: "home"
             });
     }
 
-    TransactionController.$inject = ['transactionService'];
-    function TransactionController(transactionService) {
+    TransactionController.$inject = ['transactionService', 'transactions'];
+    function TransactionController(transactionService, transactions) {
         var self = this;
 
-        self.transactions = [];
+        self.transactions = transactions;
         self.status = '';
         self.startDate = '';
         self.stopDate = '';
         self.openStartDatePopup = openStartDatePopup;
         self.openEndDatePopup = openEndDatePopup;
 
-        self.fetchSize = 1;
+        self.fetchSize = 100;
 
         self.startDatePopup = {
             opened: false
@@ -66,10 +85,8 @@
             startingDay: 1
         };
 
+        self.getTransactions = getTransactions;
 
-
-
-        //getTransactions();
 
         function today() {
             self.startDate = new Date();
@@ -91,7 +108,7 @@
 
 
         function getTransactions() {
-            transactionService.getTransactions().then(function(data){
+            transactionService.getTransactions(self.status,self.startDate,self.endDate,self.fetchSize).then(function(data){
                 self.transactions = data;
 
             });
@@ -182,7 +199,7 @@
             fd.append('fileFormat', 'PDF');
             fd.append('webServiceUrl', uploadUrl);
 
-            $http.post('/sendFile', fd, {
+            $http.post('/documents/outbox', fd, {
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
             })
@@ -212,11 +229,17 @@
         }
 
 
-        function getTransactions() {
+        function getTransactions(status, startDate, endDate, fetchSize) {
 
             var deferred = $q.defer();
 
-            $http.get('/getTransactions', {
+            $http.get('/transactions', {
+                'params': {
+                    'fetchSize': fetchSize,
+                    'from': startDate,
+                    'to' : endDate,
+                    'status': status
+                },
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);

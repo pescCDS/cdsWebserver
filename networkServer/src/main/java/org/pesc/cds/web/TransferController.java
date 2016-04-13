@@ -6,15 +6,17 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.pesc.cds.domain.Transaction;
-import org.pesc.cds.domain.TransactionsDao;
-import org.pesc.cds.service.DatasourceManagerUtil;
+import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -22,21 +24,25 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 @Controller
+@RequestMapping(value="/documents")
 public class TransferController {
 	
 	private static final Log log = LogFactory.getLog(TransferController.class);
@@ -72,15 +78,7 @@ public class TransferController {
 	private String localServerFilePath;
 
 	@Autowired
-	private TransactionsDao transactionsDao;
-
-
-	@RequestMapping({ "/transfer" })
-	public String viewHome(Model model) {
-		model.addAttribute("directoryServer", directoryServer + ":" + directortyServerPort);
-
-		return "transfer";
-	}
+	private TransactionService transactionService;
 
 
 
@@ -101,7 +99,7 @@ public class TransferController {
 	 * @param webServiceUrl   <code>String</code>
 	 * @return
 	 */
-	@RequestMapping(value="/sendFile", method= RequestMethod.POST)
+	@RequestMapping(value="/outbox", method= RequestMethod.POST)
 	public ModelAndView sendFile(
 			HttpServletRequest request,
 			@RequestParam(value="recipientId", required=true) Integer recipientId,
@@ -113,8 +111,8 @@ public class TransferController {
 			@RequestParam(value="webServiceUrl", required=true) String webServiceUrl,
 			RedirectAttributes redir
 		) {
-		
-		ModelAndView mav = new ModelAndView("redirect:/transfer");
+
+		ModelAndView mav = new ModelAndView("redirect:/transfers");
 
 		if (!multipartFile.isEmpty()) {
 	        try {
@@ -123,8 +121,7 @@ public class TransferController {
 				File outboxDirectory = new File( request.getServletContext().getRealPath("/") + localServerOutboxPath);
 				outboxDirectory.mkdirs();
 
-				File outboxFile =  File.createTempFile(multipartFile.getOriginalFilename(), fileFormat, outboxDirectory);
-
+				File outboxFile = new File(outboxDirectory, multipartFile.getOriginalFilename());
 				multipartFile.transferTo(outboxFile);
 
 	        	// write action to database
@@ -140,7 +137,7 @@ public class TransferController {
 	            tx.setSent(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 	        	
 	        	// update response map
-	            Transaction savedTx = transactionsDao.save(tx);
+	            Transaction savedTx = transactionService.create(tx);
 	            
 	            log.debug(String.format(
 	            	"saved Transaction: {%n  recipientId: %s,%n  networkServerId: %s,%n  senderId: %s,%n  fileFormat: %s%n}",
@@ -167,8 +164,22 @@ public class TransferController {
             			.addPart("file", new FileBody(outboxFile))
             			.build();
 	            	post.setEntity(reqEntity);
-	            	
-	            	client.execute(post);
+
+					CloseableHttpResponse response = client.execute(post);
+
+		            try {
+						log.debug(response.getStatusLine());
+						HttpEntity resEntity = response.getEntity();
+						if (resEntity != null) {
+							log.debug("Response content length: " + resEntity.getContentLength());
+						}
+						EntityUtils.consume(resEntity);
+					}
+					finally {
+						response.close();
+					}
+
+
 	            	
 	            } finally {
 	            	client.close();
@@ -185,7 +196,7 @@ public class TransferController {
 	    	redir.addAttribute("error", true);
 	    	redir.addAttribute("status", "missing file");
 	    }
-		
+
 		return mav;
 	}
 	
@@ -198,15 +209,15 @@ public class TransferController {
 	 * @param transactionId  This is the identifier of the transaction record from the sending network server, we send it back
 	 * @param webServiceUrl  This is the url to the network server that we will send the response back to
 	 */
-	@RequestMapping(value="/receiveFile", method= RequestMethod.POST)
+	@RequestMapping(value="/inbox", method= RequestMethod.POST)
 	public void receiveFile(
 			HttpServletRequest request,
-			@RequestParam(value="recipientId", required=true) Integer recipientId,
-			@RequestParam(value="networkServerId", required=true) Integer networkServerId,
+			@RequestParam(value="recipientId", required=false) Integer recipientId,
+			@RequestParam(value="networkServerId", required=false) Integer networkServerId,
 			@RequestParam(value="file") MultipartFile multipartFile,
-			@RequestParam(value="fileFormat", required=true) String fileFormat,
-			@RequestParam(value="transactionId", required=true) Integer transactionId,
-			@RequestParam(value="webServiceUrl", required=true) String webServiceUrl
+			@RequestParam(value="fileFormat", required=false) String fileFormat,
+			@RequestParam(value="transactionId", required=false) Integer transactionId,
+			@RequestParam(value="webServiceUrl", required=false) String webServiceUrl
 		) {
 		
 		log.debug(String.format("received file from network server " + recipientId));
@@ -221,16 +232,16 @@ public class TransferController {
         tx.setReceived(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         tx.setStatus(true);
 		
-        Transaction savedTx = transactionsDao.save(tx);
+        Transaction savedTx = transactionService.create(tx);
 
 		File inboxDirectory = new File(request.getServletContext().getRealPath("/") + localServerInboxPath);
 		inboxDirectory.mkdirs();
 
 
-
 		try {
 
-			File f =  File.createTempFile(multipartFile.getOriginalFilename(), fileFormat, inboxDirectory);
+
+			File f =  new File(inboxDirectory, savedTx.getId().toString()+"-"+multipartFile.getOriginalFilename());
 
 
 			byte[] bytes = multipartFile.getBytes();
@@ -258,7 +269,7 @@ public class TransferController {
 			tx.setError(ex.getMessage());
 		}
 
-		transactionsDao.save(tx);
+		transactionService.update(tx);
 		
 		// send response back to sending network server
 		try {
@@ -269,14 +280,48 @@ public class TransferController {
 			e.printStackTrace();
 		}
 	}
-	
-	@RequestMapping(value="/response", method= RequestMethod.POST)
-	public void acceptResponse(@RequestParam(value="transactionId", required=true) Integer transactionId) {
-		Transaction tx = transactionsDao.byId(transactionId);
-		if(tx!=null) {
-			tx.setStatus(true);
-			tx.setReceived(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-			transactionsDao.save(tx);
+
+
+	/**
+	 * List Files endpoint<p>
+	 * TODO finish this
+	 *
+	 * @return <code>List&lt;String&gt;</code> A list of paths to files uploaded to the server.
+	 */
+	@RequestMapping(value="/outbox", method= RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ResponseBody
+	public List<String> listFilesFromOutbox(HttpServletRequest request) {
+		List<String> retList = new ArrayList<String>();
+		File directory = new File(request.getServletContext().getRealPath("/") + localServerOutboxPath);
+		File[] fList = directory.listFiles();
+		for (File file : fList) {
+			if (file.isFile()){
+				retList.add(file.getName());
+			}
 		}
+		return retList;
+	}
+
+
+	/**
+	 * List Files endpoint<p>
+	 * TODO finish this
+	 *
+	 * @return <code>List&lt;String&gt;</code> A list of paths to files uploaded to the server.
+	 */
+	@RequestMapping(value="/inbox", method= RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ResponseBody
+	public List<String> listFilesFromInbox(HttpServletRequest request) {
+		List<String> retList = new ArrayList<String>();
+		File directory = new File(request.getServletContext().getRealPath("/") + localServerInboxPath);
+		File[] fList = directory.listFiles();
+		for (File file : fList) {
+			if (file.isFile()){
+				retList.add(file.getName());
+			}
+		}
+		return retList;
 	}
 }

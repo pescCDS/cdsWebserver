@@ -83,7 +83,7 @@ public class AppController {
         return "home";
     }
 
-    @RequestMapping("/transactions")
+    @RequestMapping("/transaction-report")
     public String getTransactionsPage(Model model) {
 
         buildCommonModel(model);
