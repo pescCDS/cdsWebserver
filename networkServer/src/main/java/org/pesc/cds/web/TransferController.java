@@ -14,13 +14,11 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedOutputStream;
@@ -74,8 +71,6 @@ public class TransferController {
 	@Value("${networkServer.inbox.path}")
 	private String localServerInboxPath;
 
-	@Value("${networkServer.file.path}")
-	private String localServerFilePath;
 
 	@Autowired
 	private TransactionService transactionService;
@@ -101,7 +96,6 @@ public class TransferController {
 	 */
 	@RequestMapping(value="/outbox", method= RequestMethod.POST)
 	public ModelAndView sendFile(
-			HttpServletRequest request,
 			@RequestParam(value="recipientId", required=true) Integer recipientId,
 			@RequestParam(value="file") MultipartFile multipartFile,
 			@RequestParam(value="networkServerId", required=true) Integer networkServerId,
@@ -118,7 +112,7 @@ public class TransferController {
 	        try {
 
 
-				File outboxDirectory = new File( request.getServletContext().getRealPath("/") + localServerOutboxPath);
+				File outboxDirectory = new File(localServerOutboxPath);
 				outboxDirectory.mkdirs();
 
 				File outboxFile = new File(outboxDirectory, multipartFile.getOriginalFilename());
@@ -211,7 +205,6 @@ public class TransferController {
 	 */
 	@RequestMapping(value="/inbox", method= RequestMethod.POST)
 	public void receiveFile(
-			HttpServletRequest request,
 			@RequestParam(value="recipientId", required=false) Integer recipientId,
 			@RequestParam(value="networkServerId", required=false) Integer networkServerId,
 			@RequestParam(value="file") MultipartFile multipartFile,
@@ -234,7 +227,7 @@ public class TransferController {
 		
         Transaction savedTx = transactionService.create(tx);
 
-		File inboxDirectory = new File(request.getServletContext().getRealPath("/") + localServerInboxPath);
+		File inboxDirectory = new File(localServerInboxPath);
 		inboxDirectory.mkdirs();
 
 
@@ -291,9 +284,9 @@ public class TransferController {
 	@RequestMapping(value="/outbox", method= RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
-	public List<String> listFilesFromOutbox(HttpServletRequest request) {
+	public List<String> listFilesFromOutbox() {
 		List<String> retList = new ArrayList<String>();
-		File directory = new File(request.getServletContext().getRealPath("/") + localServerOutboxPath);
+		File directory = new File(localServerOutboxPath);
 		File[] fList = directory.listFiles();
 		for (File file : fList) {
 			if (file.isFile()){
@@ -313,9 +306,9 @@ public class TransferController {
 	@RequestMapping(value="/inbox", method= RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
-	public List<String> listFilesFromInbox(HttpServletRequest request) {
+	public List<String> listFilesFromInbox() {
 		List<String> retList = new ArrayList<String>();
-		File directory = new File(request.getServletContext().getRealPath("/") + localServerInboxPath);
+		File directory = new File(localServerInboxPath);
 		File[] fList = directory.listFiles();
 		for (File file : fList) {
 			if (file.isFile()){

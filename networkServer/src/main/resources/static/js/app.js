@@ -9,7 +9,7 @@
                 if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
                 if (typeof precision === 'undefined') precision = 1;
 
-                var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
+                var units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB'],
                     number = Math.floor(Math.log(bytes) / Math.log(1024)),
                     val = (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision);
 
@@ -132,7 +132,7 @@
 
         function transferFile() {
             console.log("Transfer file.");
-            fileUpload.uploadFileToUrl(self.fileToUpload, self.endpointURL);
+            fileUpload.uploadFileToUrl(self.fileToUpload, self.endpointURL, self.documentFormat.name);
         }
 
         function getSupportedDocumentFormatsForEndpoint() {
@@ -190,13 +190,13 @@
 
         return service;
 
-        function uploadFileToUrl(file, uploadUrl){
+        function uploadFileToUrl(file, uploadUrl, fileFormat){
             var fd = new FormData();
             fd.append('file', file);
             fd.append('recipientId', 1);
-            fd.append('networkServerId', 2);
-            fd.append('senderId', 3);
-            fd.append('fileFormat', 'PDF');
+            fd.append('networkServerId', 1);
+            fd.append('senderId', 1);
+            fd.append('fileFormat', fileFormat );
             fd.append('webServiceUrl', uploadUrl);
 
             $http.post('/documents/outbox', fd, {

@@ -62,24 +62,18 @@
         <table st-table="transactionCtrl.transactions" class="table table-striped">
             <thead>
             <tr>
-                <th>Recipient ID</th>
-                <th>Network Server ID</th>
-                <th>Sender ID</th>
-                <th>Direction</th>
-                <th>Document Format</th>
-                <th>File Size</th>
-                <th>File Path</th>
-                <th>Sent</th>
-                <th>Received</th>
+                <th>Operation</th>
+                <th>Format</th>
+                <th>Size</th>
+                <th>Path</th>
+                <th>Send Date/Time</th>
+                <th>Received Date/Time</th>
                 <th>Error</th>
-                <th>Status</th>
+                <th>Received Ack</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="tran in transactionCtrl.transactions">
-                <td>{{tran.recipientId}}</td>
-                <td>{{tran.networkServerId}}</td>
-                <td>{{tran.senderid}}</td>
                 <td>{{tran.direction}}</td>
                 <td>{{tran.fileFormat}}</td>
                 <td>{{tran.fileSize  | bytes}}</td>
