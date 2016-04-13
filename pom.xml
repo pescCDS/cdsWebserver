@@ -1,83 +1,30 @@
-<?xml version="1.0" ?>
-<project     xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                    http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.cds.pesc.WebServices</groupId>
-	<artifactId>EdExchange</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>PESC CDS EdExchange</name>
-	<description>
-	Common Data Services Postsecondary Electronic Standards Council (PESC) EdExchange project.
-	This project will build the CDS Network Server war file as well as a Directory Server war 
-	for local development testing.
-	</description>
-	
-	<modules>
-        <module>EdExchangeCore</module>
+<?xml version="1.0" encoding="UTF-8"?>
+<project     xmlns="http://maven.apache.org/POM/4.0.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.pesc.cds</groupId>
+    <artifactId>EdExchange</artifactId>
+    <version>0.1.4-SNAPSHOT</version>
+
+    <packaging>pom</packaging>
+    <name>PESC CDS EdExchange</name>
+    <description>
+        Common Data Services Postsecondary Electronic Standards Council (PESC) EdExchange project.
+        This project will build the CDS Network Server war file as well as a Directory Server war
+        for local development testing.
+    </description>
+
+    <modules>
         <module>directoryServer</module>
         <module>networkServer</module>
     </modules>
-	
-	<properties>
-	    <edexchange.system.version>0.1.1-SNAPSHOT</edexchange.system.version>
-	    <core.version>0.1.1-SNAPSHOT</core.version>
-	    
-	    <cxf.version>3.0.0</cxf.version>
-	    <cxf.xjc-utils.version>2.6.0</cxf.xjc-utils.version>
-	    <jaxb2.plugin.version>1.6</jaxb2.plugin.version>
-        <hibernate.tools.version>3.2.4.ga</hibernate.tools.version>
-        <hibernate.version>3.2.7.ga</hibernate.version>
-        <hibernate.core.version>3.6.9.Final</hibernate.core.version>
-        <hibernate.annotations.version>3.3.1.ga</hibernate.annotations.version>
-        <hibernate.commons.annotations.version>3.3.0.ga</hibernate.commons.annotations.version>
-        <log4j.version>1.2.9</log4j.version>
-        <slf4j.version>1.7.7</slf4j.version>
-        <commons.logging.version>1.1.3</commons.logging.version>
-        <mysql.connector.version>5.1.6</mysql.connector.version>
-        <junit.version>4.1.0</junit.version>
-        <spring.web.version>3.2.8.RELEASE</spring.web.version>
-	    
-	    <!-- prevents cp1252 encoding warning on windows environments -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        
-        <tomcat.admin.username>tomcat</tomcat.admin.username>
-        <tomcat.admin.pass>tomcat</tomcat.admin.pass>
-	</properties>
-	
+
+
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <!-- Tomcat7 Plugin
-                    Can be used to either push to an existing tomcat server, or run in 
-                    an embedded tomcat server
-                    mvn clean install
-                    mvn tomcat7:run-war
-                    -->
-                    <groupId>org.apache.tomcat.maven</groupId>
-                    <artifactId>tomcat7-maven-plugin</artifactId>
-                    <version>2.1</version>
-                    <configuration>
-                        <server>local.dev</server>
-                        <url>http://localhost:8080/manager/text</url>
-                        <path>/directoryServer</path>
-                        <warFile>${basedir}/target/directoryServer-${core.version}.war</warFile>
-                        <username>${tomcat.admin.username}</username>
-                        <password>${tomcat.admin.pass}</password>
-                    </configuration>
-                    <dependencies>
-                       <dependency>
-                           <groupId>org.cds.pesc.WebServices</groupId>
-                           <artifactId>EdExchangeCore</artifactId>
-                           <version>${core.version}</version>
-                       </dependency>
-                    </dependencies>
-                </plugin>
-                
                 <!-- per the spec, using JDK 1.7 -->
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -86,114 +33,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                         <target>1.7</target>
                     </configuration>
                 </plugin>
-                
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>1.6</version>
-                </plugin>
             </plugins>
         </pluginManagement>
-        
-        <plugins>
-            <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-        
     </build>
-    
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.cds.pesc.WebServices</groupId>
-                <artifactId>EdExchangeCore</artifactId>
-                <version>${edexchange.system.version}</version>
-            </dependency>
-            
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-parent</artifactId>
-                <version>${cxf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-annotations</artifactId>
-                <version>${hibernate.annotations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-commons-annotations</artifactId>
-                <version>${hibernate.commons.annotations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-tools</artifactId>
-                <version>${hibernate.tools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.connector.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-frontend-jaxws</artifactId>
-                <version>3.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-transports-http</artifactId>
-                <version>3.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf.xjc-utils</groupId>
-                <artifactId>cxf-xjc-runtime</artifactId>
-                <version>${cxf.xjc-utils.version}</version>
-            </dependency>
-            <dependency>
-               <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.10</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.web.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.web.version}</version>
-            </dependency>
-            
-        </dependencies>
-    </dependencyManagement>
-	
+
 </project>

@@ -1,0 +1,13 @@
+.idea/
+out/
+*.iml
+**/target/
+directoryServer/src/main/webapp/WEB-INF/jetty-env.xml
+docker/container-data/
+docker_container_data/
+node/
+**/node_modules/
+
+
+
+

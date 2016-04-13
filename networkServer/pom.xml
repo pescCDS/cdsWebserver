@@ -1,146 +1,175 @@
-<project     xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                    http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>networkServer</artifactId>
-	<packaging>war</packaging>
-	<name>PESC CDS EdExchange Network Server</name>
-	<description>
-	
-	</description>
-	
-	<properties>
-    
-    </properties>
+
+	<groupId>org.pesc</groupId>
+	<artifactId>network-server</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>network-server</name>
+	<description>Network Server</description>
 
 	<parent>
-		<groupId>org.cds.pesc.WebServices</groupId>
-		<artifactId>EdExchange</artifactId>
-		<version>0.1.1-SNAPSHOT</version>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.3.3.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+
+		<docker.image.prefix>edex</docker.image.prefix>
+
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+		<!-- database -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-cache</artifactId>
+			<version>4.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+			<version>4.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>fluent-hc</artifactId>
+			<version>4.4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-jaxrs</artifactId>
+			<version>1.9.13</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+		</dependency>
+
+		<!--
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+        -->
+
+		<dependency>
+			<groupId>com.spotify</groupId>
+			<artifactId>docker-client</artifactId>
+			<version>3.5.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.nekohtml</groupId>
+			<artifactId>nekohtml</artifactId>
+			<version>1.9.22</version>
+		</dependency>
+
+	</dependencies>
+	
 	<build>
-	   <resources>
-            <resource>
-                <directory>${project.build.directory}/generated-sources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
-        
+		<finalName>network-server</finalName>
+
 		<plugins>
 			<plugin>
-				<groupId>org.apache.cxf</groupId>
-				<artifactId>cxf-codegen-plugin</artifactId>
-				<version>${cxf.version}</version>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<executable>true</executable>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.3.3</version>
+
 				<executions>
 					<execution>
-						<id>generate-sources</id>
-						<phase>generate-sources</phase>
-						<configuration>
-							<!-- Use the extraarg elements if you need to generate default constructors 
-								and constructors that populate all the class properties, then un-comment 
-								the defaultOptions element along with the jaxb2-value-constructor and jaxb2-basics 
-								dependencies below <defaultOptions> <extraargs> <extraarg>-xjc-Xvalue-constructor</extraarg> 
-								</extraargs> </defaultOptions> -->
-							<defaultOptions>
-								<extraargs>
-									<extraarg>-keep</extraarg>
-									<extraarg>-nexclude</extraarg>
-									<extraarg>urn:org:pesc:core:CoreMain:v1.12.0=org.pesc.core.coremain.v1_12</extraarg>
-									<extraarg>-nexclude</extraarg>
-									<extraarg>urn:org:pesc:sector:AcademicRecord:v1.7.0=org.pesc.sector.academicrecord.v1_7</extraarg>
-									<extraarg>-nexclude</extraarg>
-									<extraarg>urn:org:pesc:EdExchange:v1.0.7=org.pesc.edexchange.v1_0</extraarg>
-								</extraargs>
-							</defaultOptions>
-							<wsdlOptions>
-								<wsdlOption>
-									<wsdl>src/main/resources/networkServer.wsdl</wsdl>
-									<frontEnd>jaxws</frontEnd>
-
-									<!-- to generate JAX-WS 2.1 compliant code <frontEnd>jaxws21</frontEnd> -->
-									<faultSerialVersionUID>1</faultSerialVersionUID>
-									<bindingFiles>
-										<bindingFile>src/main/resources/binding.xjb</bindingFile>
-									</bindingFiles>
-								</wsdlOption>
-							</wsdlOptions>
-						</configuration>
 						<goals>
-							<goal>wsdl2java</goal>
+							<goal>build</goal>
 						</goals>
 					</execution>
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
-						<version>1.1.2</version>
-					</dependency>
 
-					<!-- <dependency> <groupId>org.jvnet.jaxb2_commons</groupId> <artifactId>jaxb2-value-constructor</artifactId> 
-						<version>3.0</version> </dependency> <dependency> <groupId>org.jvnet.jaxb2_commons</groupId> 
-						<artifactId>jaxb2-basics</artifactId> <version>0.6.3</version> </dependency> -->
-				</dependencies>
+				<configuration>
+					<imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+					<dockerDirectory>${basedir}/src/main/docker</dockerDirectory>
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
 			</plugin>
+
 		</plugins>
+
 	</build>
-    
-	<dependencies>
-		<dependency>
-            <groupId>org.cds.pesc.WebServices</groupId>
-            <artifactId>EdExchangeCore</artifactId>
-        </dependency>
-    
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet.jsp</groupId>
-            <artifactId>jsp-api</artifactId>
-            <version>2.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>jstl</groupId>
-            <artifactId>jstl</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>taglibs</groupId>
-            <artifactId>standard</artifactId>
-            <version>1.1.2</version>
-        </dependency>
-    
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxws</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-transports-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf.xjc-utils</groupId>
-            <artifactId>cxf-xjc-runtime</artifactId>
-        </dependency>
-    
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-	</dependencies>
-  
+	
+
 </project>

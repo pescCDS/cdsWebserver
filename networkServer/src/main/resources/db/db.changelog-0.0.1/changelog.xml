@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet id="1" author="owenwe" context="dev, ci, prod">
+		<comment>This changeSet is the initial creation of the required base tables for the Network Server.</comment>
+
+		<createTable schemaName="pesc_networkserver" tableName="transactions">
+			<column name="id" type="INT UNSIGNED" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="recipientId" type="INT UNSIGNED">
+				<constraints nullable="false" />
+			</column>
+			<column name="networkServerId" type="INT UNSIGNED">
+				<constraints nullable="false" />
+			</column>
+			<column name="senderId" type="INT UNSIGNED">
+				<constraints nullable="true" />
+			</column>
+			<column name="fileFormat" type="varchar(18)">
+				<constraints nullable="true" />
+			</column>
+			<column name="fileSize" type="BIGINT UNSIGNED"
+				defaultValueNumeric="0">
+				<constraints nullable="false" />
+			</column>
+			<column name="direction" type="ENUM('SEND','RECEIVE')">
+				<constraints nullable="true" />
+			</column>
+			<column name="sent" type="TIMESTAMP">
+				<constraints nullable="true" />
+			</column>
+			<column name="received" type="TIMESTAMP">
+				<constraints nullable="true" />
+			</column>
+			<column name="error" type="TEXT">
+				<constraints nullable="true" />
+			</column>
+			<column name="status" type="BIT(1)" defaultValueBoolean="false">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+	</changeSet>
+
+	<changeSet id="2" author="owenwe" context="dev, ci, prod">
+		<comment></comment>
+		<sql dbms="mysql">ALTER TABLE `transactions` ENGINE=MyISAM</sql>
+	</changeSet>
+
+</databaseChangeLog>

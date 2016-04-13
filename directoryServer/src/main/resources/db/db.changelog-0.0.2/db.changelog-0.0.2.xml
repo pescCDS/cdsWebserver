@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog 
+               xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	
+	<changeSet id="2" author="owenwe" context="dev, ci, qa, prod">
+		<comment>
+		This changeSet adds the document formats to the document_format table.
+		</comment>
+		
+		<sqlFile encoding="utf8" path="1-add-document-formats.sql" relativeToChangelogFile="true" />
+		
+	</changeSet>
+
+	<changeSet id="3" author="owenwe" context="dev, ci, qa, prod">
+		<comment>
+			This changeSet adds a couple organizations to the organization table---1 for PESC, the administration
+			organization and 1 for Butte College.
+		</comment>
+
+		<sqlFile encoding="utf8" path="2-default-organizations.sql" relativeToChangelogFile="true" />
+
+	</changeSet>
+
+</databaseChangeLog>
