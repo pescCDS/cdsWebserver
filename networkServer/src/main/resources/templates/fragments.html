@@ -2,39 +2,52 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>An Error Occurred</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
 
 <div th:fragment="transactions">
 
-    <form name="transactionFrom"  ng-submit="transactionCtrl.getTransactions()" novalidate="novalidate" class="glow">
+    <form name="transactionFrom" ng-submit="transactionCtrl.getTransactions()" novalidate="novalidate" class="glow">
 
         <div class="form-group">
             <strong>Status</strong>
+
             <div class="btn-group">
-                <label class="btn btn-primary" ng-model="transactionCtrl.status" uib-btn-radio="'Incomplete'">Incomplete</label>
-                <label class="btn btn-primary" ng-model="transactionCtrl.status" uib-btn-radio="'Complete'">Complete</label>
+                <label class="btn btn-primary" ng-model="transactionCtrl.status"
+                       uib-btn-radio="'Incomplete'">Incomplete</label>
+                <label class="btn btn-primary" ng-model="transactionCtrl.status"
+                       uib-btn-radio="'Complete'">Complete</label>
             </div>
         </div>
 
         <div class="form-group">
             <strong>From/To</strong>
+
             <div class="row">
                 <div class="col-md-3">
                     <p class="input-group">
-                        <input type="text" class="form-control" placeholder="MM/DD/YYYY"  uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.startDate" is-open="transactionCtrl.startDatePopup.opened" datepicker-options="dateOptions" close-text="Close"  />
+                        <input type="text" class="form-control" placeholder="MM/DD/YYYY"
+                               uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.startDate"
+                               is-open="transactionCtrl.startDatePopup.opened" datepicker-options="dateOptions"
+                               close-text="Close"/>
                           <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="transactionCtrl.openStartDatePopup()"><i class="glyphicon glyphicon-calendar"></i></button>
+                            <button type="button" class="btn btn-default"
+                                    ng-click="transactionCtrl.openStartDatePopup()"><i
+                                    class="glyphicon glyphicon-calendar"></i></button>
                           </span>
                     </p>
                 </div>
 
                 <div class="col-md-3">
                     <p class="input-group">
-                        <input type="text" class="form-control" placeholder="MM/DD/YYYY" uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.endDate" is-open="transactionCtrl.endDatePopup.opened" datepicker-options="dateOptions" close-text="Close" />
+                        <input type="text" class="form-control" placeholder="MM/DD/YYYY"
+                               uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.endDate"
+                               is-open="transactionCtrl.endDatePopup.opened" datepicker-options="dateOptions"
+                               close-text="Close"/>
                         <span class="input-group-btn">
-                           <button type="button" class="btn btn-default" ng-click="transactionCtrl.openEndDatePopup()"><i class="glyphicon glyphicon-calendar"></i></button>
+                           <button type="button" class="btn btn-default" ng-click="transactionCtrl.openEndDatePopup()">
+                               <i class="glyphicon glyphicon-calendar"></i></button>
                         </span>
                     </p>
                 </div>
@@ -42,11 +55,12 @@
         </div>
         <div class="form-group">
             <strong>Fetch Size</strong>
+
             <div>
-                <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.fetchSize" min="1" max="1000">
+                <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.fetchSize" min="1"
+                       max="1000">
             </div>
         </div>
-
 
 
         <div class="btn-group">
@@ -76,7 +90,7 @@
             <tr ng-repeat="tran in transactionCtrl.transactions">
                 <td>{{tran.direction}}</td>
                 <td>{{tran.fileFormat}}</td>
-                <td>{{tran.fileSize  | bytes}}</td>
+                <td>{{tran.fileSize | bytes}}</td>
                 <td>{{tran.filePath}}</td>
                 <td>{{tran.sent | date:'medium'}}</td>
                 <td>{{tran.received | date:'medium'}}</td>
@@ -88,43 +102,50 @@
     </div>
 
 
-
 </div>
 
-<div th:fragment="transfers">
-    <form name="transferForm"  ng-submit="transferForm.$valid && transferCtrl.transferFile()" novalidate="novalidate">
+<div th:fragment="upload-status">
+    <div th:if="${error} == true">
+        <div>The following error occurred:</div>
+    </div>
+    <div th:text="${status}"></div>
+</div>
+
+<div th:fragment="upload">
+
+    <form name="uploadForm" ng-submit="uploadForm.$valid && uploadCtrl.uploadFile()" novalidate="novalidate">
 
 
         <div>
-
             <div class="form-group">
-                <strong>Recipient</strong>
-                    <span>
-                         <input class="form-control" type="text" placeholder="Recipient Name" ng-model="transferCtrl.recipientName" > </input>
-                    </span>
-            </div>
-            <div  class="form-group">
-                <strong>Sender</strong>
-                    <span>
-                         <input class="form-control" type="text" placeholder="Sender Name" ng-model="transferCtrl.senderName" > </input>
-                    </span>
-            </div>
+                <strong>School Code</strong>
+                <div class="form-inline">
+                    <div class="form-group">
 
-            <div  class="form-group">
-                <strong>Endpoint</strong>
-                    <span>
-                         <input class="form-control" type="url" placeholder="Endpoint URL" ng-model="transferCtrl.endpointURL" > </input>
-                    </span>
-            </div>
+                        <input class="form-control" type="text" ng-model="uploadCtrl.schoolCode" placeholder="Code" style="width: 110px;"> </input>
 
+
+                        <select class="form-control" style="width: 110px;" required="required"
+                                ng-model="uploadCtrl.schoolCodeType">
+                            <option value="">Code Type</option>
+                            <option value="ACT">ACT</option>
+                            <option value="ATP">ATP</option>
+                            <option value="FICE">FICE</option>
+                            <option value="IPEDS">IPEDS</option>
+                        </select>
+
+                    </div>
+                </div>
+            </div>
 
             <div class="form-group">
                 <strong>Document Format</strong>
                 <select class="form-control" style="width: 160px;" required="required"
-                        ng-model="transferCtrl.documentFormat"
-                        ng-options="documentFormat.name for documentFormat in transferCtrl.documentFormats track by documentFormat.id">
+                        ng-model="uploadCtrl.documentFormat"
+                        ng-options="documentFormat.name for documentFormat in uploadCtrl.documentFormats track by documentFormat.id">
 
                 </select>
+
                 <p>
                     {{documentFormat.description}}
                 </p>
@@ -133,8 +154,10 @@
             <div class="form-group">
                 <div><strong>Transcript File</strong></div>
                 <div class="btn btn-default btn-file">
-                    Browse <input type="file" file-model="transferCtrl.fileToUpload"/>
+                    Browse <input type="file" file-model="uploadCtrl.fileToUpload"/>
                 </div>
+
+                <span>{{uploadCtrl.fileToUpload.name}}</span>
             </div>
         </div>
 
@@ -153,7 +176,8 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">
-                    <a href="http://www.pesc.org/interior.php?page_id=217">EDExchange by the Common Data Services (CDS) Task Force</a>
+                    <a href="http://www.pesc.org/interior.php?page_id=217">EDExchange by the Common Data Services (CDS)
+                        Task Force</a>
                 </h1>
             </div>
             <div class="col-md-4">
@@ -163,7 +187,11 @@
                     </div>
                     <div class="panel-body">
                         <p>
-                            The mission of the PESC Common Data Services taskforce is to improve security, reliability, efficiency and speed in the transfer of all educational data types by developing an open web services network and associated standards to benefit the education of students, streamline processes for institutions, and facilitate the advancement of services offered for education. (12.2011)
+                            The mission of the PESC Common Data Services taskforce is to improve security, reliability,
+                            efficiency and speed in the transfer of all educational data types by developing an open web
+                            services network and associated standards to benefit the education of students, streamline
+                            processes for institutions, and facilitate the advancement of services offered for
+                            education. (12.2011)
                         </p>
                         <a href="#about" class="btn btn-default">Learn More</a>
                     </div>
@@ -186,7 +214,9 @@
                         <h4><i class="fa fa-fw fa-compass"></i> Easy to Use</h4>
                     </div>
                     <div class="panel-body">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque, optio corporis quae nulla aspernatur in alias at numquam rerum ea excepturi expedita tenetur assumenda voluptatibus eveniet incidunt dicta nostrum quod?</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque, optio corporis quae nulla
+                            aspernatur in alias at numquam rerum ea excepturi expedita tenetur assumenda voluptatibus
+                            eveniet incidunt dicta nostrum quod?</p>
                         <a href="#about" class="btn btn-default">Learn More</a>
                     </div>
                 </div>
@@ -247,7 +277,9 @@
                     <li>Network Server</li>
                     <li>Exchange any type of document with member organizations.</li>
                 </ul>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis, omnis doloremque non cum id reprehenderit, quisquam totam aspernatur tempora minima unde aliquid ea culpa sunt. Reiciendis quia dolorum ducimus unde.</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis, omnis doloremque non cum id
+                    reprehenderit, quisquam totam aspernatur tempora minima unde aliquid ea culpa sunt. Reiciendis quia
+                    dolorum ducimus unde.</p>
             </div>
             <div class="col-md-6">
                 <img class="img-responsive" src="http://placehold.it/700x450" alt="">
@@ -261,7 +293,8 @@
         <div class="well">
             <div class="row">
                 <div class="col-md-8">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias, expedita, saepe, vero rerum deleniti beatae veniam harum neque nemo praesentium cum alias asperiores commodi.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias, expedita, saepe, vero rerum
+                        deleniti beatae veniam harum neque nemo praesentium cum alias asperiores commodi.</p>
                 </div>
                 <div class="col-md-4">
                     <a class="btn btn-lg btn-default btn-block" href="#directory">Directory</a>

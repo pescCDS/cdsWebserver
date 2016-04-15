@@ -23,7 +23,7 @@
         .service('fileUpload', fileUpload)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
-        .controller("TransferController", TransferController)
+        .controller("UploadController", UploadController)
         .config(config)
         .run(['transactionService', function(transactionService) {
             transactionService.initialize();
@@ -43,10 +43,10 @@
                     }]
                 }
             })
-            .when("/transfers", {
-                templateUrl: "transfers",
-                controller: "TransferController",
-                controllerAs: "transferCtrl"
+            .when("/upload", {
+                templateUrl: "upload",
+                controller: "UploadController",
+                controllerAs: "uploadCtrl"
             })
             .when("/home", {
                 templateUrl: "about"
@@ -116,23 +116,23 @@
     }
 
 
-    TransferController.$inject = ['fileUpload'];
-    function TransferController(fileUpload) {
+    UploadController.$inject = ['fileUpload'];
+    function UploadController(fileUpload) {
         var self = this;
 
-        self.transfers = [];
-
-        self.transferFile = transferFile;
+        self.uploadFile = uploadFile;
         self.documentFormats = getSupportedDocumentFormatsForEndpoint();
         self.documentFormat = ''; //selected document format.
         self.recipientName = '';
         self.senderName = '';
         self.endpointURL = 'http://';
         self.fileToUpload = '';
+        self.schoolCode = '';
+        self.schoolCodeType = '';
 
-        function transferFile() {
+        function uploadFile() {
             console.log("Transfer file.");
-            fileUpload.uploadFileToUrl(self.fileToUpload, self.endpointURL, self.documentFormat.name);
+            fileUpload.uploadFileToUrl(self.fileToUpload, self.documentFormat.name, self.schoolCode, self.schoolCodeType);
         }
 
         function getSupportedDocumentFormatsForEndpoint() {
@@ -162,7 +162,8 @@
         var service = {
             success: success,
             error: error,
-            ajaxInfo: ajaxInfo
+            ajaxInfo: ajaxInfo,
+            renderHtml: renderHtml
         } ;
 
         return service;
@@ -178,6 +179,10 @@
         function error(text) {
             toaster.pop('error', "Error", text);
         }
+
+        function renderHtml(type, title, html) {
+            toaster.pop(type, title, html,null, 'trustedHtml');
+        }
     }
 
 
@@ -190,24 +195,25 @@
 
         return service;
 
-        function uploadFileToUrl(file, uploadUrl, fileFormat){
+        function uploadFileToUrl(file, fileFormat, schoolCode, schoolCodeType){
             var fd = new FormData();
             fd.append('file', file);
             fd.append('recipientId', 1);
             fd.append('networkServerId', 1);
             fd.append('senderId', 1);
             fd.append('fileFormat', fileFormat );
-            fd.append('webServiceUrl', uploadUrl);
+            fd.append('schoolCode', schoolCode);
+            fd.append('schoolCodeType', schoolCodeType);
 
             $http.post('/documents/outbox', fd, {
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
             })
             .success(function(data){
-                notificationService.success("Successfully uploaded file.");
+                notificationService.renderHtml('info', 'Upload', data);
             })
             .error(function(data){
-                notificationService.error("Failed to upload file.");
+                notificationService.renderHtml('error', 'Upload', data);
             });
         }
 

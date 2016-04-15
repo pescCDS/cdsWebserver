@@ -3,10 +3,12 @@ package org.pesc.cds.web;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
@@ -14,6 +16,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +43,9 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value="/documents")
-public class TransferController {
+public class DocumentController {
 	
-	private static final Log log = LogFactory.getLog(TransferController.class);
+	private static final Log log = LogFactory.getLog(DocumentController.class);
 
 	@Value("${directory.server}")
 	private String directoryServer;
@@ -71,10 +74,131 @@ public class TransferController {
 	@Value("${networkServer.inbox.path}")
 	private String localServerInboxPath;
 
+	@Value("${api.organization}")
+	private String organizationApiPath;
+
+
+	@Value("${api.endpoints}")
+	private String endpointsApiPath;
 
 	@Autowired
 	private TransactionService transactionService;
 
+
+	private String getEndpointForOrg(int orgID, String documentFormat) {
+		StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + endpointsApiPath);
+		uri.append("?organizationId=").append(orgID).append("&documentFormat=").append(documentFormat);
+
+		CloseableHttpClient client = HttpClients.custom().build();
+
+		String endpointURI = null;
+		try {
+			HttpGet get = new HttpGet(uri.toString());
+			get.setHeader(HttpHeaders.ACCEPT, "application/json");
+			CloseableHttpResponse response = client.execute(get);
+
+			try {
+
+				HttpEntity resEntity = response.getEntity();
+				if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
+					JSONArray endpoints = new JSONArray(EntityUtils.toString(resEntity));
+					if (endpoints.length() > 0) {
+
+						if (endpoints.length() != 1) {
+							throw new RuntimeException("More than one endpoint was found that fits the given criteria.");
+						}
+
+						endpointURI = endpoints.getJSONObject(0).getString("address");
+
+						log.debug(endpoints.toString(3));
+					}
+
+
+				}
+				EntityUtils.consume(resEntity);
+			}
+			finally {
+				response.close();
+			}
+
+
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				client.close();
+			}
+			catch (IOException e) {
+
+			}
+
+		}
+		return endpointURI;
+	}
+
+	private String getEndpointURIForSchool(String schoolCode, String schoolCodeType, String documentFormat) {
+
+		int orgID = getOrganizationId(schoolCode, schoolCodeType);
+
+		return getEndpointForOrg(orgID, documentFormat);
+	}
+
+	private int getOrganizationId(String schoolCode, String schoolCodeType) {
+
+		int orgID = 0;
+
+	    StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + organizationApiPath);
+		uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
+
+		CloseableHttpClient client = HttpClients.custom().build();
+
+		try {
+			HttpGet get = new HttpGet(uri.toString());
+			get.setHeader(HttpHeaders.ACCEPT, "application/json");
+			CloseableHttpResponse response = client.execute(get);
+
+			try {
+
+				HttpEntity resEntity = response.getEntity();
+
+
+
+				if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
+					JSONArray organizations = new JSONArray(EntityUtils.toString(resEntity));
+
+
+					if (organizations.length() == 1) {
+						orgID = organizations.getJSONObject(0).getInt("id");
+
+						log.debug("Getting endpoint for org");
+					}
+				}
+				EntityUtils.consume(resEntity);
+			}
+			finally {
+				response.close();
+			}
+
+
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				client.close();
+			}
+			catch (IOException e) {
+
+			}
+
+		}
+
+
+		return orgID;
+	}
 
 
 	/**
@@ -90,8 +214,7 @@ public class TransferController {
 	 * @param networkServerId id of sending network server 
 	 * @param senderId        id of sending organization 
 	 * @param fileFormat      compliant file format 
-	 * @param fileSize        <code>Long</code>  
-	 * @param webServiceUrl   <code>String</code>
+	 * @param fileSize        <code>Long</code>
 	 * @return
 	 */
 	@RequestMapping(value="/outbox", method= RequestMethod.POST)
@@ -102,15 +225,22 @@ public class TransferController {
 			@RequestParam(value="senderId") Integer senderId,
 			@RequestParam(value="fileFormat", required=true) String fileFormat,
 			@RequestParam(value="fileSize", defaultValue="0") Long fileSize,
-			@RequestParam(value="webServiceUrl", required=true) String webServiceUrl,
+			@RequestParam(value="schoolCode", required=true) String schoolCode,
+			@RequestParam(value="schoolCodeType", required=true) String schoolCodeType,
 			RedirectAttributes redir
 		) {
 
-		ModelAndView mav = new ModelAndView("redirect:/transfers");
+		ModelAndView mav = new ModelAndView("redirect:/upload-status");
 
 		if (!multipartFile.isEmpty()) {
 	        try {
 
+
+				String endpointURI = getEndpointURIForSchool(schoolCode, schoolCodeType, fileFormat);
+
+				if (endpointURI == null) {
+					throw new IllegalArgumentException("No endpoint URI exists for the given school and document format.");
+				}
 
 				File outboxDirectory = new File(localServerOutboxPath);
 				outboxDirectory.mkdirs();
@@ -140,14 +270,14 @@ public class TransferController {
 	            	savedTx.getSenderId(),
 	            	savedTx.getFileFormat()
 	            ));
-	            
-	            redir.addAttribute("error", false);
-	            redir.addAttribute("status","upload successfull");
-	            
+
+	            redir.addFlashAttribute("error", false);
+	            redir.addFlashAttribute("status", "Upload successfull");
+
 	            // send http post to network server
 	            CloseableHttpClient client = HttpClients.createDefault();
 	            try {
-	            	HttpPost post = new HttpPost(webServiceUrl);
+	            	HttpPost post = new HttpPost(endpointURI);
 	            	
 	            	HttpEntity reqEntity = MultipartEntityBuilder.create()
             			.addPart("recipientId", new StringBody(localServerId))
@@ -182,13 +312,13 @@ public class TransferController {
 	            
 	        } catch (Exception e) {
 				log.error(e);
-	        	redir.addAttribute("error", true);
-	        	redir.addAttribute("status", String.format("upload failed: %s", e.getMessage()));
+	        	redir.addFlashAttribute("error", true);
+	        	redir.addFlashAttribute("status", String.format("Upload failed: %s", e.getMessage() != null ? e.getMessage() : e.getCause()));
 	        }
 	    } else {
 
-	    	redir.addAttribute("error", true);
-	    	redir.addAttribute("status", "missing file");
+	    	redir.addFlashAttribute("error", true);
+	    	redir.addFlashAttribute("status", "Missing file");
 	    }
 
 		return mav;
