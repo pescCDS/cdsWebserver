@@ -90,13 +90,11 @@ public class DocumentController {
 		uri.append("?organizationId=").append(orgID).append("&documentFormat=").append(documentFormat);
 
 		CloseableHttpClient client = HttpClients.custom().build();
-
 		String endpointURI = null;
 		try {
 			HttpGet get = new HttpGet(uri.toString());
 			get.setHeader(HttpHeaders.ACCEPT, "application/json");
 			CloseableHttpResponse response = client.execute(get);
-
 			try {
 
 				HttpEntity resEntity = response.getEntity();
@@ -107,21 +105,15 @@ public class DocumentController {
 						if (endpoints.length() != 1) {
 							throw new RuntimeException("More than one endpoint was found that fits the given criteria.");
 						}
-
 						endpointURI = endpoints.getJSONObject(0).getString("address");
-
 						log.debug(endpoints.toString(3));
 					}
-
-
 				}
 				EntityUtils.consume(resEntity);
 			}
 			finally {
 				response.close();
 			}
-
-
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -133,7 +125,6 @@ public class DocumentController {
 			catch (IOException e) {
 
 			}
-
 		}
 		return endpointURI;
 	}
@@ -151,9 +142,7 @@ public class DocumentController {
 
 	    StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + organizationApiPath);
 		uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
-
 		CloseableHttpClient client = HttpClients.custom().build();
-
 		try {
 			HttpGet get = new HttpGet(uri.toString());
 			get.setHeader(HttpHeaders.ACCEPT, "application/json");
@@ -162,13 +151,8 @@ public class DocumentController {
 			try {
 
 				HttpEntity resEntity = response.getEntity();
-
-
-
 				if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
 					JSONArray organizations = new JSONArray(EntityUtils.toString(resEntity));
-
-
 					if (organizations.length() == 1) {
 						orgID = organizations.getJSONObject(0).getInt("id");
 
@@ -180,8 +164,6 @@ public class DocumentController {
 			finally {
 				response.close();
 			}
-
-
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -195,8 +177,6 @@ public class DocumentController {
 			}
 
 		}
-
-
 		return orgID;
 	}
 

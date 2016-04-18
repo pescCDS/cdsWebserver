@@ -81,10 +81,6 @@ public class Organization implements Serializable {
     private List<SchoolCode> schoolCodes;
 
 
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = Endpoint.class,  cascade = CascadeType.MERGE)
-    @JoinColumn(name="organization_id")
-    private List<Endpoint> endpoints;
-
     public String getName() {
         return this.name;
     }
@@ -235,15 +231,6 @@ public class Organization implements Serializable {
 
     public void setSchoolCodes(List<SchoolCode> schoolCodes) {
         this.schoolCodes = schoolCodes;
-    }
-
-    @XmlTransient
-    public List<Endpoint> getEndpoints() {
-        return endpoints;
-    }
-
-    public void setEndpoints(List<Endpoint> endpoints) {
-        this.endpoints = endpoints;
     }
 
     @Override
