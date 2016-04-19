@@ -2,6 +2,7 @@ package org.pesc.api.model;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,8 +18,9 @@ public class Endpoint {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "organization_id")
-    private Integer organizationId;
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.DETACH)
+    @JoinColumn(name="organization_id")
+    private Organization organization;
 
     @Column(name = "delivery_confirm")
     private boolean confirmDelivery;
@@ -53,6 +55,24 @@ public class Endpoint {
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = DeliveryMethod.class, cascade = CascadeType.MERGE)
     private DeliveryMethod deliveryMethod;
 
+    @JoinTable(
+            name="endpoint_organization",
+            joinColumns=
+            @JoinColumn(name="endpoint_id", referencedColumnName="id"),
+            inverseJoinColumns=
+            @JoinColumn(name="organization_id", referencedColumnName="id")
+    )
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.MERGE)
+    private List<Organization> organizations;
+
+
+    public List<Organization> getOrganizations() {
+        return organizations;
+    }
+
+    public void setOrganizations(List<Organization> organizations) {
+        this.organizations = organizations;
+    }
 
     public Integer getId() {
         return id;
@@ -62,12 +82,12 @@ public class Endpoint {
         this.id = id;
     }
 
-    public Integer getOrganizationId() {
-        return organizationId;
+    public Organization getOrganization() {
+        return organization;
     }
 
-    public void setOrganizationId(Integer organizationId) {
-        this.organizationId = organizationId;
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 
     public boolean isConfirmDelivery() {

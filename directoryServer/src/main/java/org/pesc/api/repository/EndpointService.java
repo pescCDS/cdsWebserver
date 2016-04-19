@@ -2,7 +2,10 @@ package org.pesc.api.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.api.StringUtils;
 import org.pesc.api.model.Endpoint;
+import org.pesc.api.model.Organization;
+import org.pesc.api.model.SchoolCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,10 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class EndpointService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("(#endpoint.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("(#endpoint.organization.id == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(Endpoint endpoint)  {
         this.endpointRepository.delete(endpoint);
     }
@@ -63,13 +63,13 @@ public class EndpointService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("(#endpoint.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("(#endpoint.organization.id == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public Endpoint create(Endpoint endpoint)  {
         return this.endpointRepository.save(endpoint);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("(#endpoint.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("(#endpoint.organization.id == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public Endpoint update(Endpoint endpoint)  {
 
         return this.endpointRepository.save(endpoint);
@@ -101,8 +101,11 @@ public class EndpointService {
 
             List<Predicate> predicates = new LinkedList<Predicate>();
 
-            if (organizationId != null) {
-                predicates.add(cb.equal(endpoint.get("organizationId"), organizationId));
+
+            if ( organizationId != null ) {
+
+                Join<Endpoint, Organization> join = endpoint.join("organizations");
+                predicates.add(cb.equal(join.get("id"), organizationId));
             }
             if (endpointId != null) {
                 predicates.add(cb.equal(endpoint.get("id"), endpointId));

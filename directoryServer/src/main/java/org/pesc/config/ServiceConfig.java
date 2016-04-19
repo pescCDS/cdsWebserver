@@ -57,6 +57,8 @@ public class ServiceConfig {
     private DeliveryMethodsResource deliveryMethodsResource;
     @Autowired
     private EndpointResource endpointResource;
+    @Autowired
+    private SchoolCodesResource schoolCodesResource;
 
 
     @Bean
@@ -164,6 +166,18 @@ public class ServiceConfig {
         return sf.create();
     }
 
+    /**
+     * SOAP endpoint for delivery methods
+     * @return
+     */
+    @Bean
+    public Server schoolCodes() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(SchoolCodesResource.class);
+        sf.setAddress("/soap/v1/school-codes");
+        return sf.create();
+    }
+
 
     /**
      * Create the REST endpoint
@@ -195,6 +209,7 @@ public class ServiceConfig {
         beans.add(documentFormatResource);
         beans.add(deliveryMethodsResource) ;
         beans.add(endpointResource);
+        beans.add(schoolCodesResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

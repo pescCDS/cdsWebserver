@@ -404,39 +404,45 @@
                 </div>
                 <div ng-show="endpointCtrl.showForm(endpoint)">
                     <div style="width: 80%;">
-                    <h4>
-                        <input class="form-control" type="text" placeholder="Address" required="required" ng-model="endpoint.address"> </input>
-                    </h4>
-                    <p>
-                        <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
-                    </p>
-                    <div>
-                        <strong>Document Format</strong>
+                        <h4>
+                            <input class="form-control" type="text" placeholder="Address" required="required" ng-model="endpoint.address"> </input>
+                        </h4>
+                        <p>
+                            <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
+                        </p>
                         <div>
+                            <strong>Document Format</strong>
+                            <div>
 
-                            <select class="form-control" style="width: 160px;" required="required"
-                                    ng-model="endpoint.documentFormat"
-                                    ng-options="documentFormat.name for documentFormat in endpointCtrl.documentFormats track by documentFormat.id">
+                                <select class="form-control" style="width: 160px;" required="required"
+                                        ng-model="endpoint.documentFormat"
+                                        ng-options="documentFormat.name for documentFormat in endpointCtrl.documentFormats track by documentFormat.id">
 
-                            </select>
-                            <p>
-                                {{endpoint.documentFormat.description}}
-                            </p>
+                                </select>
+                                <p>
+                                    {{endpoint.documentFormat.description}}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <strong>Delivery Methods</strong>
                         <div>
-                            <select class="form-control" style="width: 160px;"  required="required"
-                                    ng-model="endpoint.deliveryMethod"
-                                    ng-options="deliveryMethod.name for deliveryMethod in endpointCtrl.deliveryMethods track by deliveryMethod.id">
+                            <strong>Delivery Methods</strong>
+                            <div>
+                                <select class="form-control" style="width: 160px;"  required="required"
+                                        ng-model="endpoint.deliveryMethod"
+                                        ng-options="deliveryMethod.name for deliveryMethod in endpointCtrl.deliveryMethods track by deliveryMethod.id">
 
-                            </select>
-                            <p>
-                                {{endpoint.deliveryMethod.description}}
-                            </p>
+                                </select>
+                                <p>
+                                    {{endpoint.deliveryMethod.description}}
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                        <div>
+                            <strong>Hosted By</strong>
+
+                            <p>{{endpoint.organization.name}}</p>
+                        </div>
+
                     </div>
                 </div>
                 <div ng-show="!endpointCtrl.showForm(endpoint)">
@@ -453,10 +459,59 @@
 
                             <h5>{{endpoint.deliveryMethod.name}}</h5>
                             <p>{{endpoint.deliveryMethod.description}}</p>
+
+                    <div>
+                        <strong>Hosted By</strong>
+
+                        <p>{{endpoint.organization.name}}</p>
+                    </div>
+
+
                 </div>
 
             </form>
 
+    </div>
+</div>
+
+<div th:fragment="school-code">
+    <div class="row">
+        <div ng-show="orgCtrl.editingSchoolCode(schoolCode) == false">
+            <div class="col-md-2">{{schoolCode.codeType}}</div>
+            <div class="col-md-2">{{schoolCode.code}}</div>
+
+            <div class="col-md-2" ng-show="orgCtrl.isEditableByUser()">
+                <button  type="button" class="btn btn-default" ng-click="orgCtrl.editSchoolCode(schoolCode)">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-click="orgCtrl.removeSchoolCode(schoolCode)">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                </button>
+            </div>
+        </div>
+        <div ng-show="orgCtrl.editingSchoolCode(schoolCode) == true" >
+            <div  class="col-md-2">
+                 <select class="form-control" style="width: 110px;" required="required"
+                         ng-model="schoolCode.codeType">
+                     <option value="">Select Code Type</option>
+                     <option value="ACT">ACT</option>
+                     <option value="ATP">ATP</option>
+                     <option value="FICE">FICE</option>
+                     <option value="IPEDS">IPEDS</option>
+                 </select>
+            </div>
+            <div  class="col-md-2">
+                <input class="form-control" type="text" ng-model="schoolCode.code"/>
+            </div>
+            <div class="col-md-2">
+                <button  type="button" class="btn btn-default" ng-click="orgCtrl.saveSchoolCode(schoolCode)">
+                    <span class="glyphicon glyphicon-floppy-disk"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-click="orgCtrl.removeSchoolCode(schoolCode)">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -592,15 +647,14 @@
         <div ng-show="orgCtrl.org.type === 1">
             <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
 
-                <span class="glyphicon glyphicon-plus ed-icon-btn"></span>
+                <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.addSchoolCode()"></span>
 
             </div>
 
             <div class="ed-title">School Codes</div>
 
-            <span ng-repeat="schoolCode in orgCtrl.org.schoolCodes | orderBy:'codeType'" class="ed-inline-box">
-                        <span>{{schoolCode.codeType}}</span>
-                        <span>{{schoolCode.code}}</span>
+            <span ng-repeat="schoolCode in orgCtrl.org.schoolCodes" class="ed-inline-box">
+                   <div th:include="::school-code"></div>
             </span>
         </div>
 
@@ -615,7 +669,7 @@
 
             </div>
             <div class="ed-title">Endpoints</div>
-            <div ng-repeat="endpoint in orgCtrl.org.endpoints">
+            <div ng-repeat="endpoint in orgCtrl.endpoints">
 
                 <div class="ed-endpoint">
                     <div th:include="::endpoint"></div>

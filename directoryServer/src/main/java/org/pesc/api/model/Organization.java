@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 
 @XmlRootElement(name = "Organization")
@@ -76,10 +77,12 @@ public class Organization implements Serializable {
     @Column(name="subcode")
     private String subcode;
 
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = SchoolCode.class, cascade = CascadeType.MERGE)
+    @OneToMany(fetch = FetchType.EAGER,
+            targetEntity = SchoolCode.class,
+            cascade = {CascadeType.REMOVE, CascadeType.ALL },
+            orphanRemoval = true)
     @JoinColumn(name="organization_id")
-    private List<SchoolCode> schoolCodes;
-
+    private Set<SchoolCode> schoolCodes;
 
     public String getName() {
         return this.name;
@@ -225,13 +228,14 @@ public class Organization implements Serializable {
         this.subcode = subcode;
     }
 
-    public List<SchoolCode> getSchoolCodes() {
+    public Set<SchoolCode> getSchoolCodes() {
         return schoolCodes;
     }
 
-    public void setSchoolCodes(List<SchoolCode> schoolCodes) {
+    public void setSchoolCodes(Set<SchoolCode> schoolCodes) {
         this.schoolCodes = schoolCodes;
     }
+
 
     @Override
     public boolean equals(Object obj) {

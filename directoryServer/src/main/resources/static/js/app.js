@@ -9,6 +9,7 @@
         .service('organizationService', organizationService)
         .service('userService', userService)
         .service('settingsService', settingsService)
+        .service('schoolCodesService', schoolCodesService)
         .service('endpointService', endpointService)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
@@ -351,9 +352,9 @@
         };
     }
 
-    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService'];
+    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService'];
 
-    function OrgController($routeParams, organizationService, org, userService, endpointService) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -364,19 +365,74 @@
         self.createEndpoint = createEndpoint;
         self.getEndpoints = getEndpoints;
         self.deleteEndpoint = deleteEndpoint;
+        self.endpoints = [];
+        self.addSchoolCode = addSchoolCode;
+        self.editingSchoolCode = editingSchoolCode;
+        self.removeSchoolCode = removeSchoolCode;
+        self.saveSchoolCode = saveSchoolCode;
+        self.editSchoolCode = editSchoolCode;
 
 
         getEndpoints();
 
         function getEndpoints() {
             endpointService.getEndpoints(self.org).then(function(data){
-                self.org.endpoints = data;
+                self.endpoints = data;
             });
+        }
+
+        function editSchoolCode(schoolCode) {
+            schoolCode.editing = true;
+        }
+
+        function editingSchoolCode(schoolCode) {
+            return schoolCode.hasOwnProperty('editing');
+        }
+
+        function removeSchoolCodeFromModel(schoolCode) {
+            var index = self.org.schoolCodes.indexOf(schoolCode);
+            if (index > -1) {
+                self.org.schoolCodes.splice(index, 1);
+            }
+        }
+
+        function removeSchoolCode(schoolCode) {
+            if (schoolCode.hasOwnProperty("id")) {
+                removeSchoolCodeFromModel(schoolCode);
+                schoolCodesService.removeSchoolCode(schoolCode).then(function(data){
+                    delete schoolCode.editing;
+                    console.log("Successfully remove school code.");
+                });
+
+            }
+            else {
+                removeSchoolCodeFromModel(schoolCode);
+            }
+        }
+
+        function saveSchoolCode(schoolCode) {
+            delete schoolCode.editing;
+
+            schoolCodesService.saveSchoolCode(schoolCode).then(function(data){
+                console.log("Successfully created new school code.");
+            });
+        }
+
+        function addSchoolCode() {
+            var schoolCode = {
+                code: '4226',
+                codeType: 'FICE',
+                organizationId: self.org.id,
+                editing: true
+            }
+
+            self.org.schoolCodes.push(schoolCode);
         }
 
         function createEndpoint() {
             var endpoint = {
-                organizationId:  self.org.id,
+                organization:  self.org,
+                organizations:  [ self.org ],
                 confirmDelivery: false,
                 address: '',
                 error: false,
@@ -386,14 +442,14 @@
                 editing: true
             }
 
-            self.org.endpoints.push(endpoint);
+            self.endpoints.push(endpoint);
 
         }
 
         function removeEndpointFromModel(endpoint) {
-            var index = self.org.endpoints.indexOf(endpoint);
+            var index = self.endpoints.indexOf(endpoint);
             if (index > -1) {
-                self.org.endpoints.splice(index, 1);
+                self.endpoints.splice(index, 1);
             }
         }
 
@@ -873,6 +929,65 @@
 
     }
 
+
+
+    schoolCodesService.$inject = ['$http', '$q', 'notificationService'];
+
+    function schoolCodesService ($http, $q, notificationService) {
+
+
+        var service = {
+            saveSchoolCode: createSchoolCode,
+            removeSchoolCode: removeSchoolCode,
+            updateSchoolCode: updateSchoolCode
+        };
+
+        return service;
+
+
+        function removeSchoolCode(schoolCode) {
+            var deferred = $q.defer();
+
+            $http.delete('/services/rest/v1/school-codes/' + schoolCode.id, schoolCode).success(function (data) {
+                deferred.resolve(schoolCode);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while deleting a school code.");
+            });
+
+            return deferred.promise;
+        }
+
+        function updateSchoolCode(schoolCode) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/school-codes/' + schoolCode.id, schoolCode).success(function (data) {
+                deferred.resolve(schoolCode);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while updating a school code.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function createSchoolCode(schoolCode) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/school-codes/', schoolCode).success(function (data) {
+                angular.extend(schoolCode, data);
+                deferred.resolve(schoolCode);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while updating a school code.");
+            });
+
+            return deferred.promise;
+        }
+    }
 
     settingsService.$inject = ['$http', '$q', '$cacheFactory', 'notificationService'];
 

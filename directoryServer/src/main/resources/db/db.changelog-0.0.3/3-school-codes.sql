@@ -4,7 +4,7 @@ CREATE TABLE school_codes (
   code_type ENUM('FICE', 'ATP',	'ACT', 'IPEDS', 'OPEID') NOT NULL,
   organization_id INT UNSIGNED NOT NULL COMMENT 'Foriegn key to the organization table.',
   KEY fk_school_codes_organization_idx (organization_id),
-  CONSTRAINT fk_school_codes_organization FOREIGN KEY (organization_id) REFERENCES organization (id),
+  CONSTRAINT fk_school_codes_organization FOREIGN KEY (organization_id) REFERENCES organization (id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 );
 

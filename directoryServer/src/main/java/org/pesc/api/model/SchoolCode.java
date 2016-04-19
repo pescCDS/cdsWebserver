@@ -5,6 +5,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
 
 /**
  * Created by james on 4/7/16.
@@ -12,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="SchoolCode")
 @Entity
 @Table(name = "school_codes")
-public class SchoolCode {
+public class SchoolCode implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
@@ -23,6 +25,10 @@ public class SchoolCode {
 
     @Column(name="code_type")
     private String codeType;
+
+    @Column(name = "organization_id")
+    private Integer organizationId;
+
 
     public Integer getId() {
         return id;
@@ -48,6 +54,13 @@ public class SchoolCode {
         this.codeType = codeType;
     }
 
+    public Integer getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Integer organizationId) {
+        this.organizationId = organizationId;
+    }
 
     @Override
     public boolean equals(Object obj) {
