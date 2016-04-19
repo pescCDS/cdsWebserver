@@ -373,15 +373,42 @@
         self.editSchoolCode = editSchoolCode;
         self.setShowServiceProviderForm = setShowServiceProviderForm;
         self.getShowServiceProviderForm = getShowServiceProviderForm;
-
+        self.serviceProviders = [];
+        self.hasServiceProvider = hasServiceProvider;
+        self.updateSelectedServiceProviders = updateSelectedServiceProviders;
+        self.selectedServiceProviders = [];
 
         var showServiceProviderForm = false;
 
+        function getServiceProviders() {
+            organizationService.getServiceProviders().then(function(data){
+                self.serviceProviders = data;
+            });
+        };
+
         function setShowServiceProviderForm(show) {
+
+            if (show === true && self.serviceProviders.length == 0) {
+                getServiceProviders();
+            }
             showServiceProviderForm = show;
         }
         function getShowServiceProviderForm() {
             return showServiceProviderForm;
+        }
+
+        function hasServiceProvider(provider) {
+            var index = self.selectedServiceProviders.indexOf(provider);
+            return (index > -1);
+        }
+        function updateSelectedServiceProviders($event, provider) {
+            var index = self.selectedServiceProviders.indexOf(provider);
+            if (index > -1) {
+                self.selectedServiceProviders.splice(index, 1);
+            }
+            else {
+                self.selectedServiceProviders.push(provider);
+            }
         }
 
         getEndpoints();
@@ -789,6 +816,7 @@
             getActiveOrg: getActiveOrg,
             setActiveOrg: setActiveOrg,
             search: search,
+            getServiceProviders: getServiceProviders,
             initialize: initialize
         };
 
@@ -933,6 +961,25 @@
             }).error(function(data){
                 notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the organization.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getServiceProviders() {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations', {
+                'params': {
+                    'type': 2
+                },
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching the service providers.");
             });
 
             return deferred.promise;
