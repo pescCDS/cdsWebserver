@@ -371,7 +371,18 @@
         self.removeSchoolCode = removeSchoolCode;
         self.saveSchoolCode = saveSchoolCode;
         self.editSchoolCode = editSchoolCode;
+        self.setShowServiceProviderForm = setShowServiceProviderForm;
+        self.getShowServiceProviderForm = getShowServiceProviderForm;
 
+
+        var showServiceProviderForm = false;
+
+        function setShowServiceProviderForm(show) {
+            showServiceProviderForm = show;
+        }
+        function getShowServiceProviderForm() {
+            return showServiceProviderForm;
+        }
 
         getEndpoints();
 

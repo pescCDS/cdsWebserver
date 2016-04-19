@@ -656,10 +656,26 @@
             <span ng-repeat="schoolCode in orgCtrl.org.schoolCodes" class="ed-inline-box">
                    <div th:include="::school-code"></div>
             </span>
+
+            <div>
+                <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
+
+                    <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.setShowServiceProviderForm(true)"></span>
+
+                </div>
+                <div class="ed-title">Service Providers</div>
+
+                <div ng-show="orgCtrl.getShowServiceProviderForm()==true">
+                    <button class="btn btn-default" ng-click="orgCtrl.setShowServiceProviderForm(false)">
+                        <i class="glyphicon glyphicon-ok"></i> Done
+                    </button>
+
+                </div>
+            </div>
         </div>
 
         <div ng-show="orgCtrl.org.type === 2">
-            <div class="ed-title">Represented Schools</div>
+            <div class="ed-title">Serviced Schools</div>
         </div>
 
         <div>
@@ -678,6 +694,8 @@
             </div>
 
         </div>
+
+
 
     </div>
 </div>
