@@ -27,4 +27,12 @@
 		<sqlFile encoding="utf8" path="3-school-codes.sql" relativeToChangelogFile="true" />
 	</changeSet>
 
+	<changeSet id="7" author="james">
+		<comment>
+			This change set adds the ability to associate an institution organization with a service provider
+			organization.  Many-to-many relationship.
+		</comment>
+		<sqlFile encoding="utf8" path="4-institutions-service-providers.sql" relativeToChangelogFile="true" />
+	</changeSet>
+
 </databaseChangeLog>

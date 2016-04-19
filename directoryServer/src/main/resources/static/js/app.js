@@ -374,9 +374,11 @@
         self.setShowServiceProviderForm = setShowServiceProviderForm;
         self.getShowServiceProviderForm = getShowServiceProviderForm;
         self.serviceProviders = [];
+        self.institutions = self.org.institutions;
         self.hasServiceProvider = hasServiceProvider;
         self.updateSelectedServiceProviders = updateSelectedServiceProviders;
         self.selectedServiceProviders = [];
+
 
         var showServiceProviderForm = false;
 
@@ -391,18 +393,36 @@
             if (show === true && self.serviceProviders.length == 0) {
                 getServiceProviders();
             }
+            else if (show == false) {
+
+                organizationService.updateServiceProvidersForInstitition(self.org, self.selectedServiceProviders)
+                    .then(function(data){
+
+                    });
+            }
             showServiceProviderForm = show;
         }
         function getShowServiceProviderForm() {
             return showServiceProviderForm;
         }
 
-        function hasServiceProvider(provider) {
-            var index = self.selectedServiceProviders.indexOf(provider);
-            return (index > -1);
+        function indexOf(provider) {
+            for(var i=0; i < self.selectedServiceProviders.length; i++) {
+                if (self.selectedServiceProviders[i].id === provider.id) {
+                    return i;
+                }
+            }
+
+            return -1;
         }
+
+        function hasServiceProvider(provider) {
+           return indexOf(provider) != -1;
+        }
+
         function updateSelectedServiceProviders($event, provider) {
-            var index = self.selectedServiceProviders.indexOf(provider);
+            var index = indexOf(provider);
+
             if (index > -1) {
                 self.selectedServiceProviders.splice(index, 1);
             }
@@ -412,11 +432,22 @@
         }
 
         getEndpoints();
+        getServiceProvidersForInstitution();
 
         function getEndpoints() {
             endpointService.getEndpoints(self.org).then(function(data){
                 self.endpoints = data;
             });
+        }
+
+        function getServiceProvidersForInstitution() {
+
+            if (self.org.type ==1 ) {
+                organizationService.getServiceProvidersForInstitution(self.org).then(function(data){
+                    self.selectedServiceProviders = data;
+                });
+            }
+
         }
 
         function editSchoolCode(schoolCode) {
@@ -817,6 +848,8 @@
             setActiveOrg: setActiveOrg,
             search: search,
             getServiceProviders: getServiceProviders,
+            getServiceProvidersForInstitution: getServiceProvidersForInstitution,
+            updateServiceProvidersForInstitition: setServiceProvidersForInstitution,
             initialize: initialize
         };
 
@@ -832,6 +865,8 @@
 
             }
         }
+
+
         function getActiveOrg() {
             return activeOrg;
         }
@@ -980,6 +1015,44 @@
             }).error(function(data){
                 notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the service providers.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getServiceProvidersForInstitution(institution) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/service-providers', {
+                'params': {
+                    'institution_id': institution.id
+                },
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching the service providers.");
+            });
+
+            return deferred.promise;
+        }
+
+        function setServiceProvidersForInstitution(institution, serviceProviders) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/service-providers', serviceProviders, {
+                'params': {
+                    'institution_id': institution.id,
+                },
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while updating the service providers for institution.");
             });
 
             return deferred.promise;

@@ -95,7 +95,6 @@ public class Organization implements Serializable {
         return id;
     }
 
-
     public Integer setId(Integer id) {
         return this.id = id;
     }

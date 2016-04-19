@@ -665,36 +665,39 @@
                 </div>
                 <div class="ed-title">Service Providers</div>
 
-                <div class="col-md-3">
-                    <div ng-repeat="provider in orgCtrl.selectedServiceProviders" style="margin-top: 10px;">
+                <div class="row">
 
-                        <div>
-                         <b>{{provider.name}}</b>
-
-                        </div>
-
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <div ng-show="orgCtrl.getShowServiceProviderForm()==true">
-                        <button class="btn btn-default" ng-click="orgCtrl.setShowServiceProviderForm(false)">
-                            <i class="glyphicon glyphicon-ok"></i> Done
-                        </button>
-
-                        <div ng-repeat="provider in orgCtrl.serviceProviders" style="margin-top: 10px;">
+                    <div class="col-md-3">
+                        <div ng-repeat="provider in orgCtrl.selectedServiceProviders" style="margin-top: 10px;">
 
                             <div>
-
-                            <span  class="checkbox-inline"> <input
-                                    type="checkbox"
-                                    ng-checked="orgCtrl.hasServiceProvider(provider)"
-                                    name="school"
-                                    ng-click="orgCtrl.updateSelectedServiceProviders($event, provider)"> <b>{{provider.name}}</b></span>
+                                <b>{{provider.name}}</b>
 
                             </div>
 
                         </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div ng-show="orgCtrl.getShowServiceProviderForm()==true">
+                            <button class="btn btn-default" ng-click="orgCtrl.setShowServiceProviderForm(false)">
+                                <i class="glyphicon glyphicon-ok"></i> Done
+                            </button>
 
+                            <div ng-repeat="provider in orgCtrl.serviceProviders" style="margin-top: 10px;">
+
+                                <div>
+
+                                    <span  class="checkbox-inline"> <input
+                                        type="checkbox"
+                                        ng-checked="orgCtrl.hasServiceProvider(provider)"
+                                        name="school"
+                                        ng-click="orgCtrl.updateSelectedServiceProviders($event, provider)"> <b>{{provider.name}}</b></span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
                     </div>
                 </div>
 

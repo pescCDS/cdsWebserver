@@ -8,6 +8,7 @@ import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
 import org.pesc.api.*;
+import org.pesc.api.model.ServiceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -59,6 +60,9 @@ public class ServiceConfig {
     private EndpointResource endpointResource;
     @Autowired
     private SchoolCodesResource schoolCodesResource;
+
+    @Autowired
+    private ServiceProviderResource serviceProviderResource;
 
 
     @Bean
@@ -180,6 +184,19 @@ public class ServiceConfig {
 
 
     /**
+     * SOAP endpoint for service providers
+     * @return
+     */
+    @Bean
+    public Server serviceProviders() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(ServiceProvider.class);
+        sf.setAddress("/soap/v1/service-providers");
+        return sf.create();
+    }
+
+
+    /**
      * Create the REST endpoint
      * @return
      */
@@ -210,6 +227,7 @@ public class ServiceConfig {
         beans.add(deliveryMethodsResource) ;
         beans.add(endpointResource);
         beans.add(schoolCodesResource);
+        beans.add(serviceProviderResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 
