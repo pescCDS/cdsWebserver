@@ -17,7 +17,9 @@ import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by james on 3/22/16.
@@ -31,9 +33,6 @@ public class ServiceProviderResource {
     private static final Log log = LogFactory.getLog(ServiceProviderResource.class);
 
     @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
     private InstitutionRepository institutionRepository;
 
 
@@ -41,12 +40,12 @@ public class ServiceProviderResource {
     @GET
     @ApiOperation("Return the service providers for the institution.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Organization> getServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam("The directory identifier for the institution.") Integer id) {
+    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam("The directory identifier for the institution.") Integer id) {
 
         Institution organization = institutionRepository.findOne(id);
 
         if (organization == null) {
-            return new ArrayList<Organization>();
+            return new HashSet<Organization>();
         }
 
         return organization.getServiceProviders();
@@ -55,7 +54,7 @@ public class ServiceProviderResource {
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the organization with the given ID.")
-    public Institution updateServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam("The directory identifier for the organization.") Integer id, List<Organization> serviceProviders) {
+    public Institution updateServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam("The directory identifier for the organization.") Integer id, Set<Organization> serviceProviders) {
 
         Institution institution = new Institution();
         institution.setId(id);

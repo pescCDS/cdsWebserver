@@ -26,11 +26,11 @@ public class ServiceProvider implements Serializable {
     @JoinTable(
             name="institutions_service_providers",
             joinColumns=
-            @JoinColumn(name="institution_id", referencedColumnName="id"),
+            @JoinColumn(name="service_provider_id", referencedColumnName="id"),
             inverseJoinColumns=
-            @JoinColumn(name="service_provider_id", referencedColumnName="id")
+            @JoinColumn(name="institution_id", referencedColumnName="id")
     )
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<Organization> institutions;
 
 

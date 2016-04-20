@@ -64,6 +64,8 @@ public class ServiceConfig {
     @Autowired
     private ServiceProviderResource serviceProviderResource;
 
+    @Autowired
+    private InstitutionResource institutionResource;
 
     @Bean
     public JacksonJaxbJsonProvider jacksonJaxbJsonProvider() {
@@ -182,6 +184,18 @@ public class ServiceConfig {
         return sf.create();
     }
 
+    /**
+     * SOAP endpoint for delivery methods
+     * @return
+     */
+    @Bean
+    public Server institutions() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(InstitutionResource.class);
+        sf.setAddress("/soap/v1/institutions");
+        return sf.create();
+    }
+
 
     /**
      * SOAP endpoint for service providers
@@ -228,6 +242,7 @@ public class ServiceConfig {
         beans.add(endpointResource);
         beans.add(schoolCodesResource);
         beans.add(serviceProviderResource);
+        beans.add(institutionResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

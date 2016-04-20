@@ -374,7 +374,7 @@
         self.setShowServiceProviderForm = setShowServiceProviderForm;
         self.getShowServiceProviderForm = getShowServiceProviderForm;
         self.serviceProviders = [];
-        self.institutions = self.org.institutions;
+        self.institutions = [];
         self.hasServiceProvider = hasServiceProvider;
         self.updateSelectedServiceProviders = updateSelectedServiceProviders;
         self.selectedServiceProviders = [];
@@ -433,6 +433,7 @@
 
         getEndpoints();
         getServiceProvidersForInstitution();
+        getInstitutionsForServiceProvider();
 
         function getEndpoints() {
             endpointService.getEndpoints(self.org).then(function(data){
@@ -445,6 +446,16 @@
             if (self.org.type ==1 ) {
                 organizationService.getServiceProvidersForInstitution(self.org).then(function(data){
                     self.selectedServiceProviders = data;
+                });
+            }
+
+        }
+
+        function getInstitutionsForServiceProvider() {
+
+            if (self.org.type == 2 ) {
+                organizationService.getInstitutionsForServiceProvider(self.org).then(function(data){
+                    self.institutions = data;
                 });
             }
 
@@ -850,6 +861,7 @@
             getServiceProviders: getServiceProviders,
             getServiceProvidersForInstitution: getServiceProvidersForInstitution,
             updateServiceProvidersForInstitition: setServiceProvidersForInstitution,
+            getInstitutionsForServiceProvider: getInstitutionsForServiceProvider,
             initialize: initialize
         };
 
@@ -1034,6 +1046,25 @@
             }).error(function(data){
                 notificationService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the service providers.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getInstitutionsForServiceProvider(org) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/institutions', {
+                'params': {
+                    'service_provider_id': org.id
+                },
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching the institutions.");
             });
 
             return deferred.promise;

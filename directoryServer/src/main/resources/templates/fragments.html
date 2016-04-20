@@ -671,8 +671,7 @@
                         <div ng-repeat="provider in orgCtrl.selectedServiceProviders" style="margin-top: 10px;">
 
                             <div>
-                                <b>{{provider.name}}</b>
-
+                                <a ng-href="#organization/{{provider.id}}">{{provider.name}}</a>
                             </div>
 
                         </div>
@@ -706,7 +705,17 @@
 
         <div ng-show="orgCtrl.org.type === 2">
             <div class="ed-title">Serviced Schools</div>
+
+            <div ng-repeat="institution in orgCtrl.institutions" style="margin-top: 10px;">
+
+                <div>
+                    <a ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+                </div>
+
+            </div>
+
         </div>
+
 
         <div>
             <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">

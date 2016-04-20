@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 import java.util.Set;
 
 
@@ -32,13 +32,13 @@ public class Institution implements Serializable {
             @JoinColumn(name="service_provider_id", referencedColumnName="id")
     )
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    private List<Organization> serviceProviders;
+    private Set<Organization> serviceProviders;
 
-    public List<Organization> getServiceProviders() {
+    public Set<Organization> getServiceProviders() {
         return serviceProviders;
     }
 
-    public void setServiceProviders(List<Organization> serviceProviders) {
+    public void setServiceProviders(Set<Organization> serviceProviders) {
         this.serviceProviders = serviceProviders;
     }
 
