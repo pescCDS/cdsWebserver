@@ -156,3 +156,14 @@ form[name="userForm"] label {
     padding-bottom:20px;
     border-bottom: 1px dotted #CCCCCC;
 }
+
+.half-column {
+    width: 48%;
+    display:inline-block;
+    vertical-align: top;
+
+}
+
+.full-column {
+    width: 100%;
+}

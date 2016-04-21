@@ -62,6 +62,12 @@ public class EndpointService {
         return this.endpointRepository.findOne(id);
     }
 
+    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    public List<Endpoint> findByIDList(List<Integer> idList)  {
+        return (List<Endpoint>)this.endpointRepository.findAll(idList);
+    }
+
+
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#endpoint.organization.id == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public Endpoint create(Endpoint endpoint)  {
@@ -86,7 +92,7 @@ public class EndpointService {
     public List<Endpoint> search(
             String documentFormat,
             Integer endpointId,
-            Integer organizationId
+            List<Integer> organizationId
     ) {
 
         try {
@@ -105,7 +111,7 @@ public class EndpointService {
             if ( organizationId != null ) {
 
                 Join<Endpoint, Organization> join = endpoint.join("organizations");
-                predicates.add(cb.equal(join.get("id"), organizationId));
+                predicates.add(join.get("id").in(organizationId));
             }
             if (endpointId != null) {
                 predicates.add(cb.equal(endpoint.get("id"), endpointId));

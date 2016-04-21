@@ -352,9 +352,9 @@
         };
     }
 
-    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService'];
+    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', '$uibModal'];
 
-    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, $uibModal) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -372,15 +372,44 @@
         self.saveSchoolCode = saveSchoolCode;
         self.editSchoolCode = editSchoolCode;
         self.setShowServiceProviderForm = setShowServiceProviderForm;
-        self.getShowServiceProviderForm = getShowServiceProviderForm;
         self.serviceProviders = [];
         self.institutions = [];
         self.hasServiceProvider = hasServiceProvider;
         self.updateSelectedServiceProviders = updateSelectedServiceProviders;
         self.selectedServiceProviders = [];
+        self.isMyOrgServiceProviderForInstitution = isMyOrgServiceProviderForInstitution;
+        self.selectEndpoint = selectEndpoint;
+        self.selectableEndpoints = [];
+        self.saveSelectedEndpoints = saveSelectedEndpoints;
+        self.editingEndpoints = false;
+
+        self.showServiceProviderForm = false;
 
 
-        var showServiceProviderForm = false;
+        function saveSelectedEndpoints() {
+            self.editingEndpoints = false;
+
+            //TODO: ajax call to save endpoints.
+        }
+
+
+        function isMyOrgServiceProviderForInstitution() {
+            if (self.org.type !== 1) { //if the current org isn't an institution, false
+                return false;
+            }
+
+            //If current user is system admin, they assign endpoints if the institution
+            //has any service providers.
+            if ( userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                return true;
+            }
+
+            //Otherwise, check if this institution is used by the current user's org as a service provider.
+
+            var myorg = organizationService.getActiveOrg();
+            return hasServiceProvider(myorg) && userService.hasRoleByName(userService.activeUser, 'ROLE_ORG_ADMIN');
+
+        }
 
         function getServiceProviders() {
             organizationService.getServiceProviders().then(function(data){
@@ -400,13 +429,11 @@
 
                     });
             }
-            showServiceProviderForm = show;
-        }
-        function getShowServiceProviderForm() {
-            return showServiceProviderForm;
+            self.showServiceProviderForm = show;
         }
 
-        function indexOf(provider) {
+
+        function indexOfProvider(provider) {
             for(var i=0; i < self.selectedServiceProviders.length; i++) {
                 if (self.selectedServiceProviders[i].id === provider.id) {
                     return i;
@@ -416,12 +443,13 @@
             return -1;
         }
 
+
         function hasServiceProvider(provider) {
-           return indexOf(provider) != -1;
+           return indexOfProvider(provider) != -1;
         }
 
         function updateSelectedServiceProviders($event, provider) {
-            var index = indexOf(provider);
+            var index = indexOfProvider(provider);
 
             if (index > -1) {
                 self.selectedServiceProviders.splice(index, 1);
@@ -526,6 +554,28 @@
 
         }
 
+        var selectEndpointsDialog;
+
+        function selectEndpoint() {
+            //get provider's endpoints and allow user to select/assign one to the current org.
+
+            if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                endpointService.getEndpointsForServiceProviders(self.selectedServiceProviders).then(function(data){
+                    self.selectableEndpoints = data;
+                });
+            }
+            else {
+                endpointService.getEndpoints(organizationService.getActiveOrg()).then(function(data){
+                    self.selectableEndpoints = data;
+                });
+            }
+
+
+            self.editingEndpoints = true;
+
+
+        }
+
         function removeEndpointFromModel(endpoint) {
             var index = self.endpoints.indexOf(endpoint);
             if (index > -1) {
@@ -557,11 +607,15 @@
                 return false;
             }
 
+            if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                return true;
+            }
+
             if (self.org.id === userService.activeUser.organizationId) {
                 return userService.hasRoleByName(userService.activeUser, 'ROLE_ORG_ADMIN');
             }
 
-            return userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN');
+            return false;
         }
 
 
@@ -648,11 +702,7 @@
         }
 
         function createUser(org) {
-            console.log(organizationService.getActiveOrg());
-
             organizationService.setActiveOrg(org);
-
-            console.log(organizationService.getActiveOrg() );
 
             $location.path( "users" );
         };
@@ -773,11 +823,38 @@
             getEndpoints: getEndpoints,
             update: update,
             create: create,
-            deleteEndpoint: deleteEndpoint
-
-        };
+            deleteEndpoint: deleteEndpoint,
+            getEndpointsForServiceProviders: getEndpointsForServiceProviders
+        }
 
         return service;
+
+        function getAttributes(input, attr) {
+            var output = [];
+            for (var i=0; i < input.length ; ++i)
+                output.push(input[i][attr]);
+            return output;
+        }
+
+
+        function getEndpointsForServiceProviders(serviceProviders) {
+
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/endpoints', {
+                'params': {'organizationId': getAttributes(serviceProviders, "id")},
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching endpoints for list of service providers.");
+            });
+
+            return deferred.promise;
+        }
+
 
         function deleteEndpoint(endpoint) {
             var deferred = $q.defer();
@@ -829,7 +906,7 @@
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/endpoints', {
-                'params': {'organizationId': org.id},
+                'params': {'organizationId': [org.id]},
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
@@ -873,6 +950,10 @@
             if ($window.activeUser !== null) {
                 find($window.activeUser.organizationId).then(function(orgArray){
                     activeOrg = orgArray[0];
+
+                    getInstitutionsForServiceProvider(activeOrg).then(function(data){
+                        activeOrg.institutions = data;
+                    });
                 });
 
             }

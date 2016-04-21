@@ -386,90 +386,90 @@
 <div th:fragment="endpoint">
     <div ng-controller="EndpointController as endpointCtrl">
 
-            <form name="endpointForm"  ng-submit="endpointForm.$valid && endpointCtrl.save(endpoint)" novalidate="novalidate" class="glow" >
+        <form name="endpointForm"  ng-submit="endpointForm.$valid && endpointCtrl.save(endpoint)" novalidate="novalidate" class="glow" >
 
-                <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
-                    <div class="btn-group">
-                        <button ng-show="!endpointCtrl.showForm(endpoint)" type="button" class="btn btn-default" ng-click="endpointCtrl.edit(endpoint)">
-                            <span class="glyphicon glyphicon-pencil"></span> Edit
-                        </button>
-                        <button ng-show="endpointCtrl.showForm(endpoint)" type="submit" class="btn btn-default">
-                            <span class="glyphicon glyphicon-floppy-disk"></span> Save
-                        </button>
-                        <button type="button" uib-popover-template="'delete-endpoint.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
-                            <span class="glyphicon glyphicon-remove-circle"></span> Delete
-                        </button>
+            <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!endpointCtrl.showForm(endpoint)" type="button" class="btn btn-default" ng-click="endpointCtrl.edit(endpoint)">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="endpointCtrl.showForm(endpoint)" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-endpoint.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
 
-                    </div>
                 </div>
-                <div ng-show="endpointCtrl.showForm(endpoint)">
-                    <div style="width: 80%;">
-                        <h4>
-                            <input class="form-control" type="text" placeholder="Address" required="required" ng-model="endpoint.address"> </input>
-                        </h4>
-                        <p>
-                            <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
-                        </p>
+            </div>
+            <div ng-show="endpointCtrl.showForm(endpoint)">
+                <div style="width: 80%;">
+                    <h4>
+                        <input class="form-control" type="text" placeholder="Address" required="required" ng-model="endpoint.address"> </input>
+                    </h4>
+                    <p>
+                        <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
+                    </p>
+                    <div>
+                        <strong>Document Format</strong>
                         <div>
-                            <strong>Document Format</strong>
-                            <div>
 
-                                <select class="form-control" style="width: 160px;" required="required"
-                                        ng-model="endpoint.documentFormat"
-                                        ng-options="documentFormat.name for documentFormat in endpointCtrl.documentFormats track by documentFormat.id">
+                            <select class="form-control" style="width: 160px;" required="required"
+                                    ng-model="endpoint.documentFormat"
+                                    ng-options="documentFormat.name for documentFormat in endpointCtrl.documentFormats track by documentFormat.id">
 
-                                </select>
-                                <p>
-                                    {{endpoint.documentFormat.description}}
-                                </p>
-                            </div>
+                            </select>
+                            <p>
+                                {{endpoint.documentFormat.description}}
+                            </p>
                         </div>
-                        <div>
-                            <strong>Delivery Methods</strong>
-                            <div>
-                                <select class="form-control" style="width: 160px;"  required="required"
-                                        ng-model="endpoint.deliveryMethod"
-                                        ng-options="deliveryMethod.name for deliveryMethod in endpointCtrl.deliveryMethods track by deliveryMethod.id">
-
-                                </select>
-                                <p>
-                                    {{endpoint.deliveryMethod.description}}
-                                </p>
-                            </div>
-                        </div>
-                        <div>
-                            <strong>Hosted By</strong>
-
-                            <p>{{endpoint.organization.name}}</p>
-                        </div>
-
                     </div>
-                </div>
-                <div ng-show="!endpointCtrl.showForm(endpoint)">
-                    <h4>{{endpoint.address}}</h4>
-                    <p>{{endpoint.instructions}}</p>
-                    <div><strong>Document Format</strong></div>
+                    <div>
+                        <strong>Delivery Methods</strong>
+                        <div>
+                            <select class="form-control" style="width: 160px;"  required="required"
+                                    ng-model="endpoint.deliveryMethod"
+                                    ng-options="deliveryMethod.name for deliveryMethod in endpointCtrl.deliveryMethods track by deliveryMethod.id">
 
-
-                            <h5>{{endpoint.documentFormat.name}}</h5>
-                            <p>{{endpoint.documentFormat.description}}</p>
-
-
-                    <div><strong>Delivery Method</strong></div>
-
-                            <h5>{{endpoint.deliveryMethod.name}}</h5>
-                            <p>{{endpoint.deliveryMethod.description}}</p>
-
+                            </select>
+                            <p>
+                                {{endpoint.deliveryMethod.description}}
+                            </p>
+                        </div>
+                    </div>
                     <div>
                         <strong>Hosted By</strong>
 
                         <p>{{endpoint.organization.name}}</p>
                     </div>
 
+                </div>
+            </div>
+            <div ng-show="!endpointCtrl.showForm(endpoint)">
+                <h4>{{endpoint.address}}</h4>
+                <p>{{endpoint.instructions}}</p>
+                <div><strong>Document Format</strong></div>
 
+
+                <h5>{{endpoint.documentFormat.name}}</h5>
+                <p>{{endpoint.documentFormat.description}}</p>
+
+
+                <div><strong>Delivery Method</strong></div>
+
+                <h5>{{endpoint.deliveryMethod.name}}</h5>
+                <p>{{endpoint.deliveryMethod.description}}</p>
+
+                <div>
+                    <strong>Hosted By</strong>
+
+                    <p>{{endpoint.organization.name}}</p>
                 </div>
 
-            </form>
+
+            </div>
+
+        </form>
 
     </div>
 </div>
@@ -491,14 +491,14 @@
         </div>
         <div ng-show="orgCtrl.editingSchoolCode(schoolCode) == true" >
             <div  class="col-md-2">
-                 <select class="form-control" style="width: 110px;" required="required"
-                         ng-model="schoolCode.codeType">
-                     <option value="">Select Code Type</option>
-                     <option value="ACT">ACT</option>
-                     <option value="ATP">ATP</option>
-                     <option value="FICE">FICE</option>
-                     <option value="IPEDS">IPEDS</option>
-                 </select>
+                <select class="form-control" style="width: 110px;" required="required"
+                        ng-model="schoolCode.codeType">
+                    <option value="">Select Code Type</option>
+                    <option value="ACT">ACT</option>
+                    <option value="ATP">ATP</option>
+                    <option value="FICE">FICE</option>
+                    <option value="IPEDS">IPEDS</option>
+                </select>
             </div>
             <div  class="col-md-2">
                 <input class="form-control" type="text" ng-model="schoolCode.code"/>
@@ -658,48 +658,41 @@
             </span>
 
             <div>
-                <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
+                <div style="float:right;" ng-show="orgCtrl.isEditableByUser()">
 
-                    <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.setShowServiceProviderForm(true)"></span>
+
+                     <span ng-show="orgCtrl.showServiceProviderForm == false">
+                         <span class="glyphicon glyphicon-pencil ed-icon-btn" ng-click="orgCtrl.setShowServiceProviderForm(true)"></span>
+                     </span>
+                     <span ng-show="orgCtrl.showServiceProviderForm == true">
+                         <span class="glyphicon glyphicon-floppy-disk ed-icon-btn" ng-click="orgCtrl.setShowServiceProviderForm(false)"></span>
+                     </span>
 
                 </div>
                 <div class="ed-title">Service Providers</div>
 
-                <div class="row">
 
-                    <div class="col-md-3">
-                        <div ng-repeat="provider in orgCtrl.selectedServiceProviders" >
+                <div ng-show="orgCtrl.showServiceProviderForm==false">
+                    <div ng-repeat="provider in orgCtrl.selectedServiceProviders" >
 
-                            <div>
-                                <a ng-href="#organization/{{provider.id}}">{{provider.name}}</a>
-                            </div>
-
+                        <div>
+                            <a ng-href="#organization/{{provider.id}}">{{provider.name}}</a>
                         </div>
+
                     </div>
-                    <div class="col-md-9">
-                        <div ng-show="orgCtrl.getShowServiceProviderForm()==true">
-                            <button class="btn btn-default" ng-click="orgCtrl.setShowServiceProviderForm(false)">
-                                <i class="glyphicon glyphicon-ok"></i> Done
-                            </button>
+                </div>
 
-                            <div ng-repeat="provider in orgCtrl.serviceProviders" style="margin-top: 10px;">
-
-                                <div>
-
-                                    <span  class="checkbox-inline"> <input
+                <div ng-show="orgCtrl.showServiceProviderForm==true">
+                    <div ng-repeat="provider in orgCtrl.serviceProviders" style="margin-top: 10px;">
+                        <div>
+                                <span  class="checkbox-inline"> <input
                                         type="checkbox"
                                         ng-checked="orgCtrl.hasServiceProvider(provider)"
                                         name="school"
                                         ng-click="orgCtrl.updateSelectedServiceProviders($event, provider)"> <b>{{provider.name}}</b></span>
-
-                                </div>
-
-                            </div>
-
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -718,22 +711,44 @@
 
 
         <div>
-            <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
+            <div style="float:right;">
 
-                <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.createEndpoint()"></span>
-
+                     <span ng-show="orgCtrl.isMyOrgServiceProviderForInstitution()==true">
+                         <span ng-show="orgCtrl.editingEndpoints == false">
+                             <span class="glyphicon glyphicon-pencil ed-icon-btn" ng-click="orgCtrl.selectEndpoint()"></span>
+                         </span>
+                         <span ng-show="orgCtrl.editingEndpoints == true">
+                             <span class="glyphicon glyphicon-floppy-disk ed-icon-btn" ng-click="orgCtrl.saveSelectedEndpoints()"></span>
+                         </span>
+                     </span>
+                     <span ng-show="orgCtrl.isEditableByUser()">
+                            <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.createEndpoint()"></span>
+                     </span>
             </div>
+
+
             <div class="ed-title">Endpoints</div>
-            <div ng-repeat="endpoint in orgCtrl.endpoints">
 
-                <div class="ed-endpoint">
-                    <div th:include="::endpoint"></div>
+            <div ng-show="orgCtrl.editingEndpoints == false">
+                <div ng-repeat="endpoint in orgCtrl.endpoints">
+
+                    <div class="ed-endpoint">
+                        <div th:include="::endpoint"></div>
+                    </div>
                 </div>
-
             </div>
+            <div ng-show="orgCtrl.editingEndpoints == true">
+                <div ng-repeat="endpoint in orgCtrl.selectableEndpoints">
+
+                    <div class="ed-endpoint">
+                        <div th:include="::endpoint"></div>
+                    </div>
+
+                </div>
+            </div>
+
 
         </div>
-
 
 
     </div>

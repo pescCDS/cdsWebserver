@@ -34,8 +34,8 @@ public class EndpointResource {
     private EndpointService endpointService;
 
 
-    private void checkOrganizationParameter(Integer organizationId) {
-        if (organizationId == null) {
+    private void checkOrganizationParameter(List<Integer> organizationId) {
+        if (organizationId == null || organizationId.size() == 0 ) {
             throw new IllegalArgumentException("The organizationID parameter is mandatory.");
         }
     }
@@ -46,7 +46,7 @@ public class EndpointResource {
     public List<Endpoint> findEndpoint(
             @QueryParam("documentFormat") String documentFormat,
             @QueryParam("id") @ApiParam("The identifier for the endpoint.") Integer id,
-            @QueryParam("organizationId") @ApiParam(value = "The endpoint's organization ID.", required = true) Integer organizationId
+            @QueryParam("organizationId") @ApiParam(value = "The endpoint's organization ID.", required = true) List<Integer> organizationId
     ) {
 
         checkOrganizationParameter(organizationId);
