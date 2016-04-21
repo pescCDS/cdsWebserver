@@ -40,8 +40,11 @@ public class InstitutionResource {
     @GET
     @ApiOperation("Return the institutions that are serviced by this service provider.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("service_provider_id") @ApiParam("The directory identifier for the service provider.") Integer id) {
+    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("service_provider_id") @ApiParam(value="The directory identifier for the service provider.", required = true) Integer id) {
 
+        if (id == null) {
+            throw new IllegalArgumentException("The service provider's id must be provided.");
+        }
         ServiceProvider serviceProvider = serviceProviderRepository.findOne(id);
 
         if (serviceProvider == null) {

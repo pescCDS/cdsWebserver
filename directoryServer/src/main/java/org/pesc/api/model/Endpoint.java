@@ -2,6 +2,7 @@ package org.pesc.api.model;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.List;
 import java.util.Set;
 
@@ -55,6 +56,7 @@ public class Endpoint {
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = DeliveryMethod.class, cascade = CascadeType.MERGE)
     private DeliveryMethod deliveryMethod;
 
+
     @JoinTable(
             name="endpoint_organization",
             joinColumns=
@@ -63,16 +65,18 @@ public class Endpoint {
             @JoinColumn(name="organization_id", referencedColumnName="id")
     )
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.MERGE)
-    private List<Organization> organizations;
+    private Set<Organization> organizations;
 
 
-    public List<Organization> getOrganizations() {
+    @XmlTransient
+    public Set<Organization> getOrganizations() {
         return organizations;
     }
 
-    public void setOrganizations(List<Organization> organizations) {
+    public void setOrganizations(Set<Organization> organizations) {
         this.organizations = organizations;
     }
+
 
     public Integer getId() {
         return id;

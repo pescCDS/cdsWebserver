@@ -40,7 +40,11 @@ public class ServiceProviderResource {
     @GET
     @ApiOperation("Return the service providers for the institution.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam("The directory identifier for the institution.") Integer id) {
+    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam(value="The directory identifier for the institution.", required = true) Integer id) {
+
+        if (id == null) {
+            throw new IllegalArgumentException("The institution's id must be provided.");
+        }
 
         Institution organization = institutionRepository.findOne(id);
 
@@ -54,8 +58,11 @@ public class ServiceProviderResource {
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the organization with the given ID.")
-    public Institution updateServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam("The directory identifier for the organization.") Integer id, Set<Organization> serviceProviders) {
+    public Institution updateServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam(value="The directory identifier for the organization.", required = true) Integer id, Set<Organization> serviceProviders) {
 
+        if (id == null) {
+            throw new IllegalArgumentException("The institution's id must be provided.");
+        }
         Institution institution = new Institution();
         institution.setId(id);
         institution.setServiceProviders(serviceProviders);

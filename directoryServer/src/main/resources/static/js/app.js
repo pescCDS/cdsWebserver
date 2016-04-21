@@ -394,7 +394,8 @@
 
 
         function isMyOrgServiceProviderForInstitution() {
-            if (self.org.type !== 1) { //if the current org isn't an institution, false
+
+            if (self.org.type !== 1 || userService.activeUser == null) { //if the current org isn't an institution, false
                 return false;
             }
 
@@ -550,7 +551,7 @@
                 editing: true
             }
 
-            self.endpoints.push(endpoint);
+            self.endpoints.unshift(endpoint);
 
         }
 
@@ -1330,6 +1331,9 @@
         }
 
         function hasRoleByName(user, roleName) {
+            if (user == null) {
+                return false;
+            }
             var found = false;
 
             for (var i=0; i < user.roles.length; i++) {
