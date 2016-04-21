@@ -840,6 +840,9 @@
 
         function getEndpointsForServiceProviders(serviceProviders) {
 
+            if (serviceProviders == null || serviceProviders == undefined || serviceProviders.length == 0) {
+                return;
+            }
 
             var deferred = $q.defer();
 
