@@ -560,7 +560,7 @@
         function selectEndpoint() {
             //get provider's endpoints and allow user to select/assign one to the current org.
 
-            if (serviceProviders == null || serviceProviders == undefined || serviceProviders.length == 0) {
+            if (self.selectedServiceProviders == null || self.selectedServiceProviders == undefined || self.selectedServiceProviders.length == 0) {
                 notificationService.info("There are no service providers for this institution.  At least one service provider " +
                     "must be assigned to the institution to use third party endpoints.");
                 return;
