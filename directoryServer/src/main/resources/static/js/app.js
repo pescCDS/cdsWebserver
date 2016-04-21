@@ -804,7 +804,8 @@
         var service = {
             success: success,
             error: error,
-            ajaxInfo: ajaxInfo
+            ajaxInfo: ajaxInfo,
+            info: info
         } ;
 
         return service;
