@@ -68,7 +68,6 @@ public class Endpoint {
     private Set<Organization> organizations;
 
 
-    @XmlTransient
     public Set<Organization> getOrganizations() {
         return organizations;
     }
