@@ -352,9 +352,9 @@
         };
     }
 
-    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', '$uibModal'];
+    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'notificationService'];
 
-    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, $uibModal) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, notificationService) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -559,6 +559,12 @@
 
         function selectEndpoint() {
             //get provider's endpoints and allow user to select/assign one to the current org.
+
+            if (serviceProviders == null || serviceProviders == undefined || serviceProviders.length == 0) {
+                notificationService.info("There are no service providers for this institution.  At least one service provider " +
+                    "must be assigned to the institution to use third party endpoints.");
+                return;
+            }
 
             if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
                 endpointService.getEndpointsForServiceProviders(self.selectedServiceProviders).then(function(data){
@@ -803,6 +809,10 @@
 
         return service;
 
+        function info(text) {
+            toaster.pop('warning', "Info", text);
+        }
+
         function success(text) {
             toaster.pop('success', "Success", text);
         }
@@ -839,10 +849,6 @@
 
 
         function getEndpointsForServiceProviders(serviceProviders) {
-
-            if (serviceProviders == null || serviceProviders == undefined || serviceProviders.length == 0) {
-                return;
-            }
 
             var deferred = $q.defer();
 
