@@ -78,6 +78,14 @@ public class AppController {
         return "fragments :: organization";
     }
 
+    @RequestMapping({"/endpoint-selector"})
+    public String getEndpointSelector(Model model) {
+        buildUserModel(model);
+
+        return "fragments :: endpoint-selector";
+    }
+
+
     @RequestMapping({"/organization-details"})
     public String getOrganizationDetails(HttpServletRequest request, Model model) {
 

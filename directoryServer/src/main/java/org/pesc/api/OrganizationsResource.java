@@ -7,11 +7,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.Organization;
-import org.pesc.api.repository.OrganizationRepository;
 import org.pesc.api.repository.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.jws.WebService;
 import javax.ws.rs.*;
@@ -105,6 +103,38 @@ public class OrganizationsResource {
         organizationService.delete(id);
 
     }
+
+    @Path("/{id}")
+    @POST
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Add the the endpoint with the given ID to the organization's list of endpoints.")
+    public void updateEndpoints(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id,
+                                @QueryParam("endpoint_id") @ApiParam(value="The identifier for the endpoint.", required = true) Integer endpointID,
+                                @QueryParam("operation") @ApiParam(value="The operation to perform. Must by case insensitive 'add' or 'remove'.", required = true) String operation) {
+
+        checkParameter(endpointID, "endpoint_id");
+        checkParameter(operation, "operation");
+
+        if ("add".equalsIgnoreCase(operation)) {
+            organizationService.addEndpointToOrganization(id, endpointID);
+        }
+
+        else if ("remove".equalsIgnoreCase(operation)) {
+            organizationService.removeEndpointToOrganization(id, endpointID);
+        }
+
+
+
+
+    }
+
+    void checkParameter(Object param, String parameterName) {
+        if (param == null) {
+            throw new WebApplicationException(String.format("The %s parameter is required.", parameterName));
+        }
+    }
+
+
 
 
 }

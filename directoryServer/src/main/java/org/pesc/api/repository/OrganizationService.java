@@ -1,11 +1,14 @@
 package org.pesc.api.repository;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.SchoolCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,6 +18,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import javax.persistence.criteria.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -30,6 +36,11 @@ public class OrganizationService {
     private static final Log log = LogFactory.getLog(OrganizationService.class);
 
     private EntityManagerFactory entityManagerFactory;
+
+
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @Autowired
     public OrganizationService(EntityManagerFactory entityManagerFactory) {
@@ -78,6 +89,22 @@ public class OrganizationService {
     public Organization findById(Integer id)  {
 
         return this.organizationRepository.findOne(id);
+    }
+
+    public void addEndpointToOrganization(Integer orgID, Integer endpointID) {
+
+        jdbcTemplate.update(
+                "insert into endpoint_organization (endpoint_id, organization_id) values (?, ?)",
+                endpointID, orgID);
+
+    }
+
+
+    public void removeEndpointToOrganization(Integer orgID,
+                                             Integer endpointID) {
+
+        jdbcTemplate.update(
+                "delete from endpoint_organization where endpoint_id = ? and organization_id =?", endpointID, orgID);
     }
 
 

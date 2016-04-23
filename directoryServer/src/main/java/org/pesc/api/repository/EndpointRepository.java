@@ -14,7 +14,4 @@ import java.util.List;
 @Repository
 public interface EndpointRepository extends CrudRepository<Endpoint, Integer>, JpaSpecificationExecutor {
 
-    @Query("from Endpoint where organizationId = ?1")
-    List<Endpoint> findByOrganizationId(Integer orgID);
-
 }

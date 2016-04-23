@@ -439,8 +439,10 @@
                     </div>
                     <div>
                         <strong>Hosted By</strong>
+                        <p>
+                            <a ng-href="#organization/{{endpoint.organization.id}}">{{endpoint.organization.name}}</a>
 
-                        <p>{{endpoint.organization.name}}</p>
+                        </p>
                     </div>
 
                 </div>
@@ -462,8 +464,10 @@
 
                 <div>
                     <strong>Hosted By</strong>
+                    <p>
+                        <a ng-href="#organization/{{endpoint.organization.id}}">{{endpoint.organization.name}}</a>
 
-                    <p>{{endpoint.organization.name}}</p>
+                    </p>
                 </div>
 
 
@@ -471,6 +475,55 @@
 
         </form>
 
+    </div>
+</div>
+
+
+<div th:fragment="endpoint-selector">
+    <div>
+
+
+            <div ng-repeat="endpoint in endpointCtrl.selectableEndpoints">
+                <div class="well">
+
+                    <div style="float:right;">
+                        <button type="button" class="btn btn-default" ng-show="endpointCtrl.isAssignedToInstitution(endpoint) == false"
+                                ng-click="endpointCtrl.addEndpointToInstitution(endpoint)">
+                            <span class="glyphicon glyphicon-plus"></span> Add
+                        </button>
+
+                        <button type="button" class="btn btn-default" ng-show="endpointCtrl.isAssignedToInstitution(endpoint) == true"
+                                ng-click="endpointCtrl.removeEndpointToInstitution(endpoint)">
+                            <span class="glyphicon glyphicon-remove"></span> Remove
+                        </button>
+
+                    </div>
+
+                    <div>
+                        <h4>{{endpoint.address}}</h4>
+                        <p>{{endpoint.instructions}}</p>
+                        <div><strong>Document Format</strong></div>
+
+
+                        <h5>{{endpoint.documentFormat.name}}</h5>
+                        <p>{{endpoint.documentFormat.description}}</p>
+
+
+                        <div><strong>Delivery Method</strong></div>
+
+                        <h5>{{endpoint.deliveryMethod.name}}</h5>
+                        <p>{{endpoint.deliveryMethod.description}}</p>
+
+                        <div>
+                            <strong>Hosted By</strong>
+                            <p>
+                                <a ng-href="#organization/{{endpoint.organization.id}}">{{endpoint.organization.name}}</a>
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
 </div>
 
@@ -493,7 +546,7 @@
             <div  class="col-md-2">
                 <select class="form-control" style="width: 110px;" required="required"
                         ng-model="schoolCode.codeType">
-                    <option value="">Select Code Type</option>
+                    <option value=""></option>
                     <option value="ACT">ACT</option>
                     <option value="ATP">ATP</option>
                     <option value="FICE">FICE</option>
@@ -712,15 +765,6 @@
 
         <div>
             <div style="float:right;">
-
-                     <span ng-show="orgCtrl.isMyOrgServiceProviderForInstitution()==true">
-                         <span ng-show="orgCtrl.editingEndpoints == false">
-                             <span class="glyphicon glyphicon-pencil ed-icon-btn" ng-click="orgCtrl.selectEndpoint()"></span>
-                         </span>
-                         <span ng-show="orgCtrl.editingEndpoints == true">
-                             <span class="glyphicon glyphicon-floppy-disk ed-icon-btn" ng-click="orgCtrl.saveSelectedEndpoints()"></span>
-                         </span>
-                     </span>
                      <span ng-show="orgCtrl.isEditableByUser()">
                             <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.createEndpoint()"></span>
                      </span>
@@ -729,21 +773,18 @@
 
             <div class="ed-title">Endpoints</div>
 
-            <div ng-show="orgCtrl.editingEndpoints == false">
-                <div ng-repeat="endpoint in orgCtrl.endpoints">
-
-                    <div class="ed-endpoint">
-                        <div th:include="::endpoint"></div>
-                    </div>
-                </div>
+            <div ng-show="orgCtrl.isMyOrgServiceProviderForInstitution()==true && orgCtrl.selectedServiceProviders.length > 0">
+                <a ng-href="#endpoint-selector/{{orgCtrl.org.id}}">Select Endpoints</a>
             </div>
-            <div ng-show="orgCtrl.editingEndpoints == true">
-                <div ng-repeat="endpoint in orgCtrl.selectableEndpoints">
 
-                    <div class="ed-endpoint">
-                        <div th:include="::endpoint"></div>
-                    </div>
+            <here>
 
+            </here>
+
+            <div ng-repeat="endpoint in orgCtrl.endpoints">
+
+                <div class="ed-endpoint">
+                    <div th:include="::endpoint"></div>
                 </div>
             </div>
 

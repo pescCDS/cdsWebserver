@@ -83,9 +83,10 @@ public class EndpointService {
 
 
     /**
+     *
+     * @param documentFormat
      * @param endpointId
      * @param organizationId
-     *
      * @return
      */
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)

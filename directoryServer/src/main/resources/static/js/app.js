@@ -18,6 +18,7 @@
         .controller("UserController", UserController)
         .controller("UsersController", UsersController)
         .controller("EndpointController", EndpointController)
+        .controller("EndpointSelectorController", EndpointSelectorController)
         .config(config)
         .run(['organizationService', function(organizationService) {
             organizationService.initialize();
@@ -74,6 +75,20 @@
                 resolve: {
                     users: ['$window', 'userService', 'organizationService', function ($window, userService, organizationService) {
                         return userService.getUsers(organizationService.getActiveOrg().id);
+                    }]
+                }
+            })
+            .when("/endpoint-selector/:institution_id", {
+                templateUrl: "endpoint-selector",
+                controller: "EndpointSelectorController",
+                controllerAs: "endpointCtrl",
+                resolve: {
+                    institutions: ['$route', 'organizationService', function ($route, organizationService) {
+                        return organizationService.find($route.current.params.institution_id);
+                    }],
+                    endpoints: ['$route', 'endpointService', function($route, endpointService){
+                        return endpointService.getEndpointsById($route.current.params.institution_id);
+
                     }]
                 }
             })
@@ -352,6 +367,73 @@
         };
     }
 
+    EndpointSelectorController.$inject = ['institutions', 'endpoints', 'organizationService', 'endpointService', 'notificationService', 'userService'];
+
+    function EndpointSelectorController(institutions, endpoints, organizationService, endpointService, notificationService, userService) {
+        var self = this;
+
+        self.isAssignedToInstitution = isAssignedToInstitution;
+        self.institution = institutions[0];
+        self.serviceProviders = [];
+        self.selectableEndpoints = [];
+        self.addEndpointToInstitution = addEndpointToInstitution;
+        self.removeEndpointToInstitution = removeEndpointToInstitution;
+        self.endpoints = endpoints;
+
+        initialize();
+
+        function indexOfEndpoint(endpoint, endpoints) {
+            for(var i=0; i < endpoints.length; i++) {
+                if (endpoints[i].id === endpoint.id) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        function isAssignedToInstitution(endpoint) {
+            return indexOfEndpoint(endpoint, self.endpoints) != -1;
+        };
+
+        function addEndpointToInstitution(endpoint) {
+
+            organizationService.updateEndpoints(self.institution, endpoint, 'ADD').then(function(data){
+                self.endpoints.push(endpoint);
+            });
+        };
+        function removeEndpointToInstitution(endpoint) {
+
+            organizationService.updateEndpoints(self.institution, endpoint, 'REMOVE').then(function(data){
+                var index = indexOfEndpoint(endpoint, self.endpoints);
+
+                if (index!=-1) {
+                    self.endpoints.splice(index, 1);
+                }
+            });
+
+
+        };
+
+        function initialize() {
+            organizationService.getServiceProvidersForInstitution(self.institution).then(function(data){
+                self.serviceProviders = data;
+
+                if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                    endpointService.getEndpointsForServiceProviders(self.serviceProviders).then(function(data){
+                        self.selectableEndpoints = data;
+                    });
+                }
+                else {
+                    endpointService.getEndpoints(organizationService.getActiveOrg()).then(function(data){
+                        self.selectableEndpoints = data;
+                    });
+                }
+
+            });
+
+        }
+    }
+
     OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'notificationService'];
 
     function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, notificationService) {
@@ -380,17 +462,8 @@
         self.isMyOrgServiceProviderForInstitution = isMyOrgServiceProviderForInstitution;
         self.selectEndpoint = selectEndpoint;
         self.selectableEndpoints = [];
-        self.saveSelectedEndpoints = saveSelectedEndpoints;
-        self.editingEndpoints = false;
 
         self.showServiceProviderForm = false;
-
-
-        function saveSelectedEndpoints() {
-            self.editingEndpoints = false;
-
-            //TODO: ajax call to save endpoints.
-        }
 
 
         function isMyOrgServiceProviderForInstitution() {
@@ -520,22 +593,43 @@
         }
 
         function saveSchoolCode(schoolCode) {
+
+            //Validate code parameters
+            if (schoolCode.code == '' || schoolCode.codeType == '') {
+                notificationService.info("Invalid school code.  Please select a code and type and provide the code.");
+                return;
+            }
+
+            //Also make sure a duplicate code isn't being used.
+            for(var i=0; i<self.org.schoolCodes.length; i++) {
+                if (self.org.schoolCodes[i] === schoolCode) {
+                    continue;
+                }
+                if (self.org.schoolCodes[i].codeType === schoolCode.codeType){
+                    notificationService.info("An " + schoolCode.codeType + " is already defined for this school. " +
+                        " Please edit the existing " + schoolCode.codeType + " code or choose an unused code type.");
+                    return;
+                }
+            }
+
             delete schoolCode.editing;
 
             schoolCodesService.saveSchoolCode(schoolCode).then(function(data){
                 console.log("Successfully created new school code.");
+            }, function(error){
+                schoolCode.editing = true;
             });
         }
 
         function addSchoolCode() {
             var schoolCode = {
-                code: '4226',
-                codeType: 'FICE',
+                code: '',
+                codeType: '',
                 organizationId: self.org.id,
                 editing: true
             }
 
-            self.org.schoolCodes.push(schoolCode);
+            self.org.schoolCodes.unshift(schoolCode);
         }
 
         function createEndpoint() {
@@ -554,8 +648,6 @@
             self.endpoints.unshift(endpoint);
 
         }
-
-        var selectEndpointsDialog;
 
         function selectEndpoint() {
             //get provider's endpoints and allow user to select/assign one to the current org.
@@ -576,10 +668,6 @@
                     self.selectableEndpoints = data;
                 });
             }
-
-
-            self.editingEndpoints = true;
-
 
         }
 
@@ -833,6 +921,7 @@
     function endpointService($http, $q, $cacheFactory, notificationService) {
         var service = {
             getEndpoints: getEndpoints,
+            getEndpointsById: getEndpointsById,
             update: update,
             create: create,
             deleteEndpoint: deleteEndpoint,
@@ -911,13 +1000,11 @@
         }
 
 
-
-        function getEndpoints(org) {
-
+        function getEndpointsById(org_id) {
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/endpoints', {
-                'params': {'organizationId': [org.id]},
+                'params': {'organizationId': [org_id]},
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
@@ -927,6 +1014,10 @@
             });
 
             return deferred.promise;
+        }
+        function getEndpoints(org) {
+
+           return getEndpointsById(org.id);
         }
     }
 
@@ -950,6 +1041,7 @@
             getServiceProvidersForInstitution: getServiceProvidersForInstitution,
             updateServiceProvidersForInstitition: setServiceProvidersForInstitution,
             getInstitutionsForServiceProvider: getInstitutionsForServiceProvider,
+            updateEndpoints: updateEndpoints,
             initialize: initialize
         };
 
@@ -978,6 +1070,22 @@
         function setActiveOrg(orgObj) {
             activeOrg = orgObj;
         }
+
+        function updateEndpoints(org, endpoint, operation) {
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/organizations/' + org.id,null,{
+                'params': {'endpoint_id': endpoint.id, 'operation' : operation}
+            }).success(function (data) {
+                deferred.resolve(endpoint);
+            }).error(function(data){
+                notificationService.ajaxInfo(data);
+                deferred.reject("An error occured while updating the endpoints for " + org.name + ".");
+            });
+
+            return deferred.promise;
+        }
+
 
         function deleteOrg(org) {
             var deferred = $q.defer();
@@ -1236,7 +1344,7 @@
                 deferred.resolve(schoolCode);
             }).error(function(data){
                 notificationService.ajaxInfo(data);
-                deferred.reject("An error occured while updating a school code.");
+                deferred.reject("An error occured while creating a school code.");
             });
 
             return deferred.promise;
