@@ -481,7 +481,8 @@
 
 <div th:fragment="endpoint-selector">
     <div>
-
+            <h1 ng-show="!orgCtrl.showOrgForm()">{{endpointCtrl.institution.name}}</h1>
+            <p>Endpoints available from service providers.</p>
 
             <div ng-repeat="endpoint in endpointCtrl.selectableEndpoints">
                 <div class="well">
