@@ -1,6 +1,7 @@
-package org.pesc.api.repository;
+package org.pesc.service;
 
 import org.pesc.api.model.DocumentFormat;
+import org.pesc.api.repository.DocumentFormatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

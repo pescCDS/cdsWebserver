@@ -1,12 +1,11 @@
-package org.pesc.api.repository;
+package org.pesc.service;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.SchoolCode;
+import org.pesc.api.repository.OrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,9 +17,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import javax.persistence.criteria.Path;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -29,6 +25,21 @@ import java.util.StringTokenizer;
 
 /**
  * Created by james on 3/21/16.
+ *
+ * This service mixes JDBC and JPA.  The database configuration for this app instantiates the JpaTransactionManager
+ * and according the documentation for JpaTransactionManager for Spring 4,
+ * http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/orm/jpa/JpaTransactionManager.html,
+ * it (the JpaTransactionManager) supports direct access (JDBC) to the data source within a transaction.
+ *
+ * From the documentation:
+ *
+ * This transaction manager also supports direct DataSource access within a transaction
+ * (i.e. plain JDBC code working with the same DataSource). This allows for mixing services which access JPA
+ * and services which use plain JDBC (without being aware of JPA)! Application code needs to stick to the same
+ * simple Connection lookup pattern as with DataSourceTransactionManager
+ * (i.e. DataSourceUtils.getConnection(javax.sql.DataSource) or going through a
+ * TransactionAwareDataSourceProxy). Note that this requires a vendor-specific JpaDialect to be configured.
+ *
  */
 @Service
 public class OrganizationService {
@@ -56,11 +67,19 @@ public class OrganizationService {
         return this.organizationRepository.findAll();
     }
 
+    /**
+     * This method is intended to be invoked by a user who has already validated the organization, so it does
+     * not require a review/approval, as when a unknown user registers a new organization.
+     * @param organization
+     * @return
+     */
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
     public Organization create(Organization organization){
+        organization.setActive(true);  //The info has already been validated, so mark it as active
         return this.organizationRepository.save(organization);
     }
+
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
@@ -80,17 +99,20 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    //TODO: add PreAuthorize
     public List<Organization> findByName(String name)  {
         return this.organizationRepository.findByName(name);
     }
 
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    //TODO: add PreAuthorize
     public Organization findById(Integer id)  {
 
         return this.organizationRepository.findOne(id);
     }
 
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     public void addEndpointToOrganization(Integer orgID, Integer endpointID) {
 
         jdbcTemplate.update(
@@ -100,6 +122,7 @@ public class OrganizationService {
     }
 
 
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     public void removeEndpointToOrganization(Integer orgID,
                                              Integer endpointID) {
 
@@ -107,6 +130,23 @@ public class OrganizationService {
                 "delete from endpoint_organization where endpoint_id = ? and organization_id =?", endpointID, orgID);
     }
 
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
+    public void setEnabledForOrganization(Integer orgID, Boolean enable) {
+
+        jdbcTemplate.update(
+                "update organization set enabled = ? where id = ?", orgID, enable);
+    }
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
+    public void setProperty(Integer orgID, String propertyName, Object propertyValue) {
+
+        log.info(String.format("Updating %s property to %s.", propertyName, propertyValue));
+        jdbcTemplate.update(
+                String.format("update organization set %s = ? where id = ?", propertyName), propertyValue, orgID);
+    }
 
 
     /**
@@ -132,7 +172,9 @@ public class OrganizationService {
             Integer organizationType,
             String organizationEin,
             Long createdTime,
-            Long modifiedTime
+            Long modifiedTime,
+            Boolean active,
+            Boolean enabled
     ) {
 
         try {
@@ -204,6 +246,14 @@ public class OrganizationService {
                 predicates.add(cb.equal(org.get("modifiedTime"), new Timestamp(modifiedTime)));
             }
 
+
+            if (active != null) {
+                predicates.add(cb.equal(org.get("active"), active));
+            }
+
+            if (enabled != null) {
+                predicates.add(cb.equal(org.get("enabled"), enabled));
+            }
 
             Predicate[] predicateArray = new Predicate[predicates.size()];
             predicates.toArray(predicateArray);

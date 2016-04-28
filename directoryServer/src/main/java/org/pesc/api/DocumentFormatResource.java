@@ -2,21 +2,16 @@ package org.pesc.api;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
-import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.DocumentFormat;
-import org.pesc.api.repository.DocumentFormatService;
-import org.pesc.api.repository.UserService;
+import org.pesc.service.DocumentFormatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

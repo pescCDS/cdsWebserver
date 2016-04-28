@@ -58,9 +58,14 @@
                     <a class="item" href="#users">Users</a>
                 </li>
 
+                <li th:if="${isAuthenticated}==true" ng-class="{ active: nav.isActive('/messages')}">
+                    <a class="item" href="#messages">Messages</a>
+                </li>
+
             </ul>
             <ul th:if="${isAuthenticated}==false" class="nav navbar-nav navbar-right">
                 <ul class="nav navbar-nav">
+                    <li><a href="#registration-form">Sign Up</a></li>
                     <li><a href="admin">Sign In</a></li>
                 </ul>
             </ul>

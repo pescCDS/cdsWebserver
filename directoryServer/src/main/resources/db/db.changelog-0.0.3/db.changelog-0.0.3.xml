@@ -35,4 +35,11 @@
 		<sqlFile encoding="utf8" path="4-institutions-service-providers.sql" relativeToChangelogFile="true" />
 	</changeSet>
 
+	<changeSet id="8" author="james">
+		<comment>
+			Adding table to support generated messages for an organization.
+		</comment>
+		<sqlFile encoding="utf8" path="5-messages.sql" relativeToChangelogFile="true" />
+	</changeSet>
+
 </databaseChangeLog>

@@ -31,7 +31,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .enableSessionUrlRewriting(false)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/static/**","/fonts/**", "/home", "/services/**", "/about", "/organizations", "/endpoints", "/organization-details", "/swagger-ui/**", "/home.html", "/").permitAll()
+                .antMatchers("/static/**",
+                        "/fonts/**",
+                        "/registration-form",
+                        "/home",
+                        "/services/**",
+                        "/about",
+                        "/organizations",
+                        "/endpoints",
+                        "/organization-details",
+                        "/swagger-ui/**",
+                        "/home.html",
+                        "/").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()

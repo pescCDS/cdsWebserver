@@ -7,7 +7,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.Organization;
-import org.pesc.api.repository.OrganizationService;
+import org.pesc.api.model.Property;
+import org.pesc.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,9 @@ public class OrganizationsResource {
             @QueryParam("type") @ApiParam("The type of organization (1 = Institution, 2 = Service Provider).") Integer type,
             @QueryParam("ein") @ApiParam("The federal tax identification number (Employer Identification Number).") String ein,
             @QueryParam("createdTime") Long createdTime,
-            @QueryParam("modifiedTime") Long modifiedTime
+            @QueryParam("modifiedTime") Long modifiedTime,
+            @QueryParam("active") @ApiParam("Indicates whether the organization and all it's endpoints are active.") Boolean active,
+            @QueryParam("enabled") @ApiParam("Indicates whether the organization is in good standing and included in the directory.") Boolean enabled
     ) {
 
         return organizationService.search(
@@ -57,7 +60,9 @@ public class OrganizationsResource {
                 type,
                 ein,
                 createdTime,
-                modifiedTime);
+                modifiedTime,
+                active,
+                enabled);
     }
 
     @GET
@@ -75,6 +80,7 @@ public class OrganizationsResource {
 
         return results;
     }
+
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
     @POST
@@ -123,12 +129,21 @@ public class OrganizationsResource {
             organizationService.removeEndpointToOrganization(id, endpointID);
         }
 
-
-
-
     }
 
-    void checkParameter(Object param, String parameterName) {
+    @Path("/{id}/property")
+    @PUT
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Update a specific property of an organization. This API is only accessible by a System Admin")
+    public void updateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id,
+                                Property property) {
+
+        checkParameter(property, "property");
+
+        organizationService.setProperty(id, property.getName(), property.getValue());
+    }
+
+    public static void checkParameter(Object param, String parameterName) {
         if (param == null) {
             throw new WebApplicationException(String.format("The %s parameter is required.", parameterName));
         }

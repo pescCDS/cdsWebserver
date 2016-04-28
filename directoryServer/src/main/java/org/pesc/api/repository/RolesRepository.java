@@ -1,6 +1,7 @@
 package org.pesc.api.repository;
 
 import org.pesc.api.model.Credentials;
+import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Role;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,5 +15,7 @@ import java.util.List;
  */
 @Repository
 public interface RolesRepository extends CrudRepository<Role, Integer> {
+    @Query("from Role where name = ?1")
+    Role findByName(String name);
 
 }

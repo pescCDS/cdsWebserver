@@ -3,6 +3,7 @@ package org.pesc.web;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.DirectoryUser;
+import org.pesc.service.OrganizationService;
 import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +34,9 @@ public class AppController {
 
     @Autowired
     private RolesRepository roleRepo;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     private boolean buildUserModel(Model model) {
         boolean isAuthenticated = false;
@@ -65,24 +68,36 @@ public class AppController {
 
     }
 
-
     @RequestMapping(value="/",method = RequestMethod.GET)
     public String gotoHomePage(Model model){
         return "redirect:home";
     }
 
     @RequestMapping({"/organization"})
-    public String getDocs(Model model) {
+    public String getOrganizationFragment(Model model) {
         buildUserModel(model);
 
         return "fragments :: organization";
     }
 
+    @RequestMapping({"/messages"})
+    public String getMessagesFragment(Model model) {
+        buildUserModel(model);
+
+        return "fragments :: messages";
+    }
+
     @RequestMapping({"/endpoint-selector"})
-    public String getEndpointSelector(Model model) {
+    public String getEndpointSelectorFragment(Model model) {
         buildUserModel(model);
 
         return "fragments :: endpoint-selector";
+    }
+
+    @RequestMapping({"/registration-form"})
+    public String getRegistrationFormFragment(Model model) {
+
+        return "fragments :: registration-form";
     }
 
 

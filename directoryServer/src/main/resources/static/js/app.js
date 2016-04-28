@@ -5,25 +5,27 @@
         .filter('friendlyRoleName', friendlyRoleName)
         .filter('getByProperty', getByProperty)
         .directive('toNumber', toNumber)
-        .service('notificationService', notificationService)
+        .service('toasterService', toasterService)
         .service('organizationService', organizationService)
         .service('userService', userService)
         .service('settingsService', settingsService)
         .service('schoolCodesService', schoolCodesService)
         .service('endpointService', endpointService)
+        .service('messageService', messageService)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
+        .controller("MessageController", MessageController)
         .controller("OrgController", OrgController)
         .controller("UserController", UserController)
         .controller("UsersController", UsersController)
         .controller("EndpointController", EndpointController)
         .controller("EndpointSelectorController", EndpointSelectorController)
+        .controller("RegistrationController", RegistrationController)
         .config(config)
-        .run(['organizationService', function(organizationService) {
+        .run(['organizationService', function (organizationService) {
             organizationService.initialize();
         }]);
-
 
 
     function config($routeProvider) {
@@ -77,6 +79,11 @@
                         return userService.getUsers(organizationService.getActiveOrg().id);
                     }]
                 }
+            }).
+            when("/messages", {
+                templateUrl: "messages",
+                controller: "MessageController",
+                controllerAs: "messagesCtrl"
             })
             .when("/endpoint-selector/:institution_id", {
                 templateUrl: "endpoint-selector",
@@ -86,11 +93,16 @@
                     institutions: ['$route', 'organizationService', function ($route, organizationService) {
                         return organizationService.find($route.current.params.institution_id);
                     }],
-                    endpoints: ['$route', 'endpointService', function($route, endpointService){
+                    endpoints: ['$route', 'endpointService', function ($route, endpointService) {
                         return endpointService.getEndpointsById($route.current.params.institution_id);
 
                     }]
                 }
+            })
+            .when("/registration-form", {
+                templateUrl: "registration-form",
+                controller: "RegistrationController",
+                controllerAs: "regCtrl"
             })
             .when("/home", {
                 templateUrl: "about"
@@ -113,19 +125,80 @@
 
 
         function getDeliveryMethods() {
-            settingsService.getDeliveryMethods().then(function(data){
+            settingsService.getDeliveryMethods().then(function (data) {
                 self.deliveryMethods = data;
             });
         }
+
         function getDocumentFormats() {
-            settingsService.getDocumentFormats().then(function(data){
+            settingsService.getDocumentFormats().then(function (data) {
                 self.documentFormats = data;
             });
         }
 
     }
 
-    UsersController.$inject = [ 'organizationService', '$window', 'userService', 'users'];
+    MessageController.$inject = ['messageService'];
+    function MessageController(messageService) {
+        var self = this;
+
+        self.messages = [];
+
+
+        function initialize() {
+
+        }
+
+    }
+
+    RegistrationController.$inject = ['organizationService', 'toasterService'];
+    function RegistrationController(organizationService, toasterService) {
+        var self = this;
+        self.register = register;
+
+        self.org = {
+            name: '',
+            type: 0,
+            street: '',
+            city: '',
+            state: '',
+            zip: '',
+            telephone: '',
+            website: 'http://'
+        };
+
+        self.user = {
+            name: '',
+            title: '',
+            phone: '',
+            email: '',
+            username: '',
+            password: ''
+        };
+
+
+        function register() {
+
+            var bag = {
+                'user': self.user,
+                'organization': self.org
+            };
+
+            organizationService.register(bag).then(function (data) {
+                    toasterService.success("Thank you for registering.  An email will be sent to " + self.user.email + " when your organization becomes activated.");
+
+                },
+                function (response) {
+                    toasterService.error(response.message);
+                });
+
+            return true;
+        }
+
+    }
+
+
+    UsersController.$inject = ['organizationService', '$window', 'userService', 'users'];
     function UsersController(organizationService, $window, userService, users) {
         var self = this;
         self.users = users;
@@ -164,7 +237,7 @@
         self.searchInput = '';
 
         function find() {
-            userService.getByName(self.searchInput,organizationService.getActiveOrg().id ).then(function(data){
+            userService.getByName(self.searchInput, organizationService.getActiveOrg().id).then(function (data) {
                 self.users = data;
             });
         };
@@ -182,7 +255,7 @@
             //If it's an existing user we need to delete it on the server
             if (user.hasOwnProperty('id')) {
 
-                userService.deleteUser(user).then(function(data){
+                userService.deleteUser(user).then(function (data) {
                     self.removeFromModel(user);
                 });
 
@@ -195,7 +268,7 @@
         };
 
         function isNewAccount(user) {
-            return ! user.hasOwnProperty('id');
+            return !user.hasOwnProperty('id');
         }
 
         function save(user) {
@@ -205,18 +278,19 @@
             if (user.hasOwnProperty('id')) {
                 //update
 
-                userService.updateUser(user).then(function(data){
+                userService.updateUser(user).then(function (data) {
                     console.log("Successfully update user.");
                 });
 
             }
             else {
                 //create
-                userService.createUser(user).then(function(data){
+                userService.createUser(user).then(function (data) {
                     console.log("Successfully created user with id " + data.id);
-                }).catch(function(e){
+                }).catch(function (e) {
                     self.edit(user);
-                });;
+                });
+                ;
 
             }
         };
@@ -231,17 +305,17 @@
         };
 
 
-        function updateRole($event, role, user){
+        function updateRole($event, role, user) {
 
             var checkbox = $event.target;
 
-            if(checkbox.checked === true){
+            if (checkbox.checked === true) {
                 user.roles.push(role);
             } else {
                 // remove item
-                for(var i=0 ; i < user.roles.length; i++) {
-                    if(user.roles[i].id == role.id){
-                        user.roles.splice(i,1);
+                for (var i = 0; i < user.roles.length; i++) {
+                    if (user.roles[i].id == role.id) {
+                        user.roles.splice(i, 1);
                     }
                 }
             }
@@ -250,11 +324,11 @@
 
     }
 
-    UserController.$inject = [ '$window', 'notificationService', 'userService', 'users'];
-    function UserController($window, notificationService, userService, users) {
+    UserController.$inject = ['$window', 'toasterService', 'userService', 'users'];
+    function UserController($window, toasterService, userService, users) {
 
         if (users.length != 1) {
-            notificationService.error("An error occurred while processing a user record: only one record should be provided.");
+            toasterService.error("An error occurred while processing a user record: only one record should be provided.");
         }
         var self = this;
         self.user = users[0];
@@ -277,19 +351,19 @@
         function save() {
             delete self.user.editing;
 
-            userService.updateUser(self.user).then(function(data){
+            userService.updateUser(self.user).then(function (data) {
                 console.log("Successfully updated user.");
             });
         }
 
         function isNewAccount() {
-            return ! self.user.hasOwnProperty('id');
+            return !self.user.hasOwnProperty('id');
         }
 
         function hasRole(role) {
             var found = false;
 
-            for (var i=0; i < self.user.roles.length; i++) {
+            for (var i = 0; i < self.user.roles.length; i++) {
                 if (self.user.roles[i].id == role.id) {
                     found = true;
                     break;
@@ -299,17 +373,17 @@
         }
 
 
-        function updateRole($event, role){
+        function updateRole($event, role) {
 
             var checkbox = $event.target;
 
-            if(checkbox.checked === true){
+            if (checkbox.checked === true) {
                 self.user.roles.push(role);
             } else {
                 // remove item
-                for(var i=0 ; i < self.user.roles.length; i++) {
-                    if(self.user.roles[i].id == role.id){
-                        self.user.roles.splice(i,1);
+                for (var i = 0; i < self.user.roles.length; i++) {
+                    if (self.user.roles[i].id == role.id) {
+                        self.user.roles.splice(i, 1);
                     }
                 }
             }
@@ -317,9 +391,9 @@
 
     }
 
-    EndpointController.$inject = ['endpointService', 'notificationService', 'settingsService'];
+    EndpointController.$inject = ['endpointService', 'toasterService', 'settingsService'];
 
-    function EndpointController(endpointService, notificationService, settingsService) {
+    function EndpointController(endpointService, toasterService, settingsService) {
         var self = this;
         self.showForm = showForm;
         self.save = save;
@@ -330,10 +404,10 @@
         initialize();
 
         function initialize() {
-            settingsService.getDocumentFormats().then(function(data){
+            settingsService.getDocumentFormats().then(function (data) {
                 self.documentFormats = data;
             });
-            settingsService.getDeliveryMethods().then(function(data){
+            settingsService.getDeliveryMethods().then(function (data) {
                 self.deliveryMethods = data;
             });
         }
@@ -352,24 +426,24 @@
             delete endpoint.editing;
 
             if (endpoint.hasOwnProperty('id')) {
-                endpointService.update(endpoint).then(function(data){
-                    notificationService.success("Successfully updated endpoint.");
+                endpointService.update(endpoint).then(function (data) {
+                    toasterService.success("Successfully updated endpoint.");
                 });
 
             }
             else {
                 //create
-                endpointService.create(endpoint).then(function(data){
-                    notificationService.success("Successfully created endpoint.");
+                endpointService.create(endpoint).then(function (data) {
+                    toasterService.success("Successfully created endpoint.");
                 });
 
             }
         };
     }
 
-    EndpointSelectorController.$inject = ['institutions', 'endpoints', 'organizationService', 'endpointService', 'notificationService', 'userService'];
+    EndpointSelectorController.$inject = ['institutions', 'endpoints', 'organizationService', 'endpointService', 'toasterService', 'userService'];
 
-    function EndpointSelectorController(institutions, endpoints, organizationService, endpointService, notificationService, userService) {
+    function EndpointSelectorController(institutions, endpoints, organizationService, endpointService, toasterService, userService) {
         var self = this;
 
         self.isAssignedToInstitution = isAssignedToInstitution;
@@ -383,7 +457,7 @@
         initialize();
 
         function indexOfEndpoint(endpoint, endpoints) {
-            for(var i=0; i < endpoints.length; i++) {
+            for (var i = 0; i < endpoints.length; i++) {
                 if (endpoints[i].id === endpoint.id) {
                     return i;
                 }
@@ -397,34 +471,36 @@
 
         function addEndpointToInstitution(endpoint) {
 
-            organizationService.updateEndpoints(self.institution, endpoint, 'ADD').then(function(data){
+            organizationService.updateEndpoints(self.institution, endpoint, 'ADD').then(function (data) {
                 self.endpoints.push(endpoint);
+                toasterService.success("Endpoint " + endpoint.address + " has been added to " + self.institution.name);
             });
         };
         function removeEndpointToInstitution(endpoint) {
 
-            organizationService.updateEndpoints(self.institution, endpoint, 'REMOVE').then(function(data){
+            organizationService.updateEndpoints(self.institution, endpoint, 'REMOVE').then(function (data) {
                 var index = indexOfEndpoint(endpoint, self.endpoints);
 
-                if (index!=-1) {
+                if (index != -1) {
                     self.endpoints.splice(index, 1);
                 }
+                toasterService.success("Endpoint " + endpoint.address + " has been removed from " + self.institution.name);
             });
 
 
         };
 
         function initialize() {
-            organizationService.getServiceProvidersForInstitution(self.institution).then(function(data){
+            organizationService.getServiceProvidersForInstitution(self.institution).then(function (data) {
                 self.serviceProviders = data;
 
                 if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
-                    endpointService.getEndpointsForServiceProviders(self.serviceProviders).then(function(data){
+                    endpointService.getEndpointsForServiceProviders(self.serviceProviders).then(function (data) {
                         self.selectableEndpoints = data;
                     });
                 }
                 else {
-                    endpointService.getEndpoints(organizationService.getActiveOrg()).then(function(data){
+                    endpointService.getEndpoints(organizationService.getActiveOrg()).then(function (data) {
                         self.selectableEndpoints = data;
                     });
                 }
@@ -434,9 +510,9 @@
         }
     }
 
-    OrgController.$inject = [ '$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'notificationService'];
+    OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService'];
 
-    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, notificationService) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, toasterService) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -444,6 +520,7 @@
         self.showOrgForm = showOrgForm;
         self.saveOrg = saveOrg;
         self.isEditableByUser = isEditableByUser;
+        self.hostedBy = hostedBy;
         self.createEndpoint = createEndpoint;
         self.getEndpoints = getEndpoints;
         self.deleteEndpoint = deleteEndpoint;
@@ -474,7 +551,7 @@
 
             //If current user is system admin, they assign endpoints if the institution
             //has any service providers.
-            if ( userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+            if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
                 return true;
             }
 
@@ -486,7 +563,7 @@
         }
 
         function getServiceProviders() {
-            organizationService.getServiceProviders().then(function(data){
+            organizationService.getServiceProviders().then(function (data) {
                 self.serviceProviders = data;
             });
         };
@@ -499,7 +576,7 @@
             else if (show == false) {
 
                 organizationService.updateServiceProvidersForInstitition(self.org, self.selectedServiceProviders)
-                    .then(function(data){
+                    .then(function (data) {
 
                     });
             }
@@ -508,7 +585,7 @@
 
 
         function indexOfProvider(provider) {
-            for(var i=0; i < self.selectedServiceProviders.length; i++) {
+            for (var i = 0; i < self.selectedServiceProviders.length; i++) {
                 if (self.selectedServiceProviders[i].id === provider.id) {
                     return i;
                 }
@@ -519,7 +596,7 @@
 
 
         function hasServiceProvider(provider) {
-           return indexOfProvider(provider) != -1;
+            return indexOfProvider(provider) != -1;
         }
 
         function updateSelectedServiceProviders($event, provider) {
@@ -538,15 +615,15 @@
         getInstitutionsForServiceProvider();
 
         function getEndpoints() {
-            endpointService.getEndpoints(self.org).then(function(data){
+            endpointService.getEndpoints(self.org).then(function (data) {
                 self.endpoints = data;
             });
         }
 
         function getServiceProvidersForInstitution() {
 
-            if (self.org.type ==1 ) {
-                organizationService.getServiceProvidersForInstitution(self.org).then(function(data){
+            if (self.org.type == 1) {
+                organizationService.getServiceProvidersForInstitution(self.org).then(function (data) {
                     self.selectedServiceProviders = data;
                 });
             }
@@ -555,8 +632,8 @@
 
         function getInstitutionsForServiceProvider() {
 
-            if (self.org.type == 2 ) {
-                organizationService.getInstitutionsForServiceProvider(self.org).then(function(data){
+            if (self.org.type == 2) {
+                organizationService.getInstitutionsForServiceProvider(self.org).then(function (data) {
                     self.institutions = data;
                 });
             }
@@ -581,7 +658,7 @@
         function removeSchoolCode(schoolCode) {
             if (schoolCode.hasOwnProperty("id")) {
                 removeSchoolCodeFromModel(schoolCode);
-                schoolCodesService.removeSchoolCode(schoolCode).then(function(data){
+                schoolCodesService.removeSchoolCode(schoolCode).then(function (data) {
                     delete schoolCode.editing;
                     console.log("Successfully remove school code.");
                 });
@@ -596,17 +673,17 @@
 
             //Validate code parameters
             if (schoolCode.code == '' || schoolCode.codeType == '') {
-                notificationService.info("Invalid school code.  Please select a code and type and provide the code.");
+                toasterService.info("Invalid school code.  Please select a code and type and provide the code.");
                 return;
             }
 
             //Also make sure a duplicate code isn't being used.
-            for(var i=0; i<self.org.schoolCodes.length; i++) {
+            for (var i = 0; i < self.org.schoolCodes.length; i++) {
                 if (self.org.schoolCodes[i] === schoolCode) {
                     continue;
                 }
-                if (self.org.schoolCodes[i].codeType === schoolCode.codeType){
-                    notificationService.info("An " + schoolCode.codeType + " is already defined for this school. " +
+                if (self.org.schoolCodes[i].codeType === schoolCode.codeType) {
+                    toasterService.info("An " + schoolCode.codeType + " is already defined for this school. " +
                         " Please edit the existing " + schoolCode.codeType + " code or choose an unused code type.");
                     return;
                 }
@@ -614,9 +691,9 @@
 
             delete schoolCode.editing;
 
-            schoolCodesService.saveSchoolCode(schoolCode).then(function(data){
+            schoolCodesService.saveSchoolCode(schoolCode).then(function (data) {
                 console.log("Successfully created new school code.");
-            }, function(error){
+            }, function (error) {
                 schoolCode.editing = true;
             });
         }
@@ -634,8 +711,8 @@
 
         function createEndpoint() {
             var endpoint = {
-                organization:  self.org,
-                organizations:  [ self.org ],
+                organization: self.org,
+                organizations: [self.org],
                 confirmDelivery: false,
                 address: '',
                 error: false,
@@ -653,18 +730,18 @@
             //get provider's endpoints and allow user to select/assign one to the current org.
 
             if (self.selectedServiceProviders == null || self.selectedServiceProviders == undefined || self.selectedServiceProviders.length == 0) {
-                notificationService.info("There are no service providers for this institution.  At least one service provider " +
+                toasterService.info("There are no service providers for this institution.  At least one service provider " +
                     "must be assigned to the institution to use third party endpoints.");
                 return;
             }
 
             if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
-                endpointService.getEndpointsForServiceProviders(self.selectedServiceProviders).then(function(data){
+                endpointService.getEndpointsForServiceProviders(self.selectedServiceProviders).then(function (data) {
                     self.selectableEndpoints = data;
                 });
             }
             else {
-                endpointService.getEndpoints(organizationService.getActiveOrg()).then(function(data){
+                endpointService.getEndpoints(organizationService.getActiveOrg()).then(function (data) {
                     self.selectableEndpoints = data;
                 });
             }
@@ -683,7 +760,7 @@
             //If it's an existing org we need to delete it on the server
             if (endpoint.hasOwnProperty('id')) {
 
-                endpointService.deleteEndpoint(endpoint).then(function(data){
+                endpointService.deleteEndpoint(endpoint).then(function (data) {
                     removeEndpointFromModel(endpoint);
                 });
 
@@ -695,6 +772,9 @@
             }
         }
 
+        function hostedBy(endpoint) {
+            return self.org.id == endpoint.organization.id;
+        }
 
         function isEditableByUser() {
 
@@ -716,7 +796,7 @@
 
         function activate() {
 
-            organizationService.find($routeParams.org_id).then(function(data){
+            organizationService.find($routeParams.org_id).then(function (data) {
                 self.org = data;
             });
         }
@@ -734,7 +814,7 @@
 
             delete self.org.editing;
 
-            organizationService.updateOrg(self.org).then(function(data){
+            organizationService.updateOrg(self.org).then(function (data) {
                 console.log("Successfully update org.");
             });
 
@@ -754,9 +834,9 @@
         };
     }
 
-    DirectoryController.$inject = ['$log', 'organizationService', '$location'];
+    DirectoryController.$inject = ['$log', 'organizationService', '$location', 'toasterService'];
 
-    function DirectoryController($log, organizationService, $location) {
+    function DirectoryController($log, organizationService, $location, toasterService) {
 
         var self = this;
 
@@ -769,19 +849,25 @@
         self.findOrganizations = findOrganizations;
         self.removeOrgFromModel = removeOrgFromModel;
         self.createUser = createUser;
+        self.setEnabled = setEnabled;
         self.schoolCodeType = '';
         self.schoolCode = '';
         self.orgName = '';
         self.resetSearch = resetSearch;
+        self.isEnabled = true;
 
         activate();
 
         function activate() {
-            return getOrganizations().then(function() {
+
+            return getOrganizations().then(function () {
 
                 console.log('Activated Organizations View');
             });
         }
+
+
+
 
         function resetSearch() {
             self.orgName = '';
@@ -791,7 +877,7 @@
 
 
         function getOrganizations() {
-            return organizationService.getOrganizations().then(function(data){
+            return organizationService.getOrganizations().then(function (data) {
                 self.organizations = data;
             });
         }
@@ -799,7 +885,17 @@
         function createUser(org) {
             organizationService.setActiveOrg(org);
 
-            $location.path( "users" );
+            $location.path("users");
+        };
+
+        function setEnabled(org,enable) {
+
+            organizationService.updateEnabled(org,enable).then(function(data){
+                org.enabled = enable;
+            },function(data){
+                toasterService.error(data);
+            })
+
         };
 
 
@@ -821,7 +917,7 @@
         };
 
         function findOrganizations() {
-            organizationService.search(self.orgName, self.schoolCode, self.schoolCodeType).then(function(data){
+            organizationService.search(self.orgName, self.schoolCode, self.schoolCodeType, self.isEnabled).then(function (data) {
                 self.organizations = data;
             });
         };
@@ -838,7 +934,7 @@
             //If it's an existing org we need to delete it on the server
             if (org.hasOwnProperty('id')) {
 
-                organizationService.deleteOrg(org).then(function(data){
+                organizationService.deleteOrg(org).then(function (data) {
                     self.removeOrgFromModel(org);
                 });
 
@@ -858,14 +954,14 @@
             if (org.hasOwnProperty('id')) {
                 //update
 
-                organizationService.updateOrg(org).then(function(data){
+                organizationService.updateOrg(org).then(function (data) {
                     $log.info("Successfully update org.");
                 });
 
             }
             else {
                 //create
-                organizationService.createOrg(org).then(function(data){
+                organizationService.createOrg(org).then(function (data) {
                     $log.info("Successfully created org with id " + data.id);
                 });
 
@@ -885,16 +981,15 @@
     };
 
 
+    toasterService.$inject = ['toaster'];
 
-    notificationService.$inject = [ 'toaster'] ;
-
-    function notificationService(toaster) {
+    function toasterService(toaster) {
         var service = {
             success: success,
             error: error,
             ajaxInfo: ajaxInfo,
             info: info
-        } ;
+        };
 
         return service;
 
@@ -907,7 +1002,10 @@
         }
 
         function ajaxInfo(responseObject) {
-            toaster.pop('info', responseObject.error, responseObject.message);
+            if (responseObject.hasOwnProperty('error') && responseObject.hasOwnProperty('message')){
+                toaster.pop('info', responseObject.error, responseObject.message);
+            }
+
         }
 
         function error(text) {
@@ -916,9 +1014,9 @@
     }
 
 
-    endpointService.$inject = [ '$http', '$q', '$cacheFactory', 'notificationService'];
+    endpointService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService'];
 
-    function endpointService($http, $q, $cacheFactory, notificationService) {
+    function endpointService($http, $q, $cacheFactory, toasterService) {
         var service = {
             getEndpoints: getEndpoints,
             getEndpointsById: getEndpointsById,
@@ -932,7 +1030,7 @@
 
         function getAttributes(input, attr) {
             var output = [];
-            for (var i=0; i < input.length ; ++i)
+            for (var i = 0; i < input.length; ++i)
                 output.push(input[i][attr]);
             return output;
         }
@@ -947,8 +1045,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching endpoints for list of service providers.");
             });
 
@@ -961,8 +1059,8 @@
 
             $http.delete('/services/rest/v1/endpoints/' + endpoint.id).success(function (data) {
                 deferred.resolve(endpoint);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while deleting an organization.");
             });
 
@@ -975,8 +1073,8 @@
 
             $http.put('/services/rest/v1/endpoints/' + endpoint.id, endpoint).success(function (data) {
                 deferred.resolve(endpoint);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating an endpoint.");
             });
 
@@ -991,8 +1089,8 @@
             $http.post('/services/rest/v1/endpoints/', endpoint).success(function (data) {
                 angular.extend(endpoint, data);
                 deferred.resolve(endpoint);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while creating an endpoint.");
             });
 
@@ -1008,22 +1106,30 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching endpoints for " + org.name);
             });
 
             return deferred.promise;
         }
+
         function getEndpoints(org) {
 
-           return getEndpointsById(org.id);
+            return getEndpointsById(org.id);
         }
     }
 
-    organizationService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
+    messageService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'toasterService'];
 
-    function organizationService ($window, $http, $q, $cacheFactory, $filter, notificationService) {
+    function messageService($http, $q, $cacheFactory, $filter) {
+
+
+    }
+
+    organizationService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'toasterService'];
+
+    function organizationService($window, $http, $q, $cacheFactory, $filter, toasterService) {
 
 
         var service = {
@@ -1042,6 +1148,8 @@
             updateServiceProvidersForInstitition: setServiceProvidersForInstitution,
             getInstitutionsForServiceProvider: getInstitutionsForServiceProvider,
             updateEndpoints: updateEndpoints,
+            register: register,
+            updateEnabled: updateEnabled,
             initialize: initialize
         };
 
@@ -1051,10 +1159,10 @@
 
         function initialize() {
             if ($window.activeUser !== null) {
-                find($window.activeUser.organizationId).then(function(orgArray){
+                find($window.activeUser.organizationId).then(function (orgArray) {
                     activeOrg = orgArray[0];
 
-                    getInstitutionsForServiceProvider(activeOrg).then(function(data){
+                    getInstitutionsForServiceProvider(activeOrg).then(function (data) {
                         activeOrg.institutions = data;
                     });
                 });
@@ -1074,12 +1182,12 @@
         function updateEndpoints(org, endpoint, operation) {
             var deferred = $q.defer();
 
-            $http.post('/services/rest/v1/organizations/' + org.id,null,{
-                'params': {'endpoint_id': endpoint.id, 'operation' : operation}
+            $http.post('/services/rest/v1/organizations/' + org.id, null, {
+                'params': {'endpoint_id': endpoint.id, 'operation': operation}
             }).success(function (data) {
                 deferred.resolve(endpoint);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating the endpoints for " + org.name + ".");
             });
 
@@ -1092,8 +1200,8 @@
 
             $http.delete('/services/rest/v1/organizations/' + org.id).success(function (data) {
                 deferred.resolve(org);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while deleting an organization.");
             });
 
@@ -1106,9 +1214,23 @@
 
             $http.put('/services/rest/v1/organizations/' + org.id, org).success(function (data) {
                 deferred.resolve(org);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating an organization.");
+            });
+
+            return deferred.promise;
+        }
+
+        function updateEnabled(org, enabled) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/organizations/' + org.id + '/property', { 'name' : 'enabled', 'value': enabled}).success(function (data) {
+                deferred.resolve(org);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while updating the organization's enabled status.");
             });
 
             return deferred.promise;
@@ -1122,9 +1244,23 @@
             $http.post('/services/rest/v1/organizations/', org).success(function (data) {
                 angular.extend(org, data);
                 deferred.resolve(org);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating an organization.");
+            });
+
+            return deferred.promise;
+        }
+
+        function register(org) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/registration/', org).success(function (data) {
+                deferred.resolve(org);
+            }).error(function (data) {
+
+                deferred.reject(data);
             });
 
             return deferred.promise;
@@ -1136,12 +1272,13 @@
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/organizations', {
+                params: {'enabled': true},
                 cache: false
             }).success(function (data) {
                 organizations = data;
                 deferred.resolve(organizations);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching organizations.");
             });
 
@@ -1149,7 +1286,7 @@
         };
 
         function getById(id) {
-            var org = $filter('getByProperty')('id', id,  organizations);
+            var org = $filter('getByProperty')('id', id, organizations);
 
             if (org == null) {
                 org = find(id);
@@ -1166,8 +1303,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the organization.");
             });
 
@@ -1183,8 +1320,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the organization.");
             });
 
@@ -1192,7 +1329,7 @@
         }
 
 
-        function search(name,organizationCode,organizationCodeType) {
+        function search(name, organizationCode, organizationCodeType, enabled) {
 
             var deferred = $q.defer();
 
@@ -1200,13 +1337,14 @@
                 'params': {
                     'name': name,
                     'organizationCode': organizationCode,
-                    'organizationCodeType': organizationCodeType
+                    'organizationCodeType': organizationCodeType,
+                    'enabled': enabled
                 },
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the organization.");
             });
 
@@ -1224,8 +1362,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the service providers.");
             });
 
@@ -1243,8 +1381,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the service providers.");
             });
 
@@ -1262,8 +1400,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the institutions.");
             });
 
@@ -1281,8 +1419,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating the service providers for institution.");
             });
 
@@ -1292,10 +1430,9 @@
     }
 
 
+    schoolCodesService.$inject = ['$http', '$q', 'toasterService'];
 
-    schoolCodesService.$inject = ['$http', '$q', 'notificationService'];
-
-    function schoolCodesService ($http, $q, notificationService) {
+    function schoolCodesService($http, $q, toasterService) {
 
 
         var service = {
@@ -1312,8 +1449,8 @@
 
             $http.delete('/services/rest/v1/school-codes/' + schoolCode.id, schoolCode).success(function (data) {
                 deferred.resolve(schoolCode);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while deleting a school code.");
             });
 
@@ -1326,8 +1463,8 @@
 
             $http.put('/services/rest/v1/school-codes/' + schoolCode.id, schoolCode).success(function (data) {
                 deferred.resolve(schoolCode);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating a school code.");
             });
 
@@ -1342,8 +1479,8 @@
             $http.post('/services/rest/v1/school-codes/', schoolCode).success(function (data) {
                 angular.extend(schoolCode, data);
                 deferred.resolve(schoolCode);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while creating a school code.");
             });
 
@@ -1351,9 +1488,9 @@
         }
     }
 
-    settingsService.$inject = ['$http', '$q', '$cacheFactory', 'notificationService'];
+    settingsService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService'];
 
-    function settingsService ($http, $q, $cacheFactory, notificationService) {
+    function settingsService($http, $q, $cacheFactory, toasterService) {
 
 
         var service = {
@@ -1370,8 +1507,8 @@
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching delivery methods.");
             });
 
@@ -1385,8 +1522,8 @@
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching document formats.");
             });
 
@@ -1399,9 +1536,9 @@
 
     /* User Service */
 
-    userService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'notificationService'];
+    userService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'toasterService'];
 
-    function userService ($window, $http, $q, $cacheFactory, $filter, notificationService) {
+    function userService($window, $http, $q, $cacheFactory, $filter, toasterService) {
 
 
         var service = {
@@ -1427,19 +1564,19 @@
                 removeUser(user);
 
                 deferred.resolve(user);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while deleting a user.");
             });
 
             return deferred.promise;
         }
 
-        function hasRole(user,role) {
+        function hasRole(user, role) {
 
             var found = false;
 
-            for (var i=0; i < user.roles.length; i++) {
+            for (var i = 0; i < user.roles.length; i++) {
                 if (user.roles[i].id == role.id) {
                     found = true;
                     break;
@@ -1454,7 +1591,7 @@
             }
             var found = false;
 
-            for (var i=0; i < user.roles.length; i++) {
+            for (var i = 0; i < user.roles.length; i++) {
                 if (user.roles[i].name === roleName) {
                     found = true;
                     break;
@@ -1469,8 +1606,8 @@
 
             $http.put('/services/rest/v1/users/' + user.id, user).success(function (data) {
                 deferred.resolve(user);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating a user.");
             });
 
@@ -1485,8 +1622,8 @@
             $http.post('/services/rest/v1/users/', user).success(function (data) {
                 angular.extend(user, data);
                 deferred.resolve(user);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating a user.");
             });
 
@@ -1503,8 +1640,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching users.");
             });
 
@@ -1512,7 +1649,7 @@
         };
 
         function getById(id) {
-            var user = $filter('getByProperty')('id', id,  users);
+            var user = $filter('getByProperty')('id', id, users);
 
             if (user == null) {
                 user = find(id);
@@ -1529,8 +1666,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the user.");
             });
 
@@ -1549,8 +1686,8 @@
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
-            }).error(function(data){
-                notificationService.ajaxInfo(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching the user.");
             });
 
@@ -1575,9 +1712,9 @@
     }
 
     function getByProperty() {
-        return function(propertyName, propertyValue, collection) {
-            var i=0, len=collection.length;
-            for (; i<len; i++) {
+        return function (propertyName, propertyValue, collection) {
+            var i = 0, len = collection.length;
+            for (; i < len; i++) {
                 if (collection[i][propertyName] == +propertyValue) {
                     return collection[i];
                 }
@@ -1631,7 +1768,6 @@
             return friendlyName;
         };
     }
-
 
 
 })();

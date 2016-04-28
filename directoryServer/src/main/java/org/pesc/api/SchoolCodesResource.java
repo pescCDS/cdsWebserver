@@ -6,26 +6,14 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
-import org.pesc.api.model.Organization;
 import org.pesc.api.model.SchoolCode;
-import org.pesc.api.repository.OrganizationRepository;
-import org.pesc.api.repository.OrganizationService;
-import org.pesc.api.repository.SchoolCodesRepository;
-import org.pesc.api.repository.SchoolCodesService;
+import org.pesc.service.SchoolCodesService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.jws.WebService;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by james on 3/22/16.

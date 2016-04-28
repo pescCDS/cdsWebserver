@@ -5,9 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.DeliveryMethod;
-import org.pesc.api.model.DocumentFormat;
-import org.pesc.api.repository.DeliveryMethodsService;
-import org.pesc.api.repository.DocumentFormatService;
+import org.pesc.service.DeliveryMethodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

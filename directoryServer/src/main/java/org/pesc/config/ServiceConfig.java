@@ -67,6 +67,9 @@ public class ServiceConfig {
     @Autowired
     private InstitutionResource institutionResource;
 
+    @Autowired
+    private RegistrationResource registrationResource;
+
     @Bean
     public JacksonJaxbJsonProvider jacksonJaxbJsonProvider() {
         return new JacksonJaxbJsonProvider();
@@ -243,6 +246,7 @@ public class ServiceConfig {
         beans.add(schoolCodesResource);
         beans.add(serviceProviderResource);
         beans.add(institutionResource);
+        beans.add(registrationResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

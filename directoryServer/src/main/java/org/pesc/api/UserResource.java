@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.DirectoryUser;
-import org.pesc.api.repository.UserService;
+import org.pesc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
