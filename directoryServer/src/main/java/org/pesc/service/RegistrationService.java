@@ -46,7 +46,7 @@ public class RegistrationService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     public void register(Organization organization, DirectoryUser user){
 
-        if (organization.getType() == 0) {
+        if (organization.getOrganizationTypes().contains(new Integer(0))) {
             throw new IllegalArgumentException("Organization type of 'System' is not allowed for registration.");
         }
         organization.setEnabled(false);  //The info requires validation/approval before becoming active

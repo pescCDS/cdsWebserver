@@ -695,14 +695,23 @@
                 </div>
 
                 <div><strong>Type: </strong>
-                    <span ng-show="!orgCtrl.showOrgForm()">{{orgCtrl.org.type | organizationType}}</span>
-                                            <span ng-show="orgCtrl.showOrgForm()">
-                                                 <select ng-model="orgCtrl.org.type" required="required" to-number>
-                                                     <option value="0">System</option>
-                                                     <option value="1">Institution</option>
-                                                     <option value="2">Service Provider</option>
-                                                 </select>
-                                            </span>
+                    <span ng-show="!orgCtrl.showOrgForm()">
+
+                        <span ng-repeat="type in orgCtrl.org.organizationTypes" class="ed-inline-box">
+                            <span>{{type.name}}</span>
+                        </span>
+                     </span>
+
+                     <span ng-show="orgCtrl.showOrgForm()">
+
+                            <span ng-repeat="type in orgCtrl.organizationTypes">
+                                <span  class="checkbox-inline"> <input
+                                   type="checkbox"
+                                   ng-checked="orgCtrl.hasOrgType(type)"
+                                   name="roles"
+                                   ng-click="orgCtrl.updateOrgType($event, type)"> {{type.name}} </span>
+                            </span>
+                     </span>
                 </div>
                 <div><strong>Enabled: </strong>{{orgCtrl.org.enabled | trueFalse}}</div>
                 <div><strong>Member Since: </strong>{{orgCtrl.org.createdTime | date:'MM/dd/yyyy'}}</div>
@@ -945,14 +954,23 @@
                 </div>
 
                 <div><strong>Type: </strong>
-                    <span ng-show="!orgCtrl.showOrgForm(org)">{{org.type | organizationType}}</span>
-                                            <span ng-show="orgCtrl.showOrgForm(org)">
-                                                 <select ng-model="org.type" required="required" to-number>
-                                                     <option value="0">System</option>
-                                                     <option value="1">Institution</option>
-                                                     <option value="2">Service Provider</option>
-                                                 </select>
-                                            </span>
+                    <span ng-show="!orgCtrl.showOrgForm(org)">
+
+                        <span ng-repeat="type in org.organizationTypes" class="ed-inline-box">
+                            <span>{{type.name}}</span>
+                        </span>
+                    </span>
+
+                     <span ng-show="orgCtrl.showOrgForm(org)">
+
+                            <span ng-repeat="type in orgCtrl.organizationTypes">
+                                <span  class="checkbox-inline"> <input
+                                        type="checkbox"
+                                        ng-checked="orgCtrl.hasOrgType(type,org)"
+                                        name="roles"
+                                        ng-click="orgCtrl.updateOrgType($event, type,org)"> {{type.name}} </span>
+                            </span>
+                     </span>
                 </div>
                 <div><strong>Enabled: </strong>{{org.enabled | trueFalse}}</div>
                 <div><strong>Member Since: </strong>{{org.createdTime | date:'MM/dd/yyyy'}}</div>

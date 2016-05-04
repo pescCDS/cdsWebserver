@@ -4,8 +4,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
 import org.pesc.api.model.Organization;
+import org.pesc.api.model.OrganizationType;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.api.repository.OrganizationRepository;
+import org.pesc.api.repository.OrganizationTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,9 +51,11 @@ public class OrganizationService {
     private EntityManagerFactory entityManagerFactory;
 
 
+    @Autowired
+    private OrganizationTypeRepository organizationTypeRepository;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     public OrganizationService(EntityManagerFactory entityManagerFactory) {
@@ -121,6 +125,12 @@ public class OrganizationService {
                 endpointID, orgID);
 
     }
+
+    @Transactional(readOnly=true)
+    public List<OrganizationType> getOrganizationTypes() {
+        return (List<OrganizationType>)organizationTypeRepository.findAll();
+    }
+
 
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)

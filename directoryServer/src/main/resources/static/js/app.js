@@ -1,7 +1,6 @@
 (function () {
 
     var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate', 'ngSanitize'])
-        .filter('organizationType', organizationType)
         .filter('friendlyRoleName', friendlyRoleName)
         .filter('getByProperty', getByProperty)
         .filter('trueFalse', trueFalse)
@@ -527,9 +526,9 @@
         }
     }
 
-    OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService'];
+    OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService', '$window'];
 
-    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, toasterService) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, toasterService, $window) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -556,13 +555,38 @@
         self.isMyOrgServiceProviderForInstitution = isMyOrgServiceProviderForInstitution;
         self.selectEndpoint = selectEndpoint;
         self.selectableEndpoints = [];
+        self.organizationTypes = $window.organizationTypes;
+        self.hasOrgType=hasOrgType;
+        self.updateOrgType=updateOrgType;
 
         self.showServiceProviderForm = false;
+
+        function hasOrgType(orgType) {
+            return organizationService.hasOrgType(self.org, orgType);
+        }
+
+
+        function updateOrgType($event, orgType) {
+
+            var checkbox = $event.target;
+
+            if (checkbox.checked === true) {
+                self.org.organizationTypes.push(orgType);
+            } else {
+                // remove item
+                for (var i = 0; i < self.org.organizationTypes.length; i++) {
+                    if (self.org.organizationTypes[i].id == orgType.id) {
+                        self.org.organizationTypes.splice(i, 1);
+                    }
+                }
+            }
+        };
+
 
 
         function isMyOrgServiceProviderForInstitution() {
 
-            if (self.org.type !== 1 || userService.activeUser == null) { //if the current org isn't an institution, false
+            if (self.org.organizationTypes.indexOf(1) == -1 || userService.activeUser == null) { //if the current org isn't an institution, false
                 return false;
             }
 
@@ -639,7 +663,7 @@
 
         function getServiceProvidersForInstitution() {
 
-            if (self.org.type == 1) {
+            if (self.org.organizationTypes.indexOf(1) != -1) {
                 organizationService.getServiceProvidersForInstitution(self.org).then(function (data) {
                     self.selectedServiceProviders = data;
                 });
@@ -649,7 +673,7 @@
 
         function getInstitutionsForServiceProvider() {
 
-            if (self.org.type == 2) {
+            if (self.org.organizationTypes.indexOf(2) != -1) {
                 organizationService.getInstitutionsForServiceProvider(self.org).then(function (data) {
                     self.institutions = data;
                 });
@@ -851,9 +875,9 @@
         };
     }
 
-    DirectoryController.$inject = ['$log', 'organizationService', '$location', 'toasterService'];
+    DirectoryController.$inject = ['$log', 'organizationService', '$location', 'toasterService', '$window'];
 
-    function DirectoryController($log, organizationService, $location, toasterService) {
+    function DirectoryController($log, organizationService, $location, toasterService, $window) {
 
         var self = this;
 
@@ -872,6 +896,9 @@
         self.orgName = '';
         self.resetSearch = resetSearch;
         self.isEnabled = true;
+        self.updateOrgType=updateOrgType;
+        self.hasOrgType=hasOrgType;
+        self.organizationTypes = $window.organizationTypes;
 
         activate();
 
@@ -883,7 +910,26 @@
             });
         }
 
+        function hasOrgType(orgType, org) {
+            return organizationService.hasOrgType(org, orgType);
+        }
 
+
+        function updateOrgType($event, orgType, org) {
+
+            var checkbox = $event.target;
+
+            if (checkbox.checked === true) {
+                org.organizationTypes.push(role);
+            } else {
+                // remove item
+                for (var i = 0; i < org.organizationTypes.length; i++) {
+                    if (org.organizationTypes[i].id == orgType.id) {
+                        org.organizationTypes.splice(i, 1);
+                    }
+                }
+            }
+        };
 
 
         function resetSearch() {
@@ -1208,7 +1254,8 @@
             updateEndpoints: updateEndpoints,
             register: register,
             updateEnabled: updateEnabled,
-            initialize: initialize
+            initialize: initialize,
+            hasOrgType: hasOrgType
         };
 
         return service;
@@ -1228,6 +1275,18 @@
             }
         }
 
+        function hasOrgType(org, orgType) {
+
+            var found = false;
+
+            for (var i = 0; i < org.organizationTypes.length; i++) {
+                if (org.organizationTypes[i].id == orgType.id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
 
         function getActiveOrg() {
             return activeOrg;
@@ -1781,28 +1840,6 @@
         }
     }
 
-    function organizationType() {
-        return function (input) {
-
-            var type = '';
-
-            switch (input) {
-                case 0:
-                    type = "System";
-                    break;
-                case 1:
-                    type = "Institution";
-                    break;
-                case 2:
-                    type = "Service Provider";
-                    break;
-                default:
-                    type = "Unknown"
-            }
-
-            return type;
-        };
-    }
 
     function trueFalse(){
         return function(text, length, end) {

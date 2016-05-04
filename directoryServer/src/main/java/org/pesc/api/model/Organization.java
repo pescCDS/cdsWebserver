@@ -56,8 +56,15 @@ public class Organization implements Serializable {
     @Column(name = "short_description")
     private String shortDescription;
 
-    @Column(name="type")
-    private int type;
+    @JoinTable(
+            name="org_orgtype",
+            joinColumns=
+            @JoinColumn(name="organization_id", referencedColumnName="id"),
+            inverseJoinColumns=
+            @JoinColumn(name="organization_type_id", referencedColumnName="id")
+    )
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = OrganizationType.class, cascade = CascadeType.MERGE)
+    private Set<OrganizationType> organizationTypes;
 
     @Column(name="enabled")
     private boolean enabled;
@@ -171,12 +178,12 @@ public class Organization implements Serializable {
         this.shortDescription = shortDescription;
     }
 
-    public int getType() {
-        return type;
+    public Set<OrganizationType> getOrganizationTypes() {
+        return organizationTypes;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setOrganizationTypes(Set<OrganizationType> organizationTypes) {
+        this.organizationTypes = organizationTypes;
     }
 
     public boolean isEnabled() {

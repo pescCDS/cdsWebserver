@@ -76,12 +76,14 @@ public class AppController {
             model.addAttribute("hasSystemAdminRole", hasRole(authorities, "ROLE_SYSTEM_ADMIN"));
             model.addAttribute("hasOrgAdminRole", hasRole(authorities, "ROLE_ORG_ADMIN"));
 
-            model.addAttribute("roles", roleRepo.findAll() );
         }
         else {
             model.addAttribute("hasSystemAdminRole", false);
             model.addAttribute("hasOrgAdminRole", false);
         }
+
+        model.addAttribute("roles", roleRepo.findAll() );
+        model.addAttribute("organizationTypes", organizationService.getOrganizationTypes() );
 
         model.addAttribute("isAuthenticated", isAuthenticated);
 

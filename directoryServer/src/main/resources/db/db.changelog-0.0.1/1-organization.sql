@@ -1,3 +1,17 @@
+CREATE TABLE organization_type (
+  id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  name VARCHAR(18) NOT NULL COMMENT 'The name of the organization type',
+  description VARCHAR(256),
+  PRIMARY KEY (id)
+);
+
+
+INSERT INTO organization_type (name,description) VALUES
+('System','The organization that manages the Directory server. There should only be one of these.'),
+('Institution','A school.'),
+('Service Provider','An organization that provides delivery/document services to one or more institutions.');
+
+
 CREATE TABLE organization (
   id int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
   organization_id VARCHAR(35) COMMENT 'Unique Identifier that represents an organization, for a given organization id type',
@@ -12,7 +26,6 @@ CREATE TABLE organization (
   created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created Time',
   modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last Updated Time',
   telephone VARCHAR(32),
-  type INT NOT NULL COMMENT 'Indicates the type of organization as defined by the application',
 	active BIT(1) NOT NULL COMMENT 'Indicates whether the organization is active in the ed exchange program and actively supporting document exchange',
 	enabled BIT(1) NOT NULL COMMENT 'Indicates whether the organization has been reviewed and enabled by an administrator',
   street VARCHAR(100) NOT NULL,
@@ -21,3 +34,15 @@ CREATE TABLE organization (
 	zip VARCHAR(20) NOT NULL,
   PRIMARY KEY (id)
 );
+
+CREATE TABLE org_orgtype (
+  organization_id int(11) UNSIGNED NOT NULL,
+  organization_type_id int(11) UNSIGNED NOT NULL,
+  PRIMARY KEY (organization_id,organization_type_id),
+  KEY fk_orgtype_org (organization_type_id),
+  KEY fk_org_orgtype (organization_id),
+  CONSTRAINT fk_orgtype_org FOREIGN KEY (organization_type_id) REFERENCES organization_type (id),
+  CONSTRAINT fk_org_orgtype FOREIGN KEY (organization_id) REFERENCES organization (id)
+);
+
+
