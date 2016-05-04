@@ -4,6 +4,7 @@ import org.pesc.api.model.Message;
 import org.pesc.api.model.Organization;
 import org.pesc.api.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,6 +21,16 @@ public class MessageService {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    public void setDismissed(Integer messageId, Boolean dismiss) {
+
+        jdbcTemplate.update(
+                "update messages set dismissed=? where id = ?", dismiss, messageId);
+    }
+
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
@@ -30,6 +41,20 @@ public class MessageService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     public Message createMessage(Message message){
         return messageRepository.save(message);
+    }
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    public Message createMessage(String topic, String content, Boolean actionRequired, Integer orgID, Integer userID) {
+        Message msg = new Message();
+
+        msg.setTopic(topic);
+        msg.setContent(content);
+        msg.setActionRequired(actionRequired);
+        msg.setDismissed(false);
+        msg.setOrganizationId(orgID);
+        msg.setUserId(userID);
+
+        return messageRepository.save(msg);
     }
 
 }

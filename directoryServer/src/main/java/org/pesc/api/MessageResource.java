@@ -32,7 +32,6 @@ public class MessageResource {
 
 
     @GET
-    @Path("/{id}")
     @ApiOperation("Return messages that belong to the given id.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<Message> getMessagesForOrganization(@QueryParam("organization_id") @ApiParam(value="The organization id.", required=true) Integer orgID) {
@@ -47,6 +46,18 @@ public class MessageResource {
         }
         return results;
     }
+
+    @Path("/{id}")
+    @PUT
+    @ApiOperation("Update a message property.")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public void getMessagesForOrganization(@PathParam("id")Integer id, @QueryParam("dismiss") @ApiParam(value="Dismiss property.", required=true) Boolean dismiss) {
+
+        checkParameter(dismiss, "dismiss");
+
+        messageService.setDismissed(id, dismiss);
+    }
+
 
     private void checkParameter(Object param, String parameterName) {
         if (param == null) {

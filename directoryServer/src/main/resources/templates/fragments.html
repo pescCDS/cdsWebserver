@@ -444,6 +444,12 @@
 
                         </p>
                     </div>
+                    <div ng-show="orgCtrl.hostedBy(endpoint) == true" >
+                        <strong>Used By</strong>
+                        <div ng-repeat="institution in endpoint.organizations">
+                            <a ng-show="institution.id != endpoint.organization.id" ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -469,7 +475,12 @@
 
                     </p>
                 </div>
-
+                <div ng-show="orgCtrl.hostedBy(endpoint) == true" >
+                    <strong>Used By</strong>
+                    <div ng-repeat="institution in endpoint.organizations">
+                        <a ng-if="institution.id != endpoint.organization.id" ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+                    </div>
+                </div>
 
             </div>
 
@@ -693,7 +704,9 @@
                                                  </select>
                                             </span>
                 </div>
+                <div><strong>Enabled: </strong>{{orgCtrl.org.enabled | trueFalse}}</div>
                 <div><strong>Member Since: </strong>{{orgCtrl.org.createdTime | date:'MM/dd/yyyy'}}</div>
+                <div><strong>Directory ID: </strong>{{orgCtrl.org.id}}</div>
 
             </div>
         </form>
@@ -800,7 +813,9 @@
 <div th:fragment="users">
 
     <div>
-        <div class="sub-nav">
+
+        <h1>{{usersCtrl.org.name}} Users</h1>
+        <div class="sub-nav" style="margin-top: 20px;">
             <button th:if="${hasOrgAdminRole}" type="button" class="btn btn-default" ng-click="usersCtrl.create()">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> User
             </button>
@@ -939,8 +954,9 @@
                                                  </select>
                                             </span>
                 </div>
-                <div><strong>Enabled: </strong>{{org.enabled}}</div>
+                <div><strong>Enabled: </strong>{{org.enabled | trueFalse}}</div>
                 <div><strong>Member Since: </strong>{{org.createdTime | date:'MM/dd/yyyy'}}</div>
+                <div><strong>Directory ID: </strong>{{org.id}}</div>
             </div>
 
             <div th:if="${hasSystemAdminRole}" style="float: right;">
@@ -975,26 +991,74 @@
 </div>
 
 <div th:fragment="message">
-    <div>Dear <span th:text="${user.name}"></span></div>,
+    <div class="well">
+        <div th:if="${hasOrgAdminRole}" style="float: right;">
+            <div class="btn-group">
+                <button ng-show="msg.dismissed==false" type="button" class="btn btn-default" ng-click="messageCtrl.dismiss(msg)">
+                    <span class="glyphicon glyphicon-ok"></span> Dismiss
+                </button>
+            </div>
+        </div>
+        <div>Topic: <b>{{msg.topic}}</b></div>
+        <div>Action Required:  <b>{{msg.actionRequired  | trueFalse}}</b> </div>
 
-    <p>
-        Thank you for registering  <span th:text="${organization.name}"></span> with EDExchang.  Your application is
-        currently being reviewed.  When the review process is complete, your organization will be added to the EDExchange
-        directory.
-    </p>
+        <div>Dismissed:  <b>{{msg.dismissed  | trueFalse}}</b> </div>
+        <p ng-bind-html="msg.content"></p>
+
+
+    </div>
+
 </div>
 
 
 
 <div th:fragment="messages">
-    <h2>Messages</h2>
-    <div ng-repeat="msg in messageCtrl.messages | orderBy:'createdAt'">
-        <ul class="list-group">
-            <li class="list-group-item">
-                <div>{{msg.content}}</div>
-            </li>
-        </ul>
+    <div>
+        <h1>{{messageCtrl.org.name}} Messages</h1>
+        <div ng-repeat="msg in messageCtrl.messageList">
+            <div th:include="::message"></div>
+        </div>
+
     </div>
+</div>
+
+<div th:fragment="registration-email">
+    <div>Dear <span th:text="${user.name}"></span>,</div>
+
+    <p>
+        Thank you for registering  <span th:text="${organization.name}"></span> with EDExchange.  Your application is
+        currently being reviewed.  When the review process is complete, your organization will be added to the EDExchange
+        directory.
+    </p>
+
+    <p>
+        A user account has been created for you with the username and password that you provided in registration form.
+        You may login <a href="http://www.edexchange.net/login">here.</a> While your application is being reviewed, all
+        EDExchange features are available, but your organization will not be included in the directory until the application
+        is approved.
+    </p>
+
+    <p>
+        When the status of your application changes, you will receive another email. Messages can also be viewed in the
+        EDExchange application by selecting "Messages" from the menu.
+    </p>
+
+    <p>
+        Thank you from the EDExchange team.
+    </p>
+</div>
+
+<div th:fragment="registration-admin-email">
+    <p>
+        An application for EDExchange membership has been received for <a th:href="@{'#organization/' + ${organization.id}}"><span th:text="${organization.name}"></span></a>
+        You are required to review the application and organization information and enable the organization to accept
+        the application.  If additional actions are required by the applicant, you may send the application a message
+        <a ng-href="#message-form">here</a>.
+    </p>
+
+    <p>
+        The application was submitted by the primary contact for the organization, <a th:href="@{'#user/' + ${user.id}}"><span th:text="${user.name}"></span></a>.
+    </p>
 </div>
 
 <div th:fragment="registration-form">
@@ -1192,11 +1256,7 @@
     <div ng-repeat="org in orgCtrl.organizations | orderBy:'name'">
         <ul class="list-group">
             <li class="list-group-item">
-
                 <div th:include="::organization"></div>
-
-
-
             </li>
         </ul>
     </div>

@@ -68,7 +68,7 @@ public class ServiceConfig {
     private InstitutionResource institutionResource;
 
     @Autowired
-    private RegistrationResource registrationResource;
+    private MessageResource messageResource;
 
     @Bean
     public JacksonJaxbJsonProvider jacksonJaxbJsonProvider() {
@@ -246,13 +246,13 @@ public class ServiceConfig {
         beans.add(schoolCodesResource);
         beans.add(serviceProviderResource);
         beans.add(institutionResource);
-        beans.add(registrationResource);
+        beans.add(messageResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 
         endpoint.setServiceBeans(beans);
 
-        endpoint.setAddress("/rest/v1");  //TODO: change path after completion
+        endpoint.setAddress("/rest/v1");
 
         return endpoint.create();
     }

@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @ComponentScan
+@EnableAsync
 public class DirectoryApplication {
 
 

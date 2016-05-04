@@ -8,6 +8,7 @@ import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,9 @@ import java.util.Set;
  */
 @Service
 public class RegistrationService {
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     OrganizationRepository organizationRepository;
@@ -45,7 +49,7 @@ public class RegistrationService {
         if (organization.getType() == 0) {
             throw new IllegalArgumentException("Organization type of 'System' is not allowed for registration.");
         }
-        organization.setActive(false);  //The info requires validation/approval before becoming active
+        organization.setEnabled(false);  //The info requires validation/approval before becoming active
 
         organization =organizationRepository.save(organization);
 
@@ -56,7 +60,12 @@ public class RegistrationService {
 
         user.setRoles(roles);
 
-        user = userRepository.save(user);
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        user.setEnabled(true);
+
+        userRepository.save(user);
 
     }
 }

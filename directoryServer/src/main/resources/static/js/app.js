@@ -1,9 +1,10 @@
 (function () {
 
-    var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate'])
+    var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate', 'ngSanitize'])
         .filter('organizationType', organizationType)
         .filter('friendlyRoleName', friendlyRoleName)
         .filter('getByProperty', getByProperty)
+        .filter('trueFalse', trueFalse)
         .directive('toNumber', toNumber)
         .service('toasterService', toasterService)
         .service('organizationService', organizationService)
@@ -83,7 +84,7 @@
             when("/messages", {
                 templateUrl: "messages",
                 controller: "MessageController",
-                controllerAs: "messagesCtrl"
+                controllerAs: "messageCtrl"
             })
             .when("/endpoint-selector/:institution_id", {
                 templateUrl: "endpoint-selector",
@@ -138,16 +139,31 @@
 
     }
 
-    MessageController.$inject = ['messageService'];
-    function MessageController(messageService) {
+    MessageController.$inject = ['messageService', 'organizationService'];
+    function MessageController(messageService, organizationService) {
         var self = this;
+        self.org = organizationService.getActiveOrg();
+        self.dismiss = dismissMessage;
+        self.messageList = [ ];
 
-        self.messages = [];
-
+        initialize();
 
         function initialize() {
-
+           messageService.getMessages(self.org.id).then(function(data){
+               self.messageList = data;
+           });
         }
+        function dismissMessage(msg) {
+            messageService.dismissMessage(msg).then(function(data){
+                //var index = self.messageList.indexOf(msg);
+                //if (index > -1) {
+                //    self.messageList.splice(index, 1);
+                //}
+            },function(error){
+               //TODO: handle
+            }) ;
+        }
+
 
     }
 
@@ -214,6 +230,7 @@
         self.showForm = showForm;
         self.updateRole = updateRole;
         self.removeFromModel = removeFromModel;
+        self.org = organizationService.getActiveOrg();
 
         function create() {
 
@@ -1120,11 +1137,52 @@
         }
     }
 
-    messageService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'toasterService'];
+    messageService.$inject = ['$http', '$q', '$cacheFactory', '$filter', 'toasterService'];
 
-    function messageService($http, $q, $cacheFactory, $filter) {
+    function messageService($http, $q, $cacheFactory, $filter, toasterService) {
 
+        var service = {
+            getMessages: getMessages,
+            dismissMessage: dismiss
+        };
 
+        return service;
+
+        function dismiss(msg) {
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/messages/' + msg.id,{},{
+                'params' : {
+                    'dismiss': true
+                }
+            }).success(function (data) {
+                deferred.resolve(msg);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while dismissing a message.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getMessages(orgID) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/messages', {
+                'params': {
+                    'organization_id': orgID
+                },
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching messages.");
+            });
+
+            return deferred.promise;
+        }
     }
 
     organizationService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'toasterService'];
@@ -1252,12 +1310,12 @@
             return deferred.promise;
         }
 
-        function register(org) {
+        function register(formObject) {
 
             var deferred = $q.defer();
 
-            $http.post('/services/rest/v1/registration/', org).success(function (data) {
-                deferred.resolve(org);
+            $http.post('/registration/', formObject).success(function (data) {
+                deferred.resolve(formObject);
             }).error(function (data) {
 
                 deferred.reject(data);
@@ -1743,6 +1801,15 @@
             }
 
             return type;
+        };
+    }
+
+    function trueFalse(){
+        return function(text, length, end) {
+            if (text) {
+                return 'Y';
+            }
+            return 'N';
         };
     }
 

@@ -76,6 +76,7 @@
         <table st-table="transactionCtrl.transactions" class="table table-striped">
             <thead>
             <tr>
+                <th>ID</th>
                 <th>Operation</th>
                 <th>Format</th>
                 <th>Size</th>
@@ -84,18 +85,28 @@
                 <th>Received Date/Time</th>
                 <th>Error</th>
                 <th>Received Ack</th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="tran in transactionCtrl.transactions">
+                <td>{{tran.id}}</td>
                 <td>{{tran.direction}}</td>
                 <td>{{tran.fileFormat}}</td>
                 <td>{{tran.fileSize | bytes}}</td>
-                <td>{{tran.filePath}}</td>
+                <td>
+                    <a ng-href="files?tran_id={{tran.id}}">{{tran.filePath}}</a>
+
+                </td>
                 <td>{{tran.sent | date:'medium'}}</td>
                 <td>{{tran.received | date:'medium'}}</td>
                 <td>{{tran.error}}</td>
                 <td>{{tran.status}}</td>
+                <td>
+                    <button ng-show="tran.direction == 'SEND'" type="button" ng-click="transactionCtrl.resend(tran)" class="btn btn-primary btn-sm">
+                        <span class="glyphicon glyphicon-send"></span> Resend
+                    </button>
+                </td>
             </tr>
             </tbody>
         </table>

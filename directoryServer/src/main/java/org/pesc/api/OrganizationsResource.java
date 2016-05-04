@@ -141,6 +141,10 @@ public class OrganizationsResource {
         checkParameter(property, "property");
 
         organizationService.setProperty(id, property.getName(), property.getValue());
+
+        if (property.getName().equalsIgnoreCase("enabled")) {
+
+        }
     }
 
     public static void checkParameter(Object param, String parameterName) {
@@ -148,8 +152,5 @@ public class OrganizationsResource {
             throw new WebApplicationException(String.format("The %s parameter is required.", parameterName));
         }
     }
-
-
-
 
 }

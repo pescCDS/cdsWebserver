@@ -34,27 +34,30 @@ public class EndpointResource {
     private EndpointService endpointService;
 
 
-    private void checkOrganizationParameter(List<Integer> organizationId) {
-        if (organizationId == null || organizationId.size() == 0 ) {
-            throw new IllegalArgumentException("The organizationID parameter is mandatory.");
+    private void validateParameters(List<Integer> organizationIdList) {
+        if ((organizationIdList == null || organizationIdList.size() == 0 )) {
+            throw new IllegalArgumentException("At least one organization ID or school code parameter is mandatory.");
         }
+
     }
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Search endpoints based on the search parameters.")
     public List<Endpoint> findEndpoint(
-            @QueryParam("documentFormat") String documentFormat,
+            @QueryParam("documentFormat") @ApiParam(value = "Must be one of the supported documents types (case insensitive), e.g 'text', 'pdf', 'xml', 'pescxml'. See the document-formats API for more.", required = true) String documentFormat,
             @QueryParam("id") @ApiParam("The identifier for the endpoint.") Integer id,
-            @QueryParam("organizationId") @ApiParam(value = "The endpoint's organization ID.", required = true) List<Integer> organizationId
+            @QueryParam("hostingOrganizationId") @ApiParam("The organization ID of the member that hosts the endpoint.") Integer hostingOrganizationId,
+            @QueryParam("organizationId") @ApiParam(value = "A list of organization ID that use the endpoint.") List<Integer> organizationIdList
     ) {
 
-        checkOrganizationParameter(organizationId);
+        validateParameters(organizationIdList);
 
         return endpointService.search(
                 documentFormat,
                 id,
-                organizationId);
+                hostingOrganizationId,
+                organizationIdList);
     }
 
     @GET

@@ -86,14 +86,16 @@ public class EndpointService {
      *
      * @param documentFormat
      * @param endpointId
-     * @param organizationId
+     * @param hostingOrganizationId
+     * @param organizationIdList
      * @return
      */
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<Endpoint> search(
             String documentFormat,
             Integer endpointId,
-            List<Integer> organizationId
+            Integer hostingOrganizationId,
+            List<Integer> organizationIdList
     ) {
 
         try {
@@ -108,11 +110,15 @@ public class EndpointService {
 
             List<Predicate> predicates = new LinkedList<Predicate>();
 
+            if ( organizationIdList != null ) {
 
-            if ( organizationId != null ) {
+                Join<Endpoint, Organization> organizations = endpoint.join("organizations");
+                predicates.add(organizations.get("id").in(organizationIdList));
 
-                Join<Endpoint, Organization> join = endpoint.join("organizations");
-                predicates.add(join.get("id").in(organizationId));
+
+            }
+            if (hostingOrganizationId != null) {
+                predicates.add(cb.equal(endpoint.get("organization").get("id"), hostingOrganizationId));
             }
             if (endpointId != null) {
                 predicates.add(cb.equal(endpoint.get("id"), endpointId));

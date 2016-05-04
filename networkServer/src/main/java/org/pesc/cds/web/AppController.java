@@ -2,16 +2,28 @@ package org.pesc.cds.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.repository.TransactionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.QueryParam;
+import java.io.*;
 import java.util.Collection;
 
 @Controller
@@ -76,6 +88,54 @@ public class AppController {
     }
 
 
+    @Autowired
+    private TransactionService transactionService;
+
+
+    private void setContentType(HttpServletResponse response, String fileFormat) {
+        if (fileFormat.equalsIgnoreCase("pdf")) {
+            response.setContentType("application/pdf");
+        }
+        else if (fileFormat.equalsIgnoreCase("text")) {
+            response.setContentType("text/plain");
+        }
+        else if (fileFormat.equalsIgnoreCase("xml")) {
+            response.setContentType("text/xml");
+        }
+        else if (fileFormat.equalsIgnoreCase("pescxml")) {
+            response.setContentType("text/xml");
+        }
+        else if (fileFormat.equalsIgnoreCase("image")) {
+            response.setContentType("image/png"); //TODO: how to get actual MIME type ???
+        }
+        else if (fileFormat.equalsIgnoreCase("edi")) {
+            response.setContentType("application/edi-x12"); //TODO: could be application/edifact ???
+        }
+
+    }
+    @RequestMapping(value = "/files", method = RequestMethod.GET)
+    public void getFile(
+            @RequestParam("tran_id") Integer tranID,
+            HttpServletResponse response) {
+        try {
+
+            Transaction transaction = transactionService.findById(tranID);
+
+            if (transaction == null) {
+                throw new RuntimeException("Invalid transaction id.");
+            }
+
+
+            InputStream is = new FileInputStream(new File(transaction.getFilePath()));
+
+            setContentType(response, transaction.getFileFormat());
+            IOUtils.copy(is, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException e) {
+            log.error("Error writing file to output stream. Transaction id " + tranID, e);
+            throw new RuntimeException("IOError writing file to output stream");
+        }
+    }
     @RequestMapping("/admin")
     public String getAdminPage(Model model) {
 
@@ -99,6 +159,7 @@ public class AppController {
 
         return "fragments :: transactions";
     }
+
 
     @RequestMapping("/upload")
     public String getTransfersPage(Model model) {

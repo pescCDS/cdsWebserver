@@ -76,8 +76,9 @@ public class OrganizationService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
     public Organization create(Organization organization){
-        organization.setActive(true);  //The info has already been validated, so mark it as active
-        return this.organizationRepository.save(organization);
+        organization.setEnabled(true);
+        organization.setActive(true);
+        return organizationRepository.save(organization);
     }
 
 

@@ -19,7 +19,7 @@
         .directive('toNumber', toNumber)
         .directive('fileModel', fileModel)
         .service('transactionService', transactionService)
-        .service('notificationService', notificationService)
+        .service('toasterService', toasterService)
         .service('fileUpload', fileUpload)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
@@ -57,8 +57,8 @@
             });
     }
 
-    TransactionController.$inject = ['transactionService', 'transactions'];
-    function TransactionController(transactionService, transactions) {
+    TransactionController.$inject = ['transactionService', 'transactions', 'toasterService'];
+    function TransactionController(transactionService, transactions, toasterService) {
         var self = this;
 
         self.transactions = transactions;
@@ -67,6 +67,7 @@
         self.stopDate = '';
         self.openStartDatePopup = openStartDatePopup;
         self.openEndDatePopup = openEndDatePopup;
+        self.resend = resend;
 
         self.fetchSize = 100;
 
@@ -86,6 +87,16 @@
         };
 
         self.getTransactions = getTransactions;
+
+
+        function resend(tran) {
+            transactionService.resend(tran).then(function(data){
+                self.transactions.push(data);
+                toasterService.success("Successfully resent document.");
+            },function(error){
+                toasterService.error("Failed to resend document.");
+            })
+        }
 
 
         function today() {
@@ -156,9 +167,9 @@
         };
     }
 
-    notificationService.$inject = [ 'toaster'] ;
+    toasterService.$inject = [ 'toaster'] ;
 
-    function notificationService(toaster) {
+    function toasterService(toaster) {
         var service = {
             success: success,
             error: error,
@@ -186,9 +197,9 @@
     }
 
 
-    fileUpload.$inject = [ '$http', 'notificationService'] ;
+    fileUpload.$inject = [ '$http', 'toasterService'] ;
 
-    function fileUpload($http, notificationService) {
+    function fileUpload($http, toasterService) {
         var service = {
             uploadFileToUrl: uploadFileToUrl
         } ;
@@ -210,21 +221,22 @@
                 headers: {'Content-Type': undefined}
             })
             .success(function(data){
-                notificationService.renderHtml('info', 'Upload', data);
+                toasterService.renderHtml('info', 'Upload', data);
             })
             .error(function(data){
-                notificationService.renderHtml('error', 'Upload', data);
+                toasterService.renderHtml('error', 'Upload', data);
             });
         }
 
     }
 
 
-    transactionService.$inject = [ '$http', '$q', '$cacheFactory', 'notificationService'];
+    transactionService.$inject = [ '$http', '$q', '$cacheFactory', 'toasterService'];
 
-    function transactionService($http, $q, $cacheFactory, notificationService) {
+    function transactionService($http, $q, $cacheFactory, toasterService) {
         var service = {
             getTransactions: getTransactions,
+            resend: resend,
             initialize: initialize
         };
 
@@ -232,6 +244,24 @@
 
         function initialize() {
             console.log("TODO: transactionService initialize")
+        }
+
+        function resend(tran) {
+            var deferred = $q.defer();
+
+            $http.get('/documents/send', {
+                'params': {
+                    'transaction_id': tran.id
+                },
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function(data){
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while sending a document for transaction id " + tran.id);
+            });
+
+            return deferred.promise;
         }
 
 
@@ -250,7 +280,7 @@
             }).success(function (data) {
                 deferred.resolve(data);
             }).error(function(data){
-                notificationService.ajaxInfo(data);
+                toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching transactions.");
             });
 

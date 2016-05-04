@@ -3,9 +3,15 @@ package org.pesc.web;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.DirectoryUser;
+import org.pesc.api.model.Message;
+import org.pesc.api.model.MessageTopic;
+import org.pesc.api.model.RegistrationForm;
+import org.pesc.service.EmailService;
+import org.pesc.service.MessageService;
 import org.pesc.service.OrganizationService;
 import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
+import org.pesc.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,12 +19,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.thymeleaf.context.WebContext;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by james on 2/18/16.
@@ -28,6 +40,15 @@ import java.util.List;
 public class AppController {
 
     private static final Log log = LogFactory.getLog(AppController.class);
+
+    @Autowired
+    private RegistrationService registrationService;
+
+    @Autowired
+    private MessageService messageService;
+
+    @Autowired
+    private EmailService mailService;
 
     @Autowired
     private UserRepository userRepo;
@@ -121,6 +142,39 @@ public class AppController {
 
         return "fragments :: user-details";
     }
+
+
+    @RequestMapping(value="/registration", method= RequestMethod.POST)
+    @ResponseBody
+    public Message createOrganization(HttpServletRequest request, HttpServletResponse response, @RequestBody RegistrationForm regForm)  {
+
+
+        final WebContext ctx = new WebContext(request,response, request.getServletContext());
+
+        registrationService.register(regForm.getOrganization(), regForm.getUser());
+
+        try {
+            final String content = mailService.createContent(ctx, "mail/registration", regForm.getOrganization(), regForm.getUser());
+
+            mailService.sendSimpleMail(regForm.getUser().getEmail(), "noreply@edexchange.net", MessageTopic.REGISTRATION.getFriendlyName(), content);
+            messageService.createMessage(MessageTopic.REGISTRATION.name(), content, false,regForm.getOrganization().getId(), null );
+
+
+        }
+        catch (MessagingException e) {
+            log.error("Failed to send registration email.", e);
+        }
+
+
+        final String content = mailService.createContent(ctx, "mail/registration-admin", regForm.getOrganization(), regForm.getUser());
+
+        Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,2, null );
+
+
+        return regMessage;
+
+    }
+
 
 
     @RequestMapping({"/about"})

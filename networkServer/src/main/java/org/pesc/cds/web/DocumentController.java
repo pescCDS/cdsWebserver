@@ -30,12 +30,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.persistence.EntityManager;
+import javax.websocket.server.PathParam;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -84,6 +84,79 @@ public class DocumentController {
 	@Autowired
 	private TransactionService transactionService;
 
+	@RequestMapping(value="/send", method= RequestMethod.GET)
+	@ResponseBody
+	@Produces(MediaType.APPLICATION_JSON)
+	public Transaction sendDocument(@RequestParam("transaction_id")Integer tranID) {
+
+		Transaction tx = transactionService.findById(tranID);
+
+		Transaction tran = new Transaction();
+		tran.setDirection(tx.getDirection());
+		tran.setFileFormat(tx.getFileFormat());
+		tran.setFilePath(tx.getFilePath());
+		tran.setRecipientId(tx.getRecipientId());
+		tran.setNetworkServerId(tx.getNetworkServerId());
+		tran.setFileSize(tx.getFileSize());
+		tran.setSent(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+
+
+		tran = transactionService.create(tran);
+
+		String endpointURI = getEndpointForOrg(tran.getRecipientId(), tran.getFileFormat());
+
+		if (endpointURI == null) {
+			throw new RuntimeException("No endpoint found for this organization and document type.");
+		}
+		// send http post to network server
+		CloseableHttpClient client = HttpClients.createDefault();
+		try {
+			HttpPost post = new HttpPost(endpointURI);
+
+			File outboxFile = new File(tran.getFilePath());
+
+			HttpEntity reqEntity = MultipartEntityBuilder.create()
+					.addPart("recipientId", new StringBody(localServerId))
+					.addPart("networkServerId", new StringBody(tran.getRecipientId().toString()))
+					.addPart("fileFormat", new StringBody(tran.getFileFormat()))
+					.addPart("transactionId", new StringBody(tran.getId().toString()))
+					.addPart("webServiceUrl", new StringBody(localServerWebServiceURL))
+					.addPart("file", new FileBody(outboxFile))
+					.build();
+			post.setEntity(reqEntity);
+
+			CloseableHttpResponse response = client.execute(post);
+
+			try {
+				log.debug(response.getStatusLine());
+				HttpEntity resEntity = response.getEntity();
+				if (resEntity != null) {
+					log.debug("Response content length: " + resEntity.getContentLength());
+				}
+				EntityUtils.consume(resEntity);
+
+				return tran;
+			}
+			finally {
+				response.close();
+			}
+
+		} catch (ClientProtocolException e) {
+			log.error(e);
+		} catch (UnsupportedEncodingException e) {
+			log.error(e);
+		} catch (IOException e) {
+			log.error(e);
+		} finally {
+			try {
+				client.close();
+			} catch (IOException e) {
+				log.error(e);
+			}
+		}
+
+		return null;
+	}
 
 	private String getEndpointForOrg(int orgID, String documentFormat) {
 		StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + endpointsApiPath);
@@ -129,10 +202,10 @@ public class DocumentController {
 		return endpointURI;
 	}
 
-	private String getEndpointURIForSchool(String schoolCode, String schoolCodeType, String documentFormat) {
+	private String getEndpointURIForSchool(String schoolCode, String schoolCodeType, String documentFormat, Transaction tx) {
 
 		int orgID = getOrganizationId(schoolCode, schoolCodeType);
-
+		tx.setRecipientId(orgID);
 		return getEndpointForOrg(orgID, documentFormat);
 	}
 
@@ -215,8 +288,8 @@ public class DocumentController {
 		if (!multipartFile.isEmpty()) {
 	        try {
 
-
-				String endpointURI = getEndpointURIForSchool(schoolCode, schoolCodeType, fileFormat);
+				Transaction tx = new Transaction();
+				String endpointURI = getEndpointURIForSchool(schoolCode, schoolCodeType, fileFormat, tx);
 
 				if (endpointURI == null) {
 					throw new IllegalArgumentException("No endpoint URI exists for the given school and document format.");
@@ -228,10 +301,6 @@ public class DocumentController {
 				File outboxFile = new File(outboxDirectory, multipartFile.getOriginalFilename());
 				multipartFile.transferTo(outboxFile);
 
-	        	// write action to database
-	            // [RECEIVED FILE] recipientId:p1, neworkServerId:p3, senderId:p4, fileFormat:p5, fileSize:p6
-	            Transaction tx = new Transaction();
-	            tx.setRecipientId(recipientId);
 	            tx.setNetworkServerId(networkServerId);
 	            tx.setSenderId(senderId == null ? networkServerId : senderId);
 	            tx.setFileFormat(fileFormat);

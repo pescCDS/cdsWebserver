@@ -2,6 +2,15 @@ package org.pesc.cds.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.websocket.server.PathParam;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
@@ -73,6 +84,7 @@ public class TransactionsController {
 		retList = transactionService.search(1, true, null, null, -1l);
 		return retList;
 	}
+
 
 
 	@RequestMapping(value="/transactions", method= RequestMethod.POST)
