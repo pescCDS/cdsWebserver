@@ -3,6 +3,8 @@ package org.pesc.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.DirectoryUser;
+import org.pesc.api.model.Role;
+import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -32,17 +34,23 @@ public class UserService {
     private static final Log log = LogFactory.getLog(UserService.class);
 
     protected EntityManagerFactory entityManagerFactory;
+    private List<Role> roles;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(EntityManagerFactory entityManagerFactory) {
+    public UserService(EntityManagerFactory entityManagerFactory, RolesRepository rolesRepo) {
+        roles = (List<Role>)rolesRepo.findAll();
         this.entityManagerFactory = entityManagerFactory;
     }
 
     @Autowired
     private UserRepository userRepository;
+
+    public List<Role> getRoles() {
+        return roles;
+    }
 
     @Transactional(readOnly=true)
     public Iterable<DirectoryUser> findAll(){
@@ -64,6 +72,12 @@ public class UserService {
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<DirectoryUser> findByName(String name)  {
         return this.userRepository.findByName(name);
+    }
+
+
+    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    public List<DirectoryUser> findByUsername(String username)  {
+        return this.userRepository.findByUserName(username);
     }
 
 

@@ -696,10 +696,7 @@
 
                 <div><strong>Type: </strong>
                     <span ng-show="!orgCtrl.showOrgForm()">
-
-                        <span ng-repeat="type in orgCtrl.org.organizationTypes" class="ed-inline-box">
-                            <span>{{type.name}}</span>
-                        </span>
+                        <span ng-repeat="type in orgCtrl.org.organizationTypes" class="ed-inline-box"><span>{{type.name}}{{$last ? '' : ', '}}</span></span>
                      </span>
 
                      <span ng-show="orgCtrl.showOrgForm()">
@@ -708,7 +705,8 @@
                                 <span  class="checkbox-inline"> <input
                                    type="checkbox"
                                    ng-checked="orgCtrl.hasOrgType(type)"
-                                   name="roles"
+                                   name="orgTypes"
+                                   ng-disabled="type.id == 1"
                                    ng-click="orgCtrl.updateOrgType($event, type)"> {{type.name}} </span>
                             </span>
                      </span>
@@ -955,10 +953,7 @@
 
                 <div><strong>Type: </strong>
                     <span ng-show="!orgCtrl.showOrgForm(org)">
-
-                        <span ng-repeat="type in org.organizationTypes" class="ed-inline-box">
-                            <span>{{type.name}}</span>
-                        </span>
+                        <span ng-repeat="type in org.organizationTypes" class="ed-inline-box"><span>{{type.name}}{{$last ? '' : ', '}}</span></span>
                     </span>
 
                      <span ng-show="orgCtrl.showOrgForm(org)">
@@ -967,7 +962,8 @@
                                 <span  class="checkbox-inline"> <input
                                         type="checkbox"
                                         ng-checked="orgCtrl.hasOrgType(type,org)"
-                                        name="roles"
+                                        name="orgTypes"
+                                        ng-disabled="type.id == 1"
                                         ng-click="orgCtrl.updateOrgType($event, type,org)"> {{type.name}} </span>
                             </span>
                      </span>
@@ -1174,10 +1170,18 @@
                 <fieldset class="form-group">
                     <label>Type</label>
 
-                    <select class="form-control" ng-model="regCtrl.org.type" required="required" to-number>
-                        <option value="1">Institution</option>
-                        <option value="2">Service Provider</option>
-                    </select>
+
+                     <div ng-repeat="type in regCtrl.organizationTypes">
+                                <div class="well" ng-show="type.id != 1">
+                                    <input
+                                        type="checkbox"
+                                        ng-checked="regCtrl.hasOrgType(type)"
+                                        name="orgTypes"
+                                        ng-click="regCtrl.updateOrgType($event, type)" />
+                                    <b>{{type.name}}</b>
+                                    <p>{{type.description}}</p>
+                                </div>
+                            </div>
 
                 </fieldset>
 

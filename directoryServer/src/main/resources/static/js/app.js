@@ -166,14 +166,17 @@
 
     }
 
-    RegistrationController.$inject = ['organizationService', 'toasterService'];
-    function RegistrationController(organizationService, toasterService) {
+    RegistrationController.$inject = ['organizationService', 'toasterService', '$window'];
+    function RegistrationController(organizationService, toasterService, $window) {
         var self = this;
         self.register = register;
+        self.hasOrgType=hasOrgType;
+        self.updateOrgType=updateOrgType;
+        self.organizationTypes = $window.organizationTypes;
 
         self.org = {
             name: '',
-            type: 0,
+            organizationTypes: [],
             street: '',
             city: '',
             state: '',
@@ -209,6 +212,28 @@
 
             return true;
         }
+
+
+        function hasOrgType(orgType) {
+            return organizationService.hasOrgType(self.org, orgType);
+        }
+
+
+        function updateOrgType($event, orgType) {
+
+            var checkbox = $event.target;
+
+            if (checkbox.checked === true) {
+                self.org.organizationTypes.push(orgType);
+            } else {
+                // remove item
+                for (var i = 0; i < self.org.organizationTypes.length; i++) {
+                    if (self.org.organizationTypes[i].id == orgType.id) {
+                        self.org.organizationTypes.splice(i, 1);
+                    }
+                }
+            }
+        };
 
     }
 
@@ -443,14 +468,24 @@
 
             if (endpoint.hasOwnProperty('id')) {
                 endpointService.update(endpoint).then(function (data) {
+
                     toasterService.success("Successfully updated endpoint.");
+
+                }, function error(data){
+                    toasterService.error("Failed to update endpoint.");
+                    endpoint.editing = true;
                 });
 
             }
             else {
                 //create
                 endpointService.create(endpoint).then(function (data) {
+
                     toasterService.success("Successfully created endpoint.");
+
+                },function error(data){
+                    toasterService.error("Failed to create endpoint.");
+                    endpoint.editing = true;
                 });
 
             }
@@ -920,7 +955,7 @@
             var checkbox = $event.target;
 
             if (checkbox.checked === true) {
-                org.organizationTypes.push(role);
+                org.organizationTypes.push(orgType);
             } else {
                 // remove item
                 for (var i = 0; i < org.organizationTypes.length; i++) {

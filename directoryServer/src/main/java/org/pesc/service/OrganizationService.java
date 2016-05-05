@@ -51,15 +51,19 @@ public class OrganizationService {
     private EntityManagerFactory entityManagerFactory;
 
 
-    @Autowired
-    private OrganizationTypeRepository organizationTypeRepository;
+    private List<OrganizationType> organizationTypes;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public OrganizationService(EntityManagerFactory entityManagerFactory) {
-       this.entityManagerFactory = entityManagerFactory;
+    public OrganizationService(EntityManagerFactory entityManagerFactory, OrganizationTypeRepository organizationTypeRepository) {
+        this.organizationTypes = (List<OrganizationType>)organizationTypeRepository.findAll();
+
+        //remove the 'System' type, it should never be used.
+        //organizationTypes.remove(0);
+
+        this.entityManagerFactory = entityManagerFactory;
 
     }
 
@@ -126,9 +130,8 @@ public class OrganizationService {
 
     }
 
-    @Transactional(readOnly=true)
     public List<OrganizationType> getOrganizationTypes() {
-        return (List<OrganizationType>)organizationTypeRepository.findAll();
+        return organizationTypes;
     }
 
 

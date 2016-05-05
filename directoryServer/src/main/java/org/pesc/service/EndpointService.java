@@ -1,13 +1,14 @@
-package org.pesc.api.repository;
+package org.pesc.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pesc.api.StringUtils;
 import org.pesc.api.model.Endpoint;
 import org.pesc.api.model.Organization;
-import org.pesc.api.model.SchoolCode;
+import org.pesc.api.repository.EndpointRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,7 +46,7 @@ public class EndpointService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("(#endpoint.organization.id == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("(#endpoint.organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(Endpoint endpoint)  {
         this.endpointRepository.delete(endpoint);
     }
@@ -69,7 +70,7 @@ public class EndpointService {
 
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("(#endpoint.organization.id == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("( !(#endpoint.organization.organizationTypes.?[#this.name == 'Service Provider'].empty) AND ( (#endpoint.organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') ) )")
     public Endpoint create(Endpoint endpoint)  {
         return this.endpointRepository.save(endpoint);
     }

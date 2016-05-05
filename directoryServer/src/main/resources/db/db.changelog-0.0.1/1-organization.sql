@@ -7,9 +7,9 @@ CREATE TABLE organization_type (
 
 
 INSERT INTO organization_type (name,description) VALUES
-('System','The organization that manages the Directory server. There should only be one of these.'),
-('Institution','A school.'),
-('Service Provider','An organization that provides delivery/document services to one or more institutions.');
+('System','The organization that manages the Directory server.'),
+('Institution','An educational entity that intends to receive documents through EDExchange.  This type of organization cannot create or host endpoints.'),
+('Service Provider','An organization that can create and host endpoints for itself or for other institutions.');
 
 
 CREATE TABLE organization (

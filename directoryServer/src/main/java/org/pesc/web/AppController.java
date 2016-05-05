@@ -2,16 +2,10 @@ package org.pesc.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pesc.api.model.DirectoryUser;
-import org.pesc.api.model.Message;
-import org.pesc.api.model.MessageTopic;
-import org.pesc.api.model.RegistrationForm;
-import org.pesc.service.EmailService;
-import org.pesc.service.MessageService;
-import org.pesc.service.OrganizationService;
+import org.pesc.api.model.*;
+import org.pesc.service.*;
 import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
-import org.pesc.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,19 +39,18 @@ public class AppController {
     private RegistrationService registrationService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private MessageService messageService;
 
     @Autowired
     private EmailService mailService;
 
-    @Autowired
-    private UserRepository userRepo;
-
-    @Autowired
-    private RolesRepository roleRepo;
 
     @Autowired
     private OrganizationService organizationService;
+
 
     private boolean buildUserModel(Model model) {
         boolean isAuthenticated = false;
@@ -82,8 +75,8 @@ public class AppController {
             model.addAttribute("hasOrgAdminRole", false);
         }
 
-        model.addAttribute("roles", roleRepo.findAll() );
-        model.addAttribute("organizationTypes", organizationService.getOrganizationTypes() );
+        model.addAttribute("roles", userService.getRoles() );
+        model.addAttribute("organizationTypes", organizationService.getOrganizationTypes());
 
         model.addAttribute("isAuthenticated", isAuthenticated);
 
@@ -192,7 +185,7 @@ public class AppController {
 
         if (buildUserModel(model) == true) {
             User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            List<DirectoryUser> dirUser = userRepo.findByUserName(auth.getUsername());
+            List<DirectoryUser> dirUser = userService.findByUsername(auth.getUsername());
 
             if (dirUser.size() == 1) {
                 model.addAttribute("activeUser", dirUser.get(0));
