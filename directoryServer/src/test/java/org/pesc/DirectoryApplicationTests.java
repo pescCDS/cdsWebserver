@@ -52,6 +52,11 @@ public class DirectoryApplicationTests {
 
 
 	@Test
+	public void testCSVOrganizationConversion() {
+
+
+	}
+	@Test
 	public void testDocumentService() {
 
 		//ResponseEntity<Organization> response = restTemplate.exchange("http://localhost:" + port + "/services/rest/document", HttpMethod.GET, headersEntity, Organization.class);

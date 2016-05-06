@@ -3,12 +3,15 @@ package org.pesc.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
+import org.pesc.api.model.Endpoint;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.OrganizationType;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.api.repository.OrganizationRepository;
 import org.pesc.api.repository.OrganizationTypeRepository;
+import org.pesc.api.repository.SchoolCodesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -20,10 +23,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Created by james on 3/21/16.
@@ -69,6 +69,8 @@ public class OrganizationService {
 
     @Autowired
     private OrganizationRepository organizationRepository;
+    @Autowired
+    SchoolCodesRepository schoolCodesRepository;
 
     @Transactional(readOnly=true)
     public Iterable<Organization> findAll(){
@@ -87,6 +89,44 @@ public class OrganizationService {
         organization.setEnabled(true);
         organization.setActive(true);
         return organizationRepository.save(organization);
+    }
+
+    /**
+     * Insert a new organization and school codes, associating each school code with the organization and inserting
+     * the school codes.
+     * @param organization
+     * @return
+     */
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_ORG_ADMIN') ")
+    public Organization createInstitution(Organization organization, Set<SchoolCode> schoolCodes, Integer serviceProviderID){
+        organization.setEnabled(false);
+        organization.setActive(true);
+        organization.setOrganizationTypes(new HashSet<OrganizationType>());
+        organization.getOrganizationTypes().add(this.getOrganizationTypes().get(1));
+
+        Organization savedOrg= organizationRepository.save(organization);
+        for(SchoolCode schoolCode: schoolCodes) {
+            schoolCode.setOrganizationId(savedOrg.getId());
+            schoolCodesRepository.save(schoolCode);
+        }
+        savedOrg.setSchoolCodes(schoolCodes);
+
+        linkInstitutionWithServiceProvider(savedOrg.getId(), serviceProviderID);
+
+        return savedOrg;
+    }
+
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    public void linkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
+        try {
+            jdbcTemplate.update("insert into institutions_service_providers (institution_id, service_provider_id) values(?,?)", institutionID, serviceProviderID);
+        }
+        catch (DuplicateKeyException e) {
+           log.warn("A duplicate key was encountered while associating a service provider with an institution.", e);
+        }
+
     }
 
 
@@ -165,6 +205,50 @@ public class OrganizationService {
 
     /**
      *
+     * @param schoolCodesList
+     * @return
+     */
+    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    public List<Organization> findBySchoolCodes(Set<SchoolCode> schoolCodesList
+    ) {
+        EntityManager entityManager =  entityManagerFactory.createEntityManager();
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<Organization> cq = cb.createQuery(Organization.class);
+        Root<Organization> org = cq.from(Organization.class);
+        cq.select(org).distinct(true);
+
+        List<Predicate> predicates = new LinkedList<Predicate>();
+
+        //ArrayList<String> codeTypes;
+
+
+        if ( schoolCodesList != null ) {
+            ArrayList<String> codes = new ArrayList<String>();
+
+            for(SchoolCode sc : schoolCodesList) {
+                codes.add(sc.getCode());
+            }
+
+            Join<SchoolCode, Organization> join = org.join("schoolCodes");
+
+            //predicates.add(org.get("schoolCodes").get("code").in(schoolCodesList));
+            predicates.add(join.get("code").in(codes));
+        }
+
+
+
+        Predicate[] predicateArray = new Predicate[predicates.size()];
+        predicates.toArray(predicateArray);
+
+        cq.where(predicateArray);
+        TypedQuery<Organization> q = entityManager.createQuery(cq);
+
+        return q.getResultList();
+
+    }
+    /**
+     *
      * @param directoryId
      * @param organizationCode
      * @param organizationCodeType
@@ -183,7 +267,7 @@ public class OrganizationService {
             String organizationCodeType,
             String organizationName,
             String organizationSubcode,
-            Integer organizationType,
+            String organizationType,
             String organizationEin,
             Long createdTime,
             Long modifiedTime,
@@ -229,8 +313,12 @@ public class OrganizationService {
                 }
             }
 
-            if(organizationType!=null) {
-                predicates.add(cb.equal(org.get("type"), organizationType));
+
+            if ( !StringUtils.isEmpty(organizationType) ) {
+
+                Join<OrganizationType, Organization> join = org.join("organizationTypes");
+                predicates.add(cb.equal(join.get("name"), organizationType));
+
             }
 
             if(!StringUtils.isEmpty(organizationEin)) {

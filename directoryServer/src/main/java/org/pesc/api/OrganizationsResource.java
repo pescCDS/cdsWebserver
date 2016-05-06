@@ -8,7 +8,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.Property;
+import org.pesc.api.model.SchoolCode;
 import org.pesc.service.OrganizationService;
+import org.pesc.service.SchoolCodesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +34,9 @@ public class OrganizationsResource {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private SchoolCodesService schoolCodesService;
+
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -43,7 +48,7 @@ public class OrganizationsResource {
             @QueryParam("organizationCodeType") @ApiParam("Indicates the type of organization code and should be one of the following: ACT, ATP, FICE, IPEDS.") String organizationCodeType,
             @QueryParam("name") @ApiParam("The case insensitive organization name or partial name.") String name,
             @QueryParam("subcode") @ApiParam("A proprietary code used to identify an organization.") String subcode,
-            @QueryParam("type") @ApiParam("The type of organization (1 = Institution, 2 = Service Provider).") Integer type,
+            @QueryParam("type") @ApiParam("The type of organization (Institution, Service Provider).") String type,
             @QueryParam("ein") @ApiParam("The federal tax identification number (Employer Identification Number).") String ein,
             @QueryParam("createdTime") Long createdTime,
             @QueryParam("modifiedTime") Long modifiedTime,
@@ -91,6 +96,7 @@ public class OrganizationsResource {
         return organizationService.create(org);
     }
 
+
     @Path("/{id}")
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -130,6 +136,25 @@ public class OrganizationsResource {
         }
 
     }
+
+
+    @Path("/{id}/school-code")
+    @PUT
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Add or update a school code for the institution. Code types include 'FICE', 'ATP', 'ACT', 'IPEDS' and 'OPEID'")
+    public SchoolCode putSchoolCode(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id,
+                              @FormParam("code-type") @ApiParam("'FICE', 'ATP', 'ACT', 'IPEDS' or 'OPEID'") String codeType,
+                              @FormParam("code") String code) {
+
+        SchoolCode schoolCode = new SchoolCode();
+        schoolCode.setOrganizationId(id);
+        schoolCode.setCode(code);
+        schoolCode.setCodeType(codeType);
+
+        return schoolCodesService.create(schoolCode);
+    }
+
+
 
     @Path("/{id}/property")
     @PUT

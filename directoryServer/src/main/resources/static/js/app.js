@@ -5,6 +5,7 @@
         .filter('getByProperty', getByProperty)
         .filter('trueFalse', trueFalse)
         .directive('toNumber', toNumber)
+        .directive('fileModel', fileModel)
         .service('toasterService', toasterService)
         .service('organizationService', organizationService)
         .service('userService', userService)
@@ -12,9 +13,11 @@
         .service('schoolCodesService', schoolCodesService)
         .service('endpointService', endpointService)
         .service('messageService', messageService)
+        .service('fileUpload', fileUpload)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
+        .controller("UploadController", UploadController)
         .controller("MessageController", MessageController)
         .controller("OrgController", OrgController)
         .controller("UserController", UserController)
@@ -110,6 +113,49 @@
             .otherwise({
                 redirectTo: "home"
             });
+    }
+
+
+    UploadController.$inject = ['fileUpload'];
+    function UploadController(fileUpload) {
+        var self = this;
+
+        self.uploadFile = uploadFile;
+        self.fileToUpload = '';
+
+        function uploadFile(org) {
+            console.log("Uploading csv file.");
+            fileUpload.uploadFileToUrl(self.fileToUpload, org, '/services/rest/v1/institutions/csv');
+        }
+
+    }
+
+    fileUpload.$inject = [ '$http', 'toasterService'] ;
+
+    function fileUpload($http, toasterService) {
+        var service = {
+            uploadFileToUrl: uploadFileToUrl
+        } ;
+
+        return service;
+
+        function uploadFileToUrl(file, org, url){
+            var fd = new FormData();
+            fd.append('file', file);
+            fd.append('org_id', org.id);
+
+            $http.post(url, fd, {
+                transformRequest: angular.identity,
+                headers: {'Content-Type': undefined}
+            })
+            .success(function(data){
+                toasterService.success("Successfully uploaded file.");
+            })
+            .error(function(data){
+                toasterService.error("Failed to upload file.");
+            });
+        }
+
     }
 
     SettingsController.$inject = ['settingsService'];
@@ -593,12 +639,21 @@
         self.organizationTypes = $window.organizationTypes;
         self.hasOrgType=hasOrgType;
         self.updateOrgType=updateOrgType;
+        self.isServiceProvider=isServiceProvider;
+        self.isInstitution=isInstitution;
 
         self.showServiceProviderForm = false;
 
         function hasOrgType(orgType) {
             return organizationService.hasOrgType(self.org, orgType);
         }
+        function isServiceProvider() {
+            return organizationService.isServiceProvider(self.org);
+        }
+        function isInstitution() {
+            return organizationService.isInstitution(self.org);
+        }
+
 
 
         function updateOrgType($event, orgType) {
@@ -698,7 +753,7 @@
 
         function getServiceProvidersForInstitution() {
 
-            if (self.org.organizationTypes.indexOf(1) != -1) {
+            if (organizationService.isInstitution(self.org)) {
                 organizationService.getServiceProvidersForInstitution(self.org).then(function (data) {
                     self.selectedServiceProviders = data;
                 });
@@ -708,7 +763,7 @@
 
         function getInstitutionsForServiceProvider() {
 
-            if (self.org.organizationTypes.indexOf(2) != -1) {
+            if (organizationService.isServiceProvider(self.org)) {
                 organizationService.getInstitutionsForServiceProvider(self.org).then(function (data) {
                     self.institutions = data;
                 });
@@ -1001,7 +1056,7 @@
 
             var organization = {
                 name: '',
-                type: 1,
+                organizationTypes: [],
                 street: '',
                 city: '',
                 state: '',
@@ -1290,7 +1345,9 @@
             register: register,
             updateEnabled: updateEnabled,
             initialize: initialize,
-            hasOrgType: hasOrgType
+            hasOrgType: hasOrgType,
+            isServiceProvider: isServiceProvider,
+            isInstitution: isInstitution
         };
 
         return service;
@@ -1309,6 +1366,26 @@
 
             }
         }
+
+
+        function indexOfType(org, typeName) {
+            for (var i = 0; i < org.organizationTypes.length; i++) {
+                if (org.organizationTypes[i].name == typeName){
+                    return i;
+                }
+
+            }
+            return -1;
+        }
+
+        function isServiceProvider(org) {
+            return indexOfType(org, 'Service Provider') != -1;
+        }
+
+        function isInstitution(org) {
+            return indexOfType(org, 'Institution') != -1;
+        }
+
 
         function hasOrgType(org, orgType) {
 
@@ -1509,7 +1586,7 @@
 
             $http.get('/services/rest/v1/organizations', {
                 'params': {
-                    'type': 2
+                    'type': 'Service Provider'
                 },
                 cache: false
             }).success(function (data) {
@@ -1884,6 +1961,24 @@
             return 'N';
         };
     }
+
+    fileModel.$inject = [ '$parse' ];
+
+    function fileModel($parse) {
+        return {
+            restrict: 'A',
+            link: function(scope, element, attrs) {
+                var model = $parse(attrs.fileModel);
+                var modelSetter = model.assign;
+
+                element.bind('change', function(){
+                    scope.$apply(function(){
+                        modelSetter(scope, element[0].files[0]);
+                    });
+                });
+            }
+        };
+    };
 
     function friendlyRoleName() {
         return function (input) {

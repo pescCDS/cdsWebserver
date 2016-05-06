@@ -718,7 +718,7 @@
             </div>
         </form>
 
-        <div ng-show="orgCtrl.org.type === 1">
+        <div ng-show="orgCtrl.isInstitution()==true">
             <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
 
                 <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.addSchoolCode()"></span>
@@ -770,8 +770,28 @@
             </div>
         </div>
 
-        <div ng-show="orgCtrl.org.type === 2">
+        <div ng-show="orgCtrl.isServiceProvider()==true">
             <div class="ed-title">Serviced Schools</div>
+
+            <div ng-controller="UploadController as uploadCtrl">
+                <form name="uploadForm" ng-submit="uploadForm.$valid && uploadCtrl.uploadFile(orgCtrl.org)" novalidate="novalidate">
+                    <div>
+                        <div class="form-group">
+                            <div  class="btn btn-default btn-file">
+                                Browse <input type="file" file-model="uploadCtrl.fileToUpload"/>
+                            </div>
+                            <span>{{uploadCtrl.fileToUpload.name}}</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-default">
+                            <span class="glyphicon glyphicon-send"></span> Upload
+                        </button>
+                    </div>
+                </form>
+            </div>
+
 
             <div ng-repeat="institution in orgCtrl.institutions" style="margin-top: 10px;">
 
@@ -786,7 +806,7 @@
 
         <div>
             <div style="float:right;">
-                     <span ng-show="orgCtrl.isEditableByUser()">
+                     <span ng-show="orgCtrl.isEditableByUser() && orgCtrl.isServiceProvider()">
                             <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.createEndpoint()"></span>
                      </span>
             </div>
@@ -798,9 +818,6 @@
                 <a ng-href="#endpoint-selector/{{orgCtrl.org.id}}">Select Endpoints</a>
             </div>
 
-            <here>
-
-            </here>
 
             <div ng-repeat="endpoint in orgCtrl.endpoints">
 

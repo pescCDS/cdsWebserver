@@ -4,18 +4,19 @@ package org.pesc.api.model;
  * Created by james on 2/23/16.
  */
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 
 @XmlRootElement(name = "Organization")
 @Entity
 @Table(name = "organization")
+@JsonPropertyOrder({ "name", "website", "street", "city", "state", "zip", "organizationTypes", "schoolCodes" })
 public class Organization implements Serializable {
 
     @Column(name = "name")
