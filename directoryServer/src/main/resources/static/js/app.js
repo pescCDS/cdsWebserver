@@ -641,8 +641,14 @@
         self.updateOrgType=updateOrgType;
         self.isServiceProvider=isServiceProvider;
         self.isInstitution=isInstitution;
+        self.uploadInstutions=uploadInstitutions;
 
         self.showServiceProviderForm = false;
+
+        function uploadInstitutions() {
+
+        }
+
 
         function hasOrgType(orgType) {
             return organizationService.hasOrgType(self.org, orgType);

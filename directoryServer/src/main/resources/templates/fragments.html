@@ -771,27 +771,16 @@
         </div>
 
         <div ng-show="orgCtrl.isServiceProvider()==true">
-            <div class="ed-title">Serviced Schools</div>
+            <div style="float:right;">
 
-            <div ng-controller="UploadController as uploadCtrl">
-                <form name="uploadForm" ng-submit="uploadForm.$valid && uploadCtrl.uploadFile(orgCtrl.org)" novalidate="novalidate">
-                    <div>
-                        <div class="form-group">
-                            <div  class="btn btn-default btn-file">
-                                Browse <input type="file" file-model="uploadCtrl.fileToUpload"/>
-                            </div>
-                            <span>{{uploadCtrl.fileToUpload.name}}</span>
-                        </div>
-                    </div>
+                <span class="glyphicon glyphicon-upload ed-icon-btn"
+                      uib-popover-template="'upload-institutions.html'"
+                      popover-trigger="click"
+                      popover-placement="top"></span>
 
-                    <div class="btn-group">
-                        <button type="submit" class="btn btn-default">
-                            <span class="glyphicon glyphicon-send"></span> Upload
-                        </button>
-                    </div>
-                </form>
             </div>
 
+            <div class="ed-title">Serviced Schools</div>
 
             <div ng-repeat="institution in orgCtrl.institutions" style="margin-top: 10px;">
 

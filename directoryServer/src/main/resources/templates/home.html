@@ -138,6 +138,27 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="upload-institutions.html">
+    <div ng-controller="UploadController as uploadCtrl">
+        <form name="uploadForm" ng-submit="uploadForm.$valid && uploadCtrl.uploadFile(orgCtrl.org)" novalidate="novalidate">
+            <div>
+                <div class="form-group">
+                    <div  class="btn btn-default btn-file">
+                        Browse <input type="file" file-model="uploadCtrl.fileToUpload"/>
+                    </div>
+                    <span>{{uploadCtrl.fileToUpload.name}}</span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-default">
+                    <span class="glyphicon glyphicon-send"></span> Upload
+                </button>
+            </div>
+        </form>
+    </div>
+</script>
+
 
 <script th:inline="javascript">
     /*<![CDATA[*/
