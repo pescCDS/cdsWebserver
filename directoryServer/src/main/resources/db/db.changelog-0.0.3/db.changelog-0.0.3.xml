@@ -42,4 +42,11 @@
 		<sqlFile encoding="utf8" path="5-messages.sql" relativeToChangelogFile="true" />
 	</changeSet>
 
+	<changeSet id="9" author="james">
+		<comment>
+			Adding table to audit file uploads and file processing for creating institutions based on a CSV file.
+		</comment>
+		<sqlFile encoding="utf8" path="6-uploads.sql" relativeToChangelogFile="true" />
+	</changeSet>
+
 </databaseChangeLog>

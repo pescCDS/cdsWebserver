@@ -116,16 +116,47 @@
     }
 
 
-    UploadController.$inject = ['fileUpload'];
-    function UploadController(fileUpload) {
+    UploadController.$inject = ['fileUpload', 'organizationService', 'toasterService', '$uibModalInstance', 'org'];
+    function UploadController(fileUpload, organizationService, toasterService, $uibModalInstance, org) {
         var self = this;
 
+        self.org = org;
         self.uploadFile = uploadFile;
         self.fileToUpload = '';
+        self.showHistory = false;
+        self.toggleHistory = toggleHistory;
+        self.uploads = [];
+        self.ok = ok;
+        self.cancel = cancel;
 
-        function uploadFile(org) {
-            console.log("Uploading csv file.");
-            fileUpload.uploadFileToUrl(self.fileToUpload, org, '/services/rest/v1/institutions/csv');
+        function ok() {
+            $uibModalInstance.dismiss('cancel');
+        }
+
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
+
+        function toggleHistory() {
+            self.showHistory = !self.showHistory;
+
+            if (self.showHistory) {
+                organizationService.getUploads(self.org).then(function(data){
+                    self.uploads = data;
+                }, function error(data){
+                    toasterService.error("Failed to retrieve uploads.");
+                })
+            }
+        }
+
+        function uploadFile() {
+
+            if (self.fileToUpload == '') {
+                toasterService.error("Please select a file to upload.");
+                return;
+            }
+
+            fileUpload.uploadFileToUrl(self.fileToUpload, self.org, '/services/rest/v1/institutions/csv');
         }
 
     }
@@ -607,9 +638,9 @@
         }
     }
 
-    OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService', '$window'];
+    OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService', '$window', '$uibModal', '$log'];
 
-    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, toasterService, $window) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, toasterService, $window, $uibModal, $log) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -641,14 +672,8 @@
         self.updateOrgType=updateOrgType;
         self.isServiceProvider=isServiceProvider;
         self.isInstitution=isInstitution;
-        self.uploadInstutions=uploadInstitutions;
-
         self.showServiceProviderForm = false;
-
-        function uploadInstitutions() {
-
-        }
-
+        self.showUploadForm = showUploadForm;
 
         function hasOrgType(orgType) {
             return organizationService.hasOrgType(self.org, orgType);
@@ -660,7 +685,29 @@
             return organizationService.isInstitution(self.org);
         }
 
+        function showUploadForm() {
 
+                var modalInstance = $uibModal.open({
+                    animation: true,
+                    templateUrl: 'upload-institutions.html',
+                    controller: 'UploadController',
+                    controllerAs: 'uploadCtrl',
+                    size: 'lq',
+                    resolve: {
+                        org: function () {
+                            return self.org;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function (historyObj) {
+
+                }, function () {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
+
+
+        }
 
         function updateOrgType($event, orgType) {
 
@@ -682,7 +729,7 @@
 
         function isMyOrgServiceProviderForInstitution() {
 
-            if (self.org.organizationTypes.indexOf(1) == -1 || userService.activeUser == null) { //if the current org isn't an institution, false
+            if (!organizationService.isInstitution(self.org) || userService.activeUser == null) { //if the current org isn't an institution, false
                 return false;
             }
 
@@ -1353,7 +1400,8 @@
             initialize: initialize,
             hasOrgType: hasOrgType,
             isServiceProvider: isServiceProvider,
-            isInstitution: isInstitution
+            isInstitution: isInstitution,
+            getUploads: getUploads
         };
 
         return service;
@@ -1392,6 +1440,23 @@
             return indexOfType(org, 'Institution') != -1;
         }
 
+
+        function getUploads(org) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/service-providers/' + org.id + "/uploads", {
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching organizations.");
+            });
+
+            return deferred.promise;
+
+        }
 
         function hasOrgType(org, orgType) {
 

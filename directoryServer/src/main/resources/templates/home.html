@@ -139,8 +139,12 @@
 </script>
 
 <script type="text/ng-template" id="upload-institutions.html">
-    <div ng-controller="UploadController as uploadCtrl">
-        <form name="uploadForm" ng-submit="uploadForm.$valid && uploadCtrl.uploadFile(orgCtrl.org)" novalidate="novalidate">
+
+        <div class="modal-header">
+            <h3 class="modal-title">Institutions Upload</h3>
+        </div>
+        <div class="modal-body">
+            <form name="uploadForm" ng-submit="uploadForm.$valid && uploadCtrl.uploadFile()" novalidate="novalidate">
             <div>
                 <div class="form-group">
                     <div  class="btn btn-default btn-file">
@@ -155,9 +159,49 @@
                     <span class="glyphicon glyphicon-send"></span> Upload
                 </button>
             </div>
+
+
+            <div style="margin-top:10px;">
+                <button type="button" class="btn btn-default" ng-click="uploadCtrl.toggleHistory()">Show history</button>
+
+                <div ng-show="uploadCtrl.showHistory == true">
+
+                    <table st-table="transactionCtrl.transactions" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Upload Time</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Uploaded file</th>
+                            <th>Result log</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                         <tr ng-repeat="upload in uploadCtrl.uploads">
+                            <td>{{upload.createdTime | date:'short'}}</td>
+                            <td>{{upload.startTime | date:'short'}}</td>
+                            <td>{{upload.endTime | date:'short'}}</td>
+                            <td>  <a ng-href="#upload/{{upload.id}}">{{upload.inputPath}}</a></td>
+                            <td>  <a ng-href="#upload/{{upload.id}}">{{upload.outputPath}}</a></td>
+                        </tr>
+
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
         </form>
-    </div>
+
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="uploadCtrl.ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="uploadCtrl.cancel()">Cancel</button>
+        </div>
 </script>
+
 
 
 <script th:inline="javascript">

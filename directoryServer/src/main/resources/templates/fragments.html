@@ -773,10 +773,9 @@
         <div ng-show="orgCtrl.isServiceProvider()==true">
             <div style="float:right;">
 
+
                 <span class="glyphicon glyphicon-upload ed-icon-btn"
-                      uib-popover-template="'upload-institutions.html'"
-                      popover-trigger="click"
-                      popover-placement="top"></span>
+                      ng-click="orgCtrl.showUploadForm()"></span>
 
             </div>
 

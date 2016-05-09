@@ -12,7 +12,7 @@ CREATE TABLE school_codes (
 CREATE UNIQUE INDEX unique_code_per_school_schoolcodes ON school_codes(code_type, organization_id);
 CREATE UNIQUE INDEX unique_code_pair ON school_codes(code_type, code);
 
-INSERT INTO school_codes (code, code_type, organization_id) VALUES ('008073','FICE',1);
-INSERT INTO school_codes (code, code_type, organization_id) VALUES ('4226','ATP',1);
-INSERT INTO school_codes (code, code_type, organization_id) VALUES ('0165','ACT',1);
-INSERT INTO school_codes (code, code_type, organization_id) VALUES ('110246','IPEDS',1);
+INSERT INTO school_codes (code, code_type, organization_id) VALUES ('008073','FICE',2);
+INSERT INTO school_codes (code, code_type, organization_id) VALUES ('4226','ATP',2);
+INSERT INTO school_codes (code, code_type, organization_id) VALUES ('0165','ACT',2);
+INSERT INTO school_codes (code, code_type, organization_id) VALUES ('110246','IPEDS',2);
