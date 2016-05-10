@@ -1,6 +1,5 @@
 package org.pesc.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -12,22 +11,20 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.pesc.api.model.*;
+import org.pesc.api.repository.InstitutionUploadResultsRepository;
 import org.pesc.api.repository.ServiceProviderRepository;
 import org.pesc.service.OrganizationService;
-import org.pesc.service.UploadService;
+import org.pesc.service.InstitutionUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.jws.WebService;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -55,13 +52,16 @@ public class InstitutionResource {
     private OrganizationService organizationService;
 
     @Autowired
-    private UploadService uploadService;
+    private InstitutionUploadService uploadService;
 
     @Value("${directory.uploaded.csv}")
     private String csvDir;
 
+    private static final int MAX_COLUMNS = 11;
+    private static String[] COLUMNS_NAMES = {"name","website","street","city","state","zip","atp","act","ipeds","opeid","fice" };
 
-    private Upload persistUploadRecord(String inputFilepath) {
+
+    private InstitutionsUpload persistUploadRecord(String inputFilepath) {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
@@ -70,12 +70,12 @@ public class InstitutionResource {
 
             AuthUser auth = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            Upload upload = new Upload();
-            upload.setUserId(auth.getId());
-            upload.setOrganizationId(auth.getOrganizationId());
-            upload.setInputPath(inputFilepath);
+            InstitutionsUpload institutionsUpload = new InstitutionsUpload();
+            institutionsUpload.setUserId(auth.getId());
+            institutionsUpload.setOrganizationId(auth.getOrganizationId());
+            institutionsUpload.setInputPath(inputFilepath);
 
-            return uploadService.create(upload);
+            return uploadService.create(institutionsUpload);
         }
 
         return null;
@@ -100,9 +100,9 @@ public class InstitutionResource {
             File outfile = new File(csvDir + File.separator + UUID.randomUUID().toString() + ".csv");
             Files.copy(stream, outfile.toPath());
 
-            Upload upload = persistUploadRecord(outfile.getAbsolutePath());
+            InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath());
 
-            processCSVFile(upload, outfile.getPath(), orgID);
+            processCSVFile(institutionsUpload, outfile.getPath(), orgID);
 
         } catch (Exception e) {
             log.error("Failed to save uploaded CSV file", e);
@@ -138,32 +138,44 @@ public class InstitutionResource {
         return  resultMap;
     }
 
+    private boolean isValidUploadFile(Map<String,Integer> headerMap) {
+
+        for(String columnName : COLUMNS_NAMES) {
+
+            if (!headerMap.containsKey(columnName)) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
     @Async
-    private void processCSVFile(Upload upload, String filePath, Integer serviceProviderID) {
+    private void processCSVFile(InstitutionsUpload institutionsUpload, String filePath, Integer serviceProviderID) {
 
         try {
-            upload.setStartTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            BufferedWriter resultLog = null;
+            institutionsUpload.setStartTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
             final Reader reader = new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8");
             final CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
-            ObjectMapper mapper = new ObjectMapper();
+
+            if (!isValidUploadFile(parser.getHeaderMap() ) ) {
+                InstitutionsUploadResult result = new InstitutionsUploadResult();
+                result.setInstitutionUploadID(institutionsUpload.getId());
+                result.setOrganizationID(serviceProviderID);
+
+                result.setOutcome(InstitutionUploadResultsRepository.ERROR);
+                StringBuilder buf = new StringBuilder("The institutions CSV file must contain a header record with the following case sensitive column names: ");
+                buf.append(String.join(",", COLUMNS_NAMES));
+                result.setMessage(buf.toString());
+                uploadService.create(result);
+                return;
+            }
 
             try {
-                String logPath = csvDir + File.separator + UUID.randomUUID().toString() + ".log";
-
-                upload.setOutputPath(logPath);
-
-                FileWriter fstream = new FileWriter(logPath, true); //true: append to file
-                resultLog = new BufferedWriter(fstream);
-                resultLog.append('[');
-
 
                 for (final CSVRecord record : parser) {
 
-                    if (parser.getCurrentLineNumber() > 2) {
-                       resultLog.write(',');
-                    }
                     Organization organization = new Organization();
                     organization.setName(record.get("name"));
                     organization.setStreet(record.get("street"));
@@ -180,16 +192,21 @@ public class InstitutionResource {
                     addSchoolCode(schoolCodes, "OPEID", record.get("opeid"));
                     addSchoolCode(schoolCodes, "ACT", record.get("act"));
 
-                    Map<String, Object> resultMap = new HashMap<String, Object>();
+                    InstitutionsUploadResult result = new InstitutionsUploadResult();
+                    result.setInstitutionUploadID(institutionsUpload.getId());
+                    result.setOrganizationID(serviceProviderID);
+                    result.setLineNumber((int)parser.getCurrentLineNumber());
 
                     try {
                         organization = organizationService.createInstitution(organization, schoolCodes, serviceProviderID);
-                        resultMap.put("level", "INFO");
-                        addOrgInfo(resultMap, record.get("name"), organization.getId());
+                        result.setOutcome(InstitutionUploadResultsRepository.SUCCESS);
+                        result.setInstitutionID(organization.getId());
+                        result.setInstitutionName(organization.getName());
                     }
                     catch (Exception e) {
 
 
+                        log.error("Failed to process insitution upload record. Inserting result record.", e);
 
                         if (e.getMessage() != null && e.getMessage().contains("unique_code_pair")) {
 
@@ -197,51 +214,64 @@ public class InstitutionResource {
 
                             if (institutions.size() == 1) {
                                 organizationService.linkInstitutionWithServiceProvider(institutions.get(0).getId(), serviceProviderID);
-                                resultMap.put("level", "WARN");
-                                addMessage(resultMap, "A duplicate institution was found and was added to the service provider's serviceable institutions.");
-                                addOrgInfo(resultMap, institutions.get(0).getName(), institutions.get(0).getId());
+                                result.setOutcome(InstitutionUploadResultsRepository.WARNING);
+                                result.setMessage("A duplicate institution was found and was added to the service provider's serviceable institutions.");
+                                result.setInstitutionID(organization.getId());
+                                result.setInstitutionName(organization.getName());
                             }
                             else {
-                                resultMap.put("level", "ERROR");
-                                addMessage(resultMap,
-                                        String.format("Multiple instiutions were found with the same school code(s) ATP %s, FICE %s, IPEDS %s, ACT %s, OPEID %s.  This indicates data inconsistency.",
-                                                record.get("atp"), record.get("fice"), record.get("ipeds"), record.get("act"), record.get("opeid")));
+
+                                result.setOutcome(InstitutionUploadResultsRepository.ERROR);
+                                result.setMessage(String.format(
+                                        "Multiple instiutions were found with the same school code(s) ATP %s, FICE %s, IPEDS %s, ACT %s, OPEID %s.  This indicates data inconsistency.",
+                                        record.get("atp"), record.get("fice"), record.get("ipeds"), record.get("act"), record.get("opeid")));
+                                result.setInstitutionID(organization.getId());
+                                result.setInstitutionName(organization.getName());
+
+
                             }
 
                         }
                         else {
-                            resultMap.put("level", "ERROR");
-                            addMessage(resultMap, "An error ocurred which prevented the institution from being created.");
-
+                            result.setOutcome(InstitutionUploadResultsRepository.ERROR);
+                            if (e.getMessage() != null) {
+                                result.setMessage(e.getMessage());
+                            }
                         }
 
                     }
 
-                    resultLog.write(mapper.writeValueAsString(resultMap));
+                    uploadService.create(result);
+
                 }
             }
             catch (Exception e){
-                Map<String, Object> resultMap = new HashMap<String, Object>();
-                resultMap.put("level", "ERROR");
-                addMessage(resultMap, e.getMessage() != null ? e.getMessage() : "Failed to process CSV file, line number " + parser.getCurrentLineNumber());
-                resultLog.write(mapper.writeValueAsString(resultMap));
+
+                log.error("Failed to process insitution upload file. Inserting result record.", e);
+
+                InstitutionsUploadResult result = new InstitutionsUploadResult();
+                result.setInstitutionUploadID(institutionsUpload.getId());
+                result.setOrganizationID(serviceProviderID);
+                result.setLineNumber((int) parser.getCurrentLineNumber());
+
+                result.setOutcome(InstitutionUploadResultsRepository.ERROR);
+
+                if (e.getMessage() != null) {
+                    result.setMessage(e.getMessage());
+                }
+                uploadService.create(result);
             }
             finally {
                 parser.close();
                 reader.close();
-
-                resultLog.append(']');
-
-                resultLog.close();
-
 
             }
         } catch (Exception e) {
             log.error("Failed to process CSV file for institution creation.", e);
         }
         finally {
-            upload.setEndTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            uploadService.update(upload);
+            institutionsUpload.setEndTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            uploadService.update(institutionsUpload);
         }
 
     }

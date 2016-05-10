@@ -128,6 +128,8 @@
         self.uploads = [];
         self.ok = ok;
         self.cancel = cancel;
+        self.showResults = showResults;
+        self.results = [];
 
         function ok() {
             $uibModalInstance.dismiss('cancel');
@@ -135,6 +137,19 @@
 
         function cancel() {
             $uibModalInstance.dismiss('cancel');
+        }
+
+        function showResults(uploadObj) {
+
+            if (!uploadObj.hasOwnProperty('results')) {
+                organizationService.getUploadResults(self.org, uploadObj.id).then(function(data){
+                    uploadObj['results'] = data;
+                }, function error(data){
+                    toasterService.error("Failed to retrieve insitution upload results.");
+                });
+            }
+
+
         }
 
         function toggleHistory() {
@@ -1401,7 +1416,8 @@
             hasOrgType: hasOrgType,
             isServiceProvider: isServiceProvider,
             isInstitution: isInstitution,
-            getUploads: getUploads
+            getUploads: getUploads,
+            getUploadResults: getUploadResults
         };
 
         return service;
@@ -1451,7 +1467,27 @@
                 deferred.resolve(data);
             }).error(function (data) {
                 toasterService.ajaxInfo(data);
-                deferred.reject("An error occured while fetching organizations.");
+                deferred.reject("An error occured while fetching upload history.");
+            });
+
+            return deferred.promise;
+
+        }
+
+        function getUploadResults(org, uploadID) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/service-providers/' + org.id + "/upload-results", {
+                params: {
+                    'upload_id' : uploadID
+                },
+                cache: false
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching institutions upload results.");
             });
 
             return deferred.promise;

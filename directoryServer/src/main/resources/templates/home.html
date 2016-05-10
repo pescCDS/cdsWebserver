@@ -166,29 +166,42 @@
 
                 <div ng-show="uploadCtrl.showHistory == true">
 
-                    <table st-table="transactionCtrl.transactions" class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Upload Time</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Uploaded file</th>
-                            <th>Result log</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                    <div style="margin-top: 10px">
+                        <uib-accordion close-others="true">
 
-                         <tr ng-repeat="upload in uploadCtrl.uploads">
-                            <td>{{upload.createdTime | date:'short'}}</td>
-                            <td>{{upload.startTime | date:'short'}}</td>
-                            <td>{{upload.endTime | date:'short'}}</td>
-                            <td>  <a ng-href="#upload/{{upload.id}}">{{upload.inputPath}}</a></td>
-                            <td>  <a ng-href="#upload/{{upload.id}}">{{upload.outputPath}}</a></td>
-                        </tr>
+                            <uib-accordion-group ng-repeat="upload in uploadCtrl.uploads" heading="{{upload.createdTime | date:'short'}}">
+                                <div><span>Start Time: </span><b>{{upload.startTime | date:'short'}}</b></div>
+                                <div><span>End Time: </span><b>{{upload.endTime | date:'short'}}</b></div>
+                                <div><span>Uploaded File: </span><a ng-href="#upload/{{upload.id}}">{{upload.inputPath}}</a></div>
+                                <div style="margin-top: 10px;"><button type="button" class="btn btn-default" ng-click="uploadCtrl.showResults(upload)">Show Results</button></div>
 
+                                    <div style="margin-top: 10px">
+                                        <ul class="list-group">
+                                            <li ng-repeat="result in upload.results" class="list-group-item" ng-class="{'list-group-item-success': result.outcome == 'SUCCESS',  'list-group-item-warning': result.outcome == 'WARNING',  'list-group-item-danger': result.outcome == 'ERROR'  }">
+                                                <div ng-show="result.outcome == 'SUCCESS'">
+                                                    <span>{{result.institutionName}} was successfully processed.</span>
+                                                </div>
+                                                <div ng-show="result.outcome == 'WARNING'">
+                                                    <span>{{result.message}}</span>
+                                                    <span>{{result.institutionName}} was successfully processed.</span>
+                                                </div>
+                                                <div ng-show="result.outcome == 'ERROR'">
+                                                    <span>{{result.message}}</span>
+                                                    <span>{{result.institutionName}}</span>
+                                                </div>
 
-                        </tbody>
-                    </table>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                            </uib-accordion-group>
+
+                        </uib-accordion>
+
+                    </div>
+
 
                 </div>
             </div>

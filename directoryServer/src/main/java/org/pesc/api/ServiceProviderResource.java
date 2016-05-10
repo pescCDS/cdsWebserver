@@ -6,10 +6,11 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.Institution;
+import org.pesc.api.model.InstitutionsUpload;
+import org.pesc.api.model.InstitutionsUploadResult;
 import org.pesc.api.model.Organization;
-import org.pesc.api.model.Upload;
 import org.pesc.api.repository.InstitutionRepository;
-import org.pesc.service.UploadService;
+import org.pesc.service.InstitutionUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,22 +37,42 @@ public class ServiceProviderResource {
     private InstitutionRepository institutionRepository;
 
     @Autowired
-    private UploadService uploadService;
+    private InstitutionUploadService uploadService;
 
     @GET
     @Path("/{id}/uploads")
     @ApiOperation("Return the uploads for this service provider.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Upload> getUploads(@PathParam("id") @ApiParam("The directory identifier for the organization.") Integer id) {
-        List<Upload> results = uploadService.getUploadsByOrganization(id);
+    public List<InstitutionsUpload> getUploads(@PathParam("id") @ApiParam("The directory identifier for the organization.") Integer id) {
+        List<InstitutionsUpload> results = uploadService.getUploadsByOrganization(id);
 
         if (results == null) {
-            results = new ArrayList<Upload>();
+            results = new ArrayList<InstitutionsUpload>();
         }
 
         return results;
 
     }
+
+    @GET
+    @Path("/{id}/upload-results")
+    @ApiOperation("Return the uploads for this service provider.")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<InstitutionsUploadResult> getUploadResults(@PathParam("id") @ApiParam("The directory identifier for the organization.") Integer id,
+                                         @QueryParam("upload_id") Integer uploadID) {
+
+
+        List<InstitutionsUploadResult> results = uploadService.getUploadResultsByUploadId(uploadID);
+
+        if (results == null) {
+            results = new ArrayList<InstitutionsUploadResult>();
+        }
+
+        return results;
+    }
+
+
+
 
     @GET
     @ApiOperation("Return the service providers for the institution.")

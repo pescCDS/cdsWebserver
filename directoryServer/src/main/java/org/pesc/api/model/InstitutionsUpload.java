@@ -8,10 +8,10 @@ import java.util.Date;
 /**
  * Created by james on 3/17/16.
  */
-@XmlRootElement(name = "Upload")
+@XmlRootElement(name = "InstitutionUpload")
 @Entity
-@Table(name = "uploads")
-public class Upload implements Serializable {
+@Table(name = "institution_uploads")
+public class InstitutionsUpload implements Serializable {
 
     @Id
     @Column(name = "id")
@@ -40,9 +40,6 @@ public class Upload implements Serializable {
 
     @Column(name = "input_path")
     private String inputPath;
-
-    @Column(name = "output_path")
-    private String outputPath;
 
     public Integer getId() {
         return id;
@@ -92,14 +89,6 @@ public class Upload implements Serializable {
         this.inputPath = inputPath;
     }
 
-    public String getOutputPath() {
-        return outputPath;
-    }
-
-    public void setOutputPath(String outputPath) {
-        this.outputPath = outputPath;
-    }
-
     public Date getCreatedTime() {
         return createdTime;
     }
@@ -115,7 +104,7 @@ public class Upload implements Serializable {
             return true;
         if (id == null || obj == null || getClass() != obj.getClass())
             return false;
-        Upload that = (Upload) obj;
+        InstitutionsUpload that = (InstitutionsUpload) obj;
         return id.equals(that.id);
     }
     @Override
