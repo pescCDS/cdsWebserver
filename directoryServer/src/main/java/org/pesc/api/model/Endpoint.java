@@ -56,6 +56,27 @@ public class Endpoint {
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = DeliveryMethod.class, cascade = CascadeType.MERGE)
     private DeliveryMethod deliveryMethod;
 
+    @JoinTable(
+            name="endpoint_document_types",
+            joinColumns=
+            @JoinColumn(name="endpoint_id", referencedColumnName="id"),
+            inverseJoinColumns=
+            @JoinColumn(name="document_types_id", referencedColumnName="id")
+    )
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = DocumentType.class, cascade = CascadeType.MERGE)
+    private DocumentType documentType;
+
+
+    @JoinTable(
+            name="endpoint_departments",
+            joinColumns=
+            @JoinColumn(name="endpoint_id", referencedColumnName="id"),
+            inverseJoinColumns=
+            @JoinColumn(name="departments_id", referencedColumnName="id")
+    )
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Department.class, cascade = CascadeType.MERGE)
+    private Department department;
+
 
     @JoinTable(
             name="endpoint_organization",
@@ -64,7 +85,7 @@ public class Endpoint {
             inverseJoinColumns=
             @JoinColumn(name="organization_id", referencedColumnName="id")
     )
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.DETACH)
     private Set<Organization> organizations;
 
 
@@ -139,5 +160,21 @@ public class Endpoint {
 
     public void setInstructions(String instructions) {
         this.instructions = instructions;
+    }
+
+    public DocumentType getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(DocumentType documentType) {
+        this.documentType = documentType;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 }

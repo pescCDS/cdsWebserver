@@ -163,6 +163,33 @@
             </div>
 
             <div class="form-group">
+                <strong>Document Type</strong>
+                <select class="form-control" style="width: 160px;" required="required"
+                        ng-model="uploadCtrl.documentType"
+                        ng-options="documentType.name for documentType in uploadCtrl.documentTypes track by documentType.id">
+
+                </select>
+
+                <p>
+                    {{documentType.description}}
+                </p>
+            </div>
+
+            <div class="form-group">
+                <strong>Department</strong>
+                <select class="form-control" style="width: 160px;" required="required"
+                        ng-model="uploadCtrl.department"
+                        ng-options="department.name for department in uploadCtrl.departments track by department.id">
+
+                </select>
+
+                <p>
+                    {{department.description}}
+                </p>
+            </div>
+
+
+            <div class="form-group">
                 <div><strong>Transcript File</strong></div>
                 <div class="btn btn-default btn-file">
                     Browse <input type="file" file-model="uploadCtrl.fileToUpload"/>

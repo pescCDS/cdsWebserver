@@ -13,6 +13,49 @@ CREATE TABLE endpoint (
 );
 
 
+CREATE TABLE document_types (
+	  id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+    name VARCHAR(20) NOT NULL COMMENT 'The name of the delivery method',
+    description VARCHAR(256) NOT NULL COMMENT 'A description of the delivery method',
+    PRIMARY KEY (id)
+);
+
+INSERT INTO document_types (name,description) VALUES
+('Transcript','Academic transcript.'),
+('Transcript Request','Academic transcript request.');
+
+CREATE TABLE endpoint_document_types (
+  endpoint_id int(11) UNSIGNED NOT NULL,
+  document_types_id int(11) UNSIGNED NOT NULL,
+  PRIMARY KEY (endpoint_id,document_types_id),
+  KEY fk_document_types_endpoint (document_types_id),
+  KEY fk_endpoint_document_types (endpoint_id),
+  CONSTRAINT fk_document_types_endpoint FOREIGN KEY (document_types_id) REFERENCES document_types (id),
+  CONSTRAINT fk_endpoint_document_types FOREIGN KEY (endpoint_id) REFERENCES endpoint (id)
+);
+
+CREATE TABLE departments (
+	  id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+    name VARCHAR(20) NOT NULL COMMENT 'The name of the department',
+    description VARCHAR(256) NOT NULL COMMENT 'A description of the department',
+    PRIMARY KEY (id)
+);
+
+INSERT INTO departments (name,description) VALUES
+('English','The English department.'),
+('Administration','Administration department');
+
+CREATE TABLE endpoint_departments (
+  endpoint_id int(11) UNSIGNED NOT NULL,
+  departments_id int(11) UNSIGNED NOT NULL,
+  PRIMARY KEY (endpoint_id,departments_id),
+  KEY fk_departments_endpoint (departments_id),
+  KEY fk_endpoint_departments (endpoint_id),
+  CONSTRAINT fk_departments_endpoint FOREIGN KEY (departments_id) REFERENCES departments (id),
+  CONSTRAINT fk_endpoint_departments FOREIGN KEY (endpoint_id) REFERENCES endpoint (id)
+);
+
+
 CREATE TABLE endpoint_delivery_methods (
   endpoint_id int(11) UNSIGNED NOT NULL,
   delivery_methods_id int(11) UNSIGNED NOT NULL,

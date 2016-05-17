@@ -17,6 +17,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +104,7 @@ public class DocumentController {
 
 		tran = transactionService.create(tran);
 
-		String endpointURI = getEndpointForOrg(tran.getRecipientId(), tran.getFileFormat());
+		String endpointURI = getEndpointForOrg(tran.getRecipientId(), tran.getFileFormat(), null, null);
 
 		if (endpointURI == null) {
 			throw new RuntimeException("No endpoint found for this organization and document type.");
@@ -158,7 +159,7 @@ public class DocumentController {
 		return null;
 	}
 
-	private String getEndpointForOrg(int orgID, String documentFormat) {
+	private String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department) {
 		StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + endpointsApiPath);
 		uri.append("?organizationId=").append(orgID).append("&documentFormat=").append(documentFormat);
 
@@ -202,11 +203,11 @@ public class DocumentController {
 		return endpointURI;
 	}
 
-	private String getEndpointURIForSchool(String schoolCode, String schoolCodeType, String documentFormat, Transaction tx) {
+	private String getEndpointURIForSchool(String schoolCode, String schoolCodeType, String documentFormat, String documentType, String department, Transaction tx) {
 
-		int orgID = getOrganizationId(schoolCode, schoolCodeType);
+		int orgID = 2;//getOrganizationId(schoolCode, schoolCodeType);
 		tx.setRecipientId(orgID);
-		return getEndpointForOrg(orgID, documentFormat);
+		return getEndpointForOrg(orgID, documentFormat, documentType, department);
 	}
 
 	private int getOrganizationId(String schoolCode, String schoolCodeType) {
@@ -215,6 +216,10 @@ public class DocumentController {
 
 	    StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + organizationApiPath);
 		uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
+		uri.append("?enabled=true").append("&institution=true").append("&serviceprovider=false");
+		uri.append("?limit=5").append("&offset=0");
+
+		//http://localhost:8080/services/rest/v1/organizations?enabled=true&institution=true&limit=5&name=&offset=0&organizationCode=4226&organizationCodeType=ATP&serviceprovider=false
 		CloseableHttpClient client = HttpClients.custom().build();
 		try {
 			HttpGet get = new HttpGet(uri.toString());
@@ -225,7 +230,9 @@ public class DocumentController {
 
 				HttpEntity resEntity = response.getEntity();
 				if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
-					JSONArray organizations = new JSONArray(EntityUtils.toString(resEntity));
+					JSONObject pagedData = new JSONObject(EntityUtils.toString(resEntity));
+					JSONArray organizations = pagedData.getJSONArray("data");
+
 					if (organizations.length() == 1) {
 						orgID = organizations.getJSONObject(0).getInt("id");
 
@@ -277,6 +284,8 @@ public class DocumentController {
 			@RequestParam(value="networkServerId", required=true) Integer networkServerId,
 			@RequestParam(value="senderId") Integer senderId,
 			@RequestParam(value="fileFormat", required=true) String fileFormat,
+			@RequestParam(value="documentType", required=false) String documentType,
+			@RequestParam(value="department", required=false) String department,
 			@RequestParam(value="fileSize", defaultValue="0") Long fileSize,
 			@RequestParam(value="schoolCode", required=true) String schoolCode,
 			@RequestParam(value="schoolCodeType", required=true) String schoolCodeType,
@@ -289,7 +298,7 @@ public class DocumentController {
 	        try {
 
 				Transaction tx = new Transaction();
-				String endpointURI = getEndpointURIForSchool(schoolCode, schoolCodeType, fileFormat, tx);
+				String endpointURI = getEndpointURIForSchool(schoolCode, schoolCodeType, fileFormat, documentType, department, tx);
 
 				if (endpointURI == null) {
 					throw new IllegalArgumentException("No endpoint URI exists for the given school and document format.");

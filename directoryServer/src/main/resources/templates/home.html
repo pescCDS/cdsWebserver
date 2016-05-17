@@ -166,6 +166,13 @@
 
                 <div ng-show="uploadCtrl.showHistory == true">
 
+                    <div style="margin-top:10px;">
+                        <span><input name="resultFilter" type="checkbox" ng-checked="uploadCtrl.hasFilter('SUCCESS')" ng-click="uploadCtrl.updateFilter('SUCCESS')"/> Success </span>
+                        <span><input name="resultFilter" type="checkbox" ng-checked="uploadCtrl.hasFilter('ERROR')" ng-click="uploadCtrl.updateFilter('ERROR')"/> Errors </span>
+
+                    </div>
+
+
                     <div style="margin-top: 10px">
                         <uib-accordion close-others="true">
 
@@ -176,18 +183,22 @@
                                 <div style="margin-top: 10px;"><button type="button" class="btn btn-default" ng-click="uploadCtrl.showResults(upload)">Show Results</button></div>
 
                                     <div style="margin-top: 10px">
+
                                         <ul class="list-group">
-                                            <li ng-repeat="result in upload.results" class="list-group-item" ng-class="{'list-group-item-success': result.outcome == 'SUCCESS',  'list-group-item-warning': result.outcome == 'WARNING',  'list-group-item-danger': result.outcome == 'ERROR'  }">
+                                            <li ng-repeat="result in upload.results | filter:uploadCtrl.filterResults" class="list-group-item" ng-class="{'list-group-item-success': result.outcome == 'SUCCESS',  'list-group-item-warning': result.outcome == 'WARNING',  'list-group-item-danger': result.outcome == 'ERROR'  }">
                                                 <div ng-show="result.outcome == 'SUCCESS'">
-                                                    <span>{{result.institutionName}} was successfully processed.</span>
+                                                    <div ng-bind-html="result.message"></div>
+                                                    <div>Name: <b>{{result.institutionName}}</b></div>
+                                                    <div>Directory ID: <b>{{result.institutionID}}</b></div>
                                                 </div>
                                                 <div ng-show="result.outcome == 'WARNING'">
-                                                    <span>{{result.message}}</span>
-                                                    <span>{{result.institutionName}} was successfully processed.</span>
+                                                    <div ng-bind-html="result.message"></div>
+                                                    <div>Name: <b>{{result.institutionName}}</b></div>
+                                                    <div>Directory ID: <b>{{result.institutionID}}</b></div>
+
                                                 </div>
                                                 <div ng-show="result.outcome == 'ERROR'">
-                                                    <span>{{result.message}}</span>
-                                                    <span>{{result.institutionName}}</span>
+                                                    <div ng-bind-html="result.message"></div>
                                                 </div>
 
                                             </li>
@@ -211,7 +222,7 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-primary" type="button" ng-click="uploadCtrl.ok()">OK</button>
-            <button class="btn btn-warning" type="button" ng-click="uploadCtrl.cancel()">Cancel</button>
+            <!--<button class="btn btn-warning" type="button" ng-click="uploadCtrl.cancel()">Cancel</button>-->
         </div>
 </script>
 

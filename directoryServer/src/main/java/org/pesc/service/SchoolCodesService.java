@@ -36,6 +36,7 @@ public class SchoolCodesService {
         return this.schoolCodesRepository.findAll();
     }
 
+
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#schoolCode.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public void delete(SchoolCode schoolCode)  {

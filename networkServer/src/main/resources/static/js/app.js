@@ -21,6 +21,7 @@
         .service('transactionService', transactionService)
         .service('toasterService', toasterService)
         .service('fileUpload', fileUpload)
+        .service('settingsService', settingsService)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
         .controller("UploadController", UploadController)
@@ -127,8 +128,8 @@
     }
 
 
-    UploadController.$inject = ['fileUpload'];
-    function UploadController(fileUpload) {
+    UploadController.$inject = ['fileUpload', 'settingsService'];
+    function UploadController(fileUpload, settingsService) {
         var self = this;
 
         self.uploadFile = uploadFile;
@@ -140,12 +141,85 @@
         self.fileToUpload = '';
         self.schoolCode = '';
         self.schoolCodeType = '';
+        self.deliveryMethods = [];
+
+        self.documentTypes = getSupportedDocumentTypes();
+
+        self.documentType = '';
+
+        self.departments = getSupportedDepartments();
+        self.department = '';
+
+
+        //initialize();
 
         function uploadFile() {
             console.log("Transfer file.");
             fileUpload.uploadFileToUrl(self.fileToUpload, self.documentFormat.name, self.schoolCode, self.schoolCodeType);
         }
 
+        function getDeliveryMethods() {
+            settingsService.getDeliveryMethods().then(function (data) {
+                self.deliveryMethods = data;
+            });
+        }
+
+        function getDocumentFormats() {
+            settingsService.getDocumentFormats().then(function (data) {
+                self.documentFormats = data;
+            });
+        }
+
+        function getDepartments() {
+            settingsService.getDepartments().then(function (data) {
+                self.departments = data;
+            });
+        }
+
+        function getDocumentTypes() {
+            settingsService.getDocumentTypes().then(function (data) {
+                self.documentTypes = data;
+            });
+        }
+
+
+        function initialize() {
+            getDocumentFormats();
+            //getDocumentTypes();
+          //  getDepartments();
+            //getDeliveryMethods();
+        }
+
+        function getSupportedDocumentTypes() {
+            return [
+                {
+                    "id": 1,
+                    "name": "Transcript",
+                    "description": "Academic transcript."
+                },
+                {
+                    "id": 2,
+                    "name": "Transcript Request",
+                    "description": "Academic transcript request."
+                }
+            ] ;
+
+        }
+
+        function getSupportedDepartments() {
+            return [
+                {
+                    "id": 1,
+                    "name": "English",
+                    "description": "The English department."
+                },
+                {
+                    "id": 2,
+                    "name": "Administration",
+                    "description": "Administration department"
+                }
+            ];
+        }
         function getSupportedDocumentFormatsForEndpoint() {
             //TODO : ajax call to endpont to get supported doc formats.
             return [{ id: 1, name: 'XML', description: 'EXtensible Markup Language.'},
@@ -229,6 +303,87 @@
         }
 
     }
+
+    settingsService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService', '$window'];
+
+    function settingsService($http, $q, $cacheFactory, toasterService, $window) {
+
+
+        var service = {
+            getDeliveryMethods: getDeliveryMethods,
+            getDocumentFormats: getDocumentFormats,
+            getDocumentTypes: getDocumentTypes,
+            getDepartments: getDepartments
+        };
+
+        return service;
+
+        function getDeliveryMethods() {
+            var deferred = $q.defer();
+
+            $http.get('http://' + $window.directoryServer + '/services/rest/v1/delivery-methods', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching delivery methods.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDocumentFormats() {
+            var deferred = $q.defer();
+
+            $http.get('http://' + $window.directoryServer + '/services/rest/v1/document-formats', {
+                headers: {
+                    'Access-Control-Allow-Origin': 'http://localhost:8000'
+                },
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching document formats.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDepartments() {
+            var deferred = $q.defer();
+
+            $http.get('http://' + $window.directoryServer + '/services/rest/v1/departments', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching department definitions.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDocumentTypes() {
+            var deferred = $q.defer();
+
+            $http.get('http://' + $window.directoryServer + '/services/rest/v1/document-types', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching document type definitions.");
+            });
+
+            return deferred.promise;
+        }
+
+
+    }
+
 
 
     transactionService.$inject = [ '$http', '$q', '$cacheFactory', 'toasterService'];

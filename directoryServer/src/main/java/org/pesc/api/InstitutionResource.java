@@ -18,6 +18,7 @@ import org.pesc.service.InstitutionUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -57,10 +58,6 @@ public class InstitutionResource {
     @Value("${directory.uploaded.csv}")
     private String csvDir;
 
-    private static final int MAX_COLUMNS = 11;
-    private static String[] COLUMNS_NAMES = {"name","website","street","city","state","zip","atp","act","ipeds","opeid","fice" };
-
-
     private InstitutionsUpload persistUploadRecord(String inputFilepath) {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
@@ -84,6 +81,7 @@ public class InstitutionResource {
     @POST
     @Path("/csv")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @PreAuthorize("hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_SYSTEM_ADMIN')")
     public Response convertCSVtoJSON(@Multipart("org_id") Integer orgID,
                                      @Multipart("file") Attachment attachment) {
 
@@ -102,7 +100,7 @@ public class InstitutionResource {
 
             InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath());
 
-            processCSVFile(institutionsUpload, outfile.getPath(), orgID);
+            uploadService.processCSVFile(institutionsUpload, outfile.getPath(), orgID);
 
         } catch (Exception e) {
             log.error("Failed to save uploaded CSV file", e);
@@ -111,170 +109,9 @@ public class InstitutionResource {
 
         }
 
-
-
         return Response.ok("").build();
     }
 
-
-    private void addSchoolCode(Set<SchoolCode> schoolCodes, String codeType, String code){
-        if (!StringUtils.isEmpty(code)){
-            SchoolCode schoolCode = new SchoolCode();
-            schoolCode.setCodeType(codeType);
-            schoolCode.setCode(code);
-            schoolCodes.add(schoolCode);
-        }
-    }
-
-
-    private Map<String, Object> addOrgInfo(Map<String,Object> resultMap, String orgName, Integer orgID) {
-        resultMap.put("organization_name", orgName);
-        resultMap.put("org_id",orgID);
-        return resultMap;
-    }
-
-    private Map<String,Object> addMessage(Map<String,Object> resultMap, String message) {
-        resultMap.put("message", message);
-        return  resultMap;
-    }
-
-    private boolean isValidUploadFile(Map<String,Integer> headerMap) {
-
-        for(String columnName : COLUMNS_NAMES) {
-
-            if (!headerMap.containsKey(columnName)) {
-                return false;
-            }
-        }
-        return true;
-
-    }
-
-    @Async
-    private void processCSVFile(InstitutionsUpload institutionsUpload, String filePath, Integer serviceProviderID) {
-
-        try {
-            institutionsUpload.setStartTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-
-            final Reader reader = new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8");
-            final CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
-
-            if (!isValidUploadFile(parser.getHeaderMap() ) ) {
-                InstitutionsUploadResult result = new InstitutionsUploadResult();
-                result.setInstitutionUploadID(institutionsUpload.getId());
-                result.setOrganizationID(serviceProviderID);
-
-                result.setOutcome(InstitutionUploadResultsRepository.ERROR);
-                StringBuilder buf = new StringBuilder("The institutions CSV file must contain a header record with the following case sensitive column names: ");
-                buf.append(String.join(",", COLUMNS_NAMES));
-                result.setMessage(buf.toString());
-                uploadService.create(result);
-                return;
-            }
-
-            try {
-
-                for (final CSVRecord record : parser) {
-
-                    Organization organization = new Organization();
-                    organization.setName(record.get("name"));
-                    organization.setStreet(record.get("street"));
-                    organization.setCity(record.get("city"));
-                    organization.setState(record.get("state"));
-                    organization.setZip(record.get("zip"));
-                    organization.setWebsite(record.get("website"));
-
-                    Set<SchoolCode> schoolCodes = new HashSet<SchoolCode>();
-
-                    addSchoolCode(schoolCodes, "ATP", record.get("atp"));
-                    addSchoolCode(schoolCodes, "FICE", record.get("fice"));
-                    addSchoolCode(schoolCodes, "IPEDS", record.get("ipeds"));
-                    addSchoolCode(schoolCodes, "OPEID", record.get("opeid"));
-                    addSchoolCode(schoolCodes, "ACT", record.get("act"));
-
-                    InstitutionsUploadResult result = new InstitutionsUploadResult();
-                    result.setInstitutionUploadID(institutionsUpload.getId());
-                    result.setOrganizationID(serviceProviderID);
-                    result.setLineNumber((int)parser.getCurrentLineNumber());
-
-                    try {
-                        organization = organizationService.createInstitution(organization, schoolCodes, serviceProviderID);
-                        result.setOutcome(InstitutionUploadResultsRepository.SUCCESS);
-                        result.setInstitutionID(organization.getId());
-                        result.setInstitutionName(organization.getName());
-                    }
-                    catch (Exception e) {
-
-
-                        log.error("Failed to process insitution upload record. Inserting result record.", e);
-
-                        if (e.getMessage() != null && e.getMessage().contains("unique_code_pair")) {
-
-                            List<Organization> institutions = organizationService.findBySchoolCodes(schoolCodes);
-
-                            if (institutions.size() == 1) {
-                                organizationService.linkInstitutionWithServiceProvider(institutions.get(0).getId(), serviceProviderID);
-                                result.setOutcome(InstitutionUploadResultsRepository.WARNING);
-                                result.setMessage("A duplicate institution was found and was added to the service provider's serviceable institutions.");
-                                result.setInstitutionID(organization.getId());
-                                result.setInstitutionName(organization.getName());
-                            }
-                            else {
-
-                                result.setOutcome(InstitutionUploadResultsRepository.ERROR);
-                                result.setMessage(String.format(
-                                        "Multiple instiutions were found with the same school code(s) ATP %s, FICE %s, IPEDS %s, ACT %s, OPEID %s.  This indicates data inconsistency.",
-                                        record.get("atp"), record.get("fice"), record.get("ipeds"), record.get("act"), record.get("opeid")));
-                                result.setInstitutionID(organization.getId());
-                                result.setInstitutionName(organization.getName());
-
-
-                            }
-
-                        }
-                        else {
-                            result.setOutcome(InstitutionUploadResultsRepository.ERROR);
-                            if (e.getMessage() != null) {
-                                result.setMessage(e.getMessage());
-                            }
-                        }
-
-                    }
-
-                    uploadService.create(result);
-
-                }
-            }
-            catch (Exception e){
-
-                log.error("Failed to process insitution upload file. Inserting result record.", e);
-
-                InstitutionsUploadResult result = new InstitutionsUploadResult();
-                result.setInstitutionUploadID(institutionsUpload.getId());
-                result.setOrganizationID(serviceProviderID);
-                result.setLineNumber((int) parser.getCurrentLineNumber());
-
-                result.setOutcome(InstitutionUploadResultsRepository.ERROR);
-
-                if (e.getMessage() != null) {
-                    result.setMessage(e.getMessage());
-                }
-                uploadService.create(result);
-            }
-            finally {
-                parser.close();
-                reader.close();
-
-            }
-        } catch (Exception e) {
-            log.error("Failed to process CSV file for institution creation.", e);
-        }
-        finally {
-            institutionsUpload.setEndTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            uploadService.update(institutionsUpload);
-        }
-
-    }
 
 
     private String getFileName(MultivaluedMap<String, String> header) {
@@ -293,18 +130,23 @@ public class InstitutionResource {
     @GET
     @ApiOperation("Return the institutions that are serviced by this service provider.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("service_provider_id") @ApiParam(value="The directory identifier for the service provider.", required = true) Integer id) {
+    public PagedData getServiceProvidersForInstitution(
+            @QueryParam("service_provider_id") @ApiParam(value="The directory identifier for the service provider.", required = true) Integer id,
+            @QueryParam("limit") Integer limit,
+            @QueryParam("offset") Integer offset) {
+
+        if (limit == null || offset == null) {
+            limit = 5;
+            offset = 0;
+        }
+        PagedData<OrganizationDTO> pagedData = new PagedData<OrganizationDTO>(limit,offset);
 
         if (id == null) {
             throw new IllegalArgumentException("The service provider's id must be provided.");
         }
-        ServiceProvider serviceProvider = serviceProviderRepository.findOne(id);
+        organizationService.getInstitutionsByServiceProviderId(id, pagedData);
 
-        if (serviceProvider == null) {
-            return new HashSet<>();
-        }
-
-        return serviceProvider.getInstitutions();
+        return pagedData;
     }
 
 

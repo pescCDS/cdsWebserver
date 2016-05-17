@@ -3,10 +3,7 @@ package org.pesc.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
-import org.pesc.api.model.Endpoint;
-import org.pesc.api.model.Organization;
-import org.pesc.api.model.OrganizationType;
-import org.pesc.api.model.SchoolCode;
+import org.pesc.api.model.*;
 import org.pesc.api.repository.OrganizationRepository;
 import org.pesc.api.repository.OrganizationTypeRepository;
 import org.pesc.api.repository.SchoolCodesRepository;
@@ -22,26 +19,27 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import javax.persistence.criteria.Predicate;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.*;
 
 /**
  * Created by james on 3/21/16.
- *
+ * <p>
  * This service mixes JDBC and JPA.  The database configuration for this app instantiates the JpaTransactionManager
  * and according the documentation for JpaTransactionManager for Spring 4,
  * http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/orm/jpa/JpaTransactionManager.html,
  * it (the JpaTransactionManager) supports direct access (JDBC) to the data source within a transaction.
- *
+ * <p>
  * From the documentation:
- *
+ * <p>
  * This transaction manager also supports direct DataSource access within a transaction
  * (i.e. plain JDBC code working with the same DataSource). This allows for mixing services which access JPA
  * and services which use plain JDBC (without being aware of JPA)! Application code needs to stick to the same
  * simple Connection lookup pattern as with DataSourceTransactionManager
  * (i.e. DataSourceUtils.getConnection(javax.sql.DataSource) or going through a
  * TransactionAwareDataSourceProxy). Note that this requires a vendor-specific JpaDialect to be configured.
- *
  */
 @Service
 public class OrganizationService {
@@ -58,7 +56,7 @@ public class OrganizationService {
 
     @Autowired
     public OrganizationService(EntityManagerFactory entityManagerFactory, OrganizationTypeRepository organizationTypeRepository) {
-        this.organizationTypes = (List<OrganizationType>)organizationTypeRepository.findAll();
+        this.organizationTypes = (List<OrganizationType>) organizationTypeRepository.findAll();
 
         //remove the 'System' type, it should never be used.
         //organizationTypes.remove(0);
@@ -72,20 +70,21 @@ public class OrganizationService {
     @Autowired
     SchoolCodesRepository schoolCodesRepository;
 
-    @Transactional(readOnly=true)
-    public Iterable<Organization> findAll(){
+    @Transactional(readOnly = true)
+    public Iterable<Organization> findAll() {
         return this.organizationRepository.findAll();
     }
 
     /**
      * This method is intended to be invoked by a user who has already validated the organization, so it does
      * not require a review/approval, as when a unknown user registers a new organization.
+     *
      * @param organization
      * @return
      */
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
-    public Organization create(Organization organization){
+    public Organization create(Organization organization) {
         organization.setEnabled(true);
         organization.setActive(true);
         return organizationRepository.save(organization);
@@ -94,19 +93,20 @@ public class OrganizationService {
     /**
      * Insert a new organization and school codes, associating each school code with the organization and inserting
      * the school codes.
+     *
      * @param organization
      * @return
      */
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_ORG_ADMIN') ")
-    public Organization createInstitution(Organization organization, Set<SchoolCode> schoolCodes, Integer serviceProviderID){
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    //@PreAuthorize("hasRole('ROLE_ORG_ADMIN')")
+    public Organization createInstitution(Organization organization, Set<SchoolCode> schoolCodes, Integer serviceProviderID) {
         organization.setEnabled(false);
         organization.setActive(true);
         organization.setOrganizationTypes(new HashSet<OrganizationType>());
         organization.getOrganizationTypes().add(this.getOrganizationTypes().get(1));
 
-        Organization savedOrg= organizationRepository.save(organization);
-        for(SchoolCode schoolCode: schoolCodes) {
+        Organization savedOrg = organizationRepository.save(organization);
+        for (SchoolCode schoolCode : schoolCodes) {
             schoolCode.setOrganizationId(savedOrg.getId());
             schoolCodesRepository.save(schoolCode);
         }
@@ -118,50 +118,50 @@ public class OrganizationService {
     }
 
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void linkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
         try {
             jdbcTemplate.update("insert into institutions_service_providers (institution_id, service_provider_id) values(?,?)", institutionID, serviceProviderID);
-        }
-        catch (DuplicateKeyException e) {
-           log.warn("A duplicate key was encountered while associating a service provider with an institution.", e);
+        } catch (DuplicateKeyException e) {
+            log.warn("A duplicate key was encountered while associating a service provider with an institution.", e);
         }
 
     }
 
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
-    public Organization update(Organization organization){
+    public Organization update(Organization organization) {
         return this.organizationRepository.save(organization);
     }
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
-    public void delete(Organization organization)  {
+    public void delete(Organization organization) {
         this.organizationRepository.delete(organization);
     }
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
-    public void delete(Integer id)  {
+    public void delete(Integer id) {
         this.organizationRepository.delete(id);
     }
 
-    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     //TODO: add PreAuthorize
-    public List<Organization> findByName(String name)  {
+    public List<Organization> findByName(String name) {
         return this.organizationRepository.findByName(name);
     }
 
 
-    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     //TODO: add PreAuthorize
-    public Organization findById(Integer id)  {
+    public Organization findById(Integer id) {
 
         return this.organizationRepository.findOne(id);
     }
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void addEndpointToOrganization(Integer orgID, Integer endpointID) {
 
         jdbcTemplate.update(
@@ -175,8 +175,7 @@ public class OrganizationService {
     }
 
 
-
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeEndpointToOrganization(Integer orgID,
                                              Integer endpointID) {
 
@@ -185,7 +184,7 @@ public class OrganizationService {
     }
 
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public void setEnabledForOrganization(Integer orgID, Boolean enable) {
 
@@ -193,7 +192,7 @@ public class OrganizationService {
                 "update organization set enabled = ? where id = ?", orgID, enable);
     }
 
-    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public void setProperty(Integer orgID, String propertyName, Object propertyValue) {
 
@@ -204,51 +203,241 @@ public class OrganizationService {
 
 
     /**
-     *
      * @param schoolCodesList
      * @return
      */
-    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true)
     public List<Organization> findBySchoolCodes(Set<SchoolCode> schoolCodesList
     ) {
-        EntityManager entityManager =  entityManagerFactory.createEntityManager();
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-        CriteriaQuery<Organization> cq = cb.createQuery(Organization.class);
-        Root<Organization> org = cq.from(Organization.class);
-        cq.select(org).distinct(true);
+        try {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        List<Predicate> predicates = new LinkedList<Predicate>();
+            CriteriaQuery<Organization> cq = cb.createQuery(Organization.class);
+            Root<Organization> org = cq.from(Organization.class);
+            cq.select(org).distinct(true);
 
-        //ArrayList<String> codeTypes;
+            List<Predicate> predicates = new LinkedList<Predicate>();
+
+            //ArrayList<String> codeTypes;
 
 
-        if ( schoolCodesList != null ) {
-            ArrayList<String> codes = new ArrayList<String>();
+            if (schoolCodesList != null) {
+                //ArrayList<String> codes = new ArrayList<String>();
 
-            for(SchoolCode sc : schoolCodesList) {
-                codes.add(sc.getCode());
+                Join<SchoolCode, Organization> join = org.join("schoolCodes");
+
+                Predicate or = cb.or();
+
+                for (SchoolCode sc : schoolCodesList) {
+                    Predicate and = cb.and(cb.equal(join.get("code"), sc.getCode()), cb.equal(join.get("codeType"), sc.getCodeType()));
+                    or.getExpressions().add(and);
+                }
+
+                predicates.add(or);
+
+                //predicates.add(org.get("schoolCodes").get("code").in(schoolCodesList));
+
             }
 
-            Join<SchoolCode, Organization> join = org.join("schoolCodes");
 
-            //predicates.add(org.get("schoolCodes").get("code").in(schoolCodesList));
-            predicates.add(join.get("code").in(codes));
+            Predicate[] predicateArray = new Predicate[predicates.size()];
+            predicates.toArray(predicateArray);
+
+            cq.where(predicateArray);
+            TypedQuery<Organization> q = entityManager.createQuery(cq);
+
+            return q.getResultList();
+        } finally {
+            entityManager.close();
+        }
+
+    }
+
+    @Transactional(readOnly = true)
+    public PagedData getInstitutionsByServiceProviderId(Integer serviceProviderId, PagedData<OrganizationDTO> pagedData) {
+
+        String sql = "select isp.institution_id as id, org.name as name " +
+                "from institutions_service_providers isp join organization org on isp.institution_id = org.id " +
+                "where isp.service_provider_id = ? LIMIT ? OFFSET ?";
+
+
+        List<Map<String,Object>> rows = jdbcTemplate.queryForList(sql, serviceProviderId, pagedData.getLimit(), pagedData.getOffset());
+
+        ArrayList<OrganizationDTO> institutionList = new ArrayList<OrganizationDTO>();
+
+        for(Map row : rows) {
+            OrganizationDTO org = new OrganizationDTO();
+            org.setId( ((Long)row.get("id")).intValue() );
+            org.setName((String)row.get("name"));
+            institutionList.add(org);
+        }
+
+        pagedData.setTotal((Long)jdbcTemplate.queryForObject("SELECT COUNT(*) FROM institutions_service_providers WHERE service_provider_id=?",  new Object[] { serviceProviderId }, Long.class));
+        pagedData.setData(institutionList);
+        return pagedData;
+    }
+
+    public Predicate[] createPredicates(CriteriaBuilder cb, Root<Organization> orgRoot, Integer directoryId,
+                                        String organizationCode,
+                                        String organizationCodeType,
+                                        String organizationName,
+                                        String organizationSubcode,
+                                        String organizationType,
+                                        String organizationEin,
+                                        Long createdTime,
+                                        Long modifiedTime,
+                                        Boolean active,
+                                        Boolean enabled,
+                                        Boolean isServiceProvider,
+                                        Boolean isInstitution) {
+        List<Predicate> predicates = new LinkedList<Predicate>();
+
+        if (directoryId != null) {
+            predicates.add(cb.equal(orgRoot.get("id"), directoryId));
         }
 
 
+        if (!StringUtils.isEmpty(organizationName)) {
+            // tokenize string by whitespace and use each token as
+            // a LIKE clause for the organizationName column
+            StringTokenizer orgNametokens = new StringTokenizer(organizationName.trim());
+            while (orgNametokens.hasMoreElements()) {
+
+                String orgNametoken = orgNametokens.nextToken().toLowerCase();
+
+                predicates.add(cb.like(cb.lower(orgRoot.get("name")), "%" + orgNametoken + "%"));
+
+            }
+
+        }
+
+        if (!StringUtils.isEmpty(organizationSubcode)) {
+            StringTokenizer subCodetokens = new StringTokenizer(organizationSubcode.trim());
+            while (subCodetokens.hasMoreElements()) {
+                String subCodetoken = subCodetokens.nextToken().toLowerCase();
+                predicates.add(cb.like(cb.lower(orgRoot.get("subcode")), "%" + subCodetoken + "%"));
+            }
+        }
+
+
+        if (!StringUtils.isEmpty(organizationType)) {
+
+            Join<OrganizationType, Organization> join = orgRoot.join("organizationTypes");
+            predicates.add(cb.equal(join.get("name"), organizationType));
+
+        }
+
+        if (!StringUtils.isEmpty(organizationEin)) {
+
+            predicates.add(cb.like(cb.lower(orgRoot.get("ein")), "%" + organizationEin.trim().toLowerCase()));
+
+        }
+
+        if (!StringUtils.isEmpty(organizationCode)) {
+
+            Join<SchoolCode, Organization> join = orgRoot.join("schoolCodes");
+            predicates.add(cb.equal(join.get("code"), organizationCode));
+
+            if (organizationCodeType != null) {
+                predicates.add(cb.and(cb.equal(join.get("codeType"), organizationCodeType)));
+            }
+
+        }
+
+
+        if (createdTime != null) {
+            predicates.add(cb.equal(orgRoot.get("createdTime"), new Timestamp(createdTime)));
+        }
+
+        if (modifiedTime != null) {
+            predicates.add(cb.equal(orgRoot.get("modifiedTime"), new Timestamp(modifiedTime)));
+        }
+
+
+        if (active != null) {
+            predicates.add(cb.equal(orgRoot.get("active"), active));
+        }
+
+        if (enabled != null) {
+            predicates.add(cb.equal(orgRoot.get("enabled"), enabled));
+        }
+
+        if (isServiceProvider != null || isInstitution != null) {
+
+
+            Join<OrganizationType, Organization> types = orgRoot.join("organizationTypes");
+            ArrayList<Integer> typeIds = new ArrayList<Integer>();
+            if (isServiceProvider != null && isServiceProvider == true)
+                typeIds.add(3);
+            if (isInstitution != null && isInstitution == true)
+                typeIds.add(2);
+
+            predicates.add(types.get("id").in(typeIds));
+
+
+
+        }
 
         Predicate[] predicateArray = new Predicate[predicates.size()];
         predicates.toArray(predicateArray);
 
-        cq.where(predicateArray);
-        TypedQuery<Organization> q = entityManager.createQuery(cq);
+        return predicateArray;
+    }
 
-        return q.getResultList();
+    private Long getResultLength(  Integer directoryId,
+                                   String organizationCode,
+                                   String organizationCodeType,
+                                   String organizationName,
+                                   String organizationSubcode,
+                                   String organizationType,
+                                   String organizationEin,
+                                   Long createdTime,
+                                   Long modifiedTime,
+                                   Boolean active,
+                                   Boolean enabled,
+                                   Boolean isServiceProvider,
+                                   Boolean isInstitution) {
 
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        try {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+            Root<Organization> countRoot = countQuery.from(Organization.class);
+            countQuery.select(cb.count(countRoot));
+            Predicate[] predicates = createPredicates(cb,
+                    countRoot,
+                    directoryId,
+                    organizationCode,
+                    organizationCodeType,
+                    organizationName,
+                    organizationSubcode,
+                    organizationType,
+                    organizationEin,
+                    createdTime,
+                    modifiedTime,
+                    active,
+                    enabled,
+                    isServiceProvider,
+                    isInstitution);
+
+
+            countQuery.where(predicates);
+
+            return entityManager.createQuery(countQuery).getSingleResult();
+        }
+        catch (Exception e){
+            log.error("Failed to retrieve result length.", e);
+        }
+        finally {
+            entityManager.close();
+        }
+
+        return 0L;
     }
     /**
-     *
      * @param directoryId
      * @param organizationCode
      * @param organizationCodeType
@@ -260,8 +449,8 @@ public class OrganizationService {
      * @param modifiedTime
      * @return
      */
-    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    public List<Organization> search(
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public PagedData<Organization> search(
             Integer directoryId,
             String organizationCode,
             String organizationCodeType,
@@ -272,104 +461,76 @@ public class OrganizationService {
             Long createdTime,
             Long modifiedTime,
             Boolean active,
-            Boolean enabled
+            Boolean enabled,
+            Boolean isServiceProvider,
+            Boolean isInstitution,
+            PagedData<Organization> pagedData
     ) {
 
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
         try {
 
-            EntityManager entityManager =  entityManagerFactory.createEntityManager();
+
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
             CriteriaQuery<Organization> cq = cb.createQuery(Organization.class);
-            Root<Organization> org = cq.from(Organization.class);
-            cq.select(org);
+            Root<Organization> orgRoot = cq.from(Organization.class);
+            cq.select(orgRoot);
 
-            List<Predicate> predicates = new LinkedList<Predicate>();
-
-            if(directoryId!=null) {
-                predicates.add(cb.equal(org.get("id"), directoryId));
-            }
-
-
-            if(!StringUtils.isEmpty(organizationName)) {
-                // tokenize string by whitespace and use each token as
-                // a LIKE clause for the organizationName column
-                StringTokenizer orgNametokens = new StringTokenizer(organizationName.trim());
-                while(orgNametokens.hasMoreElements()) {
-
-                    String orgNametoken = orgNametokens.nextToken().toLowerCase();
-
-                    predicates.add(cb.like(cb.lower(org.get("name")), "%" + orgNametoken + "%"));
-
-                }
-
-            }
-
-            if( !StringUtils.isEmpty(organizationSubcode)) {
-                StringTokenizer subCodetokens = new StringTokenizer(organizationSubcode.trim());
-                while(subCodetokens.hasMoreElements()) {
-                    String subCodetoken = subCodetokens.nextToken().toLowerCase();
-                    predicates.add(cb.like(cb.lower(org.get("subcode")), "%" + subCodetoken + "%"));
-                }
-            }
+            Predicate[] predicates = createPredicates(cb,
+                    orgRoot,
+                    directoryId,
+                    organizationCode,
+                    organizationCodeType,
+                    organizationName,
+                    organizationSubcode,
+                    organizationType,
+                    organizationEin,
+                    createdTime,
+                    modifiedTime,
+                    active,
+                    enabled,
+                    isServiceProvider,
+                    isInstitution);
 
 
-            if ( !StringUtils.isEmpty(organizationType) ) {
-
-                Join<OrganizationType, Organization> join = org.join("organizationTypes");
-                predicates.add(cb.equal(join.get("name"), organizationType));
-
-            }
-
-            if(!StringUtils.isEmpty(organizationEin)) {
-
-                predicates.add(cb.like(cb.lower(org.get("ein")), "%" + organizationEin.trim().toLowerCase()));
-
-            }
-
-            if ( !StringUtils.isEmpty(organizationCode) ) {
-
-                Join<SchoolCode, Organization> join = org.join("schoolCodes");
-                predicates.add(cb.equal(join.get("code"), organizationCode));
-
-                if (organizationCodeType != null) {
-                    predicates.add(cb.and(cb.equal(join.get("codeType"), organizationCodeType)));
-                }
-
-            }
-
-
-
-            if(createdTime!=null) {
-                predicates.add(cb.equal(org.get("createdTime"), new Timestamp(createdTime)));
-            }
-
-            if(modifiedTime!=null) {
-                predicates.add(cb.equal(org.get("modifiedTime"), new Timestamp(modifiedTime)));
-            }
-
-
-            if (active != null) {
-                predicates.add(cb.equal(org.get("active"), active));
-            }
-
-            if (enabled != null) {
-                predicates.add(cb.equal(org.get("enabled"), enabled));
-            }
-
-            Predicate[] predicateArray = new Predicate[predicates.size()];
-            predicates.toArray(predicateArray);
-
-            cq.where(predicateArray);
+            cq.where(predicates);
             TypedQuery<Organization> q = entityManager.createQuery(cq);
+            q.setFirstResult(pagedData.getOffset());
+            q.setMaxResults(pagedData.getLimit());
+            pagedData.setData(q.getResultList());
 
-            return q.getResultList();
+
+            pagedData.setTotal(getResultLength(directoryId,
+                    organizationCode,
+                    organizationCodeType,
+                    organizationName,
+                    organizationSubcode,
+                    organizationType,
+                    organizationEin,
+                    createdTime,
+                    modifiedTime,
+                    active,
+                    enabled,
+                    isServiceProvider,
+                    isInstitution));
 
 
-        } catch(Exception ex) {
+            return pagedData;
+
+
+        } catch (Exception ex) {
             log.error("Failed to execute organization search query.", ex);
         }
-        return new ArrayList<Organization>();
+        finally {
+            entityManager.close();
+        }
+        //return new PageImpl<Organization>(new ArrayList<Organization>());
+
+        pagedData.setLimit(0);
+        pagedData.setOffset(0);
+        pagedData.setTotal(0L);
+        pagedData.setData(new ArrayList<Organization>());
+        return pagedData;
     }
 
 }

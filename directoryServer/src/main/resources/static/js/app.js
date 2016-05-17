@@ -129,7 +129,35 @@
         self.ok = ok;
         self.cancel = cancel;
         self.showResults = showResults;
-        self.results = [];
+        self.updateFilter = updateFilter;
+        self.filterResults = filterResults;
+        self.filter = [ 'ERROR'];
+        self.hasFilter = hasFilter;
+
+
+        function hasFilter(resultType) {
+            return self.filter.indexOf(resultType) != -1;
+        }
+        function updateFilter(resultType) {
+            var i = self.filter.indexOf(resultType);
+
+            if (i == -1) {
+                self.filter.push(resultType);
+            }
+            else {
+                self.filter.splice(i, 1);
+            }
+
+        }
+
+        function filterResults(resultRecord) {
+
+            if (self.filter.indexOf(resultRecord.outcome) == -1) {
+                return;
+            }
+
+            return resultRecord;
+        }
 
         function ok() {
             $uibModalInstance.dismiss('cancel');
@@ -210,8 +238,13 @@
 
         self.deliveryMethods = [];
         self.documentFormats = [];
+        self.departments = [];
+        self.documentTypes = [];
+
         self.getDeliveryMethods = getDeliveryMethods;
         self.getDocumentFormats = getDocumentFormats;
+        self.getDepartments = getDepartments;
+        self.getDocumentTypes = getDocumentTypes;
 
         getDeliveryMethods();
 
@@ -225,6 +258,18 @@
         function getDocumentFormats() {
             settingsService.getDocumentFormats().then(function (data) {
                 self.documentFormats = data;
+            });
+        }
+
+        function getDepartments() {
+            settingsService.getDepartments().then(function (data) {
+                self.departments = data;
+            });
+        }
+
+        function getDocumentTypes() {
+            settingsService.getDocumentTypes().then(function (data) {
+                self.documentTypes = data;
             });
         }
 
@@ -533,6 +578,8 @@
         self.edit = edit;
         self.documentFormats = [];
         self.deliveryMethods = [];
+        self.documentTypes = [];
+        self.departments = [];
 
         initialize();
 
@@ -542,6 +589,12 @@
             });
             settingsService.getDeliveryMethods().then(function (data) {
                 self.deliveryMethods = data;
+            });
+            settingsService.getDocumentTypes().then(function (data) {
+                self.documentTypes = data;
+            });
+            settingsService.getDepartments().then(function (data) {
+                self.departments = data;
             });
         }
 
@@ -689,6 +742,12 @@
         self.isInstitution=isInstitution;
         self.showServiceProviderForm = false;
         self.showUploadForm = showUploadForm;
+        self.getInstitutionsForServiceProvider = getInstitutionsForServiceProvider;
+        self.totalServicedSchools = 0;
+        self.servicedSchoolsOffset = 1;
+        self.pageSize = 30;
+
+
 
         function hasOrgType(orgType) {
             return organizationService.hasOrgType(self.org, orgType);
@@ -832,8 +891,9 @@
         function getInstitutionsForServiceProvider() {
 
             if (organizationService.isServiceProvider(self.org)) {
-                organizationService.getInstitutionsForServiceProvider(self.org).then(function (data) {
-                    self.institutions = data;
+                organizationService.getInstitutionsForServiceProvider(self.org,  self.pageSize, (self.servicedSchoolsOffset-1)* self.pageSize).then(function (pagedData) {
+                    self.institutions = pagedData.data;
+                    self.totalServicedSchools = pagedData.total;
                 });
             }
 
@@ -917,6 +977,8 @@
                 error: false,
                 documentFormat: {},
                 deliveryMethod: {},
+                documentType: {},
+                department: {},
                 instructions: '',
                 editing: true
             }
@@ -1054,9 +1116,15 @@
         self.orgName = '';
         self.resetSearch = resetSearch;
         self.isEnabled = true;
+        self.isInstitution = true;
+        self.isServiceProvider = false;
         self.updateOrgType=updateOrgType;
         self.hasOrgType=hasOrgType;
         self.organizationTypes = $window.organizationTypes;
+        self.totalRecords = 0;
+        self.limit = 5;
+        self.offset = 1;
+        self.pageSize = 10;
 
         activate();
 
@@ -1098,8 +1166,10 @@
 
 
         function getOrganizations() {
-            return organizationService.getOrganizations().then(function (data) {
-                self.organizations = data;
+            return organizationService.getOrganizations().then(function (pagedData) {
+                self.totalRecords = pagedData.total;
+
+                self.organizations = pagedData.data;
             });
         }
 
@@ -1137,9 +1207,18 @@
 
         };
 
+
         function findOrganizations() {
-            organizationService.search(self.orgName, self.schoolCode, self.schoolCodeType, self.isEnabled).then(function (data) {
-                self.organizations = data;
+            organizationService.search(self.orgName,
+                self.schoolCode,
+                self.schoolCodeType,
+                self.isEnabled,
+                self.isServiceProvider,
+                self.isInstitution,
+                self.limit,
+                (self.offset-1)*self.pageSize).then(function (pagedData) {
+                self.totalRecords = pagedData.total;
+                self.organizations = pagedData.data;
             });
         };
 
@@ -1429,8 +1508,8 @@
                 find($window.activeUser.organizationId).then(function (orgArray) {
                     activeOrg = orgArray[0];
 
-                    getInstitutionsForServiceProvider(activeOrg).then(function (data) {
-                        activeOrg.institutions = data;
+                    getInstitutionsForServiceProvider(activeOrg).then(function (pagedData) {
+                        activeOrg.institutions = pagedData.data;
                     });
                 });
 
@@ -1665,7 +1744,7 @@
         }
 
 
-        function search(name, organizationCode, organizationCodeType, enabled) {
+        function search(name, organizationCode, organizationCodeType, enabled, isServiceProvider,isInstitution, limit, offset) {
 
             var deferred = $q.defer();
 
@@ -1674,7 +1753,11 @@
                     'name': name,
                     'organizationCode': organizationCode,
                     'organizationCodeType': organizationCodeType,
-                    'enabled': enabled
+                    'enabled': enabled,
+                    'serviceprovider' : isServiceProvider,
+                    'institution': isInstitution,
+                    'limit': limit,
+                    'offset': offset
                 },
                 cache: false
             }).success(function (data) {
@@ -1725,13 +1808,15 @@
             return deferred.promise;
         }
 
-        function getInstitutionsForServiceProvider(org) {
+        function getInstitutionsForServiceProvider(org,limit,offset) {
 
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/institutions', {
                 'params': {
-                    'service_provider_id': org.id
+                    'service_provider_id': org.id,
+                    'limit': limit,
+                    'offset' : offset
                 },
                 cache: false
             }).success(function (data) {
@@ -1831,7 +1916,9 @@
 
         var service = {
             getDeliveryMethods: getDeliveryMethods,
-            getDocumentFormats: getDocumentFormats
+            getDocumentFormats: getDocumentFormats,
+            getDocumentTypes: getDocumentTypes,
+            getDepartments: getDepartments
         };
 
         return service;
@@ -1861,6 +1948,36 @@
             }).error(function (data) {
                 toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while fetching document formats.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDepartments() {
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/departments', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching department definitions.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDocumentTypes() {
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/document-types', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching document type definitions.");
             });
 
             return deferred.promise;

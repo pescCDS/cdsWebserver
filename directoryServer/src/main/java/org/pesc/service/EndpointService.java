@@ -94,6 +94,8 @@ public class EndpointService {
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<Endpoint> search(
             String documentFormat,
+            String documentType,
+            String departmentName,
             Integer endpointId,
             Integer hostingOrganizationId,
             List<Integer> organizationIdList
@@ -127,7 +129,12 @@ public class EndpointService {
             if (documentFormat != null) {
                 predicates.add(cb.equal(endpoint.get("documentFormat").get("name"), documentFormat));
             }
-
+            if (documentType != null) {
+                predicates.add(cb.equal(endpoint.get("documentType").get("name"), documentType));
+            }
+            if (departmentName != null) {
+                predicates.add(cb.equal(endpoint.get("department").get("name"), departmentName));
+            }
 
             Predicate[] predicateArray = new Predicate[predicates.size()];
             predicates.toArray(predicateArray);

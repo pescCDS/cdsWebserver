@@ -7,11 +7,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.Organization;
+import org.pesc.api.model.PagedData;
 import org.pesc.api.model.Property;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.service.OrganizationService;
 import org.pesc.service.SchoolCodesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
@@ -42,7 +44,7 @@ public class OrganizationsResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Search organizations based on the optional search parameters.  All organizations are returned" +
             " when no search criteria are provided.")
-    public List<Organization> findOrganization(
+    public PagedData findOrganization(
             @QueryParam("id") @ApiParam("The directory identifier for the organization.") Integer id,
             @QueryParam("organizationCode") @ApiParam("A code such as ATP code that identifies the organization.") String organizationCode,
             @QueryParam("organizationCodeType") @ApiParam("Indicates the type of organization code and should be one of the following: ACT, ATP, FICE, IPEDS.") String organizationCodeType,
@@ -53,10 +55,21 @@ public class OrganizationsResource {
             @QueryParam("createdTime") Long createdTime,
             @QueryParam("modifiedTime") Long modifiedTime,
             @QueryParam("active") @ApiParam("Indicates whether the organization and all it's endpoints are active.") Boolean active,
-            @QueryParam("enabled") @ApiParam("Indicates whether the organization is in good standing and included in the directory.") Boolean enabled
+            @QueryParam("enabled") @ApiParam("Indicates whether the organization is in good standing and included in the directory.") Boolean enabled,
+            @QueryParam("serviceprovider") @ApiParam("Indicates whether the organization is a service provider.") Boolean isServiceProvider,
+            @QueryParam("institution") @ApiParam("Indicates whether the organization is an institution.") Boolean isInstitution,
+            @QueryParam("limit") Integer limit,
+            @QueryParam("offset") Integer offset
+
     ) {
 
-        return organizationService.search(
+        if (limit == null || offset == null) {
+            limit = 5;
+            offset = 0;
+        }
+        PagedData<Organization> pagedData = new PagedData<Organization>(limit,offset);
+
+        organizationService.search(
                 id,
                 organizationCode,
                 organizationCodeType,
@@ -67,7 +80,14 @@ public class OrganizationsResource {
                 createdTime,
                 modifiedTime,
                 active,
-                enabled);
+                enabled,
+                isServiceProvider,
+                isInstitution,
+                pagedData);
+
+
+        return pagedData;
+       // return organizationPage.getContent();
     }
 
     @GET

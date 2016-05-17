@@ -242,6 +242,27 @@
                     </ul>
                 </div>
             </uib-tab>
+            <uib-tab index="$index + 2" heading="Document Types" select="settingsCtrl.getDocumentTypes()">
+                <div ng-repeat="documentType in settingsCtrl.documentTypes | orderBy:'name'">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <h3>{{documentType.name}}</h3>
+                            <p>{{documentType.description}}</p>
+                        </li>
+                    </ul>
+                </div>
+            </uib-tab>
+            <uib-tab index="$index + 3" heading="Departments" select="settingsCtrl.getDepartments()">
+                <div ng-repeat="department in settingsCtrl.departments | orderBy:'name'">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <h3>{{department.name}}</h3>
+                            <p>{{department.description}}</p>
+                        </li>
+                    </ul>
+                </div>
+            </uib-tab>
+
         </uib-tabset>
 
     </div>
@@ -437,6 +458,37 @@
                             </p>
                         </div>
                     </div>
+
+                    <div>
+                        <strong>Document Types</strong>
+                        <div>
+                            <select class="form-control" style="width: 160px;"  required="required"
+                                    ng-model="endpoint.documentType"
+                                    ng-options="documentType.name for documentType in endpointCtrl.documentTypes track by documentType.id">
+
+                            </select>
+                            <p>
+                                {{endpoint.documentType.description}}
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div>
+                        <strong>Departments</strong>
+                        <div>
+                            <select class="form-control" style="width: 160px;"  required="required"
+                                    ng-model="endpoint.department"
+                                    ng-options="department.name for department in endpointCtrl.departments track by department.id">
+
+                            </select>
+                            <p>
+                                {{endpoint.department.description}}
+                            </p>
+                        </div>
+                    </div>
+
+
                     <div>
                         <strong>Hosted By</strong>
                         <p>
@@ -467,6 +519,19 @@
 
                 <h5>{{endpoint.deliveryMethod.name}}</h5>
                 <p>{{endpoint.deliveryMethod.description}}</p>
+
+
+                <div><strong>Document Type</strong></div>
+
+                <h5>{{endpoint.documentType.name}}</h5>
+                <p>{{endpoint.documentType.description}}</p>
+
+
+                <div><strong>Department</strong></div>
+
+                <h5>{{endpoint.department.name}}</h5>
+                <p>{{endpoint.department.description}}</p>
+
 
                 <div>
                     <strong>Hosted By</strong>
@@ -781,12 +846,26 @@
 
             <div class="ed-title">Serviced Schools</div>
 
-            <div ng-repeat="institution in orgCtrl.institutions" style="margin-top: 10px;">
+            <div><b>{{orgCtrl.totalServicedSchools}} Serviced Schools</b></div>
 
-                <div>
-                    <a ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+            <uib-pagination
+                    total-items="orgCtrl.totalServicedSchools"
+                    ng-model="orgCtrl.servicedSchoolsOffset"
+                    max-size="5"
+                    class="pagination-sm"
+                    items-per-page="orgCtrl.pageSize"
+                    boundary-link-numbers="true"
+                    rotate="false" ng-change="orgCtrl.getInstitutionsForServiceProvider()"></uib-pagination>
+
+
+            <div class="row">
+                <div ng-repeat="institution in orgCtrl.institutions" style="margin-top: 10px;">
+
+                    <div class="col-sm-4 col-xs-4">
+                        <a ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+                    </div>
+
                 </div>
-
             </div>
 
         </div>
@@ -858,7 +937,7 @@
 
 </div>
 <div th:fragment="organization">
-    <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate" class="glow">
+    <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate" class="glow" style="position: relative;">
         <div class="sub-nav">
             <div class="inner-margin7">
                 <h1 ng-show="!orgCtrl.showOrgForm(org)"><a ng-href="#organization/{{org.id}}">{{org.name}}</a></h1>
@@ -978,28 +1057,28 @@
                 <div><strong>Directory ID: </strong>{{org.id}}</div>
             </div>
 
-            <div th:if="${hasSystemAdminRole}" style="float: right;">
+            <div th:if="${hasSystemAdminRole}" style="position: absolute; top: 0; right: 0;">
                 <div class="btn-group">
-                    <button type="button" class="btn btn-default" ng-show="org.enabled == false"
+                    <button type="button" class="btn btn-default btn-sm" ng-show="org.enabled == false"
                             ng-click="orgCtrl.setEnabled(org,true)">
                         <span class="glyphicon glyphicon-plus"></span> Enable
                     </button>
 
-                    <button type="button" class="btn btn-default" ng-show="org.enabled == true"
+                    <button type="button" class="btn btn-default btn-sm" ng-show="org.enabled == true"
                             ng-click="orgCtrl.setEnabled(org,false)">
                         <span class="glyphicon glyphicon-remove"></span> Disable
                     </button>
 
-                    <button type="button" class="btn btn-default" ng-click="orgCtrl.createUser(org)">
+                    <button type="button" class="btn btn-default btn-sm" ng-click="orgCtrl.createUser(org)">
                         <span class="glyphicon glyphicon-user"></span> Manage Users
                     </button>
-                    <button ng-show="!orgCtrl.showOrgForm(org)" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg(org)">
+                    <button ng-show="!orgCtrl.showOrgForm(org)" type="button" class="btn btn-default btn-sm" ng-click="orgCtrl.editOrg(org)">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
                     </button>
-                    <button ng-show="orgCtrl.showOrgForm(org)" type="submit" class="btn btn-default">
+                    <button ng-show="orgCtrl.showOrgForm(org)" type="submit" class="btn btn-default btn-sm">
                         <span class="glyphicon glyphicon-floppy-disk"></span> Save
                     </button>
-                    <button type="button" uib-popover-template="'delete-org.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
+                    <button type="button" uib-popover-template="'delete-org.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default btn-sm">
                         <span class="glyphicon glyphicon-remove-circle"></span> Delete
                     </button>
 
@@ -1232,27 +1311,42 @@
 <div th:fragment="organizations">
 
     <div class="row" style="margin-bottom: 20px;">
-        <div class="col-sm-3">
+        <div class="col-sm-5">
+
             <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default" ng-click="orgCtrl.createOrg()">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Organization
             </button>
 
-            <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default"
+            <button type="button" class="btn btn-default"
                     ng-model="orgCtrl.isEnabled"
                     uib-btn-checkbox btn-checkbox-true="true"
                     btn-checkbox-false="false" ng-click="orgCtrl.findOrganizations()">
                 Enabled
             </button>
 
+            <button type="button" class="btn btn-default"
+                    ng-model="orgCtrl.isServiceProvider"
+                    uib-btn-checkbox btn-checkbox-true="true"
+                    btn-checkbox-false="false" ng-click="orgCtrl.findOrganizations()">
+                Service Provider
+            </button>
+
+            <button type="button" class="btn btn-default"
+                    ng-model="orgCtrl.isInstitution"
+                    uib-btn-checkbox btn-checkbox-true="true"
+                    btn-checkbox-false="false" ng-click="orgCtrl.findOrganizations()">
+                Institution
+            </button>
         </div>
-        <div class="col-sm-9">
-            <div class="pull-right form-inline">
+
+        <div class="col-sm-7">
+            <div class="form-inline">
                 <div class="form-group">
                     <input class="form-control" type="text" ng-model="orgCtrl.orgName" placeholder="Organization Name"> </input>
                 </div>
 
-                <div class="form-group">
-                    <input class="form-control" type="text" ng-model="orgCtrl.schoolCode" placeholder="Code"> </input>
+                <div class="form-group" style="border: dotted 1px #eeeeee;">
+                    <input class="form-control" type="text" ng-model="orgCtrl.schoolCode" placeholder="Code" style="width: 100px;"> </input>
 
 
                     <select class="form-control" style="width: 110px;" required="required"
@@ -1279,6 +1373,19 @@
 
         </div>
     </div>
+
+
+
+        <uib-pagination
+                total-items="orgCtrl.totalRecords"
+                ng-model="orgCtrl.offset"
+                max-size="5"
+                class="pagination-sm"
+                items-per-page="orgCtrl.pageSize"
+                boundary-link-numbers="true"
+                rotate="false" ng-change="orgCtrl.findOrganizations()"></uib-pagination>
+
+
 
     <div ng-repeat="org in orgCtrl.organizations | orderBy:'name'">
         <ul class="list-group">

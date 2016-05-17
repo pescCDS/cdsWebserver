@@ -70,6 +70,12 @@ public class ServiceConfig {
     @Autowired
     private MessageResource messageResource;
 
+    @Autowired
+    private DepartmentsResource departmentsResource;
+
+    @Autowired
+    private DocumentTypesResource documentTypesResource;
+
     @Bean
     public JacksonJaxbJsonProvider jacksonJaxbJsonProvider() {
         return new JacksonJaxbJsonProvider();
@@ -247,6 +253,10 @@ public class ServiceConfig {
         beans.add(serviceProviderResource);
         beans.add(institutionResource);
         beans.add(messageResource);
+        beans.add(departmentsResource);
+        beans.add(documentTypesResource);
+
+        //TODO: add missing services to SOAP.
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

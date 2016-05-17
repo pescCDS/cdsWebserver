@@ -24,7 +24,7 @@ CREATE TABLE institution_upload_results (
   outcome ENUM('SUCCESS','ERROR','WARNING') NOT NULL,
   institution_id INT UNSIGNED COMMENT 'Foreign key to the organization table referenced the institution.',
   institution_name VARCHAR(128) NULL COMMENT 'Denormalized name of the institution/organization for easy reference.',
-  message VARCHAR(256) NULL COMMENT 'A short description of the result.',
+  message VARCHAR(1024) NULL COMMENT 'A short description of the result.',
   KEY fk_institution_upload_results_organization_idx (organization_id),
   KEY fk_institution_upload_results_institution_uploads_idx (institution_upload_id),
   KEY fk_institution_upload_results_institution_idx (institution_id),
