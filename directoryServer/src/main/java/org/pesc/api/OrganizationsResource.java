@@ -3,21 +3,23 @@ package org.pesc.api;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ResponseHeader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.Organization;
-import org.pesc.api.model.PagedData;
 import org.pesc.api.model.Property;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.service.OrganizationService;
+import org.pesc.service.PagedData;
 import org.pesc.service.SchoolCodesService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +41,15 @@ public class OrganizationsResource {
     @Autowired
     private SchoolCodesService schoolCodesService;
 
+    @Context
+    private HttpServletResponse servletResponse;
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Search organizations based on the optional search parameters.  All organizations are returned" +
             " when no search criteria are provided.")
-    public PagedData findOrganization(
+    @ResponseHeader(name="X-Total-Count", description = "The total number of available records. Useful for pagination.")
+    public List<Organization> findOrganization(
             @QueryParam("id") @ApiParam("The directory identifier for the organization.") Integer id,
             @QueryParam("organizationCode") @ApiParam("A code such as ATP code that identifies the organization.") String organizationCode,
             @QueryParam("organizationCodeType") @ApiParam("Indicates the type of organization code and should be one of the following: ACT, ATP, FICE, IPEDS.") String organizationCodeType,
@@ -58,8 +63,9 @@ public class OrganizationsResource {
             @QueryParam("enabled") @ApiParam("Indicates whether the organization is in good standing and included in the directory.") Boolean enabled,
             @QueryParam("serviceprovider") @ApiParam("Indicates whether the organization is a service provider.") Boolean isServiceProvider,
             @QueryParam("institution") @ApiParam("Indicates whether the organization is an institution.") Boolean isInstitution,
-            @QueryParam("limit") Integer limit,
-            @QueryParam("offset") Integer offset
+            @QueryParam("limit") @DefaultValue("5") Integer limit,
+            @QueryParam("offset") @DefaultValue("0") Integer offset
+
 
     ) {
 
@@ -85,9 +91,8 @@ public class OrganizationsResource {
                 isInstitution,
                 pagedData);
 
-
-        return pagedData;
-       // return organizationPage.getContent();
+        servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()) );
+        return pagedData.getData();
     }
 
     @GET

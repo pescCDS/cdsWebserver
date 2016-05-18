@@ -85,15 +85,15 @@ public class Endpoint {
             inverseJoinColumns=
             @JoinColumn(name="organization_id", referencedColumnName="id")
     )
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.DETACH)
-    private Set<Organization> organizations;
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = OrganizationDTO.class, cascade = CascadeType.DETACH)
+    private Set<OrganizationDTO> organizations;
 
 
-    public Set<Organization> getOrganizations() {
+    public Set<OrganizationDTO> getOrganizations() {
         return organizations;
     }
 
-    public void setOrganizations(Set<Organization> organizations) {
+    public void setOrganizations(Set<OrganizationDTO> organizations) {
         this.organizations = organizations;
     }
 

@@ -24,29 +24,6 @@ import java.util.List;
 @Configuration
 public class ServiceConfig {
 
-    /*
-    @Autowired
-    private ContactRestController contactRestController;
-
-    @Autowired
-    DeliveryMethodRestController deliveryMethodRestController;
-
-    @Autowired
-    DeliveryOptionRestController deliveryOptionRestController;
-
-    @Autowired
-    DocumentFormatRestController documentFormatRestController;
-
-    @Autowired
-    EntityCodeRestController entityCodeRestController;
-
-    @Autowired
-    OrganizationRestController organizationRestController;
-
-    @Autowired
-    UtilityRestController utilityRestController;
-
-    */
 
     @Autowired
     private OrganizationsResource organizationsResource;
@@ -242,8 +219,7 @@ public class ServiceConfig {
 
         beans.add(beanConfig);
         beans.add(apiListingResourceJSON());
-        //beans.add(wadlResource());
-
+        //beans.add(wadlResource()
         beans.add(organizationsResource);
         beans.add(userResource);
         beans.add(documentFormatResource);

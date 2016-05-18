@@ -3,36 +3,35 @@ package org.pesc.api;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-import org.pesc.api.model.*;
-import org.pesc.api.repository.InstitutionUploadResultsRepository;
-import org.pesc.api.repository.ServiceProviderRepository;
-import org.pesc.service.OrganizationService;
+import org.pesc.api.model.AuthUser;
+import org.pesc.api.model.InstitutionsUpload;
+import org.pesc.api.model.OrganizationDTO;
 import org.pesc.service.InstitutionUploadService;
+import org.pesc.service.OrganizationService;
+import org.pesc.service.PagedData;
+import org.pesc.web.AppController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -47,18 +46,18 @@ public class InstitutionResource {
     private static final Log log = LogFactory.getLog(InstitutionResource.class);
 
     @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
     private OrganizationService organizationService;
 
     @Autowired
     private InstitutionUploadService uploadService;
 
+    @Context
+    private HttpServletResponse servletResponse;
+
     @Value("${directory.uploaded.csv}")
     private String csvDir;
 
-    private InstitutionsUpload persistUploadRecord(String inputFilepath) {
+    private InstitutionsUpload persistUploadRecord(String inputFilepath, Integer orgID) {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
@@ -67,12 +66,18 @@ public class InstitutionResource {
 
             AuthUser auth = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            InstitutionsUpload institutionsUpload = new InstitutionsUpload();
-            institutionsUpload.setUserId(auth.getId());
-            institutionsUpload.setOrganizationId(auth.getOrganizationId());
-            institutionsUpload.setInputPath(inputFilepath);
+            //Ideally, this should be done with an annotation, but for some reason, the annotation was conflicting
+            //with the Context annotation, making the HttpServletResponse null.
+            if (AppController.hasRole(auth.getAuthorities(), "ROLE_SYSTEM_ADMIN") ||
+                    (AppController.hasRole(auth.getAuthorities(), "ROLE_ORG_ADMIN") && auth.getOrganizationId().equals(orgID))) {
+                InstitutionsUpload institutionsUpload = new InstitutionsUpload();
+                institutionsUpload.setUserId(auth.getId());
+                institutionsUpload.setOrganizationId(auth.getOrganizationId());
+                institutionsUpload.setInputPath(inputFilepath);
 
-            return uploadService.create(institutionsUpload);
+                return uploadService.create(institutionsUpload);
+            }
+
         }
 
         return null;
@@ -81,8 +86,7 @@ public class InstitutionResource {
     @POST
     @Path("/csv")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @PreAuthorize("hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_SYSTEM_ADMIN')")
-    public Response convertCSVtoJSON(@Multipart("org_id") Integer orgID,
+    public void convertCSVtoJSON(@Multipart("org_id") Integer orgID,
                                      @Multipart("file") Attachment attachment) {
 
 
@@ -98,7 +102,7 @@ public class InstitutionResource {
             File outfile = new File(csvDir + File.separator + UUID.randomUUID().toString() + ".csv");
             Files.copy(stream, outfile.toPath());
 
-            InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath());
+            InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath(), orgID);
 
             uploadService.processCSVFile(institutionsUpload, outfile.getPath(), orgID);
 
@@ -109,7 +113,7 @@ public class InstitutionResource {
 
         }
 
-        return Response.ok("").build();
+
     }
 
 
@@ -130,10 +134,10 @@ public class InstitutionResource {
     @GET
     @ApiOperation("Return the institutions that are serviced by this service provider.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public PagedData getServiceProvidersForInstitution(
+    public List<OrganizationDTO> getServiceProvidersForInstitution(
             @QueryParam("service_provider_id") @ApiParam(value="The directory identifier for the service provider.", required = true) Integer id,
-            @QueryParam("limit") Integer limit,
-            @QueryParam("offset") Integer offset) {
+            @QueryParam("limit") @DefaultValue("5") Integer limit,
+            @QueryParam("offset") @DefaultValue("0") Integer offset) {
 
         if (limit == null || offset == null) {
             limit = 5;
@@ -145,8 +149,8 @@ public class InstitutionResource {
             throw new IllegalArgumentException("The service provider's id must be provided.");
         }
         organizationService.getInstitutionsByServiceProviderId(id, pagedData);
-
-        return pagedData;
+        servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()));
+        return pagedData.getData();
     }
 
 

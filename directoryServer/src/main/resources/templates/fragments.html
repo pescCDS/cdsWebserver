@@ -835,8 +835,8 @@
             </div>
         </div>
 
-        <div ng-show="orgCtrl.isServiceProvider()==true && orgCtrl.isEditableByUser() ">
-            <div style="float:right;">
+        <div ng-show="orgCtrl.isServiceProvider()==true ">
+            <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
 
 
                 <span class="glyphicon glyphicon-upload ed-icon-btn"

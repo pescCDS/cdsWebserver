@@ -1,4 +1,4 @@
-package org.pesc.api.model;
+package org.pesc.service;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -7,7 +7,6 @@ import java.util.List;
 /**
  * Created by james on 5/10/16.
  */
-@XmlRootElement(name = "PagedData")
 public class PagedData<T> {
 
     private Integer limit;

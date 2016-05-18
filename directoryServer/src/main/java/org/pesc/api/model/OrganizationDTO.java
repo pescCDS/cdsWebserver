@@ -1,15 +1,21 @@
 package org.pesc.api.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Created by james on 5/12/16.
  */
 @XmlRootElement(name = "Organization")
+@Entity
+@Table(name = "organization")
 public class OrganizationDTO {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     Integer id;
+
+    @Column(name = "name")
     String name;
 
     public Integer getId() {

@@ -231,7 +231,7 @@ public class AppController {
 
     }
 
-    private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
+    public static boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
         boolean hasRole = false;
         for (GrantedAuthority authority : authorities) {
             hasRole = authority.getAuthority().equals(role);

@@ -891,9 +891,9 @@
         function getInstitutionsForServiceProvider() {
 
             if (organizationService.isServiceProvider(self.org)) {
-                organizationService.getInstitutionsForServiceProvider(self.org,  self.pageSize, (self.servicedSchoolsOffset-1)* self.pageSize).then(function (pagedData) {
-                    self.institutions = pagedData.data;
-                    self.totalServicedSchools = pagedData.total;
+                organizationService.getInstitutionsForServiceProvider(self.org,  self.pageSize, (self.servicedSchoolsOffset-1)* self.pageSize).then(function (response) {
+                    self.institutions = response.data;
+                    self.totalServicedSchools = response.headers('X-Total-Count');
                 });
             }
 
@@ -1130,10 +1130,8 @@
 
         function activate() {
 
-            return getOrganizations().then(function () {
+           getOrganizations();
 
-                console.log('Activated Organizations View');
-            });
         }
 
         function hasOrgType(orgType, org) {
@@ -1166,10 +1164,10 @@
 
 
         function getOrganizations() {
-            return organizationService.getOrganizations().then(function (pagedData) {
-                self.totalRecords = pagedData.total;
+            organizationService.getOrganizations().then(function (response) {
+                self.totalRecords = response.headers('X-Total-Count');
 
-                self.organizations = pagedData.data;
+                self.organizations = response.data;
             });
         }
 
@@ -1216,10 +1214,10 @@
                 self.isServiceProvider,
                 self.isInstitution,
                 self.limit,
-                (self.offset-1)*self.pageSize).then(function (pagedData) {
-                self.totalRecords = pagedData.total;
-                self.organizations = pagedData.data;
-            });
+                (self.offset-1)*self.pageSize).then(function (response) {
+                    self.totalRecords = response.headers('X-Total-Count');
+                    self.organizations = response.data;
+                });
         };
 
         function removeOrgFromModel(org) {
@@ -1508,8 +1506,8 @@
                 find($window.activeUser.organizationId).then(function (orgArray) {
                     activeOrg = orgArray[0];
 
-                    getInstitutionsForServiceProvider(activeOrg).then(function (pagedData) {
-                        activeOrg.institutions = pagedData.data;
+                    getInstitutionsForServiceProvider(activeOrg).then(function (response) {
+                        activeOrg.institutions = response.data;
                     });
                 });
 
@@ -1689,12 +1687,9 @@
             $http.get('/services/rest/v1/organizations', {
                 params: {'enabled': true},
                 cache: false
-            }).success(function (data) {
-                organizations = data;
-                deferred.resolve(organizations);
-            }).error(function (data) {
-                toasterService.ajaxInfo(data);
-                deferred.reject("An error occured while fetching organizations.");
+            }).then(function (response) {
+                organizations = response.data;
+                deferred.resolve(response);
             });
 
             return deferred.promise;
@@ -1760,11 +1755,8 @@
                     'offset': offset
                 },
                 cache: false
-            }).success(function (data) {
-                deferred.resolve(data);
-            }).error(function (data) {
-                toasterService.ajaxInfo(data);
-                deferred.reject("An error occured while fetching the organization.");
+            }).then(function (response) {
+                deferred.resolve(response);
             });
 
             return deferred.promise;
@@ -1819,11 +1811,8 @@
                     'offset' : offset
                 },
                 cache: false
-            }).success(function (data) {
-                deferred.resolve(data);
-            }).error(function (data) {
-                toasterService.ajaxInfo(data);
-                deferred.reject("An error occured while fetching the institutions.");
+            }).then(function (response) {
+                deferred.resolve(response);
             });
 
             return deferred.promise;

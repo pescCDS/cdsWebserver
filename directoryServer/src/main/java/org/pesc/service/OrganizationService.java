@@ -22,7 +22,6 @@ import javax.persistence.criteria.*;
 import javax.persistence.criteria.Predicate;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.function.*;
 
 /**
  * Created by james on 3/21/16.
