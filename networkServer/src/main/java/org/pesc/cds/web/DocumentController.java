@@ -161,7 +161,8 @@ public class DocumentController {
 
 	private String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department) {
 		StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + endpointsApiPath);
-		uri.append("?organizationId=").append(orgID).append("&documentFormat=").append(documentFormat);
+		uri.append("?organizationId=").append(orgID).append("&documentFormat=").append(documentFormat).append("&documentType=").append(documentType)
+		.append("&department=").append(department);
 
 		CloseableHttpClient client = HttpClients.custom().build();
 		String endpointURI = null;
@@ -205,7 +206,7 @@ public class DocumentController {
 
 	private String getEndpointURIForSchool(String schoolCode, String schoolCodeType, String documentFormat, String documentType, String department, Transaction tx) {
 
-		int orgID = 2;//getOrganizationId(schoolCode, schoolCodeType);
+		int orgID = getOrganizationId(schoolCode, schoolCodeType);
 		tx.setRecipientId(orgID);
 		return getEndpointForOrg(orgID, documentFormat, documentType, department);
 	}
@@ -216,10 +217,6 @@ public class DocumentController {
 
 	    StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + organizationApiPath);
 		uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
-		uri.append("?enabled=true").append("&institution=true").append("&serviceprovider=false");
-		uri.append("?limit=5").append("&offset=0");
-
-		//http://localhost:8080/services/rest/v1/organizations?enabled=true&institution=true&limit=5&name=&offset=0&organizationCode=4226&organizationCodeType=ATP&serviceprovider=false
 		CloseableHttpClient client = HttpClients.custom().build();
 		try {
 			HttpGet get = new HttpGet(uri.toString());
@@ -230,9 +227,7 @@ public class DocumentController {
 
 				HttpEntity resEntity = response.getEntity();
 				if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
-					JSONObject pagedData = new JSONObject(EntityUtils.toString(resEntity));
-					JSONArray organizations = pagedData.getJSONArray("data");
-
+					JSONArray organizations = new JSONArray(EntityUtils.toString(resEntity));
 					if (organizations.length() == 1) {
 						orgID = organizations.getJSONObject(0).getInt("id");
 

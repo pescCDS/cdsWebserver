@@ -155,7 +155,12 @@
 
         function uploadFile() {
             console.log("Transfer file.");
-            fileUpload.uploadFileToUrl(self.fileToUpload, self.documentFormat.name, self.schoolCode, self.schoolCodeType);
+            fileUpload.uploadFileToUrl(self.fileToUpload,
+                self.documentFormat.name,
+                self.documentType.name,
+                self.department.name,
+                self.schoolCode,
+                self.schoolCodeType);
         }
 
         function getDeliveryMethods() {
@@ -280,7 +285,7 @@
 
         return service;
 
-        function uploadFileToUrl(file, fileFormat, schoolCode, schoolCodeType){
+        function uploadFileToUrl(file, fileFormat, documentType, department, schoolCode, schoolCodeType){
             var fd = new FormData();
             fd.append('file', file);
             fd.append('recipientId', 1);
@@ -289,6 +294,8 @@
             fd.append('fileFormat', fileFormat );
             fd.append('schoolCode', schoolCode);
             fd.append('schoolCodeType', schoolCodeType);
+            fd.append('documentType', documentType);
+            fd.append('department', department);
 
             $http.post('/documents/outbox', fd, {
                 transformRequest: angular.identity,

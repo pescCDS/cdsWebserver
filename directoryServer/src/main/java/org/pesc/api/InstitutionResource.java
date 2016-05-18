@@ -57,7 +57,7 @@ public class InstitutionResource {
     @Value("${directory.uploaded.csv}")
     private String csvDir;
 
-    private InstitutionsUpload persistUploadRecord(String inputFilepath, Integer orgID) {
+    private InstitutionsUpload persistUploadRecord(String inputFilepath, Integer providerID) {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
@@ -69,7 +69,7 @@ public class InstitutionResource {
             //Ideally, this should be done with an annotation, but for some reason, the annotation was conflicting
             //with the Context annotation, making the HttpServletResponse null.
             if (AppController.hasRole(auth.getAuthorities(), "ROLE_SYSTEM_ADMIN") ||
-                    (AppController.hasRole(auth.getAuthorities(), "ROLE_ORG_ADMIN") && auth.getOrganizationId().equals(orgID))) {
+                    (AppController.hasRole(auth.getAuthorities(), "ROLE_ORG_ADMIN") && auth.getOrganizationId().equals(providerID))) {
                 InstitutionsUpload institutionsUpload = new InstitutionsUpload();
                 institutionsUpload.setUserId(auth.getId());
                 institutionsUpload.setOrganizationId(auth.getOrganizationId());
@@ -83,11 +83,21 @@ public class InstitutionResource {
         return null;
     }
 
+    /**
+     * Accepts a CSV file where each row represents and institution that should be associated with the service
+     * provider.  If the institution already exists in the system, the service provider is granted permissions to
+     * handle endpoints for the institution.
+     * @param providerID The organication/directory ID of the provider.
+     * @param attachment The CSV file of institutions where each row must have "state,name,city,ipeds,fice,act,atp,opeid"
+     */
     @POST
     @Path("/csv")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public void convertCSVtoJSON(@Multipart("org_id") Integer orgID,
-                                     @Multipart("file") Attachment attachment) {
+    @ApiOperation("Accepts a CSV file where each row represents and institution that should be associated with the service " +
+            "provider.  If the institution already exists in the system, the service provider is granted permissions to " +
+            "handle endpoints for the institution. The file header and the columns for the data are state,name,city,ipeds,fice,act,atp,opeid")
+    public void associateInstitutions(@Multipart("org_id") @ApiParam("The service provider's directory ID.") Integer providerID,
+                                      @Multipart("file") @ApiParam("The csv file.") Attachment attachment) {
 
 
 
@@ -102,9 +112,9 @@ public class InstitutionResource {
             File outfile = new File(csvDir + File.separator + UUID.randomUUID().toString() + ".csv");
             Files.copy(stream, outfile.toPath());
 
-            InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath(), orgID);
+            InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath(), providerID);
 
-            uploadService.processCSVFile(institutionsUpload, outfile.getPath(), orgID);
+            uploadService.processCSVFile(institutionsUpload, outfile.getPath(), providerID);
 
         } catch (Exception e) {
             log.error("Failed to save uploaded CSV file", e);
@@ -152,7 +162,5 @@ public class InstitutionResource {
         servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()));
         return pagedData.getData();
     }
-
-
 
 }
