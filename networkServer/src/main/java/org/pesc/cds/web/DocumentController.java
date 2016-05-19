@@ -264,11 +264,11 @@ public class DocumentController {
 	 *     <li></li>
 	 * </ul>
 	 * 
-	 * @param recipientId     Will use the recipientId to send to end point 
-	 * @param multipartFile            <code>MultipartFile (required)</code>
-	 * @param networkServerId id of sending network server 
+	 * @param recipientId     The EDExchange directory/organization ID that identifies the receiver.
+	 * @param multipartFile   <code>MultipartFile (required)</code>
+	 * @param networkServerId The EDExchange directory/organization ID that identifies the sender
 	 * @param senderId        id of sending organization 
-	 * @param fileFormat      compliant file format 
+	 * @param fileFormat      One of the supported file formats. E.g. 'pdf, 'text, 'xml', 'pescxml' ...
 	 * @param fileSize        <code>Long</code>
 	 * @return
 	 */

@@ -116,8 +116,8 @@
     }
 
 
-    UploadController.$inject = ['fileUpload', 'organizationService', 'toasterService', '$uibModalInstance', 'org'];
-    function UploadController(fileUpload, organizationService, toasterService, $uibModalInstance, org) {
+    UploadController.$inject = ['fileUpload', 'organizationService', 'toasterService', '$uibModalInstance', 'org', '$timeout'];
+    function UploadController(fileUpload, organizationService, toasterService, $uibModalInstance, org, $timeout) {
         var self = this;
 
         self.org = org;
@@ -192,6 +192,20 @@
             }
         }
 
+        function showStatus(uploadRecord) {
+            $timeout(fileUpload.getCSVStatus, 1000, true, uploadRecord.id).then(function(response){
+
+                if (response.data[0].endTime == null) {
+                     uploadRecord.status = 'Processing line number ' + response.data[0].lineNumber;
+                     showStatus(uploadRecord);
+                }
+                else {
+                    uploadRecord.endTime = response.data[0].endTime;
+                }
+
+                console.log(response.data[0]);
+            });
+        }
         function uploadFile() {
 
             if (self.fileToUpload == '') {
@@ -199,21 +213,56 @@
                 return;
             }
 
-            fileUpload.uploadFileToUrl(self.fileToUpload, self.org, '/services/rest/v1/institutions/csv');
+            fileUpload.uploadFileToUrl(self.fileToUpload, self.org, '/services/rest/v1/institutions/csv').then(function(response){
+
+                if (response.status == 200) {
+                    var uploadRecord = response.data;
+
+
+                    console.log(uploadRecord);
+
+                    self.uploads.push(uploadRecord);
+                    self.showHistory = true;
+
+                    if (uploadRecord.endTime == null) {
+
+                        showStatus(uploadRecord);
+                    }
+                }
+            });
         }
 
     }
 
-    fileUpload.$inject = [ '$http', 'toasterService'] ;
+    fileUpload.$inject = [ '$http', 'toasterService', '$q'] ;
 
-    function fileUpload($http, toasterService) {
+    function fileUpload($http, toasterService, $q) {
         var service = {
-            uploadFileToUrl: uploadFileToUrl
+            uploadFileToUrl: uploadFileToUrl,
+            getCSVStatus: getCSVStatus
         } ;
 
         return service;
 
+        function getCSVStatus(uploadID) {
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/institutions/csv-status',  {
+                    'params': {
+                        'upload_id': uploadID
+                    },
+                    cache: false
+                }).then(function(response){
+                    deferred.resolve(response);
+                });
+
+            return deferred.promise;
+        };
+
+
         function uploadFileToUrl(file, org, url){
+            var deferred = $q.defer();
+
             var fd = new FormData();
             fd.append('file', file);
             fd.append('org_id', org.id);
@@ -221,13 +270,11 @@
             $http.post(url, fd, {
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
-            })
-            .success(function(data){
-                toasterService.success("Successfully uploaded file.");
-            })
-            .error(function(data){
-                toasterService.error("Failed to upload file.");
+            }).then(function (response) {
+                deferred.resolve(response);
             });
+
+            return deferred.promise;
         }
 
     }

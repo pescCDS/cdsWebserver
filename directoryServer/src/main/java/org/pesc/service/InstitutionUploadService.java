@@ -7,13 +7,11 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
-import org.pesc.api.model.InstitutionsUpload;
-import org.pesc.api.model.InstitutionsUploadResult;
-import org.pesc.api.model.Organization;
-import org.pesc.api.model.SchoolCode;
+import org.pesc.api.model.*;
 import org.pesc.api.repository.InstitutionUploadResultsRepository;
 import org.pesc.api.repository.InstitutionUploadsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,6 +39,8 @@ public class InstitutionUploadService {
     private static String[] OPTINOAL_COLUMN_NAMES = { "website","street","zip" };
 
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private OrganizationService organizationService;
@@ -92,6 +92,29 @@ public class InstitutionUploadService {
     }
 
 
+    @Transactional(readOnly=true)
+    public List<CSVStatusDTO> getCSVStatus(Integer uploadID)  {
+
+        String sql = "SELECT iur.line_number, iu.end_time FROM institution_uploads iu JOIN institution_upload_results iur on iur.institution_upload_id = iu.id WHERE iu.id = ? order by iur.line_number DESC LIMIT 1";
+        List<Map<String,Object>> rows = jdbcTemplate.queryForList(sql, uploadID);
+
+        ArrayList<CSVStatusDTO> statusList = new ArrayList<CSVStatusDTO>();
+
+        for(Map row : rows) {
+            CSVStatusDTO status = new CSVStatusDTO();
+            status.setLineNumber((Integer) row.get("line_Number"));
+            java.sql.Timestamp dateTime = (java.sql.Timestamp)row.get("end_time");
+
+            if (dateTime != null)
+                 status.setEndTime(new Date(dateTime.getTime()));
+            statusList.add(status);
+        }
+
+
+        return statusList;
+    }
+
+
     private boolean isValidUploadFile(Map<String,Integer> headerMap) {
 
         for(String columnName : REQUIRED_COLUMNS_NAMES) {
@@ -119,6 +142,8 @@ public class InstitutionUploadService {
         try {
             institutionsUpload.setStartTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
+            this.update(institutionsUpload);
+
             final Reader reader = new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8");
             final CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
 
@@ -136,7 +161,6 @@ public class InstitutionUploadService {
             }
 
             try {
-
                 for (final CSVRecord record : parser) {
 
                     Organization organization = new Organization();

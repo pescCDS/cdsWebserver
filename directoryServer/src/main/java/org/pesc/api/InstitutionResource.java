@@ -7,7 +7,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.pesc.api.model.AuthUser;
+import org.pesc.api.model.CSVStatusDTO;
 import org.pesc.api.model.InstitutionsUpload;
 import org.pesc.api.model.OrganizationDTO;
 import org.pesc.service.InstitutionUploadService;
@@ -28,8 +30,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,7 +75,9 @@ public class InstitutionResource {
             //with the Context annotation, making the HttpServletResponse null.
             if (AppController.hasRole(auth.getAuthorities(), "ROLE_SYSTEM_ADMIN") ||
                     (AppController.hasRole(auth.getAuthorities(), "ROLE_ORG_ADMIN") && auth.getOrganizationId().equals(providerID))) {
+
                 InstitutionsUpload institutionsUpload = new InstitutionsUpload();
+                institutionsUpload.setCreatedTime(Calendar.getInstance().getTime());
                 institutionsUpload.setUserId(auth.getId());
                 institutionsUpload.setOrganizationId(auth.getOrganizationId());
                 institutionsUpload.setInputPath(inputFilepath);
@@ -96,7 +103,7 @@ public class InstitutionResource {
     @ApiOperation("Accepts a CSV file where each row represents and institution that should be associated with the service " +
             "provider.  If the institution already exists in the system, the service provider is granted permissions to " +
             "handle endpoints for the institution. The file header and the columns for the data are state,name,city,ipeds,fice,act,atp,opeid")
-    public void associateInstitutions(@Multipart("org_id") @ApiParam("The service provider's directory ID.") Integer providerID,
+    public InstitutionsUpload associateInstitutions(@Multipart("org_id") @ApiParam("The service provider's directory ID.") Integer providerID,
                                       @Multipart("file") @ApiParam("The csv file.") Attachment attachment) {
 
 
@@ -116,6 +123,8 @@ public class InstitutionResource {
 
             uploadService.processCSVFile(institutionsUpload, outfile.getPath(), providerID);
 
+            return institutionsUpload;
+
         } catch (Exception e) {
             log.error("Failed to save uploaded CSV file", e);
 
@@ -123,23 +132,41 @@ public class InstitutionResource {
 
         }
 
-
     }
 
+    @GET
+    @Path("/csv")
+    public void getFile(
+            @QueryParam("upload_id") Integer uploadID) {
+        try {
 
+            InstitutionsUpload institutionsUpload = uploadService.getUploadById(uploadID);
 
-    private String getFileName(MultivaluedMap<String, String> header) {
-        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
-        for (String filename : contentDisposition) {
-            if ((filename.trim().startsWith("filename"))) {
-                String[] name = filename.split("=");
-                String exactFileName = name[1].trim().replaceAll("\"", "");
-                return exactFileName;
+            if (institutionsUpload == null) {
+                throw new RuntimeException("Invalid institutions upload id.");
             }
-        }
 
-        throw new RuntimeException("Failed to extract file name.");
+
+            InputStream is = new FileInputStream(new File(institutionsUpload.getInputPath()));
+
+            servletResponse.setContentType("text/csv");
+            IOUtils.copy(is, servletResponse.getOutputStream());
+            servletResponse.flushBuffer();
+        } catch (IOException e) {
+            log.error("Error writing file to output stream. Institution upload id " + uploadID, e);
+            throw new RuntimeException("IOError writing file to output stream");
+        }
     }
+
+    @GET
+    @Path("/csv-status")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<CSVStatusDTO> getCSVStatus(
+            @QueryParam("upload_id") Integer uploadID) {
+
+        return uploadService.getCSVStatus(uploadID);
+    }
+
 
     @GET
     @ApiOperation("Return the institutions that are serviced by this service provider.")

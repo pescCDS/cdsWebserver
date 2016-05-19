@@ -176,10 +176,11 @@
                     <div style="margin-top: 10px">
                         <uib-accordion close-others="true">
 
-                            <uib-accordion-group ng-repeat="upload in uploadCtrl.uploads" heading="{{upload.createdTime | date:'short'}}">
+                            <uib-accordion-group ng-repeat="upload in uploadCtrl.uploads" heading="{{upload.createdTime | date:'short'}} {{upload.status}}">
                                 <div><span>Start Time: </span><b>{{upload.startTime | date:'short'}}</b></div>
                                 <div><span>End Time: </span><b>{{upload.endTime | date:'short'}}</b></div>
-                                <div><span>Uploaded File: </span><a ng-href="#upload/{{upload.id}}">{{upload.inputPath}}</a></div>
+                                <div><a ng-href="#user/{{upload.userId}}">Uploader</a></div>
+                                <div><span>Uploaded File: </span><a ng-href="/services/rest/v1/institutions/csv?upload_id={{upload.id}}">{{upload.inputPath}}</a></div>
                                 <div style="margin-top: 10px;"><button type="button" class="btn btn-default" ng-click="uploadCtrl.showResults(upload)">Show Results</button></div>
 
                                     <div style="margin-top: 10px">
@@ -188,17 +189,20 @@
                                             <li ng-repeat="result in upload.results | filter:uploadCtrl.filterResults" class="list-group-item" ng-class="{'list-group-item-success': result.outcome == 'SUCCESS',  'list-group-item-warning': result.outcome == 'WARNING',  'list-group-item-danger': result.outcome == 'ERROR'  }">
                                                 <div ng-show="result.outcome == 'SUCCESS'">
                                                     <div ng-bind-html="result.message"></div>
+                                                    <div>Line Number: <b>{{result.lineNumber}}</b></div>
                                                     <div>Name: <b>{{result.institutionName}}</b></div>
                                                     <div>Directory ID: <b>{{result.institutionID}}</b></div>
                                                 </div>
                                                 <div ng-show="result.outcome == 'WARNING'">
                                                     <div ng-bind-html="result.message"></div>
+                                                    <div>Line Number: <b>{{result.lineNumber}}</b></div>
                                                     <div>Name: <b>{{result.institutionName}}</b></div>
                                                     <div>Directory ID: <b>{{result.institutionID}}</b></div>
 
                                                 </div>
                                                 <div ng-show="result.outcome == 'ERROR'">
                                                     <div ng-bind-html="result.message"></div>
+                                                    <div>Line Number: <b>{{result.lineNumber}}</b></div>
                                                 </div>
 
                                             </li>

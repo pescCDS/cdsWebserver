@@ -5,7 +5,6 @@ CREATE TABLE institution_uploads (
   created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created Time',
   start_time TIMESTAMP NULL COMMENT 'When the file processing started',
   end_time TIMESTAMP NULL COMMENT 'When the file finished processing',
-  output_path VARCHAR(256) NULL COMMENT 'The file path to the result log that contains information about the processed file.',
   input_path VARCHAR(256) NULL COMMENT 'The file path to the uploaded file.',
   KEY fk_institution_uploads_organization_idx (organization_id),
   KEY fk_institution_uploads_users_idx (user_id),
