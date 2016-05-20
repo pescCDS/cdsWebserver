@@ -31,7 +31,7 @@ public class DirectoryApplicationTests {
 	@Value("${local.server.port}")   //Injects that actual port used in the test
 	int port;
 
-	final String USERNAME = "admin";
+	final String USERNAME = "sallen";
 	final String PASSWORD = "admin";
 
 	//Test RestTemplate to invoke the APIs.
@@ -158,7 +158,7 @@ public class DirectoryApplicationTests {
 
 		HttpEntity<Endpoint> request = new HttpEntity<Endpoint>(endpoint, headers);
 
-		Endpoint persistedEndpoint = restTemplate.postForObject("http://localhost:" + port + "/services/rest/v1/endpoints", request, Endpoint.class);
+		Endpoint persistedEndpoint = secureRestTemplate.postForObject("http://localhost:" + port + "/services/rest/v1/endpoints", request, Endpoint.class);
 
 		assertThat("Endpoint was not saved correctly.", persistedEndpoint.getId() > 0);
 
