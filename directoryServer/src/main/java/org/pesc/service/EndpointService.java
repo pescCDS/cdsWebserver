@@ -70,7 +70,7 @@ public class EndpointService {
 
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("( !(#endpoint.organization.organizationTypes.?[#this.name == 'Service Provider'].empty) AND ( (#endpoint.organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') ) )")
+    @PreAuthorize("( !(principal.organizationTypes.?[#this.name == 'Service Provider'].empty) AND ( (#endpoint.organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') ) )")
     public Endpoint create(Endpoint endpoint)  {
         return this.endpointRepository.save(endpoint);
     }

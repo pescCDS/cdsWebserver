@@ -4,6 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Extending the Spring User, which is used as the principal during and after authentication so that the additional
@@ -13,7 +14,7 @@ import java.util.Collection;
 public class AuthUser extends User {
     private Integer id;
     private Integer organizationId;
-    private OrganizationType organizationTypes;
+    private Set<OrganizationType> organizationTypes;
 
     public AuthUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
@@ -39,11 +40,11 @@ public class AuthUser extends User {
         this.organizationId = organizationId;
     }
 
-    public OrganizationType getOrganizationTypes() {
+    public Set<OrganizationType> getOrganizationTypes() {
         return organizationTypes;
     }
 
-    public void setOrganizationTypes(OrganizationType organizationTypes) {
+    public void setOrganizationTypes(Set<OrganizationType> organizationTypes) {
         this.organizationTypes = organizationTypes;
     }
 }

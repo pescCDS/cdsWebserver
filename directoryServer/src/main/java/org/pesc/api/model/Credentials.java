@@ -16,8 +16,9 @@ public class Credentials {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "organization_id")
-    private Integer organizationId;
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.DETACH)
+    @JoinColumn(name="organization_id")
+    private Organization organization;
 
     @Column(name = "username", unique=true)
     private String username;
@@ -72,11 +73,11 @@ public class Credentials {
         this.id = id;
     }
 
-    public Integer getOrganizationId() {
-        return organizationId;
+    public Organization getOrganization() {
+        return organization;
     }
 
-    public void setOrganizationId(Integer organizationId) {
-        this.organizationId = organizationId;
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

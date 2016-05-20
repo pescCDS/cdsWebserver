@@ -47,7 +47,8 @@ class CredentialsService implements UserDetailsService {
                 principal.getPassword(), principal.isEnabled(),true,true,true, authorities);
 
         authUser.setId(principal.getId());
-        authUser.setOrganizationId(principal.getOrganizationId());
+        authUser.setOrganizationId(principal.getOrganization().getId());
+        authUser.setOrganizationTypes(principal.getOrganization().getOrganizationTypes());
 
 
 
