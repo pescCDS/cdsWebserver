@@ -49,6 +49,8 @@ class CredentialsService implements UserDetailsService {
         authUser.setId(principal.getId());
         authUser.setOrganizationId(principal.getOrganizationId());
 
+
+
         return authUser;
     }
 

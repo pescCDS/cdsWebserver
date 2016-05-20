@@ -13,6 +13,7 @@ import java.util.Collection;
 public class AuthUser extends User {
     private Integer id;
     private Integer organizationId;
+    private OrganizationType organizationTypes;
 
     public AuthUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
@@ -36,5 +37,13 @@ public class AuthUser extends User {
 
     public void setOrganizationId(Integer organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public OrganizationType getOrganizationTypes() {
+        return organizationTypes;
+    }
+
+    public void setOrganizationTypes(OrganizationType organizationTypes) {
+        this.organizationTypes = organizationTypes;
     }
 }

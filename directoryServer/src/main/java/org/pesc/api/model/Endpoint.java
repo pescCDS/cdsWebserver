@@ -1,5 +1,7 @@
 package org.pesc.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -19,9 +21,9 @@ public class Endpoint {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Organization.class, cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = OrganizationDTO.class, cascade = CascadeType.DETACH)
     @JoinColumn(name="organization_id")
-    private Organization organization;
+    private OrganizationDTO organization;
 
     @Column(name = "delivery_confirm")
     private boolean confirmDelivery;
@@ -106,11 +108,11 @@ public class Endpoint {
         this.id = id;
     }
 
-    public Organization getOrganization() {
+    public OrganizationDTO getOrganization() {
         return organization;
     }
 
-    public void setOrganization(Organization organization) {
+    public void setOrganization(OrganizationDTO organization) {
         this.organization = organization;
     }
 

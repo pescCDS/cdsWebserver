@@ -1,5 +1,7 @@
 package org.pesc.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -9,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Organization")
 @Entity
 @Table(name = "organization")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrganizationDTO {
     @Id
     @Column(name = "id")
