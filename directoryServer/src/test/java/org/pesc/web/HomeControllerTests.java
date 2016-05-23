@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 public class HomeControllerTests {
 
     @ClassRule
-    public static DockerContainerRule dockerContainerRule = new DockerContainerRule("directoryserver_db_image");
+    public static DockerContainerRule dockerContainerRule = new DockerContainerRule("cdswebserver_directoryserver_db_image");
 
 
     @Value("${local.server.port}")
@@ -41,7 +41,7 @@ public class HomeControllerTests {
     @Test
     public void testHome() throws Exception {
         ResponseEntity<String> entity = new TestRestTemplate().getForEntity(
-                "http://localhost:" + this.port + "/", String.class);
+                "http://localhost:" + this.port + "/home", String.class);
         assertEquals(HttpStatus.OK, entity.getStatusCode());
     }
 

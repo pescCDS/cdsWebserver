@@ -20,7 +20,7 @@ import java.security.cert.CertificateException;
 public class NetworkServerApplicationTests {
 
 	@ClassRule
-	public static DockerContainerRule dockerContainerRule = new DockerContainerRule("edex_networkserver_db_image");
+	public static DockerContainerRule dockerContainerRule = new DockerContainerRule("cdswebserver_networkserver_db_image");
 
 
 	private KeyPair getSigningKeys() {
