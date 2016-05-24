@@ -212,16 +212,14 @@ public class ServiceConfig {
         beanConfig.setDescription("Swagger UI to document and explore the REST interface provided by the PESC CDS.");
         beanConfig.setSchemes(new String[]{"http"});
         beanConfig.setHost(restApiHost);
-        beanConfig.setBasePath("/services/rest/v1");   //TODO: change path after completion
+        beanConfig.setBasePath("/services/rest/v1");
         beanConfig.setResourcePackage(restApiPackageToScan);
         beanConfig.setPrettyPrint(true);
         beanConfig.setScan(true);
 
         beans.add(beanConfig);
         beans.add(apiListingResourceJSON());
-        //beans.add(wadlResource()
-        beans.add(organizationsResource);
-        beans.add(userResource);
+
         beans.add(documentFormatResource);
         beans.add(deliveryMethodsResource) ;
         beans.add(endpointResource);
@@ -231,8 +229,8 @@ public class ServiceConfig {
         beans.add(messageResource);
         beans.add(departmentsResource);
         beans.add(documentTypesResource);
-
-        //TODO: add missing services to SOAP.
+        beans.add(organizationsResource);
+        beans.add(userResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

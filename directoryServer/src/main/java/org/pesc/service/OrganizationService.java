@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import sun.misc.BASE64Encoder;
+import sun.security.krb5.internal.crypto.KeyUsage;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -22,6 +23,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.persistence.criteria.Predicate;
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -215,9 +217,11 @@ public class OrganizationService {
     }
 
 
+
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
-    public String setCertificate(Integer orgID, String pemCert) throws CertificateException {
+    public CertificateInfo setCertificate(Integer orgID, String pemCert) throws CertificateException {
 
         log.info(String.format("Updating signing certificate for org %d\n%s", orgID,  pemCert));
 
@@ -229,33 +233,53 @@ public class OrganizationService {
 
         jdbcTemplate.update("update organization set signing_certificate = ?, public_key = ? where id = ?", pemCert, pemEncodedPublicKey, orgID);
 
-        return cer.toString();
-
+        return buildCertificateInfo(pemCert);
     }
 
     @Transactional(readOnly = true)
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
-    public String getPEMCertificate(Integer orgID) throws CertificateException {
+    public CertificateInfo getPEMCertificate(Integer orgID) throws CertificateException {
 
         log.info(String.format("Retrieving signing certificate for org %d", orgID));
 
-        return jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
+        return buildCertificateInfo(jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class) );
     }
 
+    private CertificateInfo buildCertificateInfo(String pemCert) throws CertificateException{
+
+        X509Certificate cer = convertPEMtoX509(pemCert);
+
+        CertificateInfo info = new CertificateInfo();
+
+        info.setAlgorithmUsedToSign(cer.getSigAlgName());
+        info.setIssuerDN(cer.getIssuerDN().getName());
+        info.setNotAfter(cer.getNotAfter());
+        info.setNotBefore(cer.getNotBefore());
+        info.setSerialNumber(cer.getSerialNumber());
+        info.setVersion(cer.getVersion());
+        info.setSubjectDN(cer.getSubjectDN().getName());
+        info.setPem(pemCert);
+
+        return info;
+    }
+
+    private X509Certificate convertPEMtoX509(String pemCert) throws CertificateException {
+        CertificateFactory fact = CertificateFactory.getInstance("X.509");
+        X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
+        return cer;
+    }
 
     @Transactional(readOnly = true)
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
-    public String getCertificateInfo(Integer orgID) throws CertificateException {
+    public CertificateInfo getCertificateInfo(Integer orgID) throws CertificateException {
 
         log.info(String.format("Retrieving signing certificate for org %d", orgID));
 
 
         String pemCert = jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
 
-        CertificateFactory fact = CertificateFactory.getInstance("X.509");
-        X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
 
-        return cer.toString();
+        return buildCertificateInfo(pemCert);
 
     }
 

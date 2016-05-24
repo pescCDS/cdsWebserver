@@ -207,11 +207,14 @@
         </dependency>
 
         <!-- http://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <!--
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.54</version>
         </dependency>
+        -->
+
 
 
     </dependencies>
@@ -338,7 +341,7 @@
                     <apiSources>
                         <apiSource>
                             <springmvc>false</springmvc>
-                            <locations>org.pesc.cds.webservice.service</locations>
+                            <locations>org.pesc.api</locations>
                             <schemes>http</schemes>
                             <host>localhost:8080</host>
                             <basePath>/services/rest/v1</basePath>

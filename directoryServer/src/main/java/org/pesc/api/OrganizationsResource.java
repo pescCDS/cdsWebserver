@@ -7,6 +7,7 @@ import io.swagger.annotations.ResponseHeader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
+import org.pesc.api.model.CertificateInfo;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.service.OrganizationService;
@@ -14,7 +15,6 @@ import org.pesc.service.PagedData;
 import org.pesc.service.SchoolCodesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import javax.jws.WebService;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
@@ -31,6 +31,7 @@ import java.util.List;
 @WebService
 @Path("/organizations")
 @Api("/organizations")
+@CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
 public class OrganizationsResource {
 
     private static final Log log = LogFactory.getLog(OrganizationsResource.class);
@@ -199,9 +200,9 @@ public class OrganizationsResource {
 
     @Path("/{id}/signing-certificate")
     @PUT
-    @Produces({MediaType.TEXT_HTML})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the signing certificate of the organization.")
-    public String udpateCertificateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String pemCert) {
+    public CertificateInfo udpateCertificateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String pemCert) {
 
         try {
 
@@ -218,15 +219,11 @@ public class OrganizationsResource {
 
     @Path("/{id}/signing-certificate")
     @GET
-    @Produces({MediaType.TEXT_HTML})
-    @ApiOperation("Get the PEM formatted signing certificate for the given organization.")
-    public String getCertificate(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id,
-                                 @QueryParam("format")  @ApiParam("'PEM' or 'INFO'.  'INFO' return a human readable description of the certificate.") String format) {
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Get certificate info including the PEM formatted signing certificate for the given organization.")
+    public CertificateInfo getCertificate(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id) {
 
         try {
-            if (format != null && format.equalsIgnoreCase("INFO")) {
-                return organizationService.getCertificateInfo(id);
-            }
 
             return organizationService.getPEMCertificate(id);
 
@@ -234,8 +231,6 @@ public class OrganizationsResource {
             log.error("Failed to retrieve signing certificate.", e);
             throw new WebApplicationException("Failed to retrieve certificate", e);
         }
-
-
     }
 
     public static void checkParameter(Object param, String parameterName) {

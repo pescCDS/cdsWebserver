@@ -769,7 +769,7 @@
         self.deleteEndpoint = deleteEndpoint;
         self.endpoints = [];
         self.pemCertificate = '';
-        self.certificateInfo = '';
+        self.certificateInfo = {};
         self.publicKey = '';
         self.addSchoolCode = addSchoolCode;
         self.editingSchoolCode = editingSchoolCode;
@@ -799,12 +799,14 @@
         self.showCertificateForm = false;
         self.setCertificate = setCertificate;
         self.toggleCertificateForm = toggleCertificateForm;
-        self.getCertificateInfo = getCertificateInfo;
+        self.getCertificate = getCertificate;
 
-        function getCertificateInfo() {
-            organizationService.getCertificateInfo(self.org).then(function(response){
+
+        function getCertificate() {
+            organizationService.getCertificate(self.org).then(function(response){
                 if (response.status = 200) {
                     self.certificateInfo = response.data;
+                    self.pemCertificate = self.certificateInfo.pem;
                 }
                 else {
                     toasterService.error("Failed to retrieve current signing certificate information.");
@@ -817,15 +819,7 @@
         function toggleCertificateForm () {
             self.showCertificateForm = !self.showCertificateForm;
             if (self.showCertificateForm == true && self.pemCertificate == '') {
-                organizationService.getCertificate(self.org).then(function(response){
-                    if (response.status = 200) {
-                        self.pemCertificate = response.data;
-                    }
-                    else {
-                        toasterService.error("Failed to retrieve current signing certificate.");
-                    }
-
-                });
+                 getCertificate();
             }
         }
 
@@ -971,7 +965,7 @@
         getEndpoints();
         getServiceProvidersForInstitution();
         getInstitutionsForServiceProvider();
-        getCertificateInfo();
+        getCertificate();
 
         function getEndpoints() {
             endpointService.getEndpoints(self.org).then(function (data) {
@@ -1597,8 +1591,7 @@
             isInstitution: isInstitution,
             getUploads: getUploads,
             getUploadResults: getUploadResults,
-            getCertificate: getCertificate,
-            getCertificateInfo: getCertificateInfo
+            getCertificate: getCertificate
         };
 
         return service;
@@ -1777,19 +1770,6 @@
             return deferred.promise;
         }
 
-        function getCertificateInfo(org) {
-
-            var deferred = $q.defer();
-
-            $http.get('/services/rest/v1/organizations/' + org.id + '/signing-certificate',{
-                params: {'format': 'INFO'},
-                cache: true
-            } ).then(function (response) {
-                deferred.resolve(response);
-            });
-
-            return deferred.promise;
-        }
 
 
         function createOrg(org) {

@@ -861,7 +861,30 @@
 
                 </div>
                 <div ng-show="orgCtrl.showCertificateForm == false">
-                    <p>{{orgCtrl.certificateInfo}}</p>
+                    <div>
+                        <label><b>Subject Distinguished Name (DN):</b></label>
+                        <span>{{orgCtrl.certificateInfo.subjectDN}}</span>
+                    </div>
+                    <div>
+                        <label><b>Issuer Distinguished Name (DN):</b></label>
+                        <span>{{orgCtrl.certificateInfo.issuerDN}}</span>
+                    </div>
+                    <div>
+                        <label><b>Invalid Before:</b></label>
+                        <span>{{orgCtrl.certificateInfo.notBefore | date:'MM/dd/yyyy'}}</span>
+                    </div>
+                    <div>
+                        <label><b>Invalid After:</b></label>
+                        <span>{{orgCtrl.certificateInfo.notAfter | date:'MM/dd/yyyy'}}</span>
+                    </div>
+                    <div>
+                        <label><b>Serial Number:</b></label>
+                        <span>{{orgCtrl.certificateInfo.serialNumber}}</span>
+                    </div>
+                    <div>
+                        <label><b>Version:</b></label>
+                        <span>{{orgCtrl.certificateInfo.version}}</span>
+                    </div>
                 </div>
             </form>
 
