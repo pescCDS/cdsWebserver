@@ -646,8 +646,7 @@
 </div>
 
 <div th:fragment="organization-details">
-    <div>
-
+   <div>
         <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow">
             <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
                 <div class="btn-group">
@@ -835,6 +834,41 @@
             </div>
         </div>
 
+        <div>
+            <form name="certificateForm" ng-submit="certificateForm.$valid && orgCtrl.setCertificate()" novalidate="novalidate">
+                <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
+
+
+                    <span  ng-show="orgCtrl.showCertificateForm == false" class="glyphicon glyphicon-pencil ed-icon-btn"
+                          ng-click="orgCtrl.toggleCertificateForm()"></span>
+
+
+                    <button ng-show="orgCtrl.showCertificateForm == true" class="glyphicon glyphicon-floppy-disk ed-icon-btn" type="submit"></button>
+
+
+
+                </div>
+
+                <div class="ed-title">Signing Certificate</div>
+
+                <div ng-show="orgCtrl.showCertificateForm == true">
+
+                        <div>
+                            <div class="form-group">
+                                <textarea  type="text" required="required" ng-minlength="100" style="width: 100%; height: 250px; padding: 10px;" ng-maxlength="2047" ng-model="orgCtrl.pemCertificate" placeholder="PEM Certificate"> </textarea>
+                            </div>
+                        </div>
+
+                </div>
+                <div ng-show="orgCtrl.showCertificateForm == false">
+                    <p>{{orgCtrl.certificateInfo}}</p>
+                </div>
+            </form>
+
+
+
+        </div>
+
         <div ng-show="orgCtrl.isServiceProvider()==true ">
             <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
 
@@ -897,7 +931,7 @@
         </div>
 
 
-    </div>
+   </div>
 </div>
 
 

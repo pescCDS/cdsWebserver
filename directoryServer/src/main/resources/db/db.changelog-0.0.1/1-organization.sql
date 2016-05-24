@@ -21,6 +21,8 @@ CREATE TABLE organization (
   ein VARCHAR(11) COMMENT 'Employer Identification Number (EIN) is also known as a Federal Tax Identification Number, and is used to identify a business entity',
   website VARCHAR(255) COMMENT 'Web Site address of organization',
   short_description VARCHAR(1024),
+  signing_certificate VARCHAR(4096) COMMENT 'The SSL certificate and public key used to verify documents signed with the paired private key.',
+  public_key VARCHAR(2048) COMMENT 'The PEM encoded public key extracted from the signing certificate, used to verify digital signatures.',
   terms_of_use TEXT COMMENT 'Rules which one must agree to abide by in order to use a service. Terms of service can also be merely a disclaimer, especially regarding the use of websites.',
   privacy_policy TEXT COMMENT 'A statement that discloses some or all of the ways a party gathers, uses, discloses and manages a customer or client''s data.',
   created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created Time',

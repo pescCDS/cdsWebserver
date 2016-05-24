@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.model.Organization;
-import org.pesc.api.model.Property;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.service.OrganizationService;
 import org.pesc.service.PagedData;
@@ -21,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +43,10 @@ public class OrganizationsResource {
 
     @Context
     private HttpServletResponse servletResponse;
+
+
+
+
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -182,20 +186,56 @@ public class OrganizationsResource {
 
 
 
-    @Path("/{id}/property")
+    @Path("/{id}/enabled")
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @ApiOperation("Update a specific property of an organization. This API is only accessible by a System Admin")
-    public void updateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id,
-                                Property property) {
+    @ApiOperation("Update the enabled property of the organization.")
+    public void updateEnabledProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, Boolean enabled) {
 
-        checkParameter(property, "property");
+        organizationService.setProperty(id, "enabled", enabled);
 
-        organizationService.setProperty(id, property.getName(), property.getValue());
+    }
 
-        if (property.getName().equalsIgnoreCase("enabled")) {
 
+    @Path("/{id}/signing-certificate")
+    @PUT
+    @Produces({MediaType.TEXT_HTML})
+    @ApiOperation("Update the signing certificate of the organization.")
+    public String udpateCertificateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String pemCert) {
+
+        try {
+
+            return organizationService.setCertificate(id, pemCert);
+
+
+        } catch (CertificateException e) {
+            log.error("Failed to read signing certificate.", e);
+            throw new WebApplicationException("Failed to save certificate", e);
         }
+
+
+    }
+
+    @Path("/{id}/signing-certificate")
+    @GET
+    @Produces({MediaType.TEXT_HTML})
+    @ApiOperation("Get the PEM formatted signing certificate for the given organization.")
+    public String getCertificate(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id,
+                                 @QueryParam("format")  @ApiParam("'PEM' or 'INFO'.  'INFO' return a human readable description of the certificate.") String format) {
+
+        try {
+            if (format != null && format.equalsIgnoreCase("INFO")) {
+                return organizationService.getCertificateInfo(id);
+            }
+
+            return organizationService.getPEMCertificate(id);
+
+        } catch (CertificateException e) {
+            log.error("Failed to retrieve signing certificate.", e);
+            throw new WebApplicationException("Failed to retrieve certificate", e);
+        }
+
+
     }
 
     public static void checkParameter(Object param, String parameterName) {

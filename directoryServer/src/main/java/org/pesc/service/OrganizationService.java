@@ -14,12 +14,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import sun.misc.BASE64Encoder;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.persistence.criteria.Predicate;
+import java.io.ByteArrayInputStream;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -129,6 +135,14 @@ public class OrganizationService {
 
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void setSigningCertificate(String pemFormatedCertificate, Integer orgID) {
+
+        jdbcTemplate.update("insert into organizations (signing_certificate) values(?) where id = ?", pemFormatedCertificate, orgID);
+
+    }
+
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public Organization update(Organization organization) {
         return this.organizationRepository.save(organization);
@@ -199,6 +213,53 @@ public class OrganizationService {
         jdbcTemplate.update(
                 String.format("update organization set %s = ? where id = ?", propertyName), propertyValue, orgID);
     }
+
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public String setCertificate(Integer orgID, String pemCert) throws CertificateException {
+
+        log.info(String.format("Updating signing certificate for org %d\n%s", orgID,  pemCert));
+
+        CertificateFactory fact = CertificateFactory.getInstance("X.509");
+        X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
+        PublicKey key = cer.getPublicKey();
+
+        String pemEncodedPublicKey = new BASE64Encoder().encode(key.getEncoded());
+
+        jdbcTemplate.update("update organization set signing_certificate = ?, public_key = ? where id = ?", pemCert, pemEncodedPublicKey, orgID);
+
+        return cer.toString();
+
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public String getPEMCertificate(Integer orgID) throws CertificateException {
+
+        log.info(String.format("Retrieving signing certificate for org %d", orgID));
+
+        return jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
+    }
+
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public String getCertificateInfo(Integer orgID) throws CertificateException {
+
+        log.info(String.format("Retrieving signing certificate for org %d", orgID));
+
+
+        String pemCert = jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
+
+        CertificateFactory fact = CertificateFactory.getInstance("X.509");
+        X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
+
+        return cer.toString();
+
+    }
+
+
 
 
     /**

@@ -768,6 +768,9 @@
         self.getEndpoints = getEndpoints;
         self.deleteEndpoint = deleteEndpoint;
         self.endpoints = [];
+        self.pemCertificate = '';
+        self.certificateInfo = '';
+        self.publicKey = '';
         self.addSchoolCode = addSchoolCode;
         self.editingSchoolCode = editingSchoolCode;
         self.removeSchoolCode = removeSchoolCode;
@@ -793,7 +796,57 @@
         self.totalServicedSchools = 0;
         self.servicedSchoolsOffset = 1;
         self.pageSize = 30;
+        self.showCertificateForm = false;
+        self.setCertificate = setCertificate;
+        self.toggleCertificateForm = toggleCertificateForm;
+        self.getCertificateInfo = getCertificateInfo;
 
+        function getCertificateInfo() {
+            organizationService.getCertificateInfo(self.org).then(function(response){
+                if (response.status = 200) {
+                    self.certificateInfo = response.data;
+                }
+                else {
+                    toasterService.error("Failed to retrieve current signing certificate information.");
+                }
+
+            });
+        }
+
+
+        function toggleCertificateForm () {
+            self.showCertificateForm = !self.showCertificateForm;
+            if (self.showCertificateForm == true && self.pemCertificate == '') {
+                organizationService.getCertificate(self.org).then(function(response){
+                    if (response.status = 200) {
+                        self.pemCertificate = response.data;
+                    }
+                    else {
+                        toasterService.error("Failed to retrieve current signing certificate.");
+                    }
+
+                });
+            }
+        }
+
+        function setCertificate() {
+
+            organizationService.updateCertificate(self.org,self.pemCertificate).then(function(response){
+
+                if (response.status == 200) {
+                    self.certificateInfo = response.data;
+                    self.showCertificateForm = false;
+                    toasterService.success("Successfully updated certificate.");
+                }
+                else {
+                    toasterService.error("Failed to uopdate signing certificate.");
+                }
+
+            },function(data){
+                toasterService.error(data);
+            })
+
+        };
 
 
         function hasOrgType(orgType) {
@@ -813,7 +866,7 @@
                     templateUrl: 'upload-institutions.html',
                     controller: 'UploadController',
                     controllerAs: 'uploadCtrl',
-                    size: 'lq',
+                    size: 'lg',
                     resolve: {
                         org: function () {
                             return self.org;
@@ -918,6 +971,7 @@
         getEndpoints();
         getServiceProvidersForInstitution();
         getInstitutionsForServiceProvider();
+        getCertificateInfo();
 
         function getEndpoints() {
             endpointService.getEndpoints(self.org).then(function (data) {
@@ -1536,12 +1590,15 @@
             updateEndpoints: updateEndpoints,
             register: register,
             updateEnabled: updateEnabled,
+            updateCertificate: updateCertificate,
             initialize: initialize,
             hasOrgType: hasOrgType,
             isServiceProvider: isServiceProvider,
             isInstitution: isInstitution,
             getUploads: getUploads,
-            getUploadResults: getUploadResults
+            getUploadResults: getUploadResults,
+            getCertificate: getCertificate,
+            getCertificateInfo: getCertificateInfo
         };
 
         return service;
@@ -1557,6 +1614,8 @@
                         activeOrg.institutions = response.data;
                     });
                 });
+
+                organizationService.getCertificate
 
             }
         }
@@ -1686,11 +1745,47 @@
 
             var deferred = $q.defer();
 
-            $http.put('/services/rest/v1/organizations/' + org.id + '/property', { 'name' : 'enabled', 'value': enabled}).success(function (data) {
+            $http.put('/services/rest/v1/organizations/' + org.id + '/enabled', enabled ).success(function (data) {
                 deferred.resolve(org);
             }).error(function (data) {
                 toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating the organization's enabled status.");
+            });
+
+            return deferred.promise;
+        }
+
+        function updateCertificate(org, pemCert) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/organizations/' + org.id + '/signing-certificate', pemCert ).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+        function getCertificate(org) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations/' + org.id + '/signing-certificate' ).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+        function getCertificateInfo(org) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations/' + org.id + '/signing-certificate',{
+                params: {'format': 'INFO'},
+                cache: true
+            } ).then(function (response) {
+                deferred.resolve(response);
             });
 
             return deferred.promise;
