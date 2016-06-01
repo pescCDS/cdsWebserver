@@ -5,6 +5,8 @@ package org.pesc.api.model;
  */
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -17,9 +19,11 @@ import java.util.Set;
 @Entity
 @Table(name = "organization")
 @JsonPropertyOrder({ "name", "website", "street", "city", "state", "zip", "organizationTypes", "schoolCodes" })
+@ApiModel
 public class Organization implements Serializable {
 
     @Column(name = "name")
+    @ApiModelProperty(position = 1, required = true, value="The free form name of the organization.")
     private String name;
 
 

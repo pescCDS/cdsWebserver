@@ -2,6 +2,7 @@ package org.pesc.config;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jersey.listing.ApiListingResourceJSON;
 import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.endpoint.Server;
@@ -62,6 +63,7 @@ public class ServiceConfig {
     public ApiListingResourceJSON apiListingResourceJSON() {
         return new ApiListingResourceJSON();
     }
+
 
     //A WADL is provided by default by the CXF RS implementation---no need to add it to swagger.
     /*

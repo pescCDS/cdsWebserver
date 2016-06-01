@@ -187,13 +187,14 @@ public class OrganizationsResource {
 
 
 
+
     @Path("/{id}/enabled")
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the enabled property of the organization.")
-    public void updateEnabledProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, Boolean enabled) {
+    public void updateEnabledProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String enabled) {
 
-        organizationService.setProperty(id, "enabled", enabled);
+        organizationService.setProperty(id, "enabled", Boolean.valueOf(enabled));
 
     }
 

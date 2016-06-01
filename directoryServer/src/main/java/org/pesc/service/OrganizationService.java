@@ -15,15 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import sun.misc.BASE64Encoder;
-import sun.security.krb5.internal.crypto.KeyUsage;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import javax.persistence.criteria.Predicate;
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -217,6 +214,22 @@ public class OrganizationService {
     }
 
 
+    private String convertPublicKeyToPEM(PublicKey key) {
+        StringBuilder pem = new StringBuilder();
+
+        pem.append("-----BEGIN PUBLIC KEY-----\r\n");
+        String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
+        pem.append(encodedKey.replaceAll("(.{64})", "$1\r\n"));
+
+        if (pem.charAt(pem.length()-1) != '\n') {
+            pem.append("\r\n");
+        }
+
+        pem.append("-----END PUBLIC KEY-----\r\n");
+
+
+        return pem.toString();
+    }
 
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -229,9 +242,7 @@ public class OrganizationService {
         X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
         PublicKey key = cer.getPublicKey();
 
-        String pemEncodedPublicKey = new BASE64Encoder().encode(key.getEncoded());
-
-        jdbcTemplate.update("update organization set signing_certificate = ?, public_key = ? where id = ?", pemCert, pemEncodedPublicKey, orgID);
+        jdbcTemplate.update("update organization set signing_certificate = ?, public_key = ? where id = ?", pemCert, convertPublicKeyToPEM(key), orgID);
 
         return buildCertificateInfo(pemCert);
     }
@@ -247,18 +258,22 @@ public class OrganizationService {
 
     private CertificateInfo buildCertificateInfo(String pemCert) throws CertificateException{
 
-        X509Certificate cer = convertPEMtoX509(pemCert);
-
         CertificateInfo info = new CertificateInfo();
 
-        info.setAlgorithmUsedToSign(cer.getSigAlgName());
-        info.setIssuerDN(cer.getIssuerDN().getName());
-        info.setNotAfter(cer.getNotAfter());
-        info.setNotBefore(cer.getNotBefore());
-        info.setSerialNumber(cer.getSerialNumber());
-        info.setVersion(cer.getVersion());
-        info.setSubjectDN(cer.getSubjectDN().getName());
-        info.setPem(pemCert);
+        if (!StringUtils.isEmpty(pemCert)) {
+            X509Certificate cer = convertPEMtoX509(pemCert);
+
+
+            info.setAlgorithmUsedToSign(cer.getSigAlgName());
+            info.setIssuerDN(cer.getIssuerDN().getName());
+            info.setNotAfter(cer.getNotAfter());
+            info.setNotBefore(cer.getNotBefore());
+            info.setSerialNumber(cer.getSerialNumber());
+            info.setVersion(cer.getVersion());
+            info.setSubjectDN(cer.getSubjectDN().getName());
+            info.setPem(pemCert);
+        }
+
 
         return info;
     }
