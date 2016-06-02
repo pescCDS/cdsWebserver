@@ -112,7 +112,7 @@ public class InstitutionResource {
         DataHandler handler = attachment.getDataHandler();
         try {
             InputStream stream = handler.getInputStream();
-            MultivaluedMap<String, String> map = attachment.getHeaders();
+            //MultivaluedMap<String, String> map = attachment.getHeaders();
             //System.out.println("fileName Here" + getFileName(map));
 
 

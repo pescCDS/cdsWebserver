@@ -149,7 +149,7 @@ public class OrganizationsResource {
     @Path("/{id}")
     @POST
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @ApiOperation("Add the the endpoint with the given ID to the organization's list of endpoints.")
+    @ApiOperation("Add the endpoint with the given ID to the organization's list of endpoints.")
     public void updateEndpoints(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id,
                                 @QueryParam("endpoint_id") @ApiParam(value="The identifier for the endpoint.", required = true) Integer endpointID,
                                 @QueryParam("operation") @ApiParam(value="The operation to perform. Must by case insensitive 'add' or 'remove'.", required = true) String operation) {

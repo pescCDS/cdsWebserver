@@ -79,6 +79,8 @@
                 <th>ID</th>
                 <th>Operation</th>
                 <th>Format</th>
+                <th>Type</th>
+                <th>Dept.</th>
                 <th>Size</th>
                 <th>Path</th>
                 <th>Send Date/Time</th>
@@ -91,8 +93,10 @@
             <tbody>
             <tr ng-repeat="tran in transactionCtrl.transactions">
                 <td>{{tran.id}}</td>
-                <td>{{tran.direction}}</td>
+                <td>{{tran.operation}}</td>
                 <td>{{tran.fileFormat}}</td>
+                <td>{{tran.documentType}}</td>
+                <td>{{tran.department}}</td>
                 <td>{{tran.fileSize | bytes}}</td>
                 <td>
                     <a ng-href="files?tran_id={{tran.id}}">{{tran.filePath}}</a>
@@ -103,7 +107,7 @@
                 <td>{{tran.error}}</td>
                 <td>{{tran.status}}</td>
                 <td>
-                    <button ng-show="tran.direction == 'SEND'" type="button" ng-click="transactionCtrl.resend(tran)" class="btn btn-primary btn-sm">
+                    <button ng-show="tran.operation == 'SEND'" type="button" ng-click="transactionCtrl.resend(tran)" class="btn btn-primary btn-sm">
                         <span class="glyphicon glyphicon-send"></span> Resend
                     </button>
                 </td>

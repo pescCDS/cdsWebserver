@@ -428,6 +428,7 @@
                     <h4>
                         <input class="form-control" type="text" placeholder="Address" required="required" ng-model="endpoint.address"> </input>
                     </h4>
+                    <p class="help-block">multipart/form-data</p>
                     <p>
                         <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
                     </p>
@@ -507,6 +508,7 @@
             </div>
             <div ng-show="!endpointCtrl.showForm(endpoint)">
                 <h4>{{endpoint.address}}</h4>
+                <p class="help-block">multipart/form-data</p>
                 <p>{{endpoint.instructions}}</p>
                 <div><strong>Document Format</strong></div>
 

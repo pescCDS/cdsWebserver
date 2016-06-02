@@ -288,16 +288,13 @@
         function uploadFileToUrl(file, fileFormat, documentType, department, schoolCode, schoolCodeType){
             var fd = new FormData();
             fd.append('file', file);
-            fd.append('recipientId', 1);
-            fd.append('networkServerId', 3);
-            fd.append('senderId', 3);
-            fd.append('fileFormat', fileFormat );
-            fd.append('schoolCode', schoolCode);
-            fd.append('schoolCodeType', schoolCodeType);
-            fd.append('documentType', documentType);
+            fd.append('file_format', fileFormat );
+            fd.append('school_code', schoolCode);
+            fd.append('school_code_type', schoolCodeType);
+            fd.append('document_type', documentType);
             fd.append('department', department);
 
-            $http.post('/documents/outbox', fd, {
+            $http.post('/api/v1/documents/outbox', fd, {
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
             })
@@ -411,7 +408,7 @@
         function resend(tran) {
             var deferred = $q.defer();
 
-            $http.get('/documents/send', {
+            $http.get('/api/v1/documents/send', {
                 'params': {
                     'transaction_id': tran.id
                 },
@@ -431,7 +428,7 @@
 
             var deferred = $q.defer();
 
-            $http.get('/transactions', {
+            $http.get('/api/v1/transactions', {
                 'params': {
                     'fetchSize': fetchSize,
                     'from': startDate,

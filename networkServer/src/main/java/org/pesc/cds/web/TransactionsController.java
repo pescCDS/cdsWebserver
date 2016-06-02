@@ -15,10 +15,7 @@ import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
 import javax.ws.rs.Path;
@@ -29,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping(value="/api/v1/transactions")
 public class TransactionsController {
 	
 	private static final Log log = LogFactory.getLog(TransactionsController.class);
@@ -49,7 +47,7 @@ public class TransactionsController {
 	 * @param fetchSize <code></code> 
 	 * @return <code>List&lt;Transaction%gt;</code> Transactions matching the passed parameters.
 	 */
-	@RequestMapping(value="/transactions", method= RequestMethod.GET)
+	@RequestMapping(method= RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
 	public List<Transaction> getTransactions(
@@ -87,7 +85,7 @@ public class TransactionsController {
 
 
 
-	@RequestMapping(value="/transactions", method= RequestMethod.POST)
+	@RequestMapping(method= RequestMethod.POST)
 	public void markAsReceived(@RequestParam(value="transactionId", required=true) Integer transactionId) {
 		Transaction tx = transactionService.findById(transactionId);
 		if(tx!=null) {

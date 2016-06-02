@@ -144,7 +144,7 @@ public class DirectoryApplicationTests {
 
 
 		Endpoint endpoint = new Endpoint();
-		endpoint.setAddress("http://localhost:8000/documents/oubox");
+		endpoint.setAddress("http://localhost:8000/api/documents/outbox");
 		endpoint.setConfirmDelivery(true);
 		endpoint.setDeliveryMethod(deliveryMethod);
 		endpoint.setDocumentType(documentType);

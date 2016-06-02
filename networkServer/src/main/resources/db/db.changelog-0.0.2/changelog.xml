@@ -4,9 +4,9 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
 	<changeSet id="3" author="owenwe" context="dev, ci, prod" >
-		<comment>This changeSet adds the filePath field to the transactions table.</comment>
+		<comment>This changeSet adds the file_path field to the transactions table.</comment>
 
-		<sql dbms="mysql" >ALTER TABLE `transactions` ADD COLUMN `filePath` VARCHAR(256) NULL DEFAULT NULL AFTER `fileSize`;</sql>
+		<sql dbms="mysql" >ALTER TABLE `transactions` ADD COLUMN `file_path` VARCHAR(256) NULL DEFAULT NULL AFTER `file_size`;</sql>
 
 	</changeSet>
 
