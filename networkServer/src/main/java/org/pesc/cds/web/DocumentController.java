@@ -11,6 +11,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
+import org.pesc.cds.service.PKIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -35,8 +38,14 @@ import javax.persistence.EntityManager;
 import javax.websocket.server.PathParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -82,8 +91,16 @@ public class DocumentController {
 	@Value("${api.endpoints}")
 	private String endpointsApiPath;
 
+
+	@Value("${api.public_key}")
+	private String publicKeyApiPath;
+
 	@Autowired
 	private TransactionService transactionService;
+
+	@Autowired
+	PKIService pkiService;
+
 
 	@RequestMapping(value="/send", method= RequestMethod.GET)
 	@ResponseBody
@@ -204,6 +221,42 @@ public class DocumentController {
 		return endpointURI;
 	}
 
+	private String getPEMPublicKeyByOrgID(int orgID) {
+		StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + "/services/rest/v1/organizations/" + orgID + "/public-key");
+
+		CloseableHttpClient client = HttpClients.custom().build();
+		String pemPublicKey = null;
+		try {
+			HttpGet get = new HttpGet(uri.toString());
+			get.setHeader(HttpHeaders.ACCEPT, "text/html");
+			CloseableHttpResponse response = client.execute(get);
+			try {
+
+				HttpEntity resEntity = response.getEntity();
+				if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
+					pemPublicKey = EntityUtils.toString(resEntity);
+				}
+				EntityUtils.consume(resEntity);
+			}
+			finally {
+				response.close();
+			}
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				client.close();
+			}
+			catch (IOException e) {
+
+			}
+		}
+		return pemPublicKey;
+	}
+
+
 	private String getEndpointURIForSchool(String schoolCode, String schoolCodeType, String documentFormat, String documentType, String department, Transaction tx) {
 
 		int orgID = getOrganizationId(schoolCode, schoolCodeType);
@@ -254,6 +307,8 @@ public class DocumentController {
 		}
 		return orgID;
 	}
+
+
 
 
 	/**
@@ -317,15 +372,19 @@ public class DocumentController {
 	            Transaction savedTx = transactionService.create(tx);
 	            
 	            log.debug(String.format(
-	            	"saved Transaction: {%n  recipientId: %s,%n  networkServerId: %s,%n  senderId: %s,%n  fileFormat: %s%n}",
-	            	savedTx.getRecipientId(),
-	            	savedTx.getNetworkServerId(),
-	            	savedTx.getSenderId(),
-	            	savedTx.getFileFormat()
-	            ));
+						"saved Transaction: {%n  recipientId: %s,%n  networkServerId: %s,%n  senderId: %s,%n  fileFormat: %s%n}",
+						savedTx.getRecipientId(),
+						savedTx.getNetworkServerId(),
+						savedTx.getSenderId(),
+						savedTx.getFileFormat()
+				));
 
 	            redir.addFlashAttribute("error", false);
 	            redir.addFlashAttribute("status", "Upload successfull");
+
+				byte[] fileSignature = pkiService.createDigitalSignature(new FileInputStream(outboxFile), pkiService.getSigningKeys().getPrivate());
+
+				ContentBody signature = new ByteArrayBody(fileSignature, "signature.dat");
 
 	            // send http post to network server
 	            CloseableHttpClient client = HttpClients.createDefault();
@@ -333,13 +392,15 @@ public class DocumentController {
 	            	HttpPost post = new HttpPost(endpointURI);
 	            	
 	            	HttpEntity reqEntity = MultipartEntityBuilder.create()
-            			.addPart("recipientId", new StringBody(localServerId))
-            			.addPart("networkServerId", new StringBody(recipientId.toString()))
-            			.addPart("fileFormat", new StringBody(fileFormat))
-            			.addPart("transactionId", new StringBody(tx.getId().toString()))
-            			.addPart("webServiceUrl", new StringBody(localServerWebServiceURL))
-            			.addPart("file", new FileBody(outboxFile))
-            			.build();
+							.addPart("recipientId", new StringBody(localServerId))
+							.addPart("networkServerId", new StringBody(recipientId.toString()))
+							.addPart("senderId", new StringBody(localServerId))
+							.addPart("fileFormat", new StringBody(fileFormat))
+							.addPart("transactionId", new StringBody(tx.getId().toString()))
+							.addPart("webServiceUrl", new StringBody(localServerWebServiceURL))
+							.addPart("file", new FileBody(outboxFile))
+							.addPart("signature", signature)
+            				.build();
 	            	post.setEntity(reqEntity);
 
 					CloseableHttpResponse response = client.execute(post);
@@ -376,7 +437,8 @@ public class DocumentController {
 
 		return mav;
 	}
-	
+
+
 	/**
 	 * When another network server sends a file
 	 * 
@@ -390,7 +452,9 @@ public class DocumentController {
 	public void receiveFile(
 			@RequestParam(value="recipientId", required=false) Integer recipientId,
 			@RequestParam(value="networkServerId", required=false) Integer networkServerId,
+			@RequestParam(value="senderId", required=false) Integer senderId,
 			@RequestParam(value="file") MultipartFile multipartFile,
+			@RequestParam(value="signature") MultipartFile signatureFile,
 			@RequestParam(value="fileFormat", required=false) String fileFormat,
 			@RequestParam(value="transactionId", required=false) Integer transactionId,
 			@RequestParam(value="webServiceUrl", required=false) String webServiceUrl
@@ -398,6 +462,11 @@ public class DocumentController {
 		
 		log.debug(String.format("received file from network server " + recipientId));
 
+
+		if (multipartFile == null || signatureFile == null){
+			log.error("Incorrect number of file uploaded.  Is the digital signature file present?");
+			throw new WebApplicationException("A file and it's digital signature are required.");
+		}
 		Transaction tx = new Transaction();
 		// we need the directoryId for this organization in the organizations table
 		tx.setRecipientId(networkServerId);
@@ -416,18 +485,28 @@ public class DocumentController {
 
 		try {
 
-
 			File f =  new File(inboxDirectory, savedTx.getId().toString()+"-"+multipartFile.getOriginalFilename());
 
 
 			byte[] bytes = multipartFile.getBytes();
 
-	    	File fp = f.getParentFile();
+			String pemPublicKey = getPEMPublicKeyByOrgID(senderId);
+
+
+			PublicKey senderPublicKey = pkiService.convertPEMPublicKey(pemPublicKey);
+
+
+			if ( true == pkiService.verifySignature(signatureFile.getInputStream(),signatureFile.getBytes(), senderPublicKey)) {
+				throw new WebApplicationException("Invalid digital signature found.  File discarded.");
+			}
+
+
+			File fp = f.getParentFile();
 	    	if(!fp.exists() && !fp.mkdirs()) {
 	    		tx.setError("Could not create directory: " + fp);
 			} else {
 				try {
-					if(!f.createNewFile()) {
+					if (!f.createNewFile()) {
 						tx.setError(String.format("file %s already exists", multipartFile.getOriginalFilename()));
 					} else {
 						tx.setFilePath(f.getPath());
@@ -435,8 +514,8 @@ public class DocumentController {
 			            stream.write(bytes);
 			            stream.close();
 					}
-					
-					
+
+
 				} catch(IOException ioex) {
 					tx.setError(ioex.getMessage());
 				}

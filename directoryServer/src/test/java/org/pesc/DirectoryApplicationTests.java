@@ -84,7 +84,7 @@ public class DirectoryApplicationTests {
 		assertThat ("There should be at least 3 organizations!", organizations.size() > 2);
 
 		organizations = restTemplate.getForObject("http://localhost:" + port +  "/services/rest/v1/organizations?enabled=false&limit=5&offset=0", List.class);
-		assertThat ("There should be at least 0 organizations!", organizations.isEmpty());
+		assertThat ("There should be at 0 organizations!", organizations.isEmpty());
 
 		organizations = restTemplate.getForObject("http://localhost:" + port +  "/services/rest/v1/organizations?enabled=true&organizationCodeType=ATP&organizationCode=4226&limit=5&offset=0", List.class);
 		assertThat ("There should be at least 1 organizations!", organizations.size() == 1);

@@ -236,7 +236,7 @@ public class OrganizationService {
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public CertificateInfo setCertificate(Integer orgID, String pemCert) throws CertificateException {
 
-        log.info(String.format("Updating signing certificate for org %d\n%s", orgID,  pemCert));
+        log.info(String.format("Updating signing certificate for org %d\n%s", orgID, pemCert));
 
         CertificateFactory fact = CertificateFactory.getInstance("X.509");
         X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
@@ -254,6 +254,14 @@ public class OrganizationService {
         log.info(String.format("Retrieving signing certificate for org %d", orgID));
 
         return buildCertificateInfo(jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class) );
+    }
+
+    @Transactional(readOnly = true)
+    public String getPEMPublicKey(Integer orgID) throws CertificateException {
+
+        log.info(String.format("Retrieving public key for org %d", orgID));
+
+        return jdbcTemplate.queryForObject("SELECT public_key FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
     }
 
     private CertificateInfo buildCertificateInfo(String pemCert) throws CertificateException{

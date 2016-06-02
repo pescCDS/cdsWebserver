@@ -234,6 +234,22 @@ public class OrganizationsResource {
         }
     }
 
+    @Path("/{id}/public-key")
+    @GET
+    @Produces({MediaType.TEXT_HTML})
+    @ApiOperation("Get PEM formatted public key associated with the signing certificate used to digitally sign documents.")
+    public String getPublicKey(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id) {
+
+        try {
+
+            return organizationService.getPEMPublicKey(id);
+
+        } catch (CertificateException e) {
+            log.error("Failed to retrieve public key.", e);
+            throw new WebApplicationException("Failed to public key", e);
+        }
+    }
+
     public static void checkParameter(Object param, String parameterName) {
         if (param == null) {
             throw new WebApplicationException(String.format("The %s parameter is required.", parameterName));

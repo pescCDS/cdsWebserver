@@ -289,8 +289,8 @@
             var fd = new FormData();
             fd.append('file', file);
             fd.append('recipientId', 1);
-            fd.append('networkServerId', 1);
-            fd.append('senderId', 1);
+            fd.append('networkServerId', 3);
+            fd.append('senderId', 3);
             fd.append('fileFormat', fileFormat );
             fd.append('schoolCode', schoolCode);
             fd.append('schoolCodeType', schoolCodeType);
