@@ -8,8 +8,8 @@ CREATE TABLE organization_type (
 
 INSERT INTO organization_type (name,description) VALUES
 ('System','The organization that manages the Directory server.'),
-('Institution','An educational entity that intends to receive documents through EDExchange.  This type of organization cannot create or host endpoints.'),
-('Service Provider','An organization that can create and host endpoints for itself or for other institutions.');
+('Institution','An educational entity that can receive documents through a service provider and send digitally signed documents after providing a valid SSL certificate to EDExchange.'),
+('Service Provider','An organization that sends and receives documents on behalf of itself and/or other institutions.  Requires a network server implementation.');
 
 
 CREATE TABLE organization (

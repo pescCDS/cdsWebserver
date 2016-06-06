@@ -42,7 +42,7 @@ import java.util.Calendar;
 import java.util.List;
 
 @RestController
-@RequestMapping(value="/api/v1/documents")
+@RequestMapping(value="api/v1/documents")
 public class DocumentController {
 	
 	private static final Log log = LogFactory.getLog(DocumentController.class);

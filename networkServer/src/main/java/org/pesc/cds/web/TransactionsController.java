@@ -27,7 +27,7 @@ import java.util.Calendar;
 import java.util.List;
 
 @RestController
-@RequestMapping(value="/api/v1/transactions")
+@RequestMapping(value="api/v1/transactions")
 public class TransactionsController {
 	
 	private static final Log log = LogFactory.getLog(TransactionsController.class);

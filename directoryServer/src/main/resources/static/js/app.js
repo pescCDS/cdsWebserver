@@ -350,8 +350,8 @@
 
     }
 
-    RegistrationController.$inject = ['organizationService', 'toasterService', '$window'];
-    function RegistrationController(organizationService, toasterService, $window) {
+    RegistrationController.$inject = ['organizationService', 'toasterService', '$window', '$location'];
+    function RegistrationController(organizationService, toasterService, $window, $location) {
         var self = this;
         self.register = register;
         self.hasOrgType=hasOrgType;
@@ -388,6 +388,7 @@
 
             organizationService.register(bag).then(function (data) {
                     toasterService.success("Thank you for registering.  An email will be sent to " + self.user.email + " when your organization becomes activated.");
+                    $location.path('/login')
 
                 },
                 function (response) {
