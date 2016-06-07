@@ -20,9 +20,9 @@
     <uib-pagination
             total-items="transactionCtrl.totalRecords"
             ng-model="transactionCtrl.offset"
-            max-size="5"
+            max-size="10"
             class="pagination-sm"
-            items-per-page="transactionCtrl.pageSize"
+            items-per-page="transactionCtrl.limit"
             boundary-link-numbers="true"
             rotate="false" ng-change="transactionCtrl.getTransactions()"></uib-pagination>
 

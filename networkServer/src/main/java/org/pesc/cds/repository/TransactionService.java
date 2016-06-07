@@ -2,6 +2,7 @@ package org.pesc.cds.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.cds.domain.PagedData;
 import org.pesc.cds.domain.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,20 +70,81 @@ public class TransactionService {
         return this.transactionRepository.findOne(id);
     }
 
+    public Predicate[] createPredicates(CriteriaBuilder cb, Root<Transaction> transactionRoot,  Integer senderId,
+                                        String status,
+                                        Date startDate,
+                                        Date endDate) {
+        List<Predicate> predicates = new LinkedList<Predicate>();
 
+        if(senderId!=null) {
+            predicates.add(cb.equal(transactionRoot.get("senderId"), senderId));
+        }
+
+
+        if(status != null) {
+            predicates.add(cb.equal(transactionRoot.get("acknowledged"), "complete".equalsIgnoreCase(status) ? true : false));
+        }
+
+        if(startDate!=null && endDate != null) {
+
+            predicates.add(cb.between(transactionRoot.<Date>get("occurredAt"), startDate, endDate));
+
+        }
+
+
+        Predicate[] predicateArray = new Predicate[predicates.size()];
+        predicates.toArray(predicateArray);
+
+        return predicateArray;
+    }
+
+
+    private Long getResultLength(  Integer senderId,
+                                   String status,
+                                   Date startDate,
+                                   Date endDate ) {
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        try {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+            Root<Transaction> countRoot = countQuery.from(Transaction.class);
+            countQuery.select(cb.count(countRoot));
+            Predicate[] predicates = createPredicates(cb,
+                    countRoot,
+                    senderId,
+                    status,
+                    startDate,
+                    endDate
+                    );
+
+
+            countQuery.where(predicates);
+
+            return entityManager.createQuery(countQuery).getSingleResult();
+        }
+        catch (Exception e){
+            log.error("Failed to retrieve result length.", e);
+        }
+        finally {
+            entityManager.close();
+        }
+
+        return 0L;
+    }
 
     /**
      *
      * @return
      */
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    public List<Transaction> search(
+    public PagedData<Transaction> search(
             Integer senderId,
             String status,
             Date startDate,
             Date endDate,
-            Long limit,
-            Long offset
+            PagedData<Transaction> pagedData
     ) {
         EntityManager entityManager =  entityManagerFactory.createEntityManager();
         try {
@@ -93,31 +155,18 @@ public class TransactionService {
             Root<Transaction> transactionRoot = cq.from(Transaction.class);
             cq.select(transactionRoot);
 
-            List<Predicate> predicates = new LinkedList<Predicate>();
-
-            if(senderId!=null) {
-                predicates.add(cb.equal(transactionRoot.get("senderId"), senderId));
-            }
+            Predicate[] predicates = createPredicates(cb, transactionRoot, senderId, status, startDate, endDate);
 
 
-            if(status != null) {
-                predicates.add(cb.equal(transactionRoot.get("acknowledged"), "complete".equalsIgnoreCase(status) ? true : false));
-            }
-
-            if(startDate!=null && endDate != null) {
-
-                predicates.add(cb.between(transactionRoot.<Date>get("occurredAt"), startDate, endDate));
-
-            }
-
-            Predicate[] predicateArray = new Predicate[predicates.size()];
-            predicates.toArray(predicateArray);
-
-            cq.where(predicateArray);
+            cq.where(predicates);
             TypedQuery<Transaction> q = entityManager.createQuery(cq);
+            q.setFirstResult(pagedData.getOffset());
+            q.setMaxResults(pagedData.getLimit());
+            pagedData.setData(q.getResultList());
 
-            return q.getResultList();
+            pagedData.setTotal(getResultLength(senderId,status,startDate,endDate));
 
+            return pagedData;
 
         } catch(Exception ex) {
             log.error("Failed to execute transaction search query.", ex);
@@ -125,7 +174,12 @@ public class TransactionService {
         finally {
             entityManager.close();
         }
-        return new ArrayList<Transaction>();
+
+        pagedData.setLimit(0);
+        pagedData.setOffset(0);
+        pagedData.setTotal(0L);
+        pagedData.setData(new ArrayList<Transaction>());
+        return pagedData;
     }
 
 }

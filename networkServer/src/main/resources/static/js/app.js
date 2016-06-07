@@ -37,12 +37,7 @@
             .when("/transaction-report", {
                 templateUrl: "transaction-report",
                 controller: "TransactionController",
-                controllerAs: 'transactionCtrl',
-                resolve: {
-                    transactions: ['transactionService', function (transactionService) {
-                        return transactionService.getTransactions('Complete',null,null,20,0);
-                    }]
-                }
+                controllerAs: 'transactionCtrl'
             })
             .when("/upload", {
                 templateUrl: "upload",
@@ -58,11 +53,11 @@
             });
     }
 
-    TransactionController.$inject = ['transactionService', 'transactions', 'toasterService'];
-    function TransactionController(transactionService, transactions, toasterService) {
+    TransactionController.$inject = ['transactionService', 'toasterService'];
+    function TransactionController(transactionService, toasterService) {
         var self = this;
 
-        self.transactions = transactions;
+        self.transactions = [];
         self.status = 'Complete';
         self.startDate = '';
         self.stopDate = '';
@@ -93,6 +88,13 @@
 
         self.getTransactions = getTransactions;
 
+        activate();
+
+        function activate() {
+
+            getTransactions();
+
+        }
 
         function getRecipientURL(tran) {
             return "http://" + directoryServer + "/services/rest/v1/organizations/" + tran.recipientId;
@@ -133,8 +135,9 @@
                 self.startDate,
                 self.endDate,
                 self.limit,
-                self.offset).then(function(data){
-                self.transactions = data;
+                self.offset).then(function(response){
+                    self.transactions = response.data;
+                    self.totalRecords = response.headers('X-Total-Count');
 
             });
         }
@@ -450,11 +453,8 @@
                     'status': status
                 },
                 cache: false
-            }).success(function (data) {
-                deferred.resolve(data);
-            }).error(function(data){
-                toasterService.ajaxInfo(data);
-                deferred.reject("An error occured while fetching transactions.");
+            }).then(function (response) {
+                deferred.resolve(response);
             });
 
             return deferred.promise;
