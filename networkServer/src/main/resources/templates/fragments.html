@@ -8,6 +8,16 @@
 
 <div th:fragment="transactions">
 
+    <uib-pagination
+            total-items="transactionCtrl.totalRecords"
+            ng-model="transactionCtrl.offset"
+            max-size="5"
+            class="pagination-sm"
+            items-per-page="transactionCtrl.pageSize"
+            boundary-link-numbers="true"
+            rotate="false" ng-change="transactionCtrl.getTransactions()"></uib-pagination>
+
+
     <form name="transactionFrom" ng-submit="transactionCtrl.getTransactions()" novalidate="novalidate" class="glow">
 
         <div class="form-group">
@@ -57,7 +67,7 @@
             <strong>Fetch Size</strong>
 
             <div>
-                <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.fetchSize" min="1"
+                <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.pageSize" min="1"
                        max="1000">
             </div>
         </div>

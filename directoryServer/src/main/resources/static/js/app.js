@@ -14,6 +14,7 @@
         .service('endpointService', endpointService)
         .service('messageService', messageService)
         .service('fileUpload', fileUpload)
+        .service('contactService', contactService)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
@@ -754,9 +755,9 @@
         }
     }
 
-    OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService', '$window', '$uibModal', '$log'];
+    OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService', '$window', '$uibModal', '$log', 'contactService'];
 
-    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, toasterService, $window, $uibModal, $log) {
+    function OrgController($routeParams, organizationService, org, userService, endpointService, schoolCodesService, toasterService, $window, $uibModal, $log, contactService) {
         var self = this;
 
         self.org = org[0];  //should be an array with a single element
@@ -801,6 +802,81 @@
         self.setCertificate = setCertificate;
         self.toggleCertificateForm = toggleCertificateForm;
         self.getCertificate = getCertificate;
+        self.saveContact = saveContact;
+        self.showContactForm = showContactForm;
+        self.editContact = editContact;
+        self.deleteContact = deleteContact;
+        self.createContact = createContact;
+
+        function createContact() {
+            var contact = {
+                editing : true,
+                name : '',
+                email : '',
+                phone1: '',
+                phone2: '',
+                address: '',
+                title: '',
+                organizationId : self.org.id
+            };
+            self.org.contacts.unshift(contact);
+        }
+
+        function removeContactFromModel(contact) {
+            var index = self.org.contacts.indexOf(contact);
+            if (index > -1) {
+                self.org.contacts.splice(index, 1);
+            }
+        };
+
+        function deleteContact(contact) {
+
+            if (contact.hasOwnProperty('id')) {
+
+                contactService.deleteContact(contact).then(function (data) {
+                    removeContactFromModel(contact);
+                });
+
+            }
+            else {
+                removeContactFromModel(contact);
+
+            }
+        };
+
+
+        function editContact(contact) {
+            contact['editing'] = true;
+        }
+
+        function showContactForm(contact) {
+
+            return contact.hasOwnProperty('editing') && contact.editing === true;
+
+        }
+
+        function saveContact(contact) {
+
+            delete contact.editing;
+
+            if (contact.hasOwnProperty('id')) {
+                //update
+
+                contactService.updateContact(contact).then(function (data) {
+                    console.log("Successfully updated contact.");
+                });
+
+            }
+            else {
+                //create
+                contactService.createContact(contact).then(function (data) {
+                    console.log("Successfully created contact with id " + data.id);
+                }).catch(function (e) {
+                    self.editContact(contact);
+                });
+
+            }
+        };
 
 
         function getCertificate() {
@@ -2260,6 +2336,86 @@
         }
 
     }
+
+
+    /* Contact Service */
+
+    contactService.$inject = ['$window', '$http', '$q', '$cacheFactory', '$filter', 'toasterService'];
+
+    function contactService($window, $http, $q, $cacheFactory, $filter, toasterService) {
+
+
+        var service = {
+            deleteContact: deleteContact,
+            updateContact: updateContact,
+            createContact: createContact
+        };
+
+        return service;
+
+        function deleteContact(contact) {
+            var deferred = $q.defer();
+
+            $http.delete('/services/rest/v1/contacts/' + contact.id).success(function (data) {
+                deferred.resolve(contact);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while deleting a contact.");
+            });
+
+            return deferred.promise;
+        }
+
+        function updateContact(contact) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/contacts/' + contact.id, contact).success(function (data) {
+                deferred.resolve(contact);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while updating a contact.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function createContact(contact) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/contacts/', contact).success(function (data) {
+                angular.extend(contact, data);
+                deferred.resolve(contact);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while updating a contact.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function getContacts(orgID) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/contacts', {
+                'params': {'organizationId': orgID},
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching contacts.");
+            });
+
+            return deferred.promise;
+        };
+
+    }
+
 
 
     function toNumber() {

@@ -18,12 +18,12 @@ import java.util.Set;
 @XmlRootElement(name = "Organization")
 @Entity
 @Table(name = "organization")
-@JsonPropertyOrder({ "name", "website", "street", "city", "state", "zip", "organizationTypes", "schoolCodes" })
+@JsonPropertyOrder({"name", "website", "street", "city", "state", "zip", "organizationTypes", "schoolCodes"})
 @ApiModel
 public class Organization implements Serializable {
 
     @Column(name = "name")
-    @ApiModelProperty(position = 1, required = true, value="The free form name of the organization.")
+    @ApiModelProperty(position = 1, required = true, value = "The free form name of the organization.")
     private String name;
 
 
@@ -62,43 +62,52 @@ public class Organization implements Serializable {
     private String shortDescription;
 
     @JoinTable(
-            name="org_orgtype",
-            joinColumns=
-            @JoinColumn(name="organization_id", referencedColumnName="id"),
-            inverseJoinColumns=
-            @JoinColumn(name="organization_type_id", referencedColumnName="id")
+            name = "org_orgtype",
+            joinColumns =
+            @JoinColumn(name = "organization_id", referencedColumnName = "id"),
+            inverseJoinColumns =
+            @JoinColumn(name = "organization_type_id", referencedColumnName = "id")
     )
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = OrganizationType.class, cascade = CascadeType.MERGE)
     private Set<OrganizationType> organizationTypes;
 
-    @Column(name="enabled")
+    @Column(name = "enabled")
     private boolean enabled;
 
-    @Column(name="active")
+    @Column(name = "active")
     private boolean active;
 
-    @Column(name="ein")
+    @Column(name = "ein")
     private String ein;
 
-    @Column(name="organization_id")
+    @Column(name = "organization_id")
     private String organizationCode;
 
-    @Column(name="organization_id_type")
+    @Column(name = "organization_id_type")
     private String organizationCodeType;
 
-    @Column(name="subcode")
+    @Column(name = "subcode")
     private String subcode;
 
     @OneToMany(fetch = FetchType.EAGER,
             targetEntity = SchoolCode.class,
-            cascade = {CascadeType.REMOVE, CascadeType.ALL },
+            cascade = {CascadeType.REMOVE, CascadeType.ALL},
             orphanRemoval = true)
-    @JoinColumn(name="organization_id")
+    @JoinColumn(name = "organization_id")
     private Set<SchoolCode> schoolCodes;
+
+    @OneToMany(fetch = FetchType.EAGER,
+            targetEntity = Contact.class,
+            cascade = {CascadeType.REMOVE, CascadeType.ALL},
+            orphanRemoval = true)
+    @JoinColumn(name = "organization_id")
+    private Set<Contact> contacts;
+
 
     public String getName() {
         return this.name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -248,6 +257,14 @@ public class Organization implements Serializable {
     }
 
 
+    public Set<Contact> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(Set<Contact> contacts) {
+        this.contacts = contacts;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -257,6 +274,7 @@ public class Organization implements Serializable {
         Organization that = (Organization) obj;
         return id.equals(that.id);
     }
+
     @Override
     public int hashCode() {
         return id == null ? 0 : id.hashCode();

@@ -339,6 +339,8 @@ public class DocumentController {
 
 		ModelAndView mav = new ModelAndView("redirect:/upload-status");
 
+		Transaction tran = null;
+
 		if (!multipartFile.isEmpty()) {
 	        try {
 
@@ -365,13 +367,13 @@ public class DocumentController {
 	            tx.setSent(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
 	        	// update response map
-	            Transaction savedTx = transactionService.create(tx);
-	            
+	            tran = transactionService.create(tx);
+
 	            log.debug(String.format(
 						"saved Transaction: {%n  recipientId: %s,%n  senderId: %s,%n  fileFormat: %s%n}",
-						savedTx.getRecipientId(),
-						savedTx.getSenderId(),
-						savedTx.getFileFormat()
+						tran.getRecipientId(),
+						tran.getSenderId(),
+						tran.getFileFormat()
 				));
 
 	            redir.addFlashAttribute("error", false);
@@ -403,17 +405,21 @@ public class DocumentController {
 
 		            try {
 						log.debug(response.getStatusLine());
-						HttpEntity resEntity = response.getEntity();
-						if (resEntity != null) {
-							log.debug("Response content length: " + resEntity.getContentLength());
+						if (response.getStatusLine().getStatusCode() != 200)  {
+							throw new RuntimeException(response.getStatusLine().toString());
 						}
-						EntityUtils.consume(resEntity);
+						else {
+							HttpEntity resEntity = response.getEntity();
+							if (resEntity != null) {
+								log.debug("Response content length: " + resEntity.getContentLength());
+							}
+							EntityUtils.consume(resEntity);
+						}
+
 					}
 					finally {
 						response.close();
 					}
-
-
 	            	
 	            } finally {
 	            	client.close();
@@ -421,6 +427,9 @@ public class DocumentController {
 	            
 	            
 	        } catch (Exception e) {
+				tran.setError(e.getMessage());
+				transactionService.update(tran);
+
 				log.error(e);
 	        	redir.addFlashAttribute("error", true);
 	        	redir.addFlashAttribute("status", String.format("Upload failed: %s", e.getMessage() != null ? e.getMessage() : e.getCause()));

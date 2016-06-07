@@ -54,6 +54,8 @@ public class ServiceConfig {
     @Autowired
     private DocumentTypesResource documentTypesResource;
 
+    @Autowired ContactResource contactResource;
+
     @Bean
     public JacksonJaxbJsonProvider jacksonJaxbJsonProvider() {
         return new JacksonJaxbJsonProvider();
@@ -137,6 +139,18 @@ public class ServiceConfig {
     }
 
     /**
+     * SOAP endpoint for document formats
+     * @return
+     */
+    @Bean
+    public Server contacts() {
+        JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
+        sf.setServiceClass(ContactResource.class);
+        sf.setAddress("/soap/v1/contacts");
+        return sf.create();
+    }
+
+    /**
      * SOAP endpoint for delivery methods
      * @return
      */
@@ -192,7 +206,7 @@ public class ServiceConfig {
     @Bean
     public Server serviceProviders() {
         JaxWsServerFactoryBean sf = new JaxWsServerFactoryBean();
-        sf.setServiceClass(ServiceProvider.class);
+        sf.setServiceClass(ServiceProviderResource.class);
         sf.setAddress("/soap/v1/service-providers");
         return sf.create();
     }
@@ -233,6 +247,7 @@ public class ServiceConfig {
         beans.add(documentTypesResource);
         beans.add(organizationsResource);
         beans.add(userResource);
+        beans.add(contactResource);
 
         endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
 

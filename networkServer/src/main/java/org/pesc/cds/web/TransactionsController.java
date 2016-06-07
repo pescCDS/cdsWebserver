@@ -18,12 +18,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -36,35 +41,38 @@ public class TransactionsController {
 	private TransactionService transactionService;
 
 	
-	/**
-	 * Get Transactions REST endpoint<p>
-	 * TODO: add direction, received, sent
-	 * 
-	 * @param senderId <code>Integer</code> The id of the sending organization
-	 * @param status <code>Boolean</code> If the transaction was completed or not
-	 * @param from <code>Long</code> 
-	 * @param to <code>Long</code> 
-	 * @param fetchSize <code></code> 
-	 * @return <code>List&lt;Transaction%gt;</code> Transactions matching the passed parameters.
-	 */
+
 	@RequestMapping(method= RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
 	public List<Transaction> getTransactions(
 			@RequestParam(value="senderId", required=false) Integer senderId,
-			@RequestParam(value="status", required=false) Boolean status,
-			@RequestParam(value="from", required=false) Long from,
-			@RequestParam(value="to", required=false) Long to,
-			@RequestParam(value="fetchSize", defaultValue="1000", required=false) Long fetchSize
+			@RequestParam(value="status", required=false) String status,
+			@RequestParam(value="from", required=false) String from,
+			@RequestParam(value="to", required=false) String to,
+			@RequestParam(value = "limit", required = false, defaultValue = "5") Long limit,
+			@RequestParam(value = "offset", required = false, defaultValue = "0") Long offset
 		) {
-		List<Transaction> retList = new ArrayList<Transaction>();
-		
-		log.debug(String.format("incoming parameters: {%n  senderId: %s,%n  status: %s,%n  from: %s,%n  to: %s,%n  fetchSize: %s%n}", senderId, status, from, to, fetchSize));
-		
 
-		retList = transactionService.search(senderId, status, from, to, fetchSize);
-		log.debug(String.format("Number of Transactions returned: %s", retList.size()));
-		return retList;
+		log.debug(String.format("incoming parameters: {%n  senderId: %s,%n  status: %s,%n  from: %s,%n  to: %s%n}", senderId, status, from, to));
+
+		Date start = null;
+		Date end = null;
+		if (to != null && from != null) {
+
+			try {
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+				start = format.parse(from);
+				end = format.parse(to);
+			}
+			catch (ParseException e) {
+				log.error("Failed to convert to and from dates.", e);
+			}
+
+
+		}
+
+		return transactionService.search(senderId, status, start, end, limit, offset);
 	}
 	
 	
@@ -79,7 +87,7 @@ public class TransactionsController {
 	public List<Transaction> getCompleted() {
 		// defaults to status=complete, from/to=all
 		List<Transaction> retList = new ArrayList<Transaction>();
-		retList = transactionService.search(1, true, null, null, -1l);
+		retList = transactionService.search(1, "Complete", null, null, 20L, 0L);
 		return retList;
 	}
 

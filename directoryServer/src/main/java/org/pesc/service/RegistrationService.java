@@ -1,8 +1,10 @@
 package org.pesc.service;
 
+import org.pesc.api.model.Contact;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.Role;
+import org.pesc.api.repository.ContactsRepository;
 import org.pesc.api.repository.OrganizationRepository;
 import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
@@ -31,11 +33,25 @@ public class RegistrationService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    ContactsRepository contactsRepository;
+
     private Role organizationAdminRole;
 
     @Autowired
     public RegistrationService(RolesRepository roleRepo) {
           organizationAdminRole = roleRepo.findByName("ROLE_ORG_ADMIN");
+    }
+
+    private void saveContact(DirectoryUser user, Organization organization) {
+        Contact contact = new Contact();
+        contact.setName(user.getName());
+        contact.setEmail(user.getEmail());
+        contact.setPhone1(user.getPhone());
+        contact.setAddress(organization.getStreet() + " " + organization.getCity() + " " + organization.getState() + " " + organization.getZip());
+        contact.setTitle(user.getTitle());
+        contact.setOrganizationId(user.getOrganizationId());
+        contactsRepository.save(contact);
     }
 
     /**
@@ -54,6 +70,8 @@ public class RegistrationService {
         organization =organizationRepository.save(organization);
 
         user.setOrganizationId(organization.getId());
+
+        saveContact(user, organization);
 
         Set<Role> roles = new HashSet<Role>();
         roles.add(organizationAdminRole);

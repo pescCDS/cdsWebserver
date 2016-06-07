@@ -78,15 +78,15 @@ public class TransactionService {
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public List<Transaction> search(
             Integer senderId,
-            Boolean status,
-            Long startDate,
-            Long endDate,
-            Long fetchSize
+            String status,
+            Date startDate,
+            Date endDate,
+            Long limit,
+            Long offset
     ) {
-
+        EntityManager entityManager =  entityManagerFactory.createEntityManager();
         try {
 
-            EntityManager entityManager =  entityManagerFactory.createEntityManager();
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
             CriteriaQuery<Transaction> cq = cb.createQuery(Transaction.class);
@@ -101,12 +101,14 @@ public class TransactionService {
 
 
             if(status != null) {
-                predicates.add(cb.equal(transactionRoot.get("status"), status));
+                predicates.add(cb.equal(transactionRoot.get("status"), "complete".equalsIgnoreCase(status) ? true : false));
             }
 
             if(startDate!=null && endDate != null) {
 
-                predicates.add(cb.between(transactionRoot.<Date>get("sent"), new Date(startDate), new Date(endDate)));
+                predicates.add(cb.between(transactionRoot.<Date>get("sent"), startDate, endDate));
+                predicates.add(cb.between(transactionRoot.<Date>get("received"), startDate, endDate));
+
             }
 
             Predicate[] predicateArray = new Predicate[predicates.size()];
@@ -120,6 +122,9 @@ public class TransactionService {
 
         } catch(Exception ex) {
             log.error("Failed to execute transaction search query.", ex);
+        }
+        finally {
+            entityManager.close();
         }
         return new ArrayList<Transaction>();
     }

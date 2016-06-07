@@ -70,7 +70,9 @@
         self.openEndDatePopup = openEndDatePopup;
         self.resend = resend;
 
-        self.fetchSize = 100;
+        self.totalRecords = 0;
+        self.offset = 0;
+        self.pageSize = 10;
 
         self.startDatePopup = {
             opened: false
@@ -120,7 +122,7 @@
 
 
         function getTransactions() {
-            transactionService.getTransactions(self.status,self.startDate,self.endDate,self.fetchSize).then(function(data){
+            transactionService.getTransactions(self.status,self.startDate,self.endDate,self.pageSize).then(function(data){
                 self.transactions = data;
 
             });

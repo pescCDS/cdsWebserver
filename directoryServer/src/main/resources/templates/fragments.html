@@ -114,6 +114,97 @@
 
 </div>
 
+
+<div th:fragment="contact">
+  <div class="well">
+
+    <form name="contactForm"  ng-submit="contactForm.$valid && orgCtrl.saveContact(contact)" novalidate="novalidate" class="glow">
+        <div class="sub-nav">
+            <div class="inner-margin7">
+                <div ng-show="!orgCtrl.showContactForm(contact)">
+
+                    <h4>{{contact.name}}</h4>
+                    <div>
+                        <label><b>Title:</b></label>
+                        <span>{{contact.title}}</span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                        <span>{{contact.address}}</span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                        <span>{{contact.phone1}}</span>
+                    </div>
+                    <div>
+                        <label><b>Alternate Phone:</b></label>
+                        <span>{{contact.phone2}}</span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                        <span>{{contact.email}}</span>
+                    </div>
+                </div>
+
+                <div ng-show="orgCtrl.showContactForm(contact)">
+                    <h4>
+                        <input type="text" placeholder="Name" required="required" ng-model="contact.name"> </input>
+                    </h4>
+                    <div>
+                        <label><b>Title:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Title" ng-model="contact.title" > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Address" ng-model="contact.address" style="min-width: 375px;" > </input>
+                            </span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="contact.phone1" > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Alternate Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="contact.phone2" > </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                            <span>
+                                 <input type="email" placeholder="Email" ng-model="contact.email" style="min-width: 375px;"  > </input>
+                            </span>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${hasOrgAdminRole}" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!orgCtrl.showContactForm(contact)" type="button" class="btn btn-default" ng-click="orgCtrl.editContact(contact)">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="orgCtrl.showContactForm(contact)" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-contact.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </form>
+  </div>
+</div>
+
+
 <div th:fragment="user-details">
     <form name="userForm"  ng-submit="userForm.$valid && userCtrl.save()" novalidate="novalidate" class="glow">
         <div class="sub-nav">
@@ -784,7 +875,24 @@
             </div>
         </form>
 
-        <div ng-show="orgCtrl.isInstitution()==true">
+       <div>
+
+           <div style="float:right;">
+                         <span ng-show="orgCtrl.isEditableByUser()">
+                                <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.createContact()"></span>
+                         </span>
+           </div>
+
+           <div class="ed-title">Contacts</div>
+
+                <span ng-repeat="contact in orgCtrl.org.contacts">
+                       <div th:include="::contact"></div>
+                </span>
+
+           </div>
+       </div>
+
+       <div ng-show="orgCtrl.isInstitution()==true">
             <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
 
                 <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.addSchoolCode()"></span>

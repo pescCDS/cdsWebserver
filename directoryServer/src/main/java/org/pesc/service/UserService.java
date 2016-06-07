@@ -53,12 +53,13 @@ public class UserService {
     }
 
     @Transactional(readOnly=true)
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public Iterable<DirectoryUser> findAll(){
         return this.userRepository.findAll();
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-
+    @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(DirectoryUser user)  {
         this.userRepository.delete(user);
     }
@@ -120,10 +121,10 @@ public class UserService {
             Integer organizationId,
             String name
     ) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         try {
 
-            EntityManager entityManager = entityManagerFactory.createEntityManager();
 
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
@@ -154,6 +155,9 @@ public class UserService {
 
         } catch(Exception ex) {
             log.error("Failed to execute user search query.", ex);
+        }
+        finally {
+           entityManager.close();
         }
         return new ArrayList<DirectoryUser>();
     }

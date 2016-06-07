@@ -248,7 +248,7 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    //@PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public CertificateInfo getPEMCertificate(Integer orgID) throws CertificateException {
 
         log.info(String.format("Retrieving signing certificate for org %d", orgID));
@@ -293,7 +293,7 @@ public class OrganizationService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    //@PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public CertificateInfo getCertificateInfo(Integer orgID) throws CertificateException {
 
         log.info(String.format("Retrieving signing certificate for org %d", orgID));
