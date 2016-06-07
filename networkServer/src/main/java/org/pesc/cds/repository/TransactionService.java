@@ -72,6 +72,7 @@ public class TransactionService {
 
     public Predicate[] createPredicates(CriteriaBuilder cb, Root<Transaction> transactionRoot,  Integer senderId,
                                         String status,
+                                        String operation,
                                         Date startDate,
                                         Date endDate) {
         List<Predicate> predicates = new LinkedList<Predicate>();
@@ -83,6 +84,10 @@ public class TransactionService {
 
         if(status != null) {
             predicates.add(cb.equal(transactionRoot.get("acknowledged"), "complete".equalsIgnoreCase(status) ? true : false));
+        }
+
+        if(operation != null) {
+            predicates.add(cb.equal(transactionRoot.get("operation"), "send".equalsIgnoreCase(operation) ? "SEND" : "RECEIVE"));
         }
 
         if(startDate!=null && endDate != null) {
@@ -101,6 +106,7 @@ public class TransactionService {
 
     private Long getResultLength(  Integer senderId,
                                    String status,
+                                   String operation,
                                    Date startDate,
                                    Date endDate ) {
 
@@ -115,6 +121,7 @@ public class TransactionService {
                     countRoot,
                     senderId,
                     status,
+                    operation,
                     startDate,
                     endDate
                     );
@@ -142,6 +149,7 @@ public class TransactionService {
     public PagedData<Transaction> search(
             Integer senderId,
             String status,
+            String operation,
             Date startDate,
             Date endDate,
             PagedData<Transaction> pagedData
@@ -155,7 +163,7 @@ public class TransactionService {
             Root<Transaction> transactionRoot = cq.from(Transaction.class);
             cq.select(transactionRoot);
 
-            Predicate[] predicates = createPredicates(cb, transactionRoot, senderId, status, startDate, endDate);
+            Predicate[] predicates = createPredicates(cb, transactionRoot, senderId, status, operation, startDate, endDate);
 
 
             cq.where(predicates);
@@ -164,7 +172,7 @@ public class TransactionService {
             q.setMaxResults(pagedData.getLimit());
             pagedData.setData(q.getResultList());
 
-            pagedData.setTotal(getResultLength(senderId,status,startDate,endDate));
+            pagedData.setTotal(getResultLength(senderId,status, operation, startDate,endDate));
 
             return pagedData;
 

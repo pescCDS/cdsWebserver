@@ -59,13 +59,16 @@
 
         self.transactions = [];
         self.status = 'Complete';
+        self.operation = 'Send';
+        self.error = null;
+
         self.startDate = '';
         self.stopDate = '';
         self.openStartDatePopup = openStartDatePopup;
         self.openEndDatePopup = openEndDatePopup;
         self.resend = resend;
 
-        self.getRecipientURL = getRecipientURL;
+        self.getOrgURL = getOrgURL;
 
         self.totalRecords = 0;
         self.offset = 0;
@@ -96,8 +99,8 @@
 
         }
 
-        function getRecipientURL(tran) {
-            return "http://" + directoryServer + "/services/rest/v1/organizations/" + tran.recipientId;
+        function getOrgURL(orgID) {
+            return "http://" + directoryServer + "/services/rest/v1/organizations/" + orgID;
         }
 
         function resend(tran) {
@@ -132,6 +135,7 @@
         function getTransactions() {
             transactionService.getTransactions(
                 self.status,
+                self.operation,
                 self.startDate,
                 self.endDate,
                 self.limit,
@@ -440,12 +444,13 @@
         }
 
 
-        function getTransactions(status, startDate, endDate, limit, offset) {
+        function getTransactions(status, operation, startDate, endDate, limit, offset) {
 
             var deferred = $q.defer();
 
             $http.get('/api/v1/transactions', {
                 'params': {
+                    'operation' : operation,
                     'offset' : offset,
                     'limit' : limit,
                     'from': startDate,

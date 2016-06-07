@@ -39,6 +39,7 @@ public class TransactionsController {
 	public List<Transaction> getTransactions(
 			@RequestParam(value="senderId", required=false) Integer senderId,
 			@RequestParam(value="status", required=false) String status,
+            @RequestParam(value="operation", required = false) String operation,
 			@RequestParam(value="from", required=false) String from,
 			@RequestParam(value="to", required=false) String to,
 			@RequestParam(value = "limit", required = false, defaultValue = "5") Integer limit,
@@ -65,7 +66,7 @@ public class TransactionsController {
 
 		PagedData<Transaction> pagedData = new PagedData<Transaction>(limit,offset);
 
-		pagedData = transactionService.search(senderId, status, start, end, pagedData);
+		pagedData = transactionService.search(senderId, status, operation, start, end, pagedData);
 
         servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()) );
 
@@ -83,7 +84,7 @@ public class TransactionsController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
 	public List<Transaction> getCompleted() {
-		PagedData<Transaction> pagedData = transactionService.search(1, "Complete", null, null, new PagedData<Transaction>(20,0));
+		PagedData<Transaction> pagedData = transactionService.search(1, "Complete", "Send", null, null, new PagedData<Transaction>(20,0));
 		return pagedData.getData();
 	}
 
