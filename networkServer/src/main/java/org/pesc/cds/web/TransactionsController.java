@@ -2,26 +2,12 @@ package org.pesc.cds.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -97,8 +83,8 @@ public class TransactionsController {
 	public void markAsReceived(@RequestParam(value="transactionId", required=true) Integer transactionId) {
 		Transaction tx = transactionService.findById(transactionId);
 		if(tx!=null) {
-			tx.setStatus(true);
-			tx.setReceived(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+			tx.setAcknowledged(true);
+			tx.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 			transactionService.update(tx);
 		}
 	}

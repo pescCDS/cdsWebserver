@@ -32,16 +32,16 @@
 			<column name="operation" type="ENUM('SEND','RECEIVE')">
 				<constraints nullable="true" />
 			</column>
-			<column name="sent" type="TIMESTAMP">
+			<column name="occurred_at" type="TIMESTAMP">
 				<constraints nullable="true" />
 			</column>
-			<column name="received" type="TIMESTAMP">
+			<column name="acknowledged_at" type="TIMESTAMP">
 				<constraints nullable="true" />
 			</column>
 			<column name="error" type="TEXT">
 				<constraints nullable="true" />
 			</column>
-			<column name="status" type="BIT(1)" defaultValueBoolean="false">
+			<column name="acknowledged" type="BIT(1)" defaultValueBoolean="false">
 				<constraints nullable="false" />
 			</column>
 		</createTable>

@@ -40,7 +40,7 @@
                 controllerAs: 'transactionCtrl',
                 resolve: {
                     transactions: ['transactionService', function (transactionService) {
-                        return transactionService.getTransactions(null,null,null,100);
+                        return transactionService.getTransactions('Complete',null,null,20,0);
                     }]
                 }
             })
@@ -63,16 +63,18 @@
         var self = this;
 
         self.transactions = transactions;
-        self.status = '';
+        self.status = 'Complete';
         self.startDate = '';
         self.stopDate = '';
         self.openStartDatePopup = openStartDatePopup;
         self.openEndDatePopup = openEndDatePopup;
         self.resend = resend;
 
+        self.getRecipientURL = getRecipientURL;
+
         self.totalRecords = 0;
         self.offset = 0;
-        self.pageSize = 10;
+        self.limit = 10;
 
         self.startDatePopup = {
             opened: false
@@ -91,6 +93,10 @@
 
         self.getTransactions = getTransactions;
 
+
+        function getRecipientURL(tran) {
+            return "http://" + directoryServer + "/services/rest/v1/organizations/" + tran.recipientId;
+        }
 
         function resend(tran) {
             transactionService.resend(tran).then(function(data){
@@ -122,7 +128,12 @@
 
 
         function getTransactions() {
-            transactionService.getTransactions(self.status,self.startDate,self.endDate,self.pageSize).then(function(data){
+            transactionService.getTransactions(
+                self.status,
+                self.startDate,
+                self.endDate,
+                self.limit,
+                self.offset).then(function(data){
                 self.transactions = data;
 
             });
@@ -426,13 +437,14 @@
         }
 
 
-        function getTransactions(status, startDate, endDate, fetchSize) {
+        function getTransactions(status, startDate, endDate, limit, offset) {
 
             var deferred = $q.defer();
 
             $http.get('/api/v1/transactions', {
                 'params': {
-                    'fetchSize': fetchSize,
+                    'offset' : offset,
+                    'limit' : limit,
                     'from': startDate,
                     'to' : endDate,
                     'status': status

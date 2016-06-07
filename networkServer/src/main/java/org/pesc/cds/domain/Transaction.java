@@ -35,17 +35,17 @@ public class Transaction {
 	@Column(name="operation")
 	private String operation;
 	
-	@Column(name="sent")
-	private Timestamp sent;
+	@Column(name="occurred_at")
+	private Timestamp occurredAt;
 	
-	@Column(name="received")
-	private Timestamp received;
+	@Column(name="acknowledged_at")
+	private Timestamp acknowledgedAt;
 	
 	@Column(name="error", columnDefinition = "text")
 	private String error;
 	
-	@Column(name="status")
-	private Boolean status = false;
+	@Column(name="acknowledged")
+	private Boolean acknowledged = false;
 	
 	public Transaction() {}
 
@@ -121,20 +121,20 @@ public class Transaction {
 		this.operation = operation;
 	}
 
-	public Timestamp getSent() {
-		return sent;
+	public Timestamp getOccurredAt() {
+		return occurredAt;
 	}
 
-	public void setSent(Timestamp sent) {
-		this.sent = sent;
+	public void setOccurredAt(Timestamp occurredAt) {
+		this.occurredAt = occurredAt;
 	}
 
-	public Timestamp getReceived() {
-		return received;
+	public Timestamp getAcknowledgedAt() {
+		return acknowledgedAt;
 	}
 
-	public void setReceived(Timestamp received) {
-		this.received = received;
+	public void setAcknowledgedAt(Timestamp acknowledgedAt) {
+		this.acknowledgedAt = acknowledgedAt;
 	}
 
 	public String getError() {
@@ -145,11 +145,11 @@ public class Transaction {
 		this.error = error;
 	}
 
-	public Boolean getStatus() {
-		return status;
+	public Boolean getAcknowledged() {
+		return acknowledged;
 	}
 
-	public void setStatus(Boolean status) {
-		this.status = status;
+	public void setAcknowledged(Boolean acknowledged) {
+		this.acknowledged = acknowledged;
 	}
 }

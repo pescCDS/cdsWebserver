@@ -101,13 +101,12 @@ public class TransactionService {
 
 
             if(status != null) {
-                predicates.add(cb.equal(transactionRoot.get("status"), "complete".equalsIgnoreCase(status) ? true : false));
+                predicates.add(cb.equal(transactionRoot.get("acknowledged"), "complete".equalsIgnoreCase(status) ? true : false));
             }
 
             if(startDate!=null && endDate != null) {
 
-                predicates.add(cb.between(transactionRoot.<Date>get("sent"), startDate, endDate));
-                predicates.add(cb.between(transactionRoot.<Date>get("received"), startDate, endDate));
+                predicates.add(cb.between(transactionRoot.<Date>get("occurredAt"), startDate, endDate));
 
             }
 

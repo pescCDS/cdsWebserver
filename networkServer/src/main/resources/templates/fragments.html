@@ -8,6 +8,15 @@
 
 <div th:fragment="transactions">
 
+    <div class="form-group">
+        <strong>Fetch Size</strong>
+
+        <div>
+            <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.limit" min="1"
+                   max="1000">
+        </div>
+    </div>
+
     <uib-pagination
             total-items="transactionCtrl.totalRecords"
             ng-model="transactionCtrl.offset"
@@ -63,14 +72,6 @@
                 </div>
             </div>
         </div>
-        <div class="form-group">
-            <strong>Fetch Size</strong>
-
-            <div>
-                <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.pageSize" min="1"
-                       max="1000">
-            </div>
-        </div>
 
 
         <div class="btn-group">
@@ -87,22 +88,24 @@
             <thead>
             <tr>
                 <th>ID</th>
+                <th>Recipient ID</th>
                 <th>Operation</th>
                 <th>Format</th>
                 <th>Type</th>
                 <th>Dept.</th>
                 <th>Size</th>
                 <th>Path</th>
-                <th>Send Date/Time</th>
-                <th>Received Date/Time</th>
+                <th>Occurred At</th>
+                <th>Acknowledged At</th>
                 <th>Error</th>
-                <th>Received Ack</th>
+                <th>Acknowledgement send/received</th>
                 <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="tran in transactionCtrl.transactions">
                 <td>{{tran.id}}</td>
+                <td><a ng-href="{{transactionCtrl.getRecipientURL(tran)}}">{{tran.recipientId}}</a></td>
                 <td>{{tran.operation}}</td>
                 <td>{{tran.fileFormat}}</td>
                 <td>{{tran.documentType}}</td>
@@ -112,10 +115,10 @@
                     <a ng-href="files?tran_id={{tran.id}}">{{tran.filePath}}</a>
 
                 </td>
-                <td>{{tran.sent | date:'medium'}}</td>
-                <td>{{tran.received | date:'medium'}}</td>
+                <td>{{tran.occurredAt | date:'medium'}}</td>
+                <td>{{tran.acknowledgedAt | date:'medium'}}</td>
                 <td>{{tran.error}}</td>
-                <td>{{tran.status}}</td>
+                <td>{{tran.acknowledged}}</td>
                 <td>
                     <button ng-show="tran.operation == 'SEND'" type="button" ng-click="transactionCtrl.resend(tran)" class="btn btn-primary btn-sm">
                         <span class="glyphicon glyphicon-send"></span> Resend

@@ -24,7 +24,6 @@ import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.service.PKIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -108,7 +107,7 @@ public class DocumentController {
 		tran.setRecipientId(tx.getRecipientId());
         tran.setSenderId(tx.getSenderId());
 		tran.setFileSize(tx.getFileSize());
-		tran.setSent(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		tran.setOccurredAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
 
 		tran = transactionService.create(tran);
@@ -364,7 +363,7 @@ public class DocumentController {
                 tx.setDocumentType(documentType);
                 tx.setDepartment(department);
 	            tx.setOperation("SEND");
-	            tx.setSent(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+	            tx.setOccurredAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
 	        	// update response map
 	            tran = transactionService.create(tx);
@@ -485,8 +484,10 @@ public class DocumentController {
         tx.setDepartment(department);
         tx.setDocumentType(documentType);
         tx.setOperation("RECEIVE");
-        tx.setReceived(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-        tx.setStatus(true);
+		Timestamp occurredAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
+        tx.setOccurredAt(occurredAt);
+		tx.setAcknowledgedAt(occurredAt);
+        tx.setAcknowledged(true);
 		
         Transaction savedTx = transactionService.create(tx);
 
