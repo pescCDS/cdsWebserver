@@ -1326,6 +1326,30 @@
     </p>
 </div>
 
+<div th:fragment="registration-thank-you">
+    <h1>Thank you!</h1>
+    <p>
+        Thank you for registering with EDExchange.  Your application is
+        currently being reviewed. While your application is being reviewed, all
+        EDExchange features are available, but your organization will not be included in the directory until the application
+        is approved.
+    </p>
+
+    <p>
+        A user account has been created for you with the username and password that you provided during the registration process.
+        You may login <a href="/login">here</a> and begin configuring you organization to send and/or receive documents.
+    </p>
+
+    <p>
+        When the status of your application changes, you will receive another email. Messages can also be viewed in the
+        EDExchange application by selecting "Messages" from the menu.
+    </p>
+
+    <p>
+        Thank you from the EDExchange team.
+    </p>
+</div>
+
 <div th:fragment="registration-form">
     <form name="regForm"  ng-submit="regForm.$valid && regCtrl.register()" novalidate="novalidate">
         <div class="row">
@@ -1442,7 +1466,7 @@
             </div>
 
             <div class="col-sm-4 col-sm-offset-2">
-                <h2>Contact</h2>
+                <h2>Contact/Administrator</h2>
                 <fieldset class="form-group">
                     <label>Contact Name</label>
                     <input class="form-control" type="text" placeholder="Name" required="required" ng-model="regCtrl.user.name"> </input>

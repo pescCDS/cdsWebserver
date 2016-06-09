@@ -1,7 +1,7 @@
 CREATE TABLE organization_type (
   id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
   name VARCHAR(18) NOT NULL COMMENT 'The name of the organization type',
-  description VARCHAR(256),
+  description VARCHAR(512),
   PRIMARY KEY (id)
 );
 

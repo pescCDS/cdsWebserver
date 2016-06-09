@@ -86,7 +86,7 @@ public class TransactionService {
             predicates.add(cb.equal(transactionRoot.get("acknowledged"), "complete".equalsIgnoreCase(status) ? true : false));
         }
 
-        if(operation != null) {
+        if(operation != null && !"both".equalsIgnoreCase(operation)) {
             predicates.add(cb.equal(transactionRoot.get("operation"), "send".equalsIgnoreCase(operation) ? "SEND" : "RECEIVE"));
         }
 

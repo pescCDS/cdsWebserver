@@ -59,7 +59,7 @@
 
         self.transactions = [];
         self.status = 'Complete';
-        self.operation = 'Send';
+        self.operation = 'Both';
         self.error = null;
 
         self.startDate = '';

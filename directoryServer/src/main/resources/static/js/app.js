@@ -88,6 +88,9 @@
                 templateUrl: "messages",
                 controller: "MessageController",
                 controllerAs: "messageCtrl"
+            }).
+            when("/registration-thank-you", {
+                templateUrl: "registration-thank-you"
             })
             .when("/endpoint-selector/:institution_id", {
                 templateUrl: "endpoint-selector",
@@ -389,7 +392,7 @@
 
             organizationService.register(bag).then(function (data) {
                     toasterService.success("Thank you for registering.  An email will be sent to " + self.user.email + " when your organization becomes activated.");
-                    $location.path('/login')
+                    $location.path('/registration-thank-you')
 
                 },
                 function (response) {

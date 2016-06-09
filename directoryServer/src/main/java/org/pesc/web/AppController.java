@@ -179,6 +179,14 @@ public class AppController {
         return "fragments :: about";
     }
 
+    @RequestMapping({"/registration-thank-you"})
+    public String getRegistrationThankYou(Model model) {
+
+        buildUserModel(model);
+
+        return "fragments :: registration-thank-you";
+    }
+
     @RequestMapping({"/home", "/admin"})
     public String getHomePage(Model model) {
 
