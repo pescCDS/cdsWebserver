@@ -1,5 +1,6 @@
 package org.pesc;
 
+import org.json.JSONObject;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +41,20 @@ public class NetworkServerApplicationTests {
 		byte[] signature = pkiService.createDigitalSignature(inputStream, keyPair.getPrivate());
 
 		assertTrue("File signatures do not match.", pkiService.verifySignature(getClass().getResourceAsStream("/test.txt"), signature, keyPair.getPublic()));
+
+	}
+
+
+	@Test
+	public void createInstitution() {
+		JSONObject institution = new JSONObject();
+		institution.put("name", "Sacramento City College");
+		institution.put("website", "http://www.scc.losrios.edu/");
+		institution.put("city", "Sacramento");
+		institution.put("state", "CA");
+		institution.put("zip", "95822");
+		institution.put("telephone", "(916) 558-2351");
+
 
 	}
 
