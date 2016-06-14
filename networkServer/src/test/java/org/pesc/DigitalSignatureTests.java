@@ -1,32 +1,39 @@
 package org.pesc;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pesc.cds.service.PKIService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.http.*;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = NetworkServerApplication.class)
 @WebAppConfiguration
-public class NetworkServerApplicationTests {
-
-	@ClassRule
-	public static DockerContainerRule dockerContainerRule = new DockerContainerRule("cdswebserver_networkserver_db_image");
+public class DigitalSignatureTests {
 
 	@Autowired
 	PKIService pkiService;
@@ -41,20 +48,6 @@ public class NetworkServerApplicationTests {
 		byte[] signature = pkiService.createDigitalSignature(inputStream, keyPair.getPrivate());
 
 		assertTrue("File signatures do not match.", pkiService.verifySignature(getClass().getResourceAsStream("/test.txt"), signature, keyPair.getPublic()));
-
-	}
-
-
-	@Test
-	public void createInstitution() {
-		JSONObject institution = new JSONObject();
-		institution.put("name", "Sacramento City College");
-		institution.put("website", "http://www.scc.losrios.edu/");
-		institution.put("city", "Sacramento");
-		institution.put("state", "CA");
-		institution.put("zip", "95822");
-		institution.put("telephone", "(916) 558-2351");
-
 
 	}
 

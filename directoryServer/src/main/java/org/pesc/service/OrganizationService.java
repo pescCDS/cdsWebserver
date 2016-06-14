@@ -101,7 +101,7 @@ public class OrganizationService {
      * @return
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    //@PreAuthorize("hasRole('ROLE_ORG_ADMIN')")
+    @PreAuthorize("(hasRole('ROLE_SYSTEM_ADMIN') OR (hasRole('ROLE_ORG_ADMIN') AND #serviceProviderID == principal.organizationId) )")
     public Organization createInstitution(Organization organization, Set<SchoolCode> schoolCodes, Integer serviceProviderID) {
         organization.setEnabled(false);
         organization.setActive(true);
@@ -121,7 +121,37 @@ public class OrganizationService {
     }
 
 
+    /**
+     * Insert a new organization and school codes, associating each school code with the organization and inserting
+     * the school codes.
+     *
+     * @param organization
+     * @return
+     */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @PreAuthorize("( hasRole('ROLE_SYSTEM_ADMIN') OR (hasRole('ROLE_ORG_ADMIN') AND !(#organization.organizationTypes.?[#this.name == 'Institution'].empty)) )")
+    public Organization createInstitution(Organization organization) {
+        organization.setEnabled(false);
+        organization.setActive(true);
+        organization.setOrganizationTypes(new HashSet<OrganizationType>());
+        organization.getOrganizationTypes().add(this.getOrganizationTypes().get(1));
+
+        Set<SchoolCode> schoolCodes = organization.getSchoolCodes();
+        organization.setSchoolCodes(new HashSet<SchoolCode>());
+
+        Organization savedOrg = organizationRepository.save(organization);
+        for (SchoolCode schoolCode : schoolCodes) {
+            schoolCode.setOrganizationId(savedOrg.getId());
+            organization.getSchoolCodes().add(schoolCodesRepository.save(schoolCode));
+        }
+
+        return savedOrg;
+    }
+
+
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @PreAuthorize("(hasRole('ROLE_SYSTEM_ADMIN') OR (hasRole('ROLE_ORG_ADMIN') AND #serviceProviderID == principal.organizationId) )")
     public void linkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
         try {
             jdbcTemplate.update("insert into institutions_service_providers (institution_id, service_provider_id) values(?,?)", institutionID, serviceProviderID);

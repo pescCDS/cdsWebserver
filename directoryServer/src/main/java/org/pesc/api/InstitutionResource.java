@@ -7,11 +7,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.pesc.api.model.AuthUser;
-import org.pesc.api.model.CSVStatusDTO;
-import org.pesc.api.model.InstitutionsUpload;
-import org.pesc.api.model.OrganizationDTO;
+import org.pesc.api.model.*;
 import org.pesc.service.InstitutionUploadService;
 import org.pesc.service.OrganizationService;
 import org.pesc.service.PagedData;
@@ -28,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -88,6 +85,29 @@ public class InstitutionResource {
         }
 
         return null;
+    }
+
+
+    @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+    @POST
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Create an institution.")
+    public Organization createInstitution(Organization org) {
+
+        return organizationService.createInstitution(org);
+    }
+
+
+    @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
+    @POST
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Add an institution to the service provider's group of serviceable institutions.")
+    @Path("/relation")
+    public InstitutionServiceProviderRelation createRelation(InstitutionServiceProviderRelation relation) {
+
+        organizationService.linkInstitutionWithServiceProvider(relation.getInstitutionID(), relation.getServiceProviderID());
+
+        return relation;
     }
 
     /**

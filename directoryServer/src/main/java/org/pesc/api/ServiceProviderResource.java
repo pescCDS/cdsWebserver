@@ -92,6 +92,7 @@ public class ServiceProviderResource {
         return organization.getServiceProviders();
     }
 
+
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the organization with the given ID.")
@@ -103,6 +104,8 @@ public class ServiceProviderResource {
         Institution institution = new Institution();
         institution.setId(id);
         institution.setServiceProviders(serviceProviders);
+
+        //TODO: add security contraints...
 
         return institutionRepository.save(institution);
     }

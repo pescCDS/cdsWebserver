@@ -2,6 +2,9 @@ INSERT INTO users (username,password,enabled,name,organization_id)
 VALUES ('admin','$2a$10$Xdy5DAnmIa2pqAbi9rxyxOB/EqfymmVAsMZzXSb.mJ5BsCmAJLblm', true,'System Admin',1);
 
 INSERT INTO users (username,password,enabled,name,organization_id)
+VALUES ('jwhetstone','$2a$10$Xdy5DAnmIa2pqAbi9rxyxOB/EqfymmVAsMZzXSb.mJ5BsCmAJLblm', true,'James Whetstone',2);
+
+INSERT INTO users (username,password,enabled,name,organization_id)
 VALUES ('sallen','$2a$10$Xdy5DAnmIa2pqAbi9rxyxOB/EqfymmVAsMZzXSb.mJ5BsCmAJLblm', true,'Sam Allen',3);
 
 
