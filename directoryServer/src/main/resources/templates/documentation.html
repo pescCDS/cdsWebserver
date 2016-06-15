@@ -44,6 +44,22 @@
         <div>
             <a href="#send-document">Send a Document</a>
         </div>
+        <div>
+            <a href="#receive-document">Receive a Document</a>
+        </div>
+        <div>
+            <a href="#create-endpoint">Create an Endpoint</a>
+        </div>
+        <div>
+            <a href="#create-serviceable-institution">Create Serviceable Institution</a>
+        </div>
+        <div>
+            <a href="#upload-serviceable-institutions-csv">Upload Serviceable Institutions CSV</a>
+        </div>
+
+        <div>
+            <a href="#assign-endpoint">Assign an Endpoint</a>
+        </div>
 
         <div class="ed-title">Common Institution Tasks</div>
         <div>
@@ -51,6 +67,9 @@
         </div>
         <div>
             <a href="#send-document">Send a Document</a>
+        </div>
+        <div>
+            <a href="#manage-school-codes">Manage School Codes</a>
         </div>
 
     </div>
@@ -107,43 +126,43 @@
         <div class="ed-title">Error Description</div>
 
         <p>
-            <dl class="dl-horizontal">
-                <dt>timestamp</dt>
-                <dd>A time stamp when the error occured, i.e. System.currentTimeMillis().</dd>
+        <dl class="dl-horizontal">
+            <dt>timestamp</dt>
+            <dd>A time stamp when the error occured, i.e. System.currentTimeMillis().</dd>
 
-                <dt>exception</dt><dd>The kind of exception that occurred.  This is an optional element.</dd>
-                <dt>status</dt><dd>The HTTP status code (same as the response status code).</dd>
-                <dt>error</dt><dd>The HTTP status code description (derived from the response status code).</dd>
-                <dt>path</dt><dd>The path that was requested.</dd>
-                <dt>message</dt><dd>A message which elaborates the problem in more detail.</dd>
+            <dt>exception</dt><dd>The kind of exception that occurred.  This is an optional element.</dd>
+            <dt>status</dt><dd>The HTTP status code (same as the response status code).</dd>
+            <dt>error</dt><dd>The HTTP status code description (derived from the response status code).</dd>
+            <dt>path</dt><dd>The path that was requested.</dd>
+            <dt>message</dt><dd>A message which elaborates the problem in more detail.</dd>
 
-            </dl>
+        </dl>
         </p>
 
 
 
 
-            <div class="ed-title">HTTP Status Code Summary</div>
+        <div class="ed-title">HTTP Status Code Summary</div>
 
-            <dl class="dl-horizontal">
-                <dt>200 - OK</dt>
-                <dd>Everything worked as expected.</dd>
+        <dl class="dl-horizontal">
+            <dt>200 - OK</dt>
+            <dd>Everything worked as expected.</dd>
 
-                <dt>400 - Bad Request</dt><dd>The request was unacceptable, often due to missing a required parameter.</dd>
-                <dt>401 - Unauthorized</dt><dd>No valid API key provided.</dd>
-                <dt>402 - Request Failed</dt><dd>The parameters were valid but the request failed.</dd>
-                <dt>404 - Not Found</dt><dd>The requested resource doesn't exist.</dd>
-                <dt>409 - Conflict</dt><dd>The request conflicts with another request (perhaps due to using the same idempotent key).</dd>
-                <dt>429 - Too Many Requests</dt><dd>Too many requests hit the API too quickly.</dd>
-                <dt>500, 502, 503, 504 - Server Errors</dt><dd>Something went wrong on Stripe's end. (These are rare.)</dd>
-
-
-            </dl>
+            <dt>400 - Bad Request</dt><dd>The request was unacceptable, often due to missing a required parameter.</dd>
+            <dt>401 - Unauthorized</dt><dd>No valid API key provided.</dd>
+            <dt>402 - Request Failed</dt><dd>The parameters were valid but the request failed.</dd>
+            <dt>404 - Not Found</dt><dd>The requested resource doesn't exist.</dd>
+            <dt>409 - Conflict</dt><dd>The request conflicts with another request (perhaps due to using the same idempotent key).</dd>
+            <dt>429 - Too Many Requests</dt><dd>Too many requests hit the API too quickly.</dd>
+            <dt>500, 502, 503, 504 - Server Errors</dt><dd>Something went wrong on Stripe's end. (These are rare.)</dd>
 
 
+        </dl>
 
 
-            <div class="ed-title">Example Errors</div>
+
+
+        <div class="ed-title">Example Errors</div>
 
                 <pre>
     {
@@ -178,7 +197,7 @@
             a custom HTTP header <var>X-Total-Count</var> in the response to indicate the total number of records
             in the result set.
 
-            <pre>https://localhost:8443/services/rest/v1/organizations?limit=5&offset=0</pre>
+        <pre>https://localhost:8443/services/rest/v1/organizations?limit=5&offset=0</pre>
         </p>
 
         <div class="ed-title">Response Header Example</div>
@@ -216,10 +235,10 @@
             implementation of a network server can be used as a starting point for developing an EDExchange network server.
             The source code for the reference implementation of the network server can be found on github using the following
             url:
-            <pre><span th:text="${github}"></span></pre>
+        <pre><span th:text="${github}"></span></pre>
 
-            The project contains the source code for both the directory server and the reference implementation of the
-            network server.
+        The project contains the source code for both the directory server and the reference implementation of the
+        network server.
         </p>
 
         <div id="institutions" class="ed-title">Institutions</div>
@@ -232,8 +251,8 @@
 
         <h2 id="endpoints">Endpoints</h2>
         <p>
-            An endpoint is an object that identifies where to <a href="#send-document">send a document</a>. Organizations that are <var>Servcice Providers</var>
-            can create and manage endpoints and assign them to institutions that are serviceable by the provider.
+            An endpoint is a URL that identifies where to <a href="#send-document">send a document</a>. Organizations that are <var>Servcice Providers</var>
+            can create, manage, and assign endpoints to institutions that are serviceable by the provider.
             An institution can also be a service provider and can receive documents for itself.
         </p>
 
@@ -245,15 +264,15 @@
             a certificate from a certficate authority and upload the certificate to the EDExchange directory server
             using the website or through the REST API.
 
-            <div class="well">
-                <ul class="list-unstyled">
-                    <li><b>Step 1:</b> Obtain an SSL certificate from a certificate authority, or optionally, for test purposes, <a href="#self-signed-cert">create a
-                        self signed certificate.</a></li>
-                    <li><b>Step 2:</b> Upload the certificate to the directory servier using the website, or through the REST API.
-                        The certificate must be PEM encoded.</li>
+        <div class="well">
+            <ul class="list-unstyled">
+                <li><b>Step 1:</b> Obtain an SSL certificate from a certificate authority, or optionally, for test purposes, <a href="#self-signed-cert">create a
+                    self signed certificate.</a></li>
+                <li><b>Step 2:</b> Upload the certificate to the directory servier using the website, or through the REST API.
+                    The certificate must be PEM encoded.</li>
 
-                </ul>
-            </div>
+            </ul>
+        </div>
         </p>
 
         <div class="ed-title" id="self-signed-cert">Create a Self Signed Certificate</div>
@@ -268,74 +287,74 @@
             <p>
                 The resulting "certificate.pem" file contains the PEM encoded certificate which must be uploaded to the
                 EDExchange directory server.
-                  <pre>
------BEGIN CERTIFICATE-----
-MIIEMTCCAxmgAwIBAgIJAODgvtVzzhWlMA0GCSqGSIb3DQEBCwUAMIGuMQswCQYD
-VQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTERMA8GA1UEBwwIT3JvdmlsbGUx
-FjAUBgNVBAoMDUJ1dHRlIENvbGxlZ2UxGDAWBgNVBAsMD0NDQyBUZWNoIENlbnRl
-cjEYMBYGA1UEAwwPSmFtZXMgV2hldHN0b25lMSswKQYJKoZIhvcNAQkBFhxqd2hl
-dHN0b25lQGNjY3RlY2hjZW50ZXIub3JnMB4XDTE2MDYwMzEzMzIzM1oXDTI2MDYw
-MTEzMzIzM1owga4xCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMREw
-DwYDVQQHDAhPcm92aWxsZTEWMBQGA1UECgwNQnV0dGUgQ29sbGVnZTEYMBYGA1UE
-CwwPQ0NDIFRlY2ggQ2VudGVyMRgwFgYDVQQDDA9KYW1lcyBXaGV0c3RvbmUxKzAp
-BgkqhkiG9w0BCQEWHGp3aGV0c3RvbmVAY2NjdGVjaGNlbnRlci5vcmcwggEiMA0G
-CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBiM6gvvogXLxRtO+uMk8nqcwnQfxX
-TSGoUMlvEs2GFocB2C67BxQ++qxf3Lpn4N/ZrutClreJ403INHph1WbkhtHIZrtn
-4yZ+kAtnQIcAYicoxAtxW9NuupD335RIIYkjkjiy11Aw6/+TfJYASEB38Vg3yaEo
-3pmpqQUt84AQ/r3NrouMeFNVDnyKGz6mCAUyRqYxL3YjLrd1EhQSX6cEksGLFYmf
-9hscrTUWaQu4u8VBJ8xx9GvRp9G0zM8/7i0Teit5YWpmKnmsNmHe3XEwyxTc+/s4
-39m+VnrIB2z+lPzvWJYuKz/apSnpoulUZ4nBRsxgKAXH6KIAUTcndc5nAgMBAAGj
-UDBOMB0GA1UdDgQWBBSkaPcNqtNTaC6AWH03rSwoZ7jaSDAfBgNVHSMEGDAWgBSk
-aPcNqtNTaC6AWH03rSwoZ7jaSDAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUA
-A4IBAQBHoW5NnQz7+d5lCihwk6iaP7xAtd/qEWJu+1yZyfqcebwqoadJgb0nC8Uz
-uAMd6EzaynxUv5xheBQRUv3fpLJEe31wmLn0Gd+PpK0m6eNK4oqVawPJzML9nNmS
-JASFKKs1g429zUdQ3oUn30S5VcsXhtE0io61kBwHJPtgapFno9XFqjSRFKDL5qzz
-QyGAhIPBEq5Jl8DNpNh2fI/1UP06Gk1Dd6mu7xh5QN/Sd8tcPHKK6uHc3hpUmt7d
-Tqg8+PzF7+OZj/t456L1zNdmRsZvE+Xu3JSCSQKCWxHT5Uaw09Mf2iipCqojd8B2
-vpU99m48pMDjePnU3qOdCQmsZ8OH
------END CERTIFICATE-----
-            </pre>
+                      <pre>
+    -----BEGIN CERTIFICATE-----
+    MIIEMTCCAxmgAwIBAgIJAODgvtVzzhWlMA0GCSqGSIb3DQEBCwUAMIGuMQswCQYD
+    VQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTERMA8GA1UEBwwIT3JvdmlsbGUx
+    FjAUBgNVBAoMDUJ1dHRlIENvbGxlZ2UxGDAWBgNVBAsMD0NDQyBUZWNoIENlbnRl
+    cjEYMBYGA1UEAwwPSmFtZXMgV2hldHN0b25lMSswKQYJKoZIhvcNAQkBFhxqd2hl
+    dHN0b25lQGNjY3RlY2hjZW50ZXIub3JnMB4XDTE2MDYwMzEzMzIzM1oXDTI2MDYw
+    MTEzMzIzM1owga4xCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMREw
+    DwYDVQQHDAhPcm92aWxsZTEWMBQGA1UECgwNQnV0dGUgQ29sbGVnZTEYMBYGA1UE
+    CwwPQ0NDIFRlY2ggQ2VudGVyMRgwFgYDVQQDDA9KYW1lcyBXaGV0c3RvbmUxKzAp
+    BgkqhkiG9w0BCQEWHGp3aGV0c3RvbmVAY2NjdGVjaGNlbnRlci5vcmcwggEiMA0G
+    CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBiM6gvvogXLxRtO+uMk8nqcwnQfxX
+    TSGoUMlvEs2GFocB2C67BxQ++qxf3Lpn4N/ZrutClreJ403INHph1WbkhtHIZrtn
+    4yZ+kAtnQIcAYicoxAtxW9NuupD335RIIYkjkjiy11Aw6/+TfJYASEB38Vg3yaEo
+    3pmpqQUt84AQ/r3NrouMeFNVDnyKGz6mCAUyRqYxL3YjLrd1EhQSX6cEksGLFYmf
+    9hscrTUWaQu4u8VBJ8xx9GvRp9G0zM8/7i0Teit5YWpmKnmsNmHe3XEwyxTc+/s4
+    39m+VnrIB2z+lPzvWJYuKz/apSnpoulUZ4nBRsxgKAXH6KIAUTcndc5nAgMBAAGj
+    UDBOMB0GA1UdDgQWBBSkaPcNqtNTaC6AWH03rSwoZ7jaSDAfBgNVHSMEGDAWgBSk
+    aPcNqtNTaC6AWH03rSwoZ7jaSDAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUA
+    A4IBAQBHoW5NnQz7+d5lCihwk6iaP7xAtd/qEWJu+1yZyfqcebwqoadJgb0nC8Uz
+    uAMd6EzaynxUv5xheBQRUv3fpLJEe31wmLn0Gd+PpK0m6eNK4oqVawPJzML9nNmS
+    JASFKKs1g429zUdQ3oUn30S5VcsXhtE0io61kBwHJPtgapFno9XFqjSRFKDL5qzz
+    QyGAhIPBEq5Jl8DNpNh2fI/1UP06Gk1Dd6mu7xh5QN/Sd8tcPHKK6uHc3hpUmt7d
+    Tqg8+PzF7+OZj/t456L1zNdmRsZvE+Xu3JSCSQKCWxHT5Uaw09Mf2iipCqojd8B2
+    vpU99m48pMDjePnU3qOdCQmsZ8OH
+    -----END CERTIFICATE-----
+                </pre>
 
             </p>
 
-        <p>
-            The resulting "key.pem" file contains the private key that will be used to generate
-            the digital signature for any document sent through EDExchange.  The private key
-            should not be shared and kept in a secure location.
+            <p>
+                The resulting "key.pem" file contains the private key that will be used to generate
+                the digital signature for any document sent through EDExchange.  The private key
+                should not be shared and kept in a secure location.
 
-              <pre>
------BEGIN ENCRYPTED PRIVATE KEY-----
-MIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIYtnco2loBy4CAggA
-MBQGCCqGSIb3DQMHBAg6xRCn3LZcjQSCBMgV0/6hI2RX3jEZTR5qwNOBBA5TFinL
-SYqYz9b+gbsZc7uZqFnQjDrHtYLAv9dJXvUCCB+EhtgpL7blzWxTHWFuc5QA+20j
-jRhiFglrHDtUvvXdj9o0CT8LadsrRAOSobnSM6UY3kFzMUf7MWDQbukGM36q2uHf
-xAwbJQZ7Ulm89A3abRN3MUYJo1HG2TRKqTeNhTSjAV4G6lRzomf2VhQnzp5NbqYQ
-WNKFwhwV75jdc8Ldgsn7O4y/TEsbfnHFFu/bUSzkvuJ5b/g1RYSKmrGrtbkMsatB
-nPGValF3dmMmQ9J7qL2xw9dye8TWuu2xGNYSEAacsjdVmdcZSJv0ICnu/bMmy0y+
-E11WxcK+ntW2zmNlJYEtFY86Wesirb5f+8TM0OyJus+YVoTRd0LKjNhFdF93LIxL
-X5/F1n4N8hupdBnMpqxuBo6fbStryS16Sv6n8cLzySPoEqGdZHg1d9oc7m1LHAZQ
-jRdBbCwZXpITyJnPYp7Rbfp/YgVnKt7QRCktg4X1Tor6v/ma1WAaStWOdnfk4RyR
-GtiVJ4ceomV3cXrdmZ53+9dl+K5dL90/BZAnum/hqLcw6VYeCUEWr5cvVsVXBvxd
-SSARh+y36zk2vtrWfGZm052Eb0hCKj9iR4qcIqH5ee1tuu+sBCv8VJLWbVYk5afz
-qTjwg+8Wk5SeSh3Ojh1ktAqwIdpevDnkMvILZzibVoBGV7uGxQ9TDqJt1PDUbQyb
-8eShO2FqEzoVqUxgv0So0Ellx6w7MNDxKsENmZ931+qodwk+vQlW+j/uSlE7WF8G
-hbdUOJyNQeKaYpMKrT+o69sYEvseALfCTS4/WqZGliUW3WIKMSAvr0rtyYNbYs1E
-j0nnKt0Tj8c8CGzVH+LE7p04YJmuB4bmoyTVLRgdHUIPO8UJytKxNFP1FnWTcv/Z
-EBqKOHiiabHk9ryCobi4lP2jmxJ5EuExWOyTHzPJLL4sbfmPgpKdrerIkdrLE5+d
-60f+EagggCX762etHIslc6mnIyhiQsY3pMqx4TU6KHV7pwtbfsDbHaurgZIya5JN
-CmppPju0+hVQs6frci/fJEP3dC0CGmka/jmf3hCNYa4JedTv0uwdpC6Shz/k++RJ
-1vjoIJmGuM6I23/Y8m0FLLv7ADRHskuVNUkCntkGPk8T+GTdC1mPTRqwHAMv30VT
-R9BHwWyrmzSGKL3gzUyoZ+XAllz6groi6GWMrWNejNhSx/FlUckuKNgeu+Br8X90
-btIzKVKmzrKG4386oNjY2ax0DsuZXmwwCqA7KCoz1BTFA6781RTgZgn4Wzlh8O49
-u9ewPmP+2Gv1ye1RaAyHQ38Ke85nKr0bLtdUz6KwqEt1OW5XP+gbeEE8kSpXVZ+c
-ZFdcIp2CC2tfHD+8JeR00mygvhQmbKmKAIk529TGgYK1Mb1F/PnaRDfpAWpQlr0Q
-BDaXbOP7PhvwncO1rPBhcvNNInmErMZ9oHKrjl3uA6gwSqlo2bRnghV0TKcyWyO2
-xcnjX7FQs6aiJZU/I8e/0uFPbqx0JUETsPmi4Au5UN+xNjwFyGWSMs76CkNfKanw
-0Uq1xWtaiLZsQSGavURBynbMgx3i2aXTwmGYNwOLVm0hhexzCghN2U+wT+wCQdhH
-nmY=
------END ENCRYPTED PRIVATE KEY-----
-            </pre>
-        </p>
+                  <pre>
+    -----BEGIN ENCRYPTED PRIVATE KEY-----
+    MIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIYtnco2loBy4CAggA
+    MBQGCCqGSIb3DQMHBAg6xRCn3LZcjQSCBMgV0/6hI2RX3jEZTR5qwNOBBA5TFinL
+    SYqYz9b+gbsZc7uZqFnQjDrHtYLAv9dJXvUCCB+EhtgpL7blzWxTHWFuc5QA+20j
+    jRhiFglrHDtUvvXdj9o0CT8LadsrRAOSobnSM6UY3kFzMUf7MWDQbukGM36q2uHf
+    xAwbJQZ7Ulm89A3abRN3MUYJo1HG2TRKqTeNhTSjAV4G6lRzomf2VhQnzp5NbqYQ
+    WNKFwhwV75jdc8Ldgsn7O4y/TEsbfnHFFu/bUSzkvuJ5b/g1RYSKmrGrtbkMsatB
+    nPGValF3dmMmQ9J7qL2xw9dye8TWuu2xGNYSEAacsjdVmdcZSJv0ICnu/bMmy0y+
+    E11WxcK+ntW2zmNlJYEtFY86Wesirb5f+8TM0OyJus+YVoTRd0LKjNhFdF93LIxL
+    X5/F1n4N8hupdBnMpqxuBo6fbStryS16Sv6n8cLzySPoEqGdZHg1d9oc7m1LHAZQ
+    jRdBbCwZXpITyJnPYp7Rbfp/YgVnKt7QRCktg4X1Tor6v/ma1WAaStWOdnfk4RyR
+    GtiVJ4ceomV3cXrdmZ53+9dl+K5dL90/BZAnum/hqLcw6VYeCUEWr5cvVsVXBvxd
+    SSARh+y36zk2vtrWfGZm052Eb0hCKj9iR4qcIqH5ee1tuu+sBCv8VJLWbVYk5afz
+    qTjwg+8Wk5SeSh3Ojh1ktAqwIdpevDnkMvILZzibVoBGV7uGxQ9TDqJt1PDUbQyb
+    8eShO2FqEzoVqUxgv0So0Ellx6w7MNDxKsENmZ931+qodwk+vQlW+j/uSlE7WF8G
+    hbdUOJyNQeKaYpMKrT+o69sYEvseALfCTS4/WqZGliUW3WIKMSAvr0rtyYNbYs1E
+    j0nnKt0Tj8c8CGzVH+LE7p04YJmuB4bmoyTVLRgdHUIPO8UJytKxNFP1FnWTcv/Z
+    EBqKOHiiabHk9ryCobi4lP2jmxJ5EuExWOyTHzPJLL4sbfmPgpKdrerIkdrLE5+d
+    60f+EagggCX762etHIslc6mnIyhiQsY3pMqx4TU6KHV7pwtbfsDbHaurgZIya5JN
+    CmppPju0+hVQs6frci/fJEP3dC0CGmka/jmf3hCNYa4JedTv0uwdpC6Shz/k++RJ
+    1vjoIJmGuM6I23/Y8m0FLLv7ADRHskuVNUkCntkGPk8T+GTdC1mPTRqwHAMv30VT
+    R9BHwWyrmzSGKL3gzUyoZ+XAllz6groi6GWMrWNejNhSx/FlUckuKNgeu+Br8X90
+    btIzKVKmzrKG4386oNjY2ax0DsuZXmwwCqA7KCoz1BTFA6781RTgZgn4Wzlh8O49
+    u9ewPmP+2Gv1ye1RaAyHQ38Ke85nKr0bLtdUz6KwqEt1OW5XP+gbeEE8kSpXVZ+c
+    ZFdcIp2CC2tfHD+8JeR00mygvhQmbKmKAIk529TGgYK1Mb1F/PnaRDfpAWpQlr0Q
+    BDaXbOP7PhvwncO1rPBhcvNNInmErMZ9oHKrjl3uA6gwSqlo2bRnghV0TKcyWyO2
+    xcnjX7FQs6aiJZU/I8e/0uFPbqx0JUETsPmi4Au5UN+xNjwFyGWSMs76CkNfKanw
+    0Uq1xWtaiLZsQSGavURBynbMgx3i2aXTwmGYNwOLVm0hhexzCghN2U+wT+wCQdhH
+    nmY=
+    -----END ENCRYPTED PRIVATE KEY-----
+                </pre>
+            </p>
 
 
 
@@ -352,22 +371,7 @@ nmY=
                 <li><b>Step 1:</b> Obtain the endpoint for the recipient and document.</a></li>
                 <li><b>Step 2:</b> Digitally sign the document.</li>
                 <li><b>Step 3:</b> Upload the document and digital signature, along with the required parameters to the
-                    endpoint using a <a href="upload-document">multipart/form-data HTTP POST</a>.
-                    <p>
-                        <div class="ed-title">Parameters</div>
-                        <ul class="list-group">
-                            <li class="list-group-item">file</li>
-                            <li class="list-group-item">signature</li>
-                            <li class="list-group-item">sender_id</li>
-                            <li class="list-group-item">recipient_id</li>
-                            <li class="list-group-item">file_format</li>
-                            <li class="list-group-item">document_type</li>
-                            <li class="list-group-item">department</li>
-                            <li class="list-group-item">transaction_id</li>
-                            <li class="list-group-item">ack_url</li>
-                        </ul>
-                    </p>
-
+                    endpoint using a <a href="#upload-document">multipart/form-data HTTP POST</a>.
                 </li>
 
             </ul>
@@ -375,14 +379,135 @@ nmY=
 
         <h2 id="use-cases">Use Cases</h2>
         <div class="ed-title" id="upload-document">multipart/form-data HTTP POST</div>
-        <p>This use case describes how to execute an multipart/form-data HTTP POST to an endpoint URL</p>
+        <p>The reference implementation of the network server uses a multipart/form-data HTTP POST as the endpoint that
+            receives documents.  This section describes the HTTP POST method and provides sample code.
+        </p>
 
+        <div class="well">
+            <div class="ed-heading">Parameters</div>
+
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    file
+                </div>
+                <div class="col-sm-9">
+                    The document of interest.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    signature
+                </div>
+                <div class="col-sm-9">
+                    The digital signature of the document of interest.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    recipient_id
+                </div>
+                <div class="col-sm-9">
+                    The EDExchange directory id of the recipient.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    sender_id
+                </div>
+                <div class="col-sm-9">
+                    The EDExchange directory id of the sender.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    file_format
+                </div>
+                <div class="col-sm-9">
+                    Must be one of the <a href="/services/rest/v1/document-formats" target="_blank">document format</a> names as defined by EDExchange.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    document_type
+                </div>
+                <div class="col-sm-9">
+                    Must be one of the <a href="/services/rest/v1/document-types" target="_blank">document type</a> names as defined by EDExchange.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    department
+                </div>
+                <div class="col-sm-9">
+                    Must be one of the <a href="/services/rest/v1/departments" target="_blank">department</a> names as defined by EDExchange.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    transaction_id (optional)
+                </div>
+                <div class="col-sm-9">
+                    A number generated by the sender that uniquely identifies a transaction that represents the file transfer.
+                    Used in combination with the ack_url to acknowledge that the document has been received.
+                    The sending network server uses the acknowlegement to update the transaction status.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3" style="text-align: right;">
+                    ack_url (optional)
+                </div>
+                <div class="col-sm-9">
+                    A URL used to acknowledge that the document has been received.  Used in combination
+                    with the transaction_id, so that the sending network server can update the transaction
+                    status with a form POST to this URL and using transction_id as a form parameter.
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="well">
+            <div class="ed-heading">Sample Code</div>
+            <p>This sample code can be used to send a document to an endpoint.</p>
+
+
+        </div>
+
+        <div class="ed-title" id="receive-document">Receive a Document</div>
+
+        <div class="ed-title" id="create-endpoint">Create an Endpoint</div>
+        <p>
+            Endpoints are URLs that are hosted by the network server of a service provider.  The EDExchange API
+            provides the means to search for endpoints with various attributes.
+
+            <div class="well">
+                <div class="ed-heading">Endpoint Attributes</div>
+                <div class="row">
+                    <div class="col-sm-3" style="text-align: right;">
+                        file
+                    </div>
+                    <div class="col-sm-9">
+                        The document of interest.
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3" style="text-align: right;">
+                        signature
+                    </div>
+                    <div class="col-sm-9">
+                        The digital signature of the document of interest.
+                    </div>
+                </div>
+            </div>
+        </p>
+        <div class="ed-title" id="create-serviceable-institution">Create a Serviceable Institution</div>
+        <div class="ed-title" id="upload-serviceable-institutions-csv">Uplaod Serviceable Institutions CSV</div>
+        <div class="ed-title" id="assign-endpoint">Assign an Endpoint</div>
+        <div class="ed-title" id="manage-school-codes">Manage School Codes</div>
+        <div class="ed-title" id="manage-organization-contacts">Manage Contacts</div>
+        <div class="ed-title" id="manage-users">Manager Users</div>
 
 
     </div>
-
-</div>
-
-
 </body>
 </html>

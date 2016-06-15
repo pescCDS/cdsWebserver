@@ -142,6 +142,13 @@ form[name="userForm"] label {
     border-bottom: 1px dotted #CCCCCC;
 }
 
+.ed-heading {
+    font: 16px/20px 'ProximaNova Semibold', ProximaNova Semi-Bold, Helvetica, Arial, sans-serif;
+    text-transform: uppercase;
+    color: #787878;
+    letter-spacing: .02em;
+}
+
 .ed-icon-btn {
     opacity: 0.5;
     border:none;

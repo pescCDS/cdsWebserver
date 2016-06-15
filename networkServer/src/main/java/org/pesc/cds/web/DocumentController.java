@@ -540,7 +540,9 @@ public class DocumentController {
 		
 		// send response back to sending network server
 		try {
-			Request.Post(ackURL).bodyForm(Form.form().add("transactionId", transactionId.toString()).build()).execute();
+			if (ackURL != null && !ackURL.isEmpty() && transactionId != null) {
+				Request.Post(ackURL).bodyForm(Form.form().add("transactionId", transactionId.toString()).build()).execute();
+			}
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
