@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>EDExchange Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" media="screen" />
+</head>
+<body>
+
+<div class="container">
+    <div class="col-sm-3">
+        <div class="ed-title">Introduction</div>
+        <div><a href="#introduction">Introduction</a></div>
+        <div>
+            <a href="swagger-ui/index.html">Interactive API documentation</a>
+        </div>
+
+        <div class="ed-title">General Topics</div>
+        <div>
+            <a href="#authentication">Authentication</a>
+        </div>
+        <div>
+            <a href="#errors">Errors</a>
+        </div>
+        <div>
+            <a href="#pagination">Pagination</a>
+        </div>
+
+
+        <div class="ed-title">Core Resources</div>
+        <div>
+            <a href="#organizations">Organizations</a>
+        </div>
+        <div>
+            <a href="#endpoints">Endpoints</a>
+        </div>
+
+        <div class="ed-title">Common Service Provider Tasks</div>
+        <div>
+            <a href="#certificate">Provide SSL Certificate</a>
+        </div>
+        <div>
+            <a href="#send-document">Send a Document</a>
+        </div>
+
+        <div class="ed-title">Common Institution Tasks</div>
+        <div>
+            <a href="#certificate">Provide SSL Certificate</a>
+        </div>
+        <div>
+            <a href="#send-document">Send a Document</a>
+        </div>
+
+    </div>
+    <div class="col-sm-9">
+
+        <h2 id="introduction">API Reference</h2>
+        <p>
+            The EDExchange API is accessible using SOAP and REST based clients. A WSDL is accessible for
+            each defined resource as shown on the <a href="services">services</a> page.
+            The remainder of API documentation is specific to the REST API.
+        </p>
+        <p>
+            The EDExchange REST API has predictable, resource-oriented URLs, and uses HTTP response codes to indicate
+            API errors. We use built-in HTTP features, like HTTP authentication and HTTP verbs, which are understood
+            by off-the-shelf HTTP clients. We support cross-origin resource sharing, allowing you to interact securely
+            with our API from a client-side web application (though you should never expose your secret API key in any
+            public website's client-side code). Depending on the value of the HTTP "Accept" header in each HTTP request,
+            which must be one of "application/json" or "application/xml", JSON or XML is returned by all API responses,
+            including errors.
+        </p>
+        <p>
+            To make the API as explorable as possible, <a href="swagger-ui/index.html">interactive documentation</a> has
+            been provided.  In addition, for the purpose of testing end-to-end document delivery, endpoints can be
+            designated for use in test mode or live mode. There is no "switch" for changing between modes,
+            just use the appropriate endpoint to deliver a live or test document.
+        </p>
+
+        <p>
+            Example code in the form of Java snippets has been provided in several areas of the documentation.  Code
+            examples utilize <a href="https://spring.io/">Spring</a> based technology to demonstrate how to use the
+            the EDExchange REST API to accomplish various tasks.
+        </p>
+
+
+        <h2 id="authentication">Authentication</h2>
+        <p>
+            The EDExchange API uses basic authentication.
+            All API requests must be made over HTTPS. Calls made over plain HTTP will fail. API requests without authentication will also fail.
+        </p>
+
+        <h2 id="errors">Errors</h2>
+        <p>
+
+            EDExchange uses conventional HTTP response codes to indicate the success or failure of an API request.
+            In general, codes in the 2xx range indicate success, codes in the 4xx range indicate an error that failed
+            given the information provided (e.g., a required parameter was omitted, etc.), and codes
+            in the 5xx range indicate an error with the EDExchange servers (these are rare).
+            Not all errors map cleanly onto HTTP response codes, however. When a request is valid
+            but does not complete successfully, we return a 402 error code.  The following describes the
+            components of an error message:
+
+        </p>
+
+        <div class="ed-title">Error Description</div>
+
+        <p>
+            <dl class="dl-horizontal">
+                <dt>timestamp</dt>
+                <dd>A time stamp when the error occured, i.e. System.currentTimeMillis().</dd>
+
+                <dt>exception</dt><dd>The kind of exception that occurred.  This is an optional element.</dd>
+                <dt>status</dt><dd>The HTTP status code (same as the response status code).</dd>
+                <dt>error</dt><dd>The HTTP status code description (derived from the response status code).</dd>
+                <dt>path</dt><dd>The path that was requested.</dd>
+                <dt>message</dt><dd>A message which elaborates the problem in more detail.</dd>
+
+            </dl>
+        </p>
+
+
+
+
+            <div class="ed-title">HTTP Status Code Summary</div>
+
+            <dl class="dl-horizontal">
+                <dt>200 - OK</dt>
+                <dd>Everything worked as expected.</dd>
+
+                <dt>400 - Bad Request</dt><dd>The request was unacceptable, often due to missing a required parameter.</dd>
+                <dt>401 - Unauthorized</dt><dd>No valid API key provided.</dd>
+                <dt>402 - Request Failed</dt><dd>The parameters were valid but the request failed.</dd>
+                <dt>404 - Not Found</dt><dd>The requested resource doesn't exist.</dd>
+                <dt>409 - Conflict</dt><dd>The request conflicts with another request (perhaps due to using the same idempotent key).</dd>
+                <dt>429 - Too Many Requests</dt><dd>Too many requests hit the API too quickly.</dd>
+                <dt>500, 502, 503, 504 - Server Errors</dt><dd>Something went wrong on Stripe's end. (These are rare.)</dd>
+
+
+            </dl>
+
+
+
+
+            <div class="ed-title">Example Errors</div>
+
+                <pre>
+    {
+        "timestamp": 1465942251599,
+        "status": 403,
+        "error": "Forbidden",
+        "message": "Access is denied",
+        "path": "/services/rest/v1/organizations/3"
+    }
+                </pre>
+
+                <pre>
+    {
+      "timestamp": 1465992374617,
+      "status": 400,
+      "error": "Bad Request",
+      "exception": "java.lang.IllegalArgumentException",
+      "message": "At least one organization ID or school code parameter is mandatory.",
+      "path": "/services/rest/v1/endpoints"
+    }
+                </pre>
+
+
+
+
+        <h2 id="pagination">Pagination</h2>
+
+        <p>
+            Certain resources that have large results sets can be paginated.  Whenever pagination is available,
+            EDExchange utilized two query parameters <var>limit</var> and <var>offset</var> to specify the maximum
+            number of records that should be returned, and where in the result set to start.  EDExchange utilizes
+            a custom HTTP header <var>X-Total-Count</var> in the response to indicate the total number of records
+            in the result set.
+
+            <pre>https://localhost:8443/services/rest/v1/organizations?limit=5&offset=0</pre>
+        </p>
+
+        <div class="ed-title">Response Header Example</div>
+        <pre>
+ {
+  "pragma": "no-cache",
+  "strict-transport-security": "max-age=31536000 ; includeSubDomains",
+  "x-content-type-options": "nosniff",
+  "server": "Apache-Coyote/1.1",
+  "date": "Wed, 15 Jun 2016 12:55:29 GMT",
+  "x-frame-options": "DENY",
+  "content-type": "application/json;charset=UTF-8",
+  "x-total-count": "5150",
+  "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+  "transfer-encoding": "chunked",
+  "x-xss-protection": "1; mode=block",
+  "x-application-context": "application:dev:8443",
+  "expires": "Wed, 31 Dec 1969 16:00:00 PST, 0"
+}
+        </pre>
+
+
+        <h2 id="organizations">Organizations</h2>
+        <p>
+            An organization is an object that represents a member of the EDExchange network.  An organization can be of type <var>Service Provider</var>
+            or <var>Institution</var> or both. When an organization is created, a number is assigned to it that uniquely
+            idenifies the organization in the EDExchange network.
+            All members of the EDExchange network are included in the searchable EDExchange directory.
+        </p>
+
+        <div id="service-provider" class="ed-title">Service Providers</div>
+        <p>
+            An organization that is a <var>Service Provider</var> can both send and receive documents through EDExchange. For an
+            organization to be able to receive documents, the organization must host an EDExchange network server.  A reference
+            implementation of a network server can be used as a starting point for developing an EDExchange network server.
+            The source code for the reference implementation of the network server can be found on github using the following
+            url:
+            <pre><span th:text="${github}"></span></pre>
+
+            The project contains the source code for both the directory server and the reference implementation of the
+            network server.
+        </p>
+
+        <div id="institutions" class="ed-title">Institutions</div>
+        <p>
+            An organization that is an <var>Institution</var> can send documents through EDExchange.  To send documents,
+            the organization must provide a SSL certificate, obtained from a certificate authority.  The certificate is
+            used to verify the authenticity of a document transferred through EDExchange using digital signatures.
+        </p>
+
+
+        <h2 id="endpoints">Endpoints</h2>
+        <p>
+            An endpoint is an object that identifies where to <a href="#send-document">send a document</a>. Organizations that are <var>Servcice Providers</var>
+            can create and manage endpoints and assign them to institutions that are serviceable by the provider.
+            An institution can also be a service provider and can receive documents for itself.
+        </p>
+
+
+        <h2 id="certificate">SSL Certificate</h2>
+        <p>
+            The authenticity of documents tranferred within the EDExchange network is verified using the
+            SSL certificate provided by the sender.  Before an organization can send a document, it must obtain
+            a certificate from a certficate authority and upload the certificate to the EDExchange directory server
+            using the website or through the REST API.
+
+            <div class="well">
+                <ul class="list-unstyled">
+                    <li><b>Step 1:</b> Obtain an SSL certificate from a certificate authority, or optionally, for test purposes, <a href="#self-signed-cert">create a
+                        self signed certificate.</a></li>
+                    <li><b>Step 2:</b> Upload the certificate to the directory servier using the website, or through the REST API.
+                        The certificate must be PEM encoded.</li>
+
+                </ul>
+            </div>
+        </p>
+
+        <div class="ed-title" id="self-signed-cert">Create a Self Signed Certificate</div>
+        <p>
+            A self signed SSL certificate can be created with the openssl command line utility using the following command:
+            <p>
+                <kbd>
+                    openssl req -x509 -newkey rsa:2048 -keyout key.pem -out certificate.pem -days 365
+                </kbd>
+            </p>
+
+            <p>
+                The resulting "certificate.pem" file contains the PEM encoded certificate which must be uploaded to the
+                EDExchange directory server.
+                  <pre>
+-----BEGIN CERTIFICATE-----
+MIIEMTCCAxmgAwIBAgIJAODgvtVzzhWlMA0GCSqGSIb3DQEBCwUAMIGuMQswCQYD
+VQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTERMA8GA1UEBwwIT3JvdmlsbGUx
+FjAUBgNVBAoMDUJ1dHRlIENvbGxlZ2UxGDAWBgNVBAsMD0NDQyBUZWNoIENlbnRl
+cjEYMBYGA1UEAwwPSmFtZXMgV2hldHN0b25lMSswKQYJKoZIhvcNAQkBFhxqd2hl
+dHN0b25lQGNjY3RlY2hjZW50ZXIub3JnMB4XDTE2MDYwMzEzMzIzM1oXDTI2MDYw
+MTEzMzIzM1owga4xCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMREw
+DwYDVQQHDAhPcm92aWxsZTEWMBQGA1UECgwNQnV0dGUgQ29sbGVnZTEYMBYGA1UE
+CwwPQ0NDIFRlY2ggQ2VudGVyMRgwFgYDVQQDDA9KYW1lcyBXaGV0c3RvbmUxKzAp
+BgkqhkiG9w0BCQEWHGp3aGV0c3RvbmVAY2NjdGVjaGNlbnRlci5vcmcwggEiMA0G
+CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBiM6gvvogXLxRtO+uMk8nqcwnQfxX
+TSGoUMlvEs2GFocB2C67BxQ++qxf3Lpn4N/ZrutClreJ403INHph1WbkhtHIZrtn
+4yZ+kAtnQIcAYicoxAtxW9NuupD335RIIYkjkjiy11Aw6/+TfJYASEB38Vg3yaEo
+3pmpqQUt84AQ/r3NrouMeFNVDnyKGz6mCAUyRqYxL3YjLrd1EhQSX6cEksGLFYmf
+9hscrTUWaQu4u8VBJ8xx9GvRp9G0zM8/7i0Teit5YWpmKnmsNmHe3XEwyxTc+/s4
+39m+VnrIB2z+lPzvWJYuKz/apSnpoulUZ4nBRsxgKAXH6KIAUTcndc5nAgMBAAGj
+UDBOMB0GA1UdDgQWBBSkaPcNqtNTaC6AWH03rSwoZ7jaSDAfBgNVHSMEGDAWgBSk
+aPcNqtNTaC6AWH03rSwoZ7jaSDAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUA
+A4IBAQBHoW5NnQz7+d5lCihwk6iaP7xAtd/qEWJu+1yZyfqcebwqoadJgb0nC8Uz
+uAMd6EzaynxUv5xheBQRUv3fpLJEe31wmLn0Gd+PpK0m6eNK4oqVawPJzML9nNmS
+JASFKKs1g429zUdQ3oUn30S5VcsXhtE0io61kBwHJPtgapFno9XFqjSRFKDL5qzz
+QyGAhIPBEq5Jl8DNpNh2fI/1UP06Gk1Dd6mu7xh5QN/Sd8tcPHKK6uHc3hpUmt7d
+Tqg8+PzF7+OZj/t456L1zNdmRsZvE+Xu3JSCSQKCWxHT5Uaw09Mf2iipCqojd8B2
+vpU99m48pMDjePnU3qOdCQmsZ8OH
+-----END CERTIFICATE-----
+            </pre>
+
+            </p>
+
+        <p>
+            The resulting "key.pem" file contains the private key that will be used to generate
+            the digital signature for any document sent through EDExchange.  The private key
+            should not be shared and kept in a secure location.
+
+              <pre>
+-----BEGIN ENCRYPTED PRIVATE KEY-----
+MIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIYtnco2loBy4CAggA
+MBQGCCqGSIb3DQMHBAg6xRCn3LZcjQSCBMgV0/6hI2RX3jEZTR5qwNOBBA5TFinL
+SYqYz9b+gbsZc7uZqFnQjDrHtYLAv9dJXvUCCB+EhtgpL7blzWxTHWFuc5QA+20j
+jRhiFglrHDtUvvXdj9o0CT8LadsrRAOSobnSM6UY3kFzMUf7MWDQbukGM36q2uHf
+xAwbJQZ7Ulm89A3abRN3MUYJo1HG2TRKqTeNhTSjAV4G6lRzomf2VhQnzp5NbqYQ
+WNKFwhwV75jdc8Ldgsn7O4y/TEsbfnHFFu/bUSzkvuJ5b/g1RYSKmrGrtbkMsatB
+nPGValF3dmMmQ9J7qL2xw9dye8TWuu2xGNYSEAacsjdVmdcZSJv0ICnu/bMmy0y+
+E11WxcK+ntW2zmNlJYEtFY86Wesirb5f+8TM0OyJus+YVoTRd0LKjNhFdF93LIxL
+X5/F1n4N8hupdBnMpqxuBo6fbStryS16Sv6n8cLzySPoEqGdZHg1d9oc7m1LHAZQ
+jRdBbCwZXpITyJnPYp7Rbfp/YgVnKt7QRCktg4X1Tor6v/ma1WAaStWOdnfk4RyR
+GtiVJ4ceomV3cXrdmZ53+9dl+K5dL90/BZAnum/hqLcw6VYeCUEWr5cvVsVXBvxd
+SSARh+y36zk2vtrWfGZm052Eb0hCKj9iR4qcIqH5ee1tuu+sBCv8VJLWbVYk5afz
+qTjwg+8Wk5SeSh3Ojh1ktAqwIdpevDnkMvILZzibVoBGV7uGxQ9TDqJt1PDUbQyb
+8eShO2FqEzoVqUxgv0So0Ellx6w7MNDxKsENmZ931+qodwk+vQlW+j/uSlE7WF8G
+hbdUOJyNQeKaYpMKrT+o69sYEvseALfCTS4/WqZGliUW3WIKMSAvr0rtyYNbYs1E
+j0nnKt0Tj8c8CGzVH+LE7p04YJmuB4bmoyTVLRgdHUIPO8UJytKxNFP1FnWTcv/Z
+EBqKOHiiabHk9ryCobi4lP2jmxJ5EuExWOyTHzPJLL4sbfmPgpKdrerIkdrLE5+d
+60f+EagggCX762etHIslc6mnIyhiQsY3pMqx4TU6KHV7pwtbfsDbHaurgZIya5JN
+CmppPju0+hVQs6frci/fJEP3dC0CGmka/jmf3hCNYa4JedTv0uwdpC6Shz/k++RJ
+1vjoIJmGuM6I23/Y8m0FLLv7ADRHskuVNUkCntkGPk8T+GTdC1mPTRqwHAMv30VT
+R9BHwWyrmzSGKL3gzUyoZ+XAllz6groi6GWMrWNejNhSx/FlUckuKNgeu+Br8X90
+btIzKVKmzrKG4386oNjY2ax0DsuZXmwwCqA7KCoz1BTFA6781RTgZgn4Wzlh8O49
+u9ewPmP+2Gv1ye1RaAyHQ38Ke85nKr0bLtdUz6KwqEt1OW5XP+gbeEE8kSpXVZ+c
+ZFdcIp2CC2tfHD+8JeR00mygvhQmbKmKAIk529TGgYK1Mb1F/PnaRDfpAWpQlr0Q
+BDaXbOP7PhvwncO1rPBhcvNNInmErMZ9oHKrjl3uA6gwSqlo2bRnghV0TKcyWyO2
+xcnjX7FQs6aiJZU/I8e/0uFPbqx0JUETsPmi4Au5UN+xNjwFyGWSMs76CkNfKanw
+0Uq1xWtaiLZsQSGavURBynbMgx3i2aXTwmGYNwOLVm0hhexzCghN2U+wT+wCQdhH
+nmY=
+-----END ENCRYPTED PRIVATE KEY-----
+            </pre>
+        </p>
+
+
+
+        </p>
+
+        <h2 id="send-document">Send a Document</h2>
+        <p>
+            Both institutions and service providers can send documents through EDExchange after <a href="#certificate">providing a SSL certificate.</a>
+        </p>
+
+        <div class="well">
+            <ul class="list-unstyled">
+                <li><b>Preconditions:</b> The sender's directory ID is known and a document is available to send.</li>
+                <li><b>Step 1:</b> Obtain the endpoint for the recipient and document.</a></li>
+                <li><b>Step 2:</b> Digitally sign the document.</li>
+                <li><b>Step 3:</b> Upload the document and digital signature, along with the required parameters to the
+                    endpoint using a <a href="upload-document">multipart/form-data HTTP POST</a>.
+                    <p>
+                        <div class="ed-title">Parameters</div>
+                        <ul class="list-group">
+                            <li class="list-group-item">file</li>
+                            <li class="list-group-item">signature</li>
+                            <li class="list-group-item">sender_id</li>
+                            <li class="list-group-item">recipient_id</li>
+                            <li class="list-group-item">file_format</li>
+                            <li class="list-group-item">document_type</li>
+                            <li class="list-group-item">department</li>
+                            <li class="list-group-item">transaction_id</li>
+                            <li class="list-group-item">ack_url</li>
+                        </ul>
+                    </p>
+
+                </li>
+
+            </ul>
+        </div>
+
+        <h2 id="use-cases">Use Cases</h2>
+        <div class="ed-title" id="upload-document">multipart/form-data HTTP POST</div>
+        <p>This use case describes how to execute an multipart/form-data HTTP POST to an endpoint URL</p>
+
+
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

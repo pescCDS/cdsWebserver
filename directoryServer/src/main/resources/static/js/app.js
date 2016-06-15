@@ -632,6 +632,7 @@
         self.deliveryMethods = [];
         self.documentTypes = [];
         self.departments = [];
+        self.modes = [ 'TEST', 'LIVE'];
 
         initialize();
 
@@ -1150,6 +1151,7 @@
                 confirmDelivery: false,
                 address: '',
                 error: false,
+                mode: 'LIVE',
                 documentFormat: {},
                 deliveryMethod: {},
                 documentType: {},

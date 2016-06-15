@@ -105,7 +105,7 @@ public class InstitutionResource {
     @Path("/relation")
     public InstitutionServiceProviderRelation createRelation(InstitutionServiceProviderRelation relation) {
 
-        organizationService.linkInstitutionWithServiceProvider(relation.getInstitutionID(), relation.getServiceProviderID());
+        organizationService.secureLinkInstitutionWithServiceProvider(relation.getInstitutionID(), relation.getServiceProviderID());
 
         return relation;
     }

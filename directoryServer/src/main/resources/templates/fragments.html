@@ -580,8 +580,19 @@
                         </div>
                     </div>
 
-
                     <div>
+                        <strong>Mode</strong>
+                        <div>
+                            <select class="form-control" style="width: 160px;"  required="required"
+                                    ng-model="endpoint.mode"
+                                    ng-options="mode for mode in endpointCtrl.modes">
+
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div style="margin-top: 15px;">
                         <strong>Hosted By</strong>
                         <p>
                             <a ng-href="#organization/{{endpoint.organization.id}}">{{endpoint.organization.name}}</a>
@@ -625,6 +636,9 @@
                 <h5>{{endpoint.department.name}}</h5>
                 <p>{{endpoint.department.description}}</p>
 
+                <div><strong>Mode</strong></div>
+
+                <h5>{{endpoint.mode}}</h5>
 
                 <div>
                     <strong>Hosted By</strong>

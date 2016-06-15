@@ -189,3 +189,10 @@ form[name="userForm"] label {
     cursor: inherit;
     display: block;
 }
+
+.dl-horizontal dt
+{
+    white-space: normal;
+    width: 250px;
+    margin-right: 10px;
+}

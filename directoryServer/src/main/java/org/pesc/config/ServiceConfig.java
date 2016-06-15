@@ -2,19 +2,19 @@ package org.pesc.config;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jersey.listing.ApiListingResourceJSON;
 import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
 import org.pesc.api.*;
-import org.pesc.api.model.ServiceProvider;
+import org.pesc.api.exception.ExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.ws.rs.ext.ExceptionMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +61,10 @@ public class ServiceConfig {
         return new JacksonJaxbJsonProvider();
     }
 
+    @Bean
+    public ExceptionMapper apiExceptionMapper() {
+        return new ExceptionHandler();
+    }
     @Bean
     public ApiListingResourceJSON apiListingResourceJSON() {
         return new ApiListingResourceJSON();
@@ -226,7 +230,7 @@ public class ServiceConfig {
         beanConfig.setVersion(restAPIVersion);
         beanConfig.setTitle("PESC CDS REST Interface");
         beanConfig.setDescription("Swagger UI to document and explore the REST interface provided by the PESC CDS.");
-        beanConfig.setSchemes(new String[]{"http"});
+        beanConfig.setSchemes(new String[]{"https"});
         beanConfig.setHost(restApiHost);
         beanConfig.setBasePath("/services/rest/v1");
         beanConfig.setResourcePackage(restApiPackageToScan);
@@ -249,7 +253,7 @@ public class ServiceConfig {
         beans.add(userResource);
         beans.add(contactResource);
 
-        endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider()));
+        endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider(), apiExceptionMapper()));
 
         endpoint.setServiceBeans(beans);
 

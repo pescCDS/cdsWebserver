@@ -98,7 +98,8 @@ public class EndpointService {
             String departmentName,
             Integer endpointId,
             Integer hostingOrganizationId,
-            List<Integer> organizationIdList
+            List<Integer> organizationIdList,
+            String mode
     ) {
 
         try {
@@ -134,6 +135,9 @@ public class EndpointService {
             }
             if (departmentName != null) {
                 predicates.add(cb.equal(endpoint.get("department").get("name"), departmentName));
+            }
+            if (mode != null) {
+                predicates.add(cb.equal(endpoint.get("mode"), mode.toUpperCase()));
             }
 
             Predicate[] predicateArray = new Predicate[predicates.size()];

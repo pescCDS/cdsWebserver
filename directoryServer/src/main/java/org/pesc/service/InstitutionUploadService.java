@@ -1,6 +1,5 @@
 package org.pesc.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -193,7 +192,7 @@ public class InstitutionUploadService {
                     List<Organization> institutions = organizationService.findBySchoolCodes(schoolCodes);
 
                     if (institutions.size() == 1) {
-                        organizationService.linkInstitutionWithServiceProvider(institutions.get(0).getId(), serviceProviderID);
+                        organizationService.insecureLinkInstitutionWithServiceProvider(institutions.get(0).getId(), serviceProviderID);
                         result.setOutcome(InstitutionUploadResultsRepository.SUCCESS);
                         result.setMessage(
                                 String.format("An institution was found with one or more of school code(s) ATP %s, FICE %s, IPEDS %s, ACT %s, OPEID %s, " +
@@ -212,10 +211,11 @@ public class InstitutionUploadService {
                             result.setInstitutionName(organization.getName());
                         }
                         catch (Exception e) {
+                            log.error("Failed to create institution.", e);
                             result.setOutcome(InstitutionUploadResultsRepository.ERROR);
                             StringBuilder messageBuilder = new StringBuilder(String.format(
-                                    "<p>Could not create institution with code(s) ATP %s, FICE %s, IPEDS %s, ACT %s, OPEID %s.</p>",
-                                    record.get("atp"), record.get("fice"), record.get("ipeds"), record.get("act"), record.get("opeid")));
+                                    "<p>Could not create institution with code(s) ATP %s, FICE %s, IPEDS %s, ACT %s, OPEID %s.  Exception %s</p>",
+                                    record.get("atp"), record.get("fice"), record.get("ipeds"), record.get("act"), record.get("opeid"), e.getClass().getCanonicalName()));
                             result.setMessage(messageBuilder.toString());
                             result.setInstitutionID(organization.getId());
                             result.setInstitutionName(organization.getName());

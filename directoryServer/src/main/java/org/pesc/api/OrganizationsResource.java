@@ -7,6 +7,7 @@ import io.swagger.annotations.ResponseHeader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
+import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.CertificateInfo;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.SchoolCode;
@@ -14,12 +15,15 @@ import org.pesc.service.OrganizationService;
 import org.pesc.service.PagedData;
 import org.pesc.service.SchoolCodesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import javax.jws.WebService;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +40,11 @@ public class OrganizationsResource {
 
     private static final Log log = LogFactory.getLog(OrganizationsResource.class);
 
+    @Value("${api.base.uri}")
+    private String baseURI;
+
+
+
     @Autowired
     private OrganizationService organizationService;
 
@@ -44,8 +53,6 @@ public class OrganizationsResource {
 
     @Context
     private HttpServletResponse servletResponse;
-
-
 
 
 
@@ -154,8 +161,8 @@ public class OrganizationsResource {
                                 @QueryParam("endpoint_id") @ApiParam(value="The identifier for the endpoint.", required = true) Integer endpointID,
                                 @QueryParam("operation") @ApiParam(value="The operation to perform. Must by case insensitive 'add' or 'remove'.", required = true) String operation) {
 
-        checkParameter(endpointID, "endpoint_id");
-        checkParameter(operation, "operation");
+        checkParameter(endpointID, "endpoint_id", baseURI + "/organizations/" + id);
+        checkParameter(operation, "operation", baseURI + "/organizations/" + id);
 
         if ("add".equalsIgnoreCase(operation)) {
             organizationService.addEndpointToOrganization(id, endpointID);
@@ -246,13 +253,16 @@ public class OrganizationsResource {
 
         } catch (CertificateException e) {
             log.error("Failed to retrieve public key.", e);
-            throw new WebApplicationException("Failed to public key", e);
+            throw new RuntimeException("Failed to retrieve public key", e);
         }
     }
 
-    public static void checkParameter(Object param, String parameterName) {
+    public static void checkParameter(Object param, String parameterName, String path) {
         if (param == null) {
-            throw new WebApplicationException(String.format("The %s parameter is required.", parameterName));
+
+            throw new ApiException(
+                    new IllegalArgumentException(String.format("The %s parameter is required.", parameterName)),
+                    Response.Status.BAD_REQUEST, path );
         }
     }
 

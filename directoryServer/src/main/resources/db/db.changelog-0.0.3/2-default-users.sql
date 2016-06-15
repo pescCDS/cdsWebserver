@@ -15,3 +15,4 @@ INSERT INTO roles (name) VALUES ('ROLE_SUPPORT');
 INSERT INTO users_roles (users_id, roles_id) VALUES (1,1);
 INSERT INTO users_roles (users_id, roles_id) VALUES (1,2);
 INSERT INTO users_roles (users_id, roles_id) VALUES (2,2);
+INSERT INTO users_roles (users_id, roles_id) VALUES (3,2);

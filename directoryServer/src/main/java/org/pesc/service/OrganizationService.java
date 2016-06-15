@@ -102,6 +102,11 @@ public class OrganizationService {
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("(hasRole('ROLE_SYSTEM_ADMIN') OR (hasRole('ROLE_ORG_ADMIN') AND #serviceProviderID == principal.organizationId) )")
+    public Organization securedCreateInstitution(Organization organization, Set<SchoolCode> schoolCodes, Integer serviceProviderID) {
+        return createInstitution(organization, schoolCodes, serviceProviderID);
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Organization createInstitution(Organization organization, Set<SchoolCode> schoolCodes, Integer serviceProviderID) {
         organization.setEnabled(false);
         organization.setActive(true);
@@ -115,7 +120,7 @@ public class OrganizationService {
         }
         savedOrg.setSchoolCodes(schoolCodes);
 
-        linkInstitutionWithServiceProvider(savedOrg.getId(), serviceProviderID);
+        secureLinkInstitutionWithServiceProvider(savedOrg.getId(), serviceProviderID);
 
         return savedOrg;
     }
@@ -152,7 +157,13 @@ public class OrganizationService {
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("(hasRole('ROLE_SYSTEM_ADMIN') OR (hasRole('ROLE_ORG_ADMIN') AND #serviceProviderID == principal.organizationId) )")
-    public void linkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
+    public void secureLinkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
+       insecureLinkInstitutionWithServiceProvider(institutionID,serviceProviderID);
+
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void insecureLinkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
         try {
             jdbcTemplate.update("insert into institutions_service_providers (institution_id, service_provider_id) values(?,?)", institutionID, serviceProviderID);
         } catch (DuplicateKeyException e) {
@@ -160,6 +171,7 @@ public class OrganizationService {
         }
 
     }
+
 
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

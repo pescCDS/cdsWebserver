@@ -5,6 +5,7 @@ CREATE TABLE endpoint (
     instructions VARCHAR(1024),
     delivery_confirm BIT(1) NULL,
     error BIT(1) NULL,
+    mode ENUM('TEST','LIVE') NOT NULL,
     operational_status ENUM('INACTIVE','ACTIVE','OUTAGE') NOT NULL,
     PRIMARY KEY (id),
     KEY fk_endpoint_ownser_organization_idx (organization_id),

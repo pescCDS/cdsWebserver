@@ -8,21 +8,21 @@ import org.pesc.api.model.MessageTopic;
 import org.pesc.api.model.RegistrationForm;
 import org.pesc.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.context.WebContext;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,6 +51,8 @@ public class AppController {
     @Autowired
     private OrganizationService organizationService;
 
+    @Value("${github.url}")
+    private String githubURL;
 
     private boolean buildUserModel(Model model) {
         boolean isAuthenticated = false;
@@ -103,11 +105,34 @@ public class AppController {
         return "fragments :: messages";
     }
 
+    @RequestMapping({"/documentation"})
+    public String getDocumentation(Model model) {
+        buildUserModel(model);
+
+        model.addAttribute("github", githubURL);
+        return "documentation";
+    }
+
     @RequestMapping({"/endpoint-selector"})
     public String getEndpointSelectorFragment(Model model) {
         buildUserModel(model);
 
         return "fragments :: endpoint-selector";
+    }
+
+
+
+    @ExceptionHandler
+    void handleIllegalArgumentException(IllegalArgumentException e, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value());
+    }
+
+
+    @RequestMapping({"/exception"})
+    public void getException(Model model) {
+        buildUserModel(model);
+
+        throw new IllegalArgumentException("Bad args!");
     }
 
     @RequestMapping({"/registration-form"})

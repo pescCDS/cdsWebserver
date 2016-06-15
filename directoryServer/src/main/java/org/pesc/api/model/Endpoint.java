@@ -37,6 +37,8 @@ public class Endpoint {
     @Column(name="instructions")
     private String instructions;
 
+    @Column(name="mode")
+    private String mode;
 
     @JoinTable(
             name="endpoint_document_format",
@@ -178,5 +180,13 @@ public class Endpoint {
 
     public void setDepartment(Department department) {
         this.department = department;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 }
