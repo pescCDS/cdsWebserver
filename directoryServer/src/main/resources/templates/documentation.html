@@ -28,6 +28,13 @@
             <a href="#pagination">Pagination</a>
         </div>
 
+        <div>
+            <a href="#directory-server">Directory Server</a>
+        </div>
+
+        <div>
+            <a href="#network-server">Network Server</a>
+        </div>
 
         <div class="ed-title">Core Resources</div>
         <div>
@@ -72,6 +79,11 @@
             <a href="#manage-school-codes">Manage School Codes</a>
         </div>
 
+        <div class="ed-title">Common Directory Tasks</div>
+        <div>
+            <a href="#manage-school-codes">Upgrade an Institution to be a Service Provider</a>
+        </div>
+
     </div>
     <div class="col-sm-9">
 
@@ -79,8 +91,11 @@
         <p>
             The EDExchange API is accessible using SOAP and REST based clients. A WSDL is accessible for
             each defined resource as shown on the <a href="services">services</a> page.
-            The remainder of API documentation is specific to the REST API.
+            The remainder of the API documentation is specific to the REST API and is intended to
+            supplement the <a href="swagger-ui/index.html">interactive API documentation</a> by providing descriptions of higher level tasks.
+            Tasks are typically composoed of different API invocations and resources to accomplish a goal.
         </p>
+
         <p>
             The EDExchange REST API has predictable, resource-oriented URLs, and uses HTTP response codes to indicate
             API errors. We use built-in HTTP features, like HTTP authentication and HTTP verbs, which are understood
@@ -91,8 +106,9 @@
             including errors.
         </p>
         <p>
-            To make the API as explorable as possible, <a href="swagger-ui/index.html">interactive documentation</a> has
-            been provided.  In addition, for the purpose of testing end-to-end document delivery, endpoints can be
+            To make the API as explorable as possible, <a href="swagger-ui/index.html">interactive API documentation</a> has
+            been provided.  The interactive API documentation should be the primary source of information regarding API usage.
+            In addition, for the purpose of testing end-to-end document delivery, endpoints can be
             designated for use in test mode or live mode. There is no "switch" for changing between modes,
             just use the appropriate endpoint to deliver a live or test document.
         </p>
@@ -142,7 +158,10 @@
 
 
 
-        <div class="ed-title">HTTP Status Code Summary</div>
+        <div class="ed-title">HTTP Status Code Usage</div>
+        <p>
+            404 is not used.  When a resource cannot be found, an empty list is returned.
+        </p>
 
         <dl class="dl-horizontal">
             <dt>200 - OK</dt>
@@ -151,13 +170,14 @@
             <dt>400 - Bad Request</dt><dd>The request was unacceptable, often due to missing a required parameter.</dd>
             <dt>401 - Unauthorized</dt><dd>No valid API key provided.</dd>
             <dt>402 - Request Failed</dt><dd>The parameters were valid but the request failed.</dd>
-            <dt>404 - Not Found</dt><dd>The requested resource doesn't exist.</dd>
+            <dt>403 - Access Denied</dt><dd>No valid API key provided or inadequate permissions.</dd>
             <dt>409 - Conflict</dt><dd>The request conflicts with another request (perhaps due to using the same idempotent key).</dd>
             <dt>429 - Too Many Requests</dt><dd>Too many requests hit the API too quickly.</dd>
-            <dt>500, 502, 503, 504 - Server Errors</dt><dd>Something went wrong on Stripe's end. (These are rare.)</dd>
+            <dt>500, 502, 503, 504 - Server Errors</dt><dd>Something went wrong on internal to the EDExchange directory server. (These are rare.)</dd>
 
 
         </dl>
+
 
 
 
@@ -192,7 +212,7 @@
 
         <p>
             Certain resources that have large results sets can be paginated.  Whenever pagination is available,
-            EDExchange utilized two query parameters <var>limit</var> and <var>offset</var> to specify the maximum
+            EDExchange utilizes two query parameters <var>limit</var> and <var>offset</var> to specify the maximum
             number of records that should be returned, and where in the result set to start.  EDExchange utilizes
             a custom HTTP header <var>X-Total-Count</var> in the response to indicate the total number of records
             in the result set.
@@ -220,25 +240,47 @@
         </pre>
 
 
+        <h2 id="directory-server">Directory Server</h2>
+        <p>
+            The EDExchange directory server maintains a directory of EDExchange members and all relateded information.  This is the
+            server that hosts the API and exposes the directory information. It is hosted and maintained <a href="www.pesc.org">PESC</a>.
+            EDExchange members can also manage their organization through the directory server web application.  Most API operations
+            can be conducted using directory server operations, including the management of users, endpoints, contacts and the signing
+            certificate.
+        </p>
+
+        <h2 id="network-server">Network Server</h2>
+        <p>
+            The EDExchange network server is a server that hosts endpoints.  A network server must
+            exist for each EDExchange member that is configured to be receive documents.
+
+            <div id="reference-implementation">
+                A reference implementation of a network server can be used as a starting point for developing an EDExchange network server.
+                The source code for the reference implementation of the network server can be found on github using the following
+                url:
+                <pre><span th:text="${github}"></span></pre>
+
+                The project contains the source code for both the directory server and the reference implementation of the
+                network server.
+
+            </div>
+
+        </p>
+
         <h2 id="organizations">Organizations</h2>
         <p>
             An organization is an object that represents a member of the EDExchange network.  An organization can be of type <var>Service Provider</var>
             or <var>Institution</var> or both. When an organization is created, a number is assigned to it that uniquely
             idenifies the organization in the EDExchange network.
-            All members of the EDExchange network are included in the searchable EDExchange directory.
+            All members of the EDExchange network are included in the searchable EDExchange directory.   Operations can be
+            invoked using the <a href="/swagger-ui/index.html#!/orgnizations">organizations resource</a> of the REST API or
+            through the directory server web application by an authenticated user with the appropriate permissions.
         </p>
 
         <div id="service-provider" class="ed-title">Service Providers</div>
         <p>
             An organization that is a <var>Service Provider</var> can both send and receive documents through EDExchange. For an
-            organization to be able to receive documents, the organization must host an EDExchange network server.  A reference
-            implementation of a network server can be used as a starting point for developing an EDExchange network server.
-            The source code for the reference implementation of the network server can be found on github using the following
-            url:
-        <pre><span th:text="${github}"></span></pre>
-
-        The project contains the source code for both the directory server and the reference implementation of the
-        network server.
+            organization to be able to receive documents, the organization must host an EDExchange <a href="#network-server">network server</a>.
         </p>
 
         <div id="institutions" class="ed-title">Institutions</div>
@@ -251,24 +293,30 @@
 
         <h2 id="endpoints">Endpoints</h2>
         <p>
-            An endpoint is a URL that identifies where to <a href="#send-document">send a document</a>. Organizations that are <var>Servcice Providers</var>
-            can create, manage, and assign endpoints to institutions that are serviceable by the provider.
-            An institution can also be a service provider and can receive documents for itself.
+            An endpoint is a URL and set of attributes that identifies where to <a href="#send-document">send a document</a>. Organizations that are <var>Servcice Providers</var>
+            can create, read, update and delete and assign endpoints to institutions that are serviceable by the provider.
+            An institution can also be a service provider and can receive documents for itself.  Endpoint operations can be
+            invoked through the web application by an authenticated user with the appropriate permissions or by using
+            the <a href="/swagger-ui/index.html#!/endpoints">endpoints resource</a> of the REST API.
         </p>
 
 
         <h2 id="certificate">SSL Certificate</h2>
         <p>
+            An SSL certificate is required to send documents through the EDExchange network.
             The authenticity of documents tranferred within the EDExchange network is verified using the
             SSL certificate provided by the sender.  Before an organization can send a document, it must obtain
             a certificate from a certficate authority and upload the certificate to the EDExchange directory server
-            using the website or through the REST API.
+            using the website or by updating the signing-certificate property on the <a href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
+            of the REST API.
 
         <div class="well">
             <ul class="list-unstyled">
                 <li><b>Step 1:</b> Obtain an SSL certificate from a certificate authority, or optionally, for test purposes, <a href="#self-signed-cert">create a
                     self signed certificate.</a></li>
-                <li><b>Step 2:</b> Upload the certificate to the directory servier using the website, or through the REST API.
+                <li><b>Step 2:</b> Upload the certificate to the directory servier using the website,
+                    or by updating the signing-certificate property on the <a href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
+                    of the REST API.
                     The certificate must be PEM encoded.</li>
 
             </ul>
@@ -367,8 +415,8 @@
 
         <div class="well">
             <ul class="list-unstyled">
-                <li><b>Preconditions:</b> The sender's directory ID is known and a document is available to send.</li>
-                <li><b>Step 1:</b> Obtain the endpoint for the recipient and document.</a></li>
+                <li><b>Preconditions:</b> An SSL certificate has been uploaded to the directory server using the API.  The sender's directory ID is known and a document is available to send.</li>
+                <li><b>Step 1:</b> <a href="#find-endpoint">Get an endpoint</a> for a particular recipient and document.</li>
                 <li><b>Step 2:</b> Digitally sign the document.</li>
                 <li><b>Step 3:</b> Upload the document and digital signature, along with the required parameters to the
                     endpoint using a <a href="#upload-document">multipart/form-data HTTP POST</a>.
@@ -379,7 +427,7 @@
 
         <h2 id="use-cases">Use Cases</h2>
         <div class="ed-title" id="upload-document">multipart/form-data HTTP POST</div>
-        <p>The reference implementation of the network server uses a multipart/form-data HTTP POST as the endpoint that
+        <p>The <a href="#reference-implementation">reference implementation</a> of the network server uses a multipart/form-data HTTP POST as the endpoint that
             receives documents.  This section describes the HTTP POST method and provides sample code.
         </p>
 
@@ -474,32 +522,63 @@
         </div>
 
         <div class="ed-title" id="receive-document">Receive a Document</div>
+        <p>
+            Organizations that are service providers must host a <a href="#network-server">network server</a> in order
+            to receive documents.  The reference implementation of the network server uses a
+            <a href="#upload-document">multipart/form-data HTTP POST</a> endpoint to receive documents.
+        </p>
+
+        <p>
+            The use case below describes the steps required to receive a document.
+            <div class="well">
+                <ul class="list-unstyled">
+                    <li>
+                        <b>Preconditions:</b> A <a href="#network-server">network server</a> has been implemented </li>
+                    <li>
+                        <b>Step 1:</b> Receiver <a href="#create-endpoint">creates an endpoint</a> in the directory server that matches the URL used to to receive in the network server.</li>
+                    <li>
+                        <b>Step 2:</b> Receiver associates the endpoint with one or more institutions.</li>
+                    <li>
+                        <b>Step 3:</b> Sender <a href="#find-endpoint">finds the endpoint</a> using the <a href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoints</a> resource.
+                    </li>
+                    <li>
+                        <b>Step 4:</b> Sender signs the document to send with their private key.
+                    </li>
+                    <li>
+                        <b>Step 4:</b> Sender <a href="#send-document"> sends the document</a> to the endpoint.
+                    </li>
+
+                </ul>
+            </div>
+        </p>
+
+
 
         <div class="ed-title" id="create-endpoint">Create an Endpoint</div>
         <p>
-            Endpoints are URLs that are hosted by the network server of a service provider.  The EDExchange API
-            provides the means to search for endpoints with various attributes.
-
-            <div class="well">
-                <div class="ed-heading">Endpoint Attributes</div>
-                <div class="row">
-                    <div class="col-sm-3" style="text-align: right;">
-                        file
-                    </div>
-                    <div class="col-sm-9">
-                        The document of interest.
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-3" style="text-align: right;">
-                        signature
-                    </div>
-                    <div class="col-sm-9">
-                        The digital signature of the document of interest.
-                    </div>
-                </div>
-            </div>
+            Endpoints are URLs and related attributes that are hosted by the network server of a service provider. The <a href="/swagger-ui/index.html#!/endpoints">endpoints resource</a>
+            can be used to manage (create, read, update and delete) endpoints for a particular service provider.  The same operations
+            are available through the directory server web application to an authenticated user with the appropriate permissions.
         </p>
+        <div class="ed-title" id="find-endpoint">Find an Endpoint</div>
+        <div class="well">
+            <ul class="list-unstyled">
+                <li><b>Preconditions:</b> The following parameters are available:
+                    <p>
+                        <ul class="list-unstyled" style="margin-left: 20px;">
+                            <li><var>Recipient ID:</var>  The directory ID of the recipient institution.</li>
+                            <li><var>Document Format:</var>  The <a href="/services/rest/v1/document-formats">document format</a> name as defined by the directory server.</li>
+                            <li><var>Document Type:</var>  The <a href="/services/rest/v1/document-types">document type</a> name as defined by the directory server.</li>
+                            <li><var>Department:</var>  The <a href="/services/rest/v1/departments">department</a> name as defined by the directory server.</li>
+                            <li><var>Mode:</var> Must be either 'MODE' or 'LIVE'.</li>
+                        </ul>
+                    </p>
+
+                </li>
+                <li><b>Step 1:</b> Query the <a href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoint resource</a> using the REST API.</a></li>
+            </ul>
+        </div>
+
         <div class="ed-title" id="create-serviceable-institution">Create a Serviceable Institution</div>
         <div class="ed-title" id="upload-serviceable-institutions-csv">Uplaod Serviceable Institutions CSV</div>
         <div class="ed-title" id="assign-endpoint">Assign an Endpoint</div>

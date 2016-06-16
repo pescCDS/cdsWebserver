@@ -172,6 +172,10 @@ public class OrganizationsResource {
             organizationService.removeEndpointToOrganization(id, endpointID);
         }
 
+        throw new ApiException(
+                new IllegalArgumentException("The opration parameter must be either 'add' or 'remove'."),
+                Response.Status.BAD_REQUEST, baseURI + "/organizations/" + id );
+
     }
 
 
