@@ -25,8 +25,9 @@ public class NetworkServerApplication {
 	 * @return TomcatEmbeddedServletContainerFactory
 	 */
 	@Bean
-	public TomcatEmbeddedServletContainerFactory tomcatFactory(@Value("${http.port}")Integer port,
-															   @Value("${server.port}")Integer securePort) {
+
+	public TomcatEmbeddedServletContainerFactory tomcatFactory(/*@Value("${http.port}")Integer port,
+															   @Value("${server.port}")Integer securePort*/) {
 		TomcatEmbeddedServletContainerFactory factory =  new TomcatEmbeddedServletContainerFactory() {
 
 			@Override
@@ -38,7 +39,8 @@ public class NetworkServerApplication {
 		};
 
 
-		factory.addAdditionalTomcatConnectors(createStandardConnector(port,securePort));
+		//HTTPS
+		//factory.addAdditionalTomcatConnectors(createStandardConnector(port,securePort));
 
 
 	  /* Not using AJP do to reverse proxy issues revolving around redirects that use an absolute path.  The
