@@ -46,11 +46,8 @@ public class DocumentController {
 	
 	private static final Log log = LogFactory.getLog(DocumentController.class);
 
-	@Value("${directory.server}")
+	@Value("${directory.server.base.url}")
 	private String directoryServer;
-	@Value("${directory.server.port}")
-	private String directortyServerPort;
-
 
 	@Value("${networkServer.id}")
 	private String localServerId;
@@ -182,7 +179,7 @@ public class DocumentController {
 	}
 
 	private String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department) {
-		StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + endpointsApiPath);
+		StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
 		uri.append("?organizationId=").append(orgID).append("&documentFormat=").append(documentFormat).append("&documentType=").append(documentType)
 		.append("&department=").append(department);
 
@@ -227,7 +224,7 @@ public class DocumentController {
 	}
 
 	private String getPEMPublicKeyByOrgID(int orgID) {
-		StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + "/services/rest/v1/organizations/" + orgID + "/public-key");
+		StringBuilder uri = new StringBuilder(directoryServer + "/services/rest/v1/organizations/" + orgID + "/public-key");
 
 		CloseableHttpClient client = HttpClients.custom().build();
 		String pemPublicKey = null;
@@ -273,7 +270,7 @@ public class DocumentController {
 
 		int orgID = 0;
 
-	    StringBuilder uri = new StringBuilder("http://" + directoryServer + ":" + directortyServerPort + organizationApiPath);
+	    StringBuilder uri = new StringBuilder(directoryServer + organizationApiPath);
 		uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
 		CloseableHttpClient client = HttpClients.custom().build();
 		try {

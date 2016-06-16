@@ -100,7 +100,7 @@
         }
 
         function getOrgURL(orgID) {
-            return "http://" + directoryServer + "/services/rest/v1/organizations/" + orgID;
+            return directoryServer + "/services/rest/v1/organizations/" + orgID;
         }
 
         function resend(tran) {
@@ -345,7 +345,7 @@
         function getDeliveryMethods() {
             var deferred = $q.defer();
 
-            $http.get('http://' + $window.directoryServer + '/services/rest/v1/delivery-methods', {
+            $http.get($window.directoryServer + '/services/rest/v1/delivery-methods', {
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
@@ -360,7 +360,7 @@
         function getDocumentFormats() {
             var deferred = $q.defer();
 
-            $http.get('http://' + $window.directoryServer + '/services/rest/v1/document-formats', {
+            $http.get( $window.directoryServer + '/services/rest/v1/document-formats', {
                 headers: {
                     'Access-Control-Allow-Origin': 'http://localhost:8000'
                 },
@@ -378,7 +378,7 @@
         function getDepartments() {
             var deferred = $q.defer();
 
-            $http.get('http://' + $window.directoryServer + '/services/rest/v1/departments', {
+            $http.get($window.directoryServer + '/services/rest/v1/departments', {
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
@@ -393,7 +393,7 @@
         function getDocumentTypes() {
             var deferred = $q.defer();
 
-            $http.get('http://' + $window.directoryServer + '/services/rest/v1/document-types', {
+            $http.get($window.directoryServer + '/services/rest/v1/document-types', {
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);

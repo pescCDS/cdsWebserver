@@ -31,10 +31,7 @@ import static org.junit.Assert.assertTrue;
 @WebAppConfiguration
 public class ServiceProviderUseCaseTests {
 
-    @Value("${directory.server.port}")   //Injects that actual port used in the test
-    int port;
-
-    @Value("${directory.server}")
+    @Value("${directory.server.base.url}")
     String directoryServer;
 
     final String USERNAME = "sallen";
@@ -48,7 +45,7 @@ public class ServiceProviderUseCaseTests {
     private HttpEntity<String> headersEntity;
 
     private String getBaseDirectoryServerURL() {
-        return "http://" + directoryServer + ":" + port;
+        return directoryServer;
     }
 
 
