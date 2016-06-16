@@ -1,7 +1,10 @@
 package org.pesc;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,8 +29,8 @@ public class NetworkServerApplication {
 	 */
 	@Bean
 
-	public TomcatEmbeddedServletContainerFactory tomcatFactory(/*@Value("${http.port}")Integer port,
-															   @Value("${server.port}")Integer securePort*/) {
+	public TomcatEmbeddedServletContainerFactory tomcatFactory(@Value("${http.port}")Integer port,
+															   @Value("${server.port}")Integer securePort) {
 		TomcatEmbeddedServletContainerFactory factory =  new TomcatEmbeddedServletContainerFactory() {
 
 			@Override
@@ -36,11 +39,22 @@ public class NetworkServerApplication {
 				tomcat.enableNaming();
 				return super.getTomcatEmbeddedServletContainer(tomcat);
 			}
+
+
+			@Override
+			protected void postProcessContext(Context context) {
+				SecurityConstraint securityConstraint = new SecurityConstraint();
+				securityConstraint.setUserConstraint("CONFIDENTIAL");
+				SecurityCollection collection = new SecurityCollection();
+				collection.addPattern("/*");
+				securityConstraint.addCollection(collection);
+				context.addConstraint(securityConstraint);
+			}
 		};
 
 
 		//HTTPS
-		//factory.addAdditionalTomcatConnectors(createStandardConnector(port,securePort));
+		factory.addAdditionalTomcatConnectors(createStandardConnector(port,securePort));
 
 
 	  /* Not using AJP do to reverse proxy issues revolving around redirects that use an absolute path.  The
