@@ -17,6 +17,8 @@ import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +95,11 @@ public class EndpointResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Create a endpoint.")
     public Endpoint createEndpoint(Endpoint endpoint) {
+
+        //validate the url.
+        if (!endpoint.getAddress().toLowerCase().startsWith("https")) {
+            throw new ApiException(new IllegalArgumentException("HTTPS is required for endpint URLs."), Response.Status.BAD_REQUEST, "/endpoints") ;
+        }
 
         return endpointService.create(endpoint);
     }

@@ -2,16 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>EDExchange Documentation</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="css/main.css" media="screen" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css" media="screen"/>
 </head>
 <body>
 
 <div class="container">
     <div class="col-sm-3">
-        <div class="ed-title">Introduction</div>
+        <div class="ed-title">API Reference</div>
         <div><a href="#introduction">Introduction</a></div>
         <div>
             <a href="swagger-ui/index.html">Interactive API documentation</a>
@@ -36,6 +36,10 @@
             <a href="#network-server">Network Server</a>
         </div>
 
+        <div>
+            <a href="#faq">Frequently Ask Questions (FAQ)</a>
+        </div>
+
         <div class="ed-title">Core Resources</div>
         <div>
             <a href="#organizations">Organizations</a>
@@ -44,7 +48,7 @@
             <a href="#endpoints">Endpoints</a>
         </div>
 
-        <div class="ed-title">Common Service Provider Tasks</div>
+        <div class="ed-title" id="common-service-provider-tasks">Common Service Provider Tasks</div>
         <div>
             <a href="#certificate">Provide SSL Certificate</a>
         </div>
@@ -68,7 +72,7 @@
             <a href="#assign-endpoint">Assign an Endpoint</a>
         </div>
 
-        <div class="ed-title">Common Institution Tasks</div>
+        <div class="ed-title" id="common-institution-tasks">Common Institution Tasks</div>
         <div>
             <a href="#certificate">Provide SSL Certificate</a>
         </div>
@@ -84,16 +88,23 @@
             <a href="#manage-school-codes">Upgrade an Institution to be a Service Provider</a>
         </div>
 
+        <div class="ed-title">Use Cases</div>
+        <div>
+            <a href="#transfer-document">Transfer a Document</a>
+        </div>
+
     </div>
     <div class="col-sm-9">
 
-        <h2 id="introduction">API Reference</h2>
+        <h2 id="introduction">Introduction</h2>
+
         <p>
             The EDExchange API is accessible using SOAP and REST based clients. A WSDL is accessible for
             each defined resource as shown on the <a href="services">services</a> page.
             The remainder of the API documentation is specific to the REST API and is intended to
-            supplement the <a href="swagger-ui/index.html">interactive API documentation</a> by providing descriptions of higher level tasks.
-            Tasks are typically composoed of different API invocations and resources to accomplish a goal.
+            supplement the <a href="swagger-ui/index.html">interactive API documentation</a> by providing descriptions
+            of higher level tasks.
+            Tasks are typically composed of different API invocations on various resourcess to accomplish a goal.
         </p>
 
         <p>
@@ -105,28 +116,34 @@
             which must be one of "application/json" or "application/xml", JSON or XML is returned by all API responses,
             including errors.
         </p>
+
         <p>
-            To make the API as explorable as possible, <a href="swagger-ui/index.html">interactive API documentation</a> has
-            been provided.  The interactive API documentation should be the primary source of information regarding API usage.
+            To make the API as explorable as possible, <a href="swagger-ui/index.html">interactive API documentation</a>
+            has
+            been provided. The interactive API documentation should be the primary source of information regarding API
+            usage.
             In addition, for the purpose of testing end-to-end document delivery, endpoints can be
             designated for use in test mode or live mode. There is no "switch" for changing between modes,
             just use the appropriate endpoint to deliver a live or test document.
         </p>
 
         <p>
-            Example code in the form of Java snippets has been provided in several areas of the documentation.  Code
+            Example code in the form of Java snippets has been provided in several areas of the documentation. Code
             examples utilize <a href="https://spring.io/">Spring</a> based technology to demonstrate how to use the
             the EDExchange REST API to accomplish various tasks.
         </p>
 
 
         <h2 id="authentication">Authentication</h2>
+
         <p>
             The EDExchange API uses basic authentication.
-            All API requests must be made over HTTPS. Calls made over plain HTTP will fail. API requests without authentication will also fail.
+            All API requests must be made over HTTPS. Calls made over plain HTTP will fail. API requests without
+            authentication will also fail.
         </p>
 
         <h2 id="errors">Errors</h2>
+
         <p>
 
             EDExchange uses conventional HTTP response codes to indicate the success or failure of an API request.
@@ -134,7 +151,7 @@
             given the information provided (e.g., a required parameter was omitted, etc.), and codes
             in the 5xx range indicate an error with the EDExchange servers (these are rare).
             Not all errors map cleanly onto HTTP response codes, however. When a request is valid
-            but does not complete successfully, we return a 402 error code.  The following describes the
+            but does not complete successfully, we return a 402 error code. The following describes the
             components of an error message:
 
         </p>
@@ -146,40 +163,47 @@
             <dt>timestamp</dt>
             <dd>A time stamp when the error occured, i.e. System.currentTimeMillis().</dd>
 
-            <dt>exception</dt><dd>The kind of exception that occurred.  This is an optional element.</dd>
-            <dt>status</dt><dd>The HTTP status code (same as the response status code).</dd>
-            <dt>error</dt><dd>The HTTP status code description (derived from the response status code).</dd>
-            <dt>path</dt><dd>The path that was requested.</dd>
-            <dt>message</dt><dd>A message which elaborates the problem in more detail.</dd>
+            <dt>exception</dt>
+            <dd>The kind of exception that occurred. This is an optional element.</dd>
+            <dt>status</dt>
+            <dd>The HTTP status code (same as the response status code).</dd>
+            <dt>error</dt>
+            <dd>The HTTP status code description (derived from the response status code).</dd>
+            <dt>path</dt>
+            <dd>The path that was requested.</dd>
+            <dt>message</dt>
+            <dd>A message which elaborates the problem in more detail.</dd>
 
         </dl>
         </p>
 
 
-
-
         <div class="ed-title">HTTP Status Code Usage</div>
         <p>
-            404 is not used.  When a resource cannot be found, an empty list is returned.
+            404 is not used. When a resource cannot be found, an empty list is returned.
         </p>
 
         <dl class="dl-horizontal">
             <dt>200 - OK</dt>
             <dd>Everything worked as expected.</dd>
 
-            <dt>400 - Bad Request</dt><dd>The request was unacceptable, often due to missing a required parameter.</dd>
-            <dt>401 - Unauthorized</dt><dd>No valid API key provided.</dd>
-            <dt>402 - Request Failed</dt><dd>The parameters were valid but the request failed.</dd>
-            <dt>403 - Access Denied</dt><dd>No valid API key provided or inadequate permissions.</dd>
-            <dt>409 - Conflict</dt><dd>The request conflicts with another request (perhaps due to using the same idempotent key).</dd>
-            <dt>429 - Too Many Requests</dt><dd>Too many requests hit the API too quickly.</dd>
-            <dt>500, 502, 503, 504 - Server Errors</dt><dd>Something went wrong on internal to the EDExchange directory server. (These are rare.)</dd>
+            <dt>400 - Bad Request</dt>
+            <dd>The request was unacceptable, often due to missing a required parameter.</dd>
+            <dt>401 - Unauthorized</dt>
+            <dd>No valid API key provided.</dd>
+            <dt>402 - Request Failed</dt>
+            <dd>The parameters were valid but the request failed.</dd>
+            <dt>403 - Access Denied</dt>
+            <dd>No valid API key provided or inadequate permissions.</dd>
+            <dt>409 - Conflict</dt>
+            <dd>The request conflicts with another request (perhaps due to using the same idempotent key).</dd>
+            <dt>429 - Too Many Requests</dt>
+            <dd>Too many requests hit the API too quickly.</dd>
+            <dt>500, 502, 503, 504 - Server Errors</dt>
+            <dd>Something went wrong on internal to the EDExchange directory server. (These are rare.)</dd>
 
 
         </dl>
-
-
-
 
 
         <div class="ed-title">Example Errors</div>
@@ -206,14 +230,12 @@
                 </pre>
 
 
-
-
         <h2 id="pagination">Pagination</h2>
 
         <p>
-            Certain resources that have large results sets can be paginated.  Whenever pagination is available,
+            Certain resources that have large results sets can be paginated. Whenever pagination is available,
             EDExchange utilizes two query parameters <var>limit</var> and <var>offset</var> to specify the maximum
-            number of records that should be returned, and where in the result set to start.  EDExchange utilizes
+            number of records that should be returned, and where in the result set to start. EDExchange utilizes
             a custom HTTP header <var>X-Total-Count</var> in the response to indicate the total number of records
             in the result set.
 
@@ -241,100 +263,125 @@
 
 
         <h2 id="directory-server">Directory Server</h2>
+
         <p>
-            The EDExchange directory server maintains a directory of EDExchange members and all relateded information.  This is the
-            server that hosts the API and exposes the directory information. It is hosted and maintained <a href="www.pesc.org">PESC</a>.
-            EDExchange members can also manage their organization through the directory server web application.  Most API operations
-            can be conducted using directory server operations, including the management of users, endpoints, contacts and the signing
+            The EDExchange directory server maintains a directory of EDExchange members and all relateded information.
+            This is the
+            server that hosts the API and exposes the directory information. It is hosted and maintained <a
+                href="www.pesc.org">PESC</a>.
+            EDExchange members can also manage their organization through the directory server web application. Most API
+            operations
+            can be conducted using directory server operations, including the management of users, endpoints, contacts
+            and the signing
             certificate.
         </p>
 
         <h2 id="network-server">Network Server</h2>
+
         <p>
-            The EDExchange network server is a server that hosts endpoints.  A network server must
+            The EDExchange network server is a server that hosts endpoints. A network server must
             exist for each EDExchange member that is configured to be receive documents.
 
-            <div id="reference-implementation">
-                A reference implementation of a network server can be used as a starting point for developing an EDExchange network server.
-                The source code for the reference implementation of the network server can be found on github using the following
-                url:
-                <pre><span th:text="${github}"></span></pre>
+        <div id="reference-implementation">
+            A reference implementation of a network server can be used as a starting point for developing an EDExchange
+            network server.
+            The source code for the reference implementation of the network server can be found on github using the
+            following
+            url:
+            <pre><span th:text="${github}"></span></pre>
 
-                The project contains the source code for both the directory server and the reference implementation of the
-                network server.
+            The project contains the source code for both the directory server and the reference implementation of the
+            network server.
 
-            </div>
+        </div>
 
         </p>
 
         <h2 id="organizations">Organizations</h2>
+
         <p>
-            An organization is an object that represents a member of the EDExchange network.  An organization can be of type <var>Service Provider</var>
+            An organization is an object that represents a member of the EDExchange network. An organization can be of
+            type <var>Service Provider</var>
             or <var>Institution</var> or both. When an organization is created, a number is assigned to it that uniquely
             idenifies the organization in the EDExchange network.
-            All members of the EDExchange network are included in the searchable EDExchange directory.   Operations can be
-            invoked using the <a href="/swagger-ui/index.html#!/orgnizations">organizations resource</a> of the REST API or
+            All members of the EDExchange network are included in the searchable EDExchange directory. Operations can be
+            invoked using the <a href="/swagger-ui/index.html#!/orgnizations">organizations resource</a> of the REST API
+            or
             through the directory server web application by an authenticated user with the appropriate permissions.
         </p>
 
         <div id="service-provider" class="ed-title">Service Providers</div>
         <p>
-            An organization that is a <var>Service Provider</var> can both send and receive documents through EDExchange. For an
-            organization to be able to receive documents, the organization must host an EDExchange <a href="#network-server">network server</a>.
+            An organization that is a <var>Service Provider</var> can both send and receive documents through
+            EDExchange. For an
+            organization to be able to receive documents, the organization must host an EDExchange <a
+                href="#network-server">network server</a>.
         </p>
 
         <div id="institutions" class="ed-title">Institutions</div>
         <p>
-            An organization that is an <var>Institution</var> can send documents through EDExchange.  To send documents,
-            the organization must provide a SSL certificate, obtained from a certificate authority.  The certificate is
+            An organization that is an <var>Institution</var> can send documents through EDExchange. To send documents,
+            the organization must provide a SSL certificate, obtained from a certificate authority. The certificate is
             used to verify the authenticity of a document transferred through EDExchange using digital signatures.
         </p>
 
 
         <h2 id="endpoints">Endpoints</h2>
+
         <p>
-            An endpoint is a URL and set of attributes that identifies where to <a href="#send-document">send a document</a>. Organizations that are <var>Servcice Providers</var>
-            can create, read, update and delete and assign endpoints to institutions that are serviceable by the provider.
-            An institution can also be a service provider and can receive documents for itself.  Endpoint operations can be
+            An endpoint is a URL and set of attributes that identifies where to <a href="#send-document">send a
+            document</a>. Organizations that are <var>Servcice Providers</var>
+            can create, read, update and delete and assign endpoints to institutions that are serviceable by the
+            provider.
+            An institution can also be a service provider and can receive documents for itself. Endpoint operations can
+            be
             invoked through the web application by an authenticated user with the appropriate permissions or by using
             the <a href="/swagger-ui/index.html#!/endpoints">endpoints resource</a> of the REST API.
         </p>
 
 
         <h2 id="certificate">SSL Certificate</h2>
+
         <p>
             An SSL certificate is required to send documents through the EDExchange network.
             The authenticity of documents tranferred within the EDExchange network is verified using the
-            SSL certificate provided by the sender.  Before an organization can send a document, it must obtain
+            SSL certificate provided by the sender. Before an organization can send a document, it must obtain
             a certificate from a certficate authority and upload the certificate to the EDExchange directory server
-            using the website or by updating the signing-certificate property on the <a href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
+            using the website or by updating the signing-certificate property on the <a
+                href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
             of the REST API.
 
         <div class="well">
-            <ul class="list-unstyled">
-                <li><b>Step 1:</b> Obtain an SSL certificate from a certificate authority, or optionally, for test purposes, <a href="#self-signed-cert">create a
-                    self signed certificate.</a></li>
-                <li><b>Step 2:</b> Upload the certificate to the directory servier using the website,
-                    or by updating the signing-certificate property on the <a href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
+            <ol>
+                <li>Obtain an SSL certificate from a certificate authority, or optionally, for test
+                    purposes, <a href="#self-signed-cert">create a
+                        self signed certificate.</a></li>
+                <li>Upload the certificate to the directory servier using the website,
+                    or by updating the signing-certificate property on the <a
+                            href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization
+                        resource</a>
                     of the REST API.
-                    The certificate must be PEM encoded.</li>
+                    The certificate must be PEM encoded.
+                </li>
 
-            </ul>
+            </ol>
         </div>
         </p>
 
         <div class="ed-title" id="self-signed-cert">Create a Self Signed Certificate</div>
         <p>
-            A self signed SSL certificate can be created with the openssl command line utility using the following command:
-            <p>
-                <kbd>
-                    openssl req -x509 -newkey rsa:2048 -keyout key.pem -out certificate.pem -days 365
-                </kbd>
-            </p>
+            A self signed SSL certificate can be created with the openssl command line utility using the following
+            command:
 
-            <p>
-                The resulting "certificate.pem" file contains the PEM encoded certificate which must be uploaded to the
-                EDExchange directory server.
+        <p>
+            <kbd>
+                openssl req -x509 -newkey rsa:2048 -keyout key.pem -out certificate.pem -days 365
+            </kbd>
+        </p>
+
+        <p>
+            The resulting "certificate.pem" file contains the PEM encoded certificate which must be uploaded to the
+            EDExchange directory server.
                       <pre>
     -----BEGIN CERTIFICATE-----
     MIIEMTCCAxmgAwIBAgIJAODgvtVzzhWlMA0GCSqGSIb3DQEBCwUAMIGuMQswCQYD
@@ -363,12 +410,12 @@
     -----END CERTIFICATE-----
                 </pre>
 
-            </p>
+        </p>
 
-            <p>
-                The resulting "key.pem" file contains the private key that will be used to generate
-                the digital signature for any document sent through EDExchange.  The private key
-                should not be shared and kept in a secure location.
+        <p>
+            The resulting "key.pem" file contains the private key that will be used to generate
+            the digital signature for any document sent through EDExchange. The private key
+            should not be shared and kept in a secure location.
 
                   <pre>
     -----BEGIN ENCRYPTED PRIVATE KEY-----
@@ -402,33 +449,103 @@
     nmY=
     -----END ENCRYPTED PRIVATE KEY-----
                 </pre>
-            </p>
-
+        </p>
 
 
         </p>
 
         <h2 id="send-document">Send a Document</h2>
+
         <p>
-            Both institutions and service providers can send documents through EDExchange after <a href="#certificate">providing a SSL certificate.</a>
+            Both institutions and service providers can send documents through EDExchange after <a href="#certificate">providing
+            a SSL certificate.</a>
         </p>
 
         <div class="well">
-            <ul class="list-unstyled">
-                <li><b>Preconditions:</b> An SSL certificate has been uploaded to the directory server using the API.  The sender's directory ID is known and a document is available to send.</li>
-                <li><b>Step 1:</b> <a href="#find-endpoint">Get an endpoint</a> for a particular recipient and document.</li>
-                <li><b>Step 2:</b> Digitally sign the document.</li>
-                <li><b>Step 3:</b> Upload the document and digital signature, along with the required parameters to the
+            <div><b>Preconditions:</b> An SSL certificate has been uploaded to the directory server using the API.
+                The sender's directory ID is known and a document is available to send.
+            </div>
+
+            <ol>
+                <li><a href="#find-endpoint">Find an endpoint</a> for a particular recipient and document.
+                </li>
+                <li>Digitally sign the document.</li>
+                <li>Upload the document and digital signature, along with the required parameters to the
                     endpoint using a <a href="#upload-document">multipart/form-data HTTP POST</a>.
                 </li>
 
-            </ul>
+            </ol>
         </div>
 
         <h2 id="use-cases">Use Cases</h2>
+
+
+        <div id="transfer-document" class="ed-title">Transfer a Document</div>
+
+
+        <ol>
+            <li>
+                The sender queries the directory server for the directory ID of the recipient
+                institution using various search criteria such as the school's name, ATP code or FICE code.
+            </li>
+
+            <li>
+                The sender queries the directory server to find an endpoint
+                (a URL that identifies where to send a document using HTTP) that fulfills the required
+                criteria including the document type (Transcript or Transcript Request), the file format of
+                the document (PDF, text, XML, etc.), the name of the institution's department to deliver to
+                and the directory ID of the recipient insitution.
+            </li>
+
+            <li>
+                The sender digitally signs the document with a private key that is paired with
+                the SSL certificate's public key supplied to the directory server.
+            </li>
+
+            <li>
+                The sender optionally creates a transaction used to track the document transfer.
+            </li>
+
+            <li>
+                The sender transfers the document to the endpoint using HTTPS along with the document's
+                digital signature, the sender's directory ID, the recipient's directory ID, the file
+                format, the document type and destination department name and optionally, a transaction
+                id and acknowledegment URL.
+            </li>
+
+            <li>
+                The receiving network server queries the directory server for the sender's
+                signing certificate and verifies the digital signature of the document.
+            </li>
+
+            <li>
+                The receiving network server handles the document appropriately (E.g. delivers a
+                transcript to the recipient, send back a transcript in response to a transcript request) based
+                on the recipient ID, the document type etc.
+            </li>
+
+            <li>
+                The receiving network server creates a transaction to log the event.
+            </li>
+
+            <li>
+                The receiving network server sends an acknowledgement back to the sender using
+                the acknowledgement URL and transaction ID provided by the sender (if present).
+            </li>
+
+
+            <li>
+                The sender's network server updates the transaction with the acknowledgement.
+            </li>
+
+
+        </ol>
+
+
         <div class="ed-title" id="upload-document">multipart/form-data HTTP POST</div>
-        <p>The <a href="#reference-implementation">reference implementation</a> of the network server uses a multipart/form-data HTTP POST as the endpoint that
-            receives documents.  This section describes the HTTP POST method and provides sample code.
+        <p>The <a href="#reference-implementation">reference implementation</a> of the network server uses a
+            multipart/form-data HTTP POST as the endpoint that
+            receives documents. This section describes the HTTP POST method and provides sample code.
         </p>
 
         <div class="well">
@@ -471,7 +588,8 @@
                     file_format
                 </div>
                 <div class="col-sm-9">
-                    Must be one of the <a href="/services/rest/v1/document-formats" target="_blank">document format</a> names as defined by EDExchange.
+                    Must be one of the <a href="/services/rest/v1/document-formats" target="_blank">document format</a>
+                    names as defined by EDExchange.
                 </div>
             </div>
             <div class="row">
@@ -479,7 +597,8 @@
                     document_type
                 </div>
                 <div class="col-sm-9">
-                    Must be one of the <a href="/services/rest/v1/document-types" target="_blank">document type</a> names as defined by EDExchange.
+                    Must be one of the <a href="/services/rest/v1/document-types" target="_blank">document type</a>
+                    names as defined by EDExchange.
                 </div>
             </div>
             <div class="row">
@@ -487,7 +606,8 @@
                     department
                 </div>
                 <div class="col-sm-9">
-                    Must be one of the <a href="/services/rest/v1/departments" target="_blank">department</a> names as defined by EDExchange.
+                    Must be one of the <a href="/services/rest/v1/departments" target="_blank">department</a> names as
+                    defined by EDExchange.
                 </div>
             </div>
             <div class="row">
@@ -495,7 +615,8 @@
                     transaction_id (optional)
                 </div>
                 <div class="col-sm-9">
-                    A number generated by the sender that uniquely identifies a transaction that represents the file transfer.
+                    A number generated by the sender that uniquely identifies a transaction that represents the file
+                    transfer.
                     Used in combination with the ack_url to acknowledge that the document has been received.
                     The sending network server uses the acknowlegement to update the transaction status.
                 </div>
@@ -505,7 +626,7 @@
                     ack_url (optional)
                 </div>
                 <div class="col-sm-9">
-                    A URL used to acknowledge that the document has been received.  Used in combination
+                    A URL used to acknowledge that the document has been received. Used in combination
                     with the transaction_id, so that the sending network server can update the transaction
                     status with a form POST to this URL and using transction_id as a form parameter.
                 </div>
@@ -524,68 +645,225 @@
         <div class="ed-title" id="receive-document">Receive a Document</div>
         <p>
             Organizations that are service providers must host a <a href="#network-server">network server</a> in order
-            to receive documents.  The reference implementation of the network server uses a
+            to receive documents. The reference implementation of the network server uses a
             <a href="#upload-document">multipart/form-data HTTP POST</a> endpoint to receive documents.
         </p>
 
         <p>
             The use case below describes the steps required to receive a document.
-            <div class="well">
-                <ul class="list-unstyled">
-                    <li>
-                        <b>Preconditions:</b> A <a href="#network-server">network server</a> has been implemented </li>
-                    <li>
-                        <b>Step 1:</b> Receiver <a href="#create-endpoint">creates an endpoint</a> in the directory server that matches the URL used to to receive in the network server.</li>
-                    <li>
-                        <b>Step 2:</b> Receiver associates the endpoint with one or more institutions.</li>
-                    <li>
-                        <b>Step 3:</b> Sender <a href="#find-endpoint">finds the endpoint</a> using the <a href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoints</a> resource.
-                    </li>
-                    <li>
-                        <b>Step 4:</b> Sender signs the document to send with their private key.
-                    </li>
-                    <li>
-                        <b>Step 4:</b> Sender <a href="#send-document"> sends the document</a> to the endpoint.
-                    </li>
 
-                </ul>
+        <div class="well">
+            <div>
+                <b>Preconditions:</b> A <a href="#network-server">network server</a> has been implemented
             </div>
-        </p>
+            <ol>
+                <li>
+                    Receiver <a href="#create-endpoint">creates an endpoint</a> in the directory server
+                    that matches the URL used to to receive in the network server.
+                </li>
+                <li>
+                    Receiver associates the endpoint with one or more institutions.
+                </li>
+                <li>
+                    Sender <a href="#find-endpoint">finds the endpoint</a> using the <a
+                        href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoints</a> resource.
+                </li>
+                <li>
+                    Sender signs the document to send with their private key.
+                </li>
+                <li>
+                    Sender <a href="#send-document"> sends the document</a> to the endpoint.
+                </li>
 
+            </ol>
+        </div>
+        </p>
 
 
         <div class="ed-title" id="create-endpoint">Create an Endpoint</div>
         <p>
-            Endpoints are URLs and related attributes that are hosted by the network server of a service provider. The <a href="/swagger-ui/index.html#!/endpoints">endpoints resource</a>
-            can be used to manage (create, read, update and delete) endpoints for a particular service provider.  The same operations
-            are available through the directory server web application to an authenticated user with the appropriate permissions.
+            Endpoints are URLs and related attributes that are hosted by the network server of a service provider. The
+            <a href="/swagger-ui/index.html#!/endpoints">endpoints resource</a>
+            can be used to manage (create, read, update and delete) endpoints for a particular service provider. The
+            same operations
+            are available through the directory server web application to an authenticated user with the appropriate
+            permissions.
         </p>
+
         <div class="ed-title" id="find-endpoint">Find an Endpoint</div>
         <div class="well">
-            <ul class="list-unstyled">
-                <li><b>Preconditions:</b> The following parameters are available:
+
+                <div><b>Preconditions:</b> The following parameters are available:
                     <p>
-                        <ul class="list-unstyled" style="margin-left: 20px;">
-                            <li><var>Recipient ID:</var>  The directory ID of the recipient institution.</li>
-                            <li><var>Document Format:</var>  The <a href="/services/rest/v1/document-formats">document format</a> name as defined by the directory server.</li>
-                            <li><var>Document Type:</var>  The <a href="/services/rest/v1/document-types">document type</a> name as defined by the directory server.</li>
-                            <li><var>Department:</var>  The <a href="/services/rest/v1/departments">department</a> name as defined by the directory server.</li>
-                            <li><var>Mode:</var> Must be either 'MODE' or 'LIVE'.</li>
-                        </ul>
+                    <ul class="list-unstyled" style="margin-left: 20px;">
+                        <li><var>Recipient ID:</var> The directory ID of the recipient institution.</li>
+                        <li><var>Document Format:</var> The <a href="/services/rest/v1/document-formats">document
+                            format</a> name as defined by the directory server.
+                        </li>
+                        <li><var>Document Type:</var> The <a href="/services/rest/v1/document-types">document type</a>
+                            name as defined by the directory server.
+                        </li>
+                        <li><var>Department:</var> The <a href="/services/rest/v1/departments">department</a> name as
+                            defined by the directory server.
+                        </li>
+                        <li><var>Mode:</var> Must be either 'MODE' or 'LIVE'.</li>
+                    </ul>
                     </p>
 
-                </li>
-                <li><b>Step 1:</b> Query the <a href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoint resource</a> using the REST API.</a></li>
-            </ul>
+                </div>
+                <ol>
+                    <li> Query the <a href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoint
+                        resource</a> using the REST API.</a></li>
+                </ol>
+
         </div>
 
         <div class="ed-title" id="create-serviceable-institution">Create a Serviceable Institution</div>
-        <div class="ed-title" id="upload-serviceable-institutions-csv">Uplaod Serviceable Institutions CSV</div>
+        <div class="ed-title" id="upload-serviceable-institutions-csv">Upload Serviceable Institutions CSV</div>
         <div class="ed-title" id="assign-endpoint">Assign an Endpoint</div>
-        <div class="ed-title" id="manage-school-codes">Manage School Codes</div>
-        <div class="ed-title" id="manage-organization-contacts">Manage Contacts</div>
-        <div class="ed-title" id="manage-users">Manager Users</div>
+        <p>
+            In order to receive documents of behalf of a serviceable institution, the service provider must associate
+            one or more endpoints with the institution. This can be done using the EDExchange web application by an
+            authenticated user with the appropriate permissions, or by using the organizations API resource.
+        </p>
 
+
+        <div class="ed-title" id="manage-school-codes">Manage School Codes</div>
+        <p>
+            There are a number of attributes that are used by the API that are used to search the EDExchange
+            directory for institutions and <a href="#endpoints">endpoints</a>.  The attributes include different
+            types of school codes.
+
+            The following school codes are currently supported by EDExchange:
+
+            <ul class="square-style" style="margin-left: 15px;">
+              <li>FICE</li>
+              <li>ATP</li>
+              <li>ACT</li>
+              <li>IPEDS</li>
+              <li>OPEID</li>
+            </ul>
+
+            <p>
+                School codes can be managed through the directory server web application by an authenticated user
+                with the appropriate permissions.  School codes can also be managed using the
+                <a href="/swagger-ui/index.html#!/school-codes/createSchoolCode">school codes resource</a> or alternatively
+                by using the school-codes property of the <a href="/swagger-ui/index.html#!/organizations/putSchoolCode">organizations resource</a>.
+            </p>
+
+        </p>
+
+        <div class="ed-title" id="manage-organization-contacts">Manage Contacts</div>
+        <p>
+            EDExchange member organizations can have one or more contacts that are presented in the
+            EDExchange public directory.  Contact information is intended to provide users the abiltity to contact the organization for
+            support, questions, etc.
+        </p>
+        <p>
+            Contacts can be managed through the EDExchange directory server web application by an authenticated user
+            with the appropriate permissions.  Contacts can also be managed using the <a href="/swagger-ui/index.html#!/contacts">contacts resource</a>
+            of the API.
+        </p>
+        <div class="ed-title" id="manage-users">Manage Users</div>
+        <p>
+            The EDExchange directory server web application provides the ability for each organization, both service providers and institutions, to maintain a group of
+            users that can manage their organization using through the web application.
+        </p>
+        <p>
+            An organization's users can be managed through the directory server web application by an authenticated user with the appropriate permissions.  Alternatively,
+            users can be managed by operating on the <a href="swagger-ui/index.html#!/users">users resource</a> of the API.
+        </p>
+
+        <h2 id="faq">Frequently Asked Questions (FAQ)</h2>
+
+        <div class="ed-faq">
+            <p>
+                <b>Q: </b><span>My institution wants to send transcripts to a particular school, what do I need to do?</span>
+            </p>
+            <p>
+                <b>A: </b>
+                <span>First, check if the destination school is an EDExchange member using the searchable <a href="home#/directory">directory</a>.  If the school isn't an
+            EDExchange member, they need to <a href="home#/registration-form">register</a> as a member.  Also, the destination school needs to be configured to receive documents.
+                    The destination school must
+                    either configure a <a href="#network-server">network server</a>, optionally using the <a href="#reference-implementation">reference implementation</a>
+            that's provided by EDExchange, or use an EDExchange <a href="#service-provider"> service provider</a> to receive documents on their behalf. Service providers are
+                    listed in the searchable <a href="home#/directory">directory</a>.
+                     <p>Next, <a href="home#/registration-form">register</a> with EDExchange as an institution (as opposed to a service provider).</p>
+                     <p>
+                         After you've registered your institution, you'll need to obtain an <a href="#certificate">SSL certificate</a> from a certificate authority and upload it
+                         to the directory server.  Once you have your certificate with the corresponding private key, you can use either the free reference implementation of the network
+                         server, or the free command line utility to <a href="#send-document">send a document</a>. Optionally, you'll need a software developer to extend or implement
+                         a customized software program.
+                     </p>
+              </span>
+            </p>
+        </div>
+
+
+        <div class="ed-faq">
+            <p>
+                <b>Q: </b><span>My institution wants to receive transcripts through EDExchange, what do I need to do?</span>
+            </p>
+            <p>
+                <b>A: </b>.
+                     <span>First, you must <a href="home#/registration-form">register</a> with EDExchange as both an institution and a service provider.  As a service provider, your
+                        institution will be able both send and receive documents.
+
+                           <p>
+                               After you have been registered and are a member of the EDExchange network, your are required to host a <a href="#network-server">network server</a> on the internet
+                               using a domain name of your choosing (E.g. edexchange.butte.edu).
+                               A free <a href="#reference-implementation">reference implementation</a> of the network server can be used. Optionally the reference implementation can be extended by a software developer to add or customize
+                               features, but the reference network server has the ability to both send and receive documents. If your institution intends to send documents, you'll have to
+                               provide an SSL certificate and install the corresponding private key so that is accessible to the network server.  Other configuration changes to the reference
+                               implementation of the network server are required too, such as the installation of a second SSL certificate used to encrypt data communications with the network server
+                               over the internet using HTTPS.
+                           </p>
+
+                            <p>
+                                Once your network server has become operational, there are a number of <a href="#common-service-provider-tasks">common service provider tasks</a>
+                                and <a href="#common-institution-tasks">common institition tasks</a> that define the system.
+                            </p>
+
+                    </span>
+                </span>
+            </p>
+        </div>
+
+        <div class="ed-faq">
+            <p>
+                <b>Q: </b><span>My organization is a service provider that has thousands of serviceable institutions.  How do I configure EDExchange to send and receive for all of these institutions?</span>
+            </p>
+            <p>
+                <b>A: </b>.
+                     <span>The EDExchange web application and API provides a way for service providers to create institutions and add them to a logical group that represent serviceable institutions.
+
+                           <p>
+                               The EDExchange web application allows authenticated users of the service provider to upload a CSV file that creates and associates institutions with the service provider.
+                               Alterntively, service providers can use the <a href="/swagger-ui/index.html#!/institutions">institution</a> resource by first <a href="swagger-ui/index.html#!/institutions/createInstitution">creating</a>
+                               the institution and then adding the institution to the service provider's group is serviceable instiutions using the <a href="https://localhost:8443/swagger-ui/index.html#!/institutions/relation">relation</a>
+                               resource.
+                           </p>
+
+                            <p>
+                               In order to receive documents of behalf of a serviceable institution, the service provider must <a href="#assign-endpoint">assign an endpoint</a> to the institution.
+                            </p>
+
+                    </span>
+                </span>
+            </p>
+        </div>
+
+
+        <hr>
     </div>
+    <!-- Footer -->
+    <footer>
+        <div class="row">
+            <div class="col-lg-12">
+                <p>EDExchange by the Common Data Services (CDS) Task Force</p>
+            </div>
+        </div>
+    </footer>
+</div>
 </body>
 </html>

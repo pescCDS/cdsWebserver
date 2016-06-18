@@ -91,7 +91,7 @@ public class InstitutionResource {
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
     @POST
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @ApiOperation("Create an institution.")
+    @ApiOperation("Create an institution. This API is intended to be used by service providers.")
     public Organization createInstitution(Organization org) {
 
         return organizationService.createInstitution(org);
