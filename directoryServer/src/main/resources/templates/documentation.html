@@ -72,6 +72,10 @@
             <a href="#assign-endpoint">Assign an Endpoint</a>
         </div>
 
+        <div>
+            <a href="#sign-document">Digitally Sign a Document</a>
+        </div>
+
         <div class="ed-title" id="common-institution-tasks">Common Institution Tasks</div>
         <div>
             <a href="#certificate">Provide SSL Certificate</a>
@@ -81,6 +85,9 @@
         </div>
         <div>
             <a href="#manage-school-codes">Manage School Codes</a>
+        </div>
+        <div>
+            <a href="#sign-document">Digitally Sign a Document</a>
         </div>
 
         <div class="ed-title">Common Directory Tasks</div>
@@ -279,7 +286,7 @@
         <h2 id="network-server">Network Server</h2>
 
         <p>
-            The EDExchange network server is a server that hosts endpoints. A network server must
+            The EDExchange network server is a server that hosts endpoints (a URL that can that receives documents). A network server must
             exist for each EDExchange member that is configured to be receive documents.
 
         <div id="reference-implementation">
@@ -290,8 +297,23 @@
             url:
             <pre><span th:text="${github}"></span></pre>
 
+            <p>
             The project contains the source code for both the directory server and the reference implementation of the
-            network server.
+            network server.  The network server is a complete solution in that it can securely send and receive documents
+            over the EDExchange network.  Even so, many institutions will want to customize certain parts of the implementation.
+            </p>
+            <p>
+                If an EDExchange member chooses to use the reference implementation of the network server, there are certain tasks
+                that need to be performed to make the reference implementation live for the member.  The network server is implemented
+                as a Spring Boot application and requires Java 8 to run.
+
+                <ol>
+                  <li>Obtain a domain name for the network server that it can be accessed on the internet using the domain name.</li>
+                  <li>Obtain and install an SSL certificate for the purpose of handling the HTTPS protocol for the chosen domain name.</li>
+                  <li>Configure a mysql database server of use with the network server.</li>
+                </ol>
+
+            </p>
 
         </div>
 
@@ -454,6 +476,16 @@
 
         </p>
 
+        <h2 id="sign-document">Sign a Document</h2>
+        <p>An institution or service provider must provide an <a href="#certificate">certificate</a> obtained from a certificate authority
+            to the directory server. This process requireds that a public/private key pair be generated.</p>
+
+        <p>
+            When a document such as transcript or transcript request is <a href="#transfer-document">transferred</a> to an endpoint, the digital
+            signature of the document must generated using the private key and transmitted with the signed document.
+        </p>
+
+
         <h2 id="send-document">Send a Document</h2>
 
         <p>
@@ -469,7 +501,7 @@
             <ol>
                 <li><a href="#find-endpoint">Find an endpoint</a> for a particular recipient and document.
                 </li>
-                <li>Digitally sign the document.</li>
+                <li>Digitally <a href="#sign-document">sign the document</a>.</li>
                 <li>Upload the document and digital signature, along with the required parameters to the
                     endpoint using a <a href="#upload-document">multipart/form-data HTTP POST</a>.
                 </li>
@@ -782,13 +814,16 @@
             </p>
             <p>
                 <b>A: </b>
-                <span>First, check if the destination school is an EDExchange member using the searchable <a href="home#/directory">directory</a>.  If the school isn't an
-            EDExchange member, they need to <a href="home#/registration-form">register</a> as a member.  Also, the destination school needs to be configured to receive documents.
-                    The destination school must
-                    either configure a <a href="#network-server">network server</a>, optionally using the <a href="#reference-implementation">reference implementation</a>
-            that's provided by EDExchange, or use an EDExchange <a href="#service-provider"> service provider</a> to receive documents on their behalf. Service providers are
-                    listed in the searchable <a href="home#/directory">directory</a>.
-                     <p>Next, <a href="home#/registration-form">register</a> with EDExchange as an institution (as opposed to a service provider).</p>
+                <span>First, <a href="home#/registration-form">register</a> with EDExchange as an institution (as opposed to a service provider).  If you also want to be able to
+                        receive documents, you must register as an <a href="#institutions">institution</a> and a <a href="#service-provider">service provider</a>.  Consult the next FAQ below
+                        for more information about receiving documents.</p>
+                     <p>Next,
+                         check if the destination school is an EDExchange member using the searchable <a href="home#/directory">directory</a>.  If the school isn't an
+                         EDExchange member, they need to <a href="home#/registration-form">register</a> as a member.  Also, the destination school needs to be configured to receive documents.
+                         The destination school must
+                         either configure a <a href="#network-server">network server</a>, using the <a href="#reference-implementation">reference implementation</a>
+                         that's provided by EDExchange, or alternatively, use an EDExchange <a href="#service-provider"> service provider</a> to receive documents on their behalf. Service providers are
+                         listed in the searchable <a href="home#/directory">directory</a>.
                      <p>
                          After you've registered your institution, you'll need to obtain an <a href="#certificate">SSL certificate</a> from a certificate authority and upload it
                          to the directory server.  Once you have your certificate with the corresponding private key, you can use either the free reference implementation of the network
@@ -806,7 +841,7 @@
             </p>
             <p>
                 <b>A: </b>.
-                     <span>First, you must <a href="home#/registration-form">register</a> with EDExchange as both an institution and a service provider.  As a service provider, your
+                     <span>First, you must <a href="home#/registration-form">register</a> with EDExchange as both an <a href="#institutions">institution</a> and a <a href="#service-provider">provider</a>.  As a service provider, your
                         institution will be able both send and receive documents.
 
                            <p>
@@ -835,13 +870,14 @@
             </p>
             <p>
                 <b>A: </b>.
-                     <span>The EDExchange web application and API provides a way for service providers to create institutions and add them to a logical group that represent serviceable institutions.
+                     <span>The EDExchange web application and API provides a way for service providers to create institutions and add them to a logical group that represents serviceable institutions.
 
                            <p>
-                               The EDExchange web application allows authenticated users of the service provider to upload a CSV file that creates and associates institutions with the service provider.
-                               Alterntively, service providers can use the <a href="/swagger-ui/index.html#!/institutions">institution</a> resource by first <a href="swagger-ui/index.html#!/institutions/createInstitution">creating</a>
-                               the institution and then adding the institution to the service provider's group is serviceable instiutions using the <a href="https://localhost:8443/swagger-ui/index.html#!/institutions/relation">relation</a>
-                               resource.
+                               The EDExchange web application allows authenticated users of the service provider to upload a CSV file where each row in the file creates an institution and adds it
+                               to the provider's group of serviceable institutions.
+                               Alterntively, service providers can use the <a href="/swagger-ui/index.html#!/institutions">institution</a> API resource by first <a href="swagger-ui/index.html#!/institutions/createInstitution">creating</a>
+                               the institution and then adding the institution to the service provider's group of serviceable instiutions using the <a href="https://localhost:8443/swagger-ui/index.html#!/institutions/relation">relation</a>
+                               API resource.
                            </p>
 
                             <p>

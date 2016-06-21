@@ -22,7 +22,7 @@ public class SchoolCodesService {
     private static final Log log = LogFactory.getLog(SchoolCodesService.class);
 
     protected EntityManagerFactory entityManagerFactory;
-    
+
     @Autowired
     public SchoolCodesService(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
