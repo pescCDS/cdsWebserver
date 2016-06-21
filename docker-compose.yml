@@ -29,6 +29,7 @@ networkserver_app_image:
   volumes:
      - ./networkServer/target:/opt/edexchange
   ports:
+   - 8081:9000
    - 9443:9443
    - 9000:9000
   environment:
