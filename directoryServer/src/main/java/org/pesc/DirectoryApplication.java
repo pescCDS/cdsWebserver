@@ -49,6 +49,8 @@ public class DirectoryApplication {
                 return super.getTomcatEmbeddedServletContainer(tomcat);
             }
 
+            //Uncomment the code below if the server is used without a load balancer that's handling HTTPS.
+            /*
 
             @Override
             protected void postProcessContext(Context context) {
@@ -59,6 +61,7 @@ public class DirectoryApplication {
                 securityConstraint.addCollection(collection);
                 context.addConstraint(securityConstraint);
             }
+            */
 
         };
 

@@ -40,7 +40,8 @@ public class NetworkServerApplication {
 				return super.getTomcatEmbeddedServletContainer(tomcat);
 			}
 
-
+			//Uncomment the code below if the server is used without a load balancer that's handling HTTPS.
+            /*
 			@Override
 			protected void postProcessContext(Context context) {
 				SecurityConstraint securityConstraint = new SecurityConstraint();
@@ -50,6 +51,7 @@ public class NetworkServerApplication {
 				securityConstraint.addCollection(collection);
 				context.addConstraint(securityConstraint);
 			}
+			*/
 		};
 
 

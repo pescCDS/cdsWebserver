@@ -299,13 +299,17 @@
 
             <p>
             The project contains the source code for both the directory server and the reference implementation of the
-            network server.  The network server is a complete solution in that it can securely send and receive documents
+            network server, so that a directory server can be run locally for testing purposes.  The network server is
+                a complete solution in that it can securely send and receive documents
             over the EDExchange network.  Even so, many institutions will want to customize certain parts of the implementation.
             </p>
             <p>
                 If an EDExchange member chooses to use the reference implementation of the network server, there are certain tasks
                 that need to be performed to make the reference implementation live for the member.  The network server is implemented
-                as a Spring Boot application and requires Java 8 to run.
+                as a Spring Boot application and requires Java 8 to run.  There are multiple options with regards to how
+                to deploy and run the network server.
+
+                <div class="ed-title">Using Docker</div>
 
                 <ol>
                   <li>Obtain a domain name for the network server that it can be accessed on the internet using the domain name.</li>
