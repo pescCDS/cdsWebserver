@@ -3,7 +3,7 @@
 
 SERVICE_NAME=network-server
 PATH_TO_JAR=/usr/local/network-server.jar
-OPTS="-Xmx256m -Ddirectory.server=$DIRCTORY_SERVER -Ddirectory.server.port=$DIRECTORY_SERVER_PORT -Ddb.server=$DB_SERVER -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE"
+OPTS="-Xmx256m -Ddirectory.server=$DIRCTORY_SERVER -Ddirectory.server.port=$DIRECTORY_SERVER_PORT -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE"
 PID_PATH_NAME=/tmp/network-server-pid
 DEBUG_ARGS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
 case $1 in
