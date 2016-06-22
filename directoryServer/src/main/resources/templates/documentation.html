@@ -138,6 +138,9 @@
             <a href="#transfer-document">Transfer a Document</a>
         </div>
         <div>
+            <a href="#transcript-request">Request a Transcript</a>
+        </div>
+        <div>
             <a href="#certificate">Publish a SSL Certificate</a>
         </div>
         <div>
@@ -224,7 +227,7 @@
                 <li><a href="#receive-document">Receive a document</a> and all the logic that entails, including signature verification.</li>
                 <li>Create a transaction to store send/receive information</li>
                 <li><a href="#send-document">Send a document</a> and all that logic that entails including signature generation.</li>
-                <li><a href="#create-serviceable-institution">Create a serviceable institution<</a></li>
+                <li><a href="#create-serviceable-institution">Create a serviceable institution</a></li>
                 <li>Updating organization information in the directory</li>
             </ol>
             Code for these tasks can be seen in the network server's implemenation itself, or in the unit tests.  The unit
@@ -789,21 +792,21 @@
             href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
         of the REST API.
 
-    <div class="well">
-        <ol>
-            <li>Obtain an SSL certificate from a certificate authority, or optionally, for test
-                purposes, <a href="#self-signed-cert">create a
-                    self signed certificate.</a></li>
-            <li>Upload the certificate to the directory servier using the website,
-                or by updating the signing-certificate property on the <a
-                        href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization
-                    resource</a>
-                of the REST API.
-                The certificate must be PEM encoded.
-            </li>
+        <div class="well">
+            <ol>
+                <li>Obtain an SSL certificate from a certificate authority, or optionally, for test
+                    purposes, <a href="#self-signed-cert">create a
+                        self signed certificate.</a></li>
+                <li>Upload the certificate to the directory servier using the website,
+                    or by updating the signing-certificate property on the <a
+                            href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization
+                        resource</a>
+                    of the REST API.
+                    The certificate must be PEM encoded.
+                </li>
 
-        </ol>
-    </div>
+            </ol>
+        </div>
     </p>
 
     <div class="ed-title" id="self-signed-cert">Create a Self Signed Certificate</div>
@@ -891,6 +894,35 @@
 
 
     </p>
+
+    <h2 id="transcript-request">Request a Transcript</h2>
+
+    <p>
+        One of the attributes of an <a href="#endpoints">endpoint</a> that can be used in the search criteria is the <a href="/services/rest/v1/document-types">document type</a>
+        name.  Endpoints that are intended to handle transcript requests should specify "Transcript Request" as the document type. When an EDExchange
+        member wishes to request a transcript from a particular institution, the search for an appropriate endpoint (one
+        that specifies "Transcript Request" as the document type.
+
+    <p>
+        Note that the reference implementation does not currently implement the handling of transcript requests.
+    </p>
+    <div class="well">
+        <ol>
+            <li>The institution that is the record holder creates an endpoint to handle transcript requests. Optionally, this can be done by a service provider on behalf of the record
+                holder.</li>
+            <li>The requesting institution uses the endpoint to send a document, in this case, a transcript request such as a TS146 to the record holder.</li>
+            <li>
+                The receiving network server procesess the trancript request by executing the following in any particular order:
+                <ol class="alpha">
+                    <li>Send an acknowledgement for the transcript request to the sending network server.</li>
+                    <li><a href="#send-document">Send a document</a>, in this case, a transcript, in response to the transcript request to the requestor.</li>
+                </ol>
+            </li>
+
+        </ol>
+    </div>
+    </p>
+
 
     <h2 id="sign-document">Sign a Document</h2>
     <p>An institution or service provider must provide an <a href="#certificate">certificate</a> obtained from a certificate authority

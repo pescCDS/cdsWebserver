@@ -243,3 +243,20 @@ ol>li:before {
     text-align:right;
     content:counter(item) ".";
 }
+
+ol.alpha>li{
+    margin:0 0 0 5em;
+    padding:0 0 0 0;
+    text-indent:0;
+    list-style-type:lower-alpha;
+    counter-increment:item;
+}
+
+ol.alpha>li:before {
+    display:inline-block;
+    width:1.5em;
+    padding-right:0;
+    font-weight:bold;
+    text-align:right;
+    content: "";
+}
