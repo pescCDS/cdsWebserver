@@ -230,7 +230,7 @@ public class ServiceConfig {
         beanConfig.setVersion(restAPIVersion);
         beanConfig.setTitle("PESC CDS REST Interface");
         beanConfig.setDescription("Swagger UI to document and explore the REST interface provided by the PESC CDS.");
-        beanConfig.setSchemes(new String[]{"https"});
+        beanConfig.setSchemes(new String[]{"http"});
         beanConfig.setHost(restApiHost);
         beanConfig.setBasePath("/services/rest/v1");
         beanConfig.setResourcePackage(restApiPackageToScan);

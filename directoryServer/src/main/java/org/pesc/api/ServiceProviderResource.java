@@ -5,11 +5,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.Institution;
 import org.pesc.api.model.InstitutionsUpload;
 import org.pesc.api.model.InstitutionsUploadResult;
 import org.pesc.api.model.Organization;
 import org.pesc.api.repository.InstitutionRepository;
+import org.pesc.service.InstitutionService;
 import org.pesc.service.InstitutionUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +37,7 @@ public class ServiceProviderResource {
     private static final Log log = LogFactory.getLog(ServiceProviderResource.class);
 
     @Autowired
-    private InstitutionRepository institutionRepository;
+    private InstitutionService institutionService;
 
     @Autowired
     private InstitutionUploadService uploadService;
@@ -77,13 +80,14 @@ public class ServiceProviderResource {
     @GET
     @ApiOperation("Return the service providers for the institution.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam(value="The directory identifier for the institution.", required = true) Integer id) {
+    public Set<Organization> getServiceProvidersForInstitution(@QueryParam("institution_id")
+                                                                   @ApiParam(value="The directory identifier for the institution.", required = true) Integer id) {
 
         if (id == null) {
-            throw new IllegalArgumentException("The institution's id must be provided.");
+            throw new ApiException(new IllegalArgumentException("The institution's id must be provided."), Response.Status.BAD_REQUEST, "/service-providers");
         }
 
-        Institution organization = institutionRepository.findOne(id);
+        Institution organization = institutionService.findById(id);
 
         if (organization == null) {
             return new HashSet<Organization>();
@@ -96,10 +100,11 @@ public class ServiceProviderResource {
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the organization with the given ID.")
-    public Institution updateServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam(value="The directory identifier for the organization.", required = true) Integer id, Set<Organization> serviceProviders) {
+    public Institution updateServiceProvidersForInstitution(@QueryParam("institution_id") @ApiParam(value="The directory identifier for the organization.", required = true) Integer id,
+                                                            Set<Organization> serviceProviders) {
 
         if (id == null) {
-            throw new IllegalArgumentException("The institution's id must be provided.");
+            throw new ApiException(new IllegalArgumentException("The institution's id must be provided."), Response.Status.BAD_REQUEST, "/service-providers");
         }
         Institution institution = new Institution();
         institution.setId(id);
@@ -107,7 +112,7 @@ public class ServiceProviderResource {
 
         //TODO: add security contraints...
 
-        return institutionRepository.save(institution);
+        return institutionService.save(institution);
     }
 
 
