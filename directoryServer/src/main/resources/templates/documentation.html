@@ -372,13 +372,12 @@
         <p>
             The EDExchange directory server maintains a directory of EDExchange members and all relateded information.
             This is the
-            server that hosts the API and exposes the directory information. It is hosted and maintained <a
-                href="www.pesc.org">PESC</a>.
-            EDExchange members can also manage their organization through the directory server web application. Most API
-            operations
-            can be conducted using directory server operations, including the management of users, endpoints, contacts
-            and the signing
-            certificate.
+            server that hosts the API and exposes the directory information. It is hosted and maintained by the<a
+                href="www.pesc.org">PESC</a> organization.
+            EDExchange members can also manage their organization through the directory server web application. Operations
+            can be conducted using the REST API, including the management of users, endpoints, contacts
+            and the signing certificate, and in many cases, through the directory server web application by an authenticated
+            user with the appropriate permissions.
         </p>
 
         <h2 id="network-server">Network Server</h2>
@@ -413,9 +412,9 @@
                 <p>
                     The network server application is configured using the application.properties files.  There are 3 configuration profiles:
                 <ol>
-                    <li><span><b>dev</b></span><span>Intended for use in a development environment</span></li>
-                    <li><span><b>qa</b></span><span>Intended for use in a quality assurance environment</span></li>
-                    <li><span><b>prod</b></span><span>Intended for use in a production environment</span></li>
+                    <li><span><b>dev</b></span>: <span>Intended for use in a development environment</span></li>
+                    <li><span><b>qa</b></span>: <span>Intended for use in a quality assurance environment</span></li>
+                    <li><span><b>prod</b></span>: <span>Intended for use in a production environment</span></li>
                 </ol>
                 <p>You can specify the configuratio profile on the command line, when invoking the application:
                 <div>
@@ -490,8 +489,10 @@
 
         <div class="ed-title">Required Changes Before Going Live</div>
         <ol>
-            <li>Obtain a domain name for the network server that it can be accessed on the internet using the domain name.</li>
-            <li>Obtain and install an SSL certificate for the purpose of handling the HTTPS protocol for the chosen domain name.</li>
+            <li>Obtain a domain name for the network server. This will be the base address for endpoints hosted by the network server.</li>
+            <li>Obtain and install an SSL certificate for the purpose of handling the HTTPS protocol for the chosen domain name.  The network server project
+            implements HTTPS, but you can alternatively use a proxy server or other configuration appropriate to your organization.  HTTPS configuration and proxy
+            is outside the scope of this document.</li>
             <li>Configure a mysql database server of use with the network server.</li>
             <li>Update the application-prod.properties to reflect your environment.</li>
         </ol>
@@ -527,7 +528,7 @@
     <div id="institutions" class="ed-title">Institutions</div>
     <p>
         An organization that is an <var>Institution</var> can send documents through EDExchange. To send documents,
-        the organization must provide a SSL certificate, obtained from a certificate authority. The certificate is
+        the organization must <a href="#certificate">publish a SSL certificate</a>, obtained from a certificate authority, to the directory server. The certificate is
         used to verify the authenticity of a document transferred through EDExchange using digital signatures.
     </p>
 
@@ -535,7 +536,7 @@
     <h2 id="endpoints">Endpoints</h2>
 
     <p>
-        An endpoint is a URL and set of attributes that identifies where to <a href="#send-document">send a
+        An endpoint is a URL and set of attributes that identify where to <a href="#send-document">send a
         document</a>. Organizations that are <var>Servcice Providers</var>
         can create, read, update and delete and assign endpoints to institutions that are serviceable by the
         provider.

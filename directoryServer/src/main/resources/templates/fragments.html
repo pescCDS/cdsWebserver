@@ -446,12 +446,12 @@
                     <div class="panel-body">
                         <p>EDExchange member organizations can be configured to send and receive documents, just send, or just receive.  Alternatively, an
                         organization can utilize an EDExchange service provider to send and receive documents on it's behalf.</p>
-                        <p><span style="font-weight: bolder;">To send documents</span>, you must publish a SSL certificate to the EDExchange directory server for the purpose
-                            of creating and verifying digital signatures.</p>
+                        <p><span style="font-weight: bolder;">To send documents</span>, you must <a href="/documentation#certificate">publish a SSL certificate</a> to the EDExchange directory server for the purpose
+                            of <a href="/documentation#sign-document">creating</a> and <a href="/documentation#verify-signature">verifying digital signatures</a>.</p>
                         <p>Institutions can alternatively use an EDExchange service provider to send documents on their behalf.</p>
                         <p><span style="font-weight: bolder;">To receive documents</span>, you must deploy an EDExchange network server on the internet using a domain name of your choice and
-                            secure it using an SSL certificate.  HTTPS is required for URLs that are used to receive documents.</p>
-                        <p>Once the network server is deployed, you must publish the endpoint (the URL used to receive documents) on the
+                            secure it using a valid SSL certificate.  HTTPS is required for URLs that are used to receive documents.</p>
+                        <p>Once the network server is deployed, you must publish the <a href="/documentation#endpoint">endpoint</a> (the URL used to receive documents) on the
                             EDExchange directory server.</p>
                         <p>Insitutions can alternatively use an EDExchange service provider to receive documents on their behalf.</p>
                     </div>
@@ -466,9 +466,9 @@
 
                             <p>Note that the process of sending a document is implemented in the free <a href="/documentation#network-server">reference implementation</a> of the network server.</p>
                             <p>First, the sender obtains the published URL for the receiver, based on attributes of the document and the intended recipient, from the EDExchange directory server.</p>
-                            <p>Next, the sender must generate a digital signature for the document.</p>
+                            <p>Next, the sender must <a href="/documentation#sign-document">generate a digital signature</a> for the document.</p>
                             <p>Next, create a transaction about the document for reporting purposes.</p>
-                            <p>Send the document and digital signature to the receiving URL along with the directory ID
+                            <p><a href="/documentation#send-document">Send the document</a> and digital signature to the receiving URL along with the directory ID
                                 of the sender and the recipient, and optionally with a transaction ID and acknowledgment
                             URL.</p>
                             <p>Update the transaction with information about the delivery provided by the receiving
@@ -486,9 +486,9 @@
                     </div>
                     <div class="panel-body">
                             <p>Note that the process of receiving a document is implemented in the free <a href="/documentation#network-server">reference implementation</a> of the network server.</p>
-                            <p>When a document and it's digital signature are received by the the receiver's hosted network server over the published URL, </p>
+                            <p>When a document and it's digital signature are received by the the receiver's hosted network server over the published <a href="/documentation#endpoints">endpoint</a>, </p>
                             the network server creates a transaction about the document for reporting purposes.</p>
-                            <p>The network server then verifies the document's digital signature by obtaining the sender's published SSL certificate from the EDExchange directory server.</p>
+                            <p>The network server then <a href="/documentation#verify-signature">verifies the document's digital signature</a> by obtaining the sender's published SSL certificate from the EDExchange directory server.</p>
                             <p>Once the document's signature is verified, the network server delivers the document to the recipient and sends an acknowledgement back to the sender,
                                 with the sender's transaction ID, to indicate that the document has been delivered.</p>
 
