@@ -16,6 +16,9 @@
         <div>
             <a href="swagger-ui/index.html">Interactive API documentation</a>
         </div>
+        <div>
+            <a href="#sample-code">Sample Code</a>
+        </div>
 
         <div class="ed-title">General Topics</div>
         <div>
@@ -210,12 +213,28 @@
             just use the appropriate endpoint to deliver a live or test document.
         </p>
 
+        <h2 id="sample-code">Sample Code</h2>
         <p>
-            Example code in the form of Java snippets has been provided in several areas of the documentation. Code
-            examples utilize <a href="https://spring.io/">Spring</a> based technology to demonstrate how to use the
-            the EDExchange REST API to accomplish various tasks.
+            EDExchange is an open source project.  The source code for both the EDExchange <a href="#directory-server">directory server</a>
+            and the <a href="#network-server">network server</a> are available through github.  Most of the API operations that are used
+            by institutions and service providers are implemented in the network server code.
         </p>
-
+        <p>The network server project includes code for the following tasks:
+            <ol>
+                <li><a href="#receive-document">Receive a document</a> and all the logic that entails, including signature verification.</li>
+                <li>Create a transaction to store send/receive information</li>
+                <li><a href="#send-document">Send a document</a> and all that logic that entails including signature generation.</li>
+                <li><a href="#create-serviceable-institution">Create a serviceable institution<</a></li>
+                <li>Updating organization information in the directory</li>
+            </ol>
+            Code for these tasks can be seen in the network server's implemenation itself, or in the unit tests.  The unit
+            test classes have been named for easy identification of use cases.  For example, service provider tests are
+            located in the "ServiceProviderUseCaseTests" and institution tests are in the "InstitutionUseCaseTests" and
+            digital signature tests are in the "DigitalSignatureTests" Java classes.
+            <p>
+                It is likely that more sample code in the form of unit tests will be added to the network server project in the future.
+            </p>
+        </p>
 
         <h2 id="authentication">Authentication</h2>
 
@@ -969,10 +988,9 @@
         <a href="swagger-ui/index.html#!/service-providers/getServiceProvidersForInstitution">updating</a> the serviceable institutions for a service provider.</p>
 
 
-    <div id="ed-title" id="multiple-endpoints">Multiple Providers for an Institution</div>
+    <div class="ed-title" id="multiple-endpoints">Multiple Providers for an Institution</div>
     <p>It is possible, if unlikely, for a institution to have multiple service providers.  This means that when the EDExchange directory is queried for an endpoint, multiple
-    endpoints will be returned to the API caller.  In this case, it is up to the caller to select which endpoint in which to send the document.  From the perspective of the
-    receiving institution, it doesn't matter which endpoint is used. </p>
+    endpoints will be returned to the API caller.  In this case, it is up to the caller to select which endpoint in which to send the document. </p>
 
 
     <h2 id="upload-serviceable-institutions-csv">Upload Serviceable Institutions CSV</h2>
@@ -1019,7 +1037,7 @@
 
     </p>
 
-    <h2 id="manage-organization-contacts">Manage Contacts</h2>
+    <h2 id="manage-contacts">Manage Contacts</h2>
     <p>
         EDExchange member organizations can have one or more contacts that are presented in the
         EDExchange public directory.  Contact information is intended to provide users the abiltity to contact the organization for
