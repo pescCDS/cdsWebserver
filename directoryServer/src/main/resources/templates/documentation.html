@@ -344,7 +344,7 @@
             a custom HTTP header <var>X-Total-Count</var> in the response to indicate the total number of records
             in the result set.
 
-        <pre>https://localhost:8443/services/rest/v1/organizations?limit=5&offset=0</pre>
+        <pre th:text="${apiURL} + '/services/rest/v1/organizations?limit=5&offset=0'"></pre>
         </p>
 
         <div class="ed-title">Response Header Example</div>
@@ -1027,7 +1027,8 @@
         The EDExchange web application allows authenticated users of the service provider to upload a <a href="assets/upload-template.csv">CSV file</a> where each row in the file creates an institution and adds it
         to the provider's group of serviceable institutions.
         Alterntively, service providers can use the <a href="/swagger-ui/index.html#!/institutions">institution</a> API resource by first <a href="swagger-ui/index.html#!/institutions/createInstitution">creating</a>
-        the institution and then adding the institution to the service provider's group of serviceable instiutions using the <a href="https://localhost:8443/swagger-ui/index.html#!/institutions/relation">relation</a>
+        the institution and then adding the institution to the service provider's group of serviceable institutions using the
+        <a th:href="${apiURL} + '/swagger-ui/index.html#!/institutions/relation'">relation</a>
         API resource.
     </p>
     <p>Download the CSV template file <a href="assets/upload-template.csv">here</a>.</p>

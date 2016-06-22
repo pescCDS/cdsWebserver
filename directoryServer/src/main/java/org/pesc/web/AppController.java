@@ -35,6 +35,10 @@ public class AppController {
 
     private static final Log log = LogFactory.getLog(AppController.class);
 
+    @Value("${rest.api.host}")
+    private String restAPIHost;
+
+
     @Autowired
     private RegistrationService registrationService;
 
@@ -112,6 +116,8 @@ public class AppController {
         buildUserModel(model);
 
         model.addAttribute("github", githubURL);
+        model.addAttribute("apiURL", "https://" + restAPIHost);
+
         return "documentation";
     }
 
