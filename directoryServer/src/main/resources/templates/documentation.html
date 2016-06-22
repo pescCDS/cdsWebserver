@@ -45,6 +45,13 @@
         </div>
 
         <div>
+            <a href="#serviceable-institution">Serviceable Institutions</a>
+        </div>
+        <div>
+            <a href="#multiple-endpoints">Multiple Providers for an Institution</a>
+        </div>
+
+        <div>
             <a href="#faq">Frequently Ask Questions (FAQ)</a>
         </div>
 
@@ -89,6 +96,14 @@
             <a href="#verify-signature">Verify a Digital Signature</a>
         </div>
 
+        <div>
+            <a href="#manage-contacts">Manage Contacts</a>
+        </div>
+
+        <div>
+            <a href="#manage-users">Manage Users</a>
+        </div>
+
         <div class="ed-title" id="common-institution-tasks">Common Institution Tasks</div>
         <div>
             <a href="#certificate">Publish a SSL Certificate</a>
@@ -102,10 +117,17 @@
         <div>
             <a href="#sign-document">Digitally Sign a Document</a>
         </div>
+        <div>
+            <a href="#manage-contacts">Manage Contacts</a>
+        </div>
+
+        <div>
+            <a href="#manage-users">Manage Users</a>
+        </div>
 
         <div class="ed-title">Common Directory Tasks</div>
         <div>
-            <a href="#upgrade-institution">Upgrade an Institution to be a Service Provider</a>
+            <a href="#upgrade-institution">Update Institution to Service Provider</a>
         </div>
 
         <div class="ed-title">Use Cases</div>
@@ -147,7 +169,7 @@
         </div>
 
         <div>
-            <a href="#upgrade-institution">Upgrade an Institution to be a Service Provider</a>
+            <a href="#upgrade-institution">Update Institution to Service Provider</a>
         </div>
 
         <div>
@@ -199,8 +221,8 @@
 
         <p>
             The EDExchange API uses basic authentication.
-            All API requests must be made over HTTPS. Calls made over plain HTTP will fail. API requests without
-            authentication will also fail.
+            All API requests must be made over HTTPS. Calls made over plain HTTP will fail. Some API requests require authentication,
+            and certain permissions.  OAuth will most likely be implemented in the future, and an API key will be required.
         </p>
 
         <h2 id="errors">Errors</h2>
@@ -501,13 +523,186 @@
         the <a href="/swagger-ui/index.html#!/endpoints">endpoints resource</a> of the REST API.
     </p>
 
+    <div class="ed-title" id="upload-document">multipart/form-data HTTP POST</div>
+    <p>The <a href="#reference-implementation">reference implementation</a> of the network server uses a
+        multipart/form-data HTTP POST as the endpoint that
+        receives documents as defined below.
+    </p>
+
+
+    <div class="well">
+        <div class="ed-heading">Parameters</div>
+
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                file
+            </div>
+            <div class="col-sm-9">
+                The document of interest.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                signature
+            </div>
+            <div class="col-sm-9">
+                The digital signature of the document of interest.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                recipient_id
+            </div>
+            <div class="col-sm-9">
+                The EDExchange directory id of the recipient.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                sender_id
+            </div>
+            <div class="col-sm-9">
+                The EDExchange directory id of the sender.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                file_format
+            </div>
+            <div class="col-sm-9">
+                Must be one of the <a href="/services/rest/v1/document-formats" target="_blank">document format</a>
+                names as defined by EDExchange.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                document_type
+            </div>
+            <div class="col-sm-9">
+                Must be one of the <a href="/services/rest/v1/document-types" target="_blank">document type</a>
+                names as defined by EDExchange.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                department
+            </div>
+            <div class="col-sm-9">
+                Must be one of the <a href="/services/rest/v1/departments" target="_blank">department</a> names as
+                defined by EDExchange.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                transaction_id (optional)
+            </div>
+            <div class="col-sm-9">
+                A number generated by the sender that uniquely identifies a transaction that represents the file
+                transfer.
+                Used in combination with the ack_url to acknowledge that the document has been received.
+                The sending network server uses the acknowlegement to update the transaction status.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3" style="text-align: right;">
+                ack_url (optional)
+            </div>
+            <div class="col-sm-9">
+                A URL used to acknowledge that the document has been received. Used in combination
+                with the transaction_id, so that the sending network server can update the transaction
+                status with a form POST to this URL and using transction_id as a form parameter.
+            </div>
+        </div>
+
+    </div>
+
+
+    <h2 id="faq">Frequently Asked Questions (FAQ)</h2>
+
+    <div class="ed-faq">
+        <p>
+            <b>Q: </b><span>My institution wants to send transcripts to a particular school, what do I need to do?</span>
+        </p>
+        <p>
+            <b>A: </b>
+                <span>First, <a href="home#/registration-form">register</a> with EDExchange as an institution (as opposed to a service provider).  If you also want to be able to
+                        receive documents, you must register as an <a href="#institutions">institution</a> and a <a href="#service-provider">service provider</a>.  Consult the next FAQ below
+                        for more information about receiving documents.</p>
+        <p>Next,
+            check if the destination school is an EDExchange member using the searchable <a href="home#/directory">directory</a>.  If the school isn't an
+            EDExchange member, they need to <a href="home#/registration-form">register</a> as a member.  Also, the destination school needs to be configured to receive documents.
+            The destination school must
+            either configure a <a href="#network-server">network server</a>, using the <a href="#reference-implementation">reference implementation</a>
+            that's provided by EDExchange, or alternatively, use an EDExchange <a href="#service-provider"> service provider</a> to receive documents on their behalf. Service providers are
+            listed in the searchable <a href="home#/directory">directory</a>.
+        <p>
+            After you've registered your institution, you'll need to obtain an <a href="#certificate">SSL certificate</a> from a certificate authority and upload it
+            to the directory server.  Once you have your certificate with the corresponding private key, you can use either the free reference implementation of the network
+            server, or the free command line utility to <a href="#send-document">send a document</a>. Optionally, you'll need a software developer to extend or implement
+            a customized software program.
+        </p>
+        </span>
+        </p>
+    </div>
+
+
+    <div class="ed-faq">
+        <p>
+            <b>Q: </b><span>My institution wants to receive transcripts through EDExchange, what do I need to do?</span>
+        </p>
+        <p>
+            <b>A: </b>.
+                     <span>First, you must <a href="home#/registration-form">register</a> with EDExchange as both an <a href="#institutions">institution</a> and a <a href="#service-provider">provider</a>.  As a service provider, your
+                        institution will be able both send and receive documents.
+
+                           <p>
+                               After you have been registered and are a member of the EDExchange network, your are required to host a <a href="#network-server">network server</a> on the internet
+                               using a domain name of your choosing (E.g. edexchange.butte.edu).
+                               A free <a href="#reference-implementation">reference implementation</a> of the network server can be used. Optionally the reference implementation can be extended by a software developer to add or customize
+                               features, but the reference network server has the ability to both send and receive documents. If your institution intends to send documents, you'll have to
+                               provide an SSL certificate and install the corresponding private key so that is accessible to the network server.  Other configuration changes to the reference
+                               implementation of the network server are required too, such as the installation of a second SSL certificate used to encrypt data communications with the network server
+                               over the internet using HTTPS. Alternatively, you may configure HTTPS using a load balancer/proxy.
+                           </p>
+
+                            <p>
+                                Once your network server has become operational, there are a number of <a href="#common-service-provider-tasks">common service provider tasks</a>
+                                and <a href="#common-institution-tasks">common institition tasks</a> that define the system.
+                            </p>
+
+                    </span>
+            </span>
+        </p>
+    </div>
+
+    <div class="ed-faq">
+        <p>
+            <b>Q: </b><span>My organization is a service provider that has thousands of serviceable institutions.  How do I configure EDExchange to send and receive for all of these institutions?</span>
+        </p>
+        <p>
+            <b>A: </b>.
+                     <span>The EDExchange web application and API provides a way for service providers to create institutions and add them to a logical group that represents serviceable institutions.
+
+                            <p>Service providers <a href="#upload-serviceable-institutions-csv">upload a CSV</a>, or use the REST API to manage their group of serviceable insitutions.</p>
+
+                            <p>
+                                In order to receive documents of behalf of a serviceable institution, the service provider must <a href="#assign-endpoint">assign an endpoint</a> to the institution.
+                            </p>
+
+                    </span>
+            </span>
+        </p>
+    </div>
+
+
+    <hr>
 
 
 
     <h2 id="use-cases">Use Cases</h2>
 
 
-    <div id="transfer-document" class="ed-title">Transfer a Document</div>
+    <h2 id="transfer-document">Transfer a Document</h2>
 
 
     <ol>
@@ -715,7 +910,7 @@
         </ol>
     </div>
 
-    <h2 id="upgrade-institution">Upgrade an Institution to be a Service Provider</h2>
+    <h2 id="upgrade-institution">Update Institution to Service Provider</h2>
     <p>If an institution initially chooses to use a service provider, but later, decides to implement a network server and begin
         sending and receiving documents for themselves, it's easy for a PESC administrator to enable the institution to do so. </p>
     <p>
@@ -728,7 +923,7 @@
     </p>
 
 
-    <div class="ed-title" id="create-endpoint">Create an Endpoint</div>
+    <h2 id="create-endpoint">Create an Endpoint</h2>
     <p>
         Endpoints are URLs and related attributes that are hosted by the network server of a service provider. The
         <a href="/swagger-ui/index.html#!/endpoints">endpoints resource</a>
@@ -738,7 +933,7 @@
         permissions.
     </p>
 
-    <div class="ed-title" id="find-endpoint">Find an Endpoint</div>
+    <h2 id="find-endpoint">Find an Endpoint</h2>
     <div class="well">
 
         <div><b>Preconditions:</b> The following parameters are available:
@@ -754,7 +949,7 @@
                 <li><var>Department:</var> The <a href="/services/rest/v1/departments">department</a> name as
                     defined by the directory server.
                 </li>
-                <li><var>Mode:</var> Must be either 'MODE' or 'LIVE'.</li>
+                <li><var>Mode:</var> Must be either 'TEST' or 'LIVE'.</li>
             </ul>
             </p>
 
@@ -766,17 +961,21 @@
 
     </div>
 
-    <div class="ed-title" id="create-serviceable-institution">Create a Serviceable Institution</div>
-    <p>A serviceable institution is an institution that has been placed into a logical group that represents the schools
+    <h2 id="create-serviceable-institution">Create a Serviceable Institution</h2>
+    <p id="serviceable-institution">A serviceable institution is an institution that has been placed into a logical group that represents the schools
         for which a service provider can send and receive documents.  An institution can belong to multiple groups and have
         multiple service providers.</p>
     <p>The <a href="swagger-ui/index.html#!/service-providers">service providers</a> resource can be used to operate on serviceable institutions including
         <a href="swagger-ui/index.html#!/service-providers/getServiceProvidersForInstitution">updating</a> the serviceable institutions for a service provider.</p>
 
 
+    <div id="ed-title" id="multiple-endpoints">Multiple Providers for an Institution</div>
+    <p>It is possible, if unlikely, for a institution to have multiple service providers.  This means that when the EDExchange directory is queried for an endpoint, multiple
+    endpoints will be returned to the API caller.  In this case, it is up to the caller to select which endpoint in which to send the document.  From the perspective of the
+    receiving institution, it doesn't matter which endpoint is used. </p>
 
 
-    <div class="ed-title" id="upload-serviceable-institutions-csv">Upload Serviceable Institutions CSV</div>
+    <h2 id="upload-serviceable-institutions-csv">Upload Serviceable Institutions CSV</h2>
     <p>
         The EDExchange web application allows authenticated users of the service provider to upload a <a href="assets/upload-template.csv">CSV file</a> where each row in the file creates an institution and adds it
         to the provider's group of serviceable institutions.
@@ -787,7 +986,7 @@
     <p>Download the CSV template file <a href="assets/upload-template.csv">here</a>.</p>
 
 
-    <div class="ed-title" id="assign-endpoint">Assign an Endpoint</div>
+    <h2 id="assign-endpoint">Assign an Endpoint</h2>
     <p>
         In order to receive documents of behalf of a serviceable institution, the service provider must associate
         one or more endpoints with the institution. This can be done using the EDExchange web application by an
@@ -795,7 +994,7 @@
     </p>
 
 
-    <div class="ed-title" id="manage-school-codes">Manage School Codes</div>
+    <h2 id="manage-school-codes">Manage School Codes</h2>
     <p>
         There are a number of attributes that are used by the API that are used to search the EDExchange
         directory for institutions and <a href="#endpoints">endpoints</a>.  The attributes include different
@@ -820,7 +1019,7 @@
 
     </p>
 
-    <div class="ed-title" id="manage-organization-contacts">Manage Contacts</div>
+    <h2 id="manage-organization-contacts">Manage Contacts</h2>
     <p>
         EDExchange member organizations can have one or more contacts that are presented in the
         EDExchange public directory.  Contact information is intended to provide users the abiltity to contact the organization for
@@ -831,7 +1030,7 @@
         with the appropriate permissions.  Contacts can also be managed using the <a href="/swagger-ui/index.html#!/contacts">contacts resource</a>
         of the API.
     </p>
-    <div class="ed-title" id="manage-users">Manage Users</div>
+    <h2 id="manage-users">Manage Users</h2>
     <p>
         The EDExchange directory server web application provides the ability for each organization, both service providers and institutions, to maintain a group of
         users that can manage their organization using through the web application.
@@ -862,102 +1061,38 @@
     </ol>
 
 
-    <div class="ed-title" id="upload-document">multipart/form-data HTTP POST</div>
-    <p>The <a href="#reference-implementation">reference implementation</a> of the network server uses a
-        multipart/form-data HTTP POST as the endpoint that
-        receives documents. This section describes the HTTP POST method and provides sample code.
+    <h2 id="#registration">Register an Organization</h2>
+    <p>
+        There are various ways in which an organization object can be added to the EDExchange network.
+
+        <p>
+            New applicants can register by filling out the <a href="home#/registration-form">registration form</a>. The registration
+            automatically creates an administrator account for the individual listed in the registration form as the contact.  This account
+    has administrator priveleges for the organization.  After the
+    form is submitted, the organization's administrator will receive an email notification regarding the registration.  At that point, the organization is
+    listed in the EDExchange directory, but disabled.  It will remain disabled until a PESC administrator reviews and approves the
+    information that was provided in the registration form.  The organization's administrator can conduct normal operations such as setting up the
+    <a href="#network-server">network server</a> and <a href="#certificate">publishing a SSL certificate</a>, while
+    the application is being reviewes.
+        </p>
+        <p>
+            An orgnanization can also be created directly by an PESC administrator.
+        </p>
+    <p>
+            Organization's that are <var><a href="#institutions">institutions</a></var> can be created by a <a href="#service-provider">service provider</a> for the purpose
+        of adding the institution to the provider's group of <a href="#create-serviceable-institution">serviceable institutions</a>.  Institutions that are created in this
+        way must also be reviewed and approved by a PESC administrator.
+    </p>
+    In each case,
+        a PESC administrator is required to review and approve the organization.  When a new organization record is created,
+        it is disabled in EDExchange as shown in the directory. Once the PESC administrator approves the organization, it
+        becomes enabled in the EDExchange direcory.
+    </p>
+    <p>
+
     </p>
 
-    <div class="well">
-        <div class="ed-heading">Parameters</div>
-
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                file
-            </div>
-            <div class="col-sm-9">
-                The document of interest.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                signature
-            </div>
-            <div class="col-sm-9">
-                The digital signature of the document of interest.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                recipient_id
-            </div>
-            <div class="col-sm-9">
-                The EDExchange directory id of the recipient.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                sender_id
-            </div>
-            <div class="col-sm-9">
-                The EDExchange directory id of the sender.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                file_format
-            </div>
-            <div class="col-sm-9">
-                Must be one of the <a href="/services/rest/v1/document-formats" target="_blank">document format</a>
-                names as defined by EDExchange.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                document_type
-            </div>
-            <div class="col-sm-9">
-                Must be one of the <a href="/services/rest/v1/document-types" target="_blank">document type</a>
-                names as defined by EDExchange.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                department
-            </div>
-            <div class="col-sm-9">
-                Must be one of the <a href="/services/rest/v1/departments" target="_blank">department</a> names as
-                defined by EDExchange.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                transaction_id (optional)
-            </div>
-            <div class="col-sm-9">
-                A number generated by the sender that uniquely identifies a transaction that represents the file
-                transfer.
-                Used in combination with the ack_url to acknowledge that the document has been received.
-                The sending network server uses the acknowlegement to update the transaction status.
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-3" style="text-align: right;">
-                ack_url (optional)
-            </div>
-            <div class="col-sm-9">
-                A URL used to acknowledge that the document has been received. Used in combination
-                with the transaction_id, so that the sending network server can update the transaction
-                status with a form POST to this URL and using transction_id as a form parameter.
-            </div>
-        </div>
-
-    </div>
-
-    <div class="ed-title" id="#registration">Register an Organization</div>
-    <p></p>
-
-    <div class="ed-title" id="receive-document">Receive a Document</div>
+    <h2 id="receive-document">Receive a Document</h2>
     <p>
         Organizations that are service providers must host a <a href="#network-server">network server</a> in order
         to receive documents. The reference implementation of the network server uses a
@@ -994,89 +1129,13 @@
     </div>
     </p>
 
-    <div class="ed-title" id="associate-endpoint">Create Endpoint Relation</div>
-    <p>Endpoints must be associated with one or more institutions so that they are searchable based on attributes of the receiving institution.</p>
+    <h2 id="associate-endpoint">Create Endpoint Relation</h2>
+    <p>Endpoints must be associated with one or more institutions so that they are searchable based on attributes of the receiving institution and the document itself.
+        An endpoint relation defines a connection between an endpoint and a recipient institution. </p>
+    <p>When an institution that is configured to <a href="#receive-document">receive documents</a> <a href="#create-endpoint">creates an endpoint</a>, that endpoint is automatically connected with itself. </p>
+    <p>A service provider can <a href="#assign-endpoint">assign an endpoint</a> that is hosted by it's <a href="#network-server">network server</a> to any of it's serviceable institutions. </p>
 
 
-    <h2 id="faq">Frequently Asked Questions (FAQ)</h2>
-
-    <div class="ed-faq">
-        <p>
-            <b>Q: </b><span>My institution wants to send transcripts to a particular school, what do I need to do?</span>
-        </p>
-        <p>
-            <b>A: </b>
-                <span>First, <a href="home#/registration-form">register</a> with EDExchange as an institution (as opposed to a service provider).  If you also want to be able to
-                        receive documents, you must register as an <a href="#institutions">institution</a> and a <a href="#service-provider">service provider</a>.  Consult the next FAQ below
-                        for more information about receiving documents.</p>
-        <p>Next,
-            check if the destination school is an EDExchange member using the searchable <a href="home#/directory">directory</a>.  If the school isn't an
-            EDExchange member, they need to <a href="home#/registration-form">register</a> as a member.  Also, the destination school needs to be configured to receive documents.
-            The destination school must
-            either configure a <a href="#network-server">network server</a>, using the <a href="#reference-implementation">reference implementation</a>
-            that's provided by EDExchange, or alternatively, use an EDExchange <a href="#service-provider"> service provider</a> to receive documents on their behalf. Service providers are
-            listed in the searchable <a href="home#/directory">directory</a>.
-        <p>
-            After you've registered your institution, you'll need to obtain an <a href="#certificate">SSL certificate</a> from a certificate authority and upload it
-            to the directory server.  Once you have your certificate with the corresponding private key, you can use either the free reference implementation of the network
-            server, or the free command line utility to <a href="#send-document">send a document</a>. Optionally, you'll need a software developer to extend or implement
-            a customized software program.
-        </p>
-        </span>
-        </p>
-    </div>
-
-
-    <div class="ed-faq">
-        <p>
-            <b>Q: </b><span>My institution wants to receive transcripts through EDExchange, what do I need to do?</span>
-        </p>
-        <p>
-            <b>A: </b>.
-                     <span>First, you must <a href="home#/registration-form">register</a> with EDExchange as both an <a href="#institutions">institution</a> and a <a href="#service-provider">provider</a>.  As a service provider, your
-                        institution will be able both send and receive documents.
-
-                           <p>
-                               After you have been registered and are a member of the EDExchange network, your are required to host a <a href="#network-server">network server</a> on the internet
-                               using a domain name of your choosing (E.g. edexchange.butte.edu).
-                               A free <a href="#reference-implementation">reference implementation</a> of the network server can be used. Optionally the reference implementation can be extended by a software developer to add or customize
-                               features, but the reference network server has the ability to both send and receive documents. If your institution intends to send documents, you'll have to
-                               provide an SSL certificate and install the corresponding private key so that is accessible to the network server.  Other configuration changes to the reference
-                               implementation of the network server are required too, such as the installation of a second SSL certificate used to encrypt data communications with the network server
-                               over the internet using HTTPS. Alternatively, you may configure HTTPS using a load balancer/proxy.
-                           </p>
-
-                            <p>
-                                Once your network server has become operational, there are a number of <a href="#common-service-provider-tasks">common service provider tasks</a>
-                                and <a href="#common-institution-tasks">common institition tasks</a> that define the system.
-                            </p>
-
-                    </span>
-            </span>
-        </p>
-    </div>
-
-    <div class="ed-faq">
-        <p>
-            <b>Q: </b><span>My organization is a service provider that has thousands of serviceable institutions.  How do I configure EDExchange to send and receive for all of these institutions?</span>
-        </p>
-        <p>
-            <b>A: </b>.
-                     <span>The EDExchange web application and API provides a way for service providers to create institutions and add them to a logical group that represents serviceable institutions.
-
-                            <p>Service providers <a href="#upload-serviceable-institutions-csv">upload a CSV</a>, or use the REST API to manage their group of serviceable insitutions.</p>
-
-                            <p>
-                                In order to receive documents of behalf of a serviceable institution, the service provider must <a href="#assign-endpoint">assign an endpoint</a> to the institution.
-                            </p>
-
-                    </span>
-            </span>
-        </p>
-    </div>
-
-
-    <hr>
 </div>
 <!-- Footer -->
 <footer>
