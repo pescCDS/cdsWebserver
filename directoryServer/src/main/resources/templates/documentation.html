@@ -150,7 +150,9 @@
             <a href="#upgrade-institution">Upgrade an Institution to be a Service Provider</a>
         </div>
 
-
+        <div>
+            <a href="##registration">Register an Organization</a>
+        </div>
 
     </div>
     <div class="col-sm-9">
@@ -540,7 +542,7 @@
 
         <li>
             The receiving network server queries the directory server for the sender's
-            signing certificate and verifies the digital signature of the document.
+            signing certificate and <a href="#verify-signature">verifies the digital signature</a> of the document.
         </li>
 
         <li>
@@ -952,13 +954,8 @@
 
     </div>
 
-
-    <div class="well">
-        <div class="ed-heading">Sample Code</div>
-        <p>This sample code can be used to send a document to an endpoint.</p>
-
-
-    </div>
+    <div class="ed-title" id="#registration">Register an Organization</div>
+    <p></p>
 
     <div class="ed-title" id="receive-document">Receive a Document</div>
     <p>
@@ -977,10 +974,10 @@
         <ol>
             <li>
                 Receiver <a href="#create-endpoint">creates an endpoint</a> in the directory server
-                that matches the URL used to to receive in the network server.
+                that matches the URL used to to receive documents as implemented by the network server.
             </li>
             <li>
-                Receiver associates the endpoint with one or more institutions.
+                Receiver creates an endpoint relation that relates the endpoint with one or more institutions.
             </li>
             <li>
                 Sender <a href="#find-endpoint">finds the endpoint</a> using the <a
@@ -997,7 +994,8 @@
     </div>
     </p>
 
-
+    <div class="ed-title" id="associate-endpoint">Create Endpoint Relation</div>
+    <p>Endpoints must be associated with one or more institutions so that they are searchable based on attributes of the receiving institution.</p>
 
 
     <h2 id="faq">Frequently Asked Questions (FAQ)</h2>
