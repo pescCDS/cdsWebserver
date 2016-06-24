@@ -75,8 +75,9 @@ public class OrganizationService {
 
     @Autowired
     private OrganizationRepository organizationRepository;
+
     @Autowired
-    SchoolCodesRepository schoolCodesRepository;
+    private SchoolCodesService schoolCodesService;
 
 
     @Transactional(readOnly = true)
@@ -122,7 +123,7 @@ public class OrganizationService {
         Organization savedOrg = organizationRepository.save(organization);
         for (SchoolCode schoolCode : schoolCodes) {
             schoolCode.setOrganizationId(savedOrg.getId());
-            schoolCodesRepository.save(schoolCode);
+            schoolCodesService.create(schoolCode);
         }
         savedOrg.setSchoolCodes(schoolCodes);
 
@@ -152,8 +153,9 @@ public class OrganizationService {
 
         Organization savedOrg = organizationRepository.save(organization);
         for (SchoolCode schoolCode : schoolCodes) {
+
             schoolCode.setOrganizationId(savedOrg.getId());
-            organization.getSchoolCodes().add(schoolCodesRepository.save(schoolCode));
+            organization.getSchoolCodes().add(schoolCodesService.create(schoolCode));
         }
 
         return savedOrg;

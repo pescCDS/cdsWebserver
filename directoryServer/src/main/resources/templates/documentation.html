@@ -811,7 +811,7 @@
         <p>
             Before an organization can receive a document, it must obtain a certificate from a certficate authority
             for the purpose of securing the network server using HTTPS, and upload the certificate to the EDExchange directory server
-            using the website or by updating the signing-certificate property on the <a
+            using the website or by updating the network-certificate property on the <a
                 href="/swagger-ui/index.html#!/organizations/udpateNetworkCertificateProperty">organization resource</a>
             of the REST API.
         </p>
@@ -821,9 +821,16 @@
                 <li>Obtain an SSL certificate from a certificate authority, or optionally, for test
                     purposes, <a href="#self-signed-cert">create a
                         self signed certificate.</a></li>
-                <li>Upload the certificate to the directory servier using the website,
+                <li>Upload the signing certificate to the directory servier using the website,
                     or by updating the signing-certificate property on the <a
                             href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization
+                        resource</a>
+                    of the REST API.
+                    The certificate must be PEM encoded.
+                </li>
+                <li>Upload the network certificate to the directory servier using the website,
+                    or by updating the network-certificate property on the <a
+                            href="/swagger-ui/index.html#!/organizations/udpateNetworkCertificateProperty">organization
                         resource</a>
                     of the REST API.
                     The certificate must be PEM encoded.
@@ -1115,14 +1122,14 @@
         directory for institutions and <a href="#endpoints">endpoints</a>.  The attributes include different
         types of school codes.
 
-        The following school codes are currently supported by EDExchange:
+        EDExchange supports and validates the following school codes:
 
     <ul class="square-style" style="margin-left: 15px;">
-        <li>FICE</li>
-        <li>ATP</li>
-        <li>ACT</li>
-        <li>IPEDS</li>
-        <li>OPEID</li>
+        <li><b>FICE</b><span>: 6 digits</span></li>
+        <li><b>ATP</b><span>: 6 digits</span></li>
+        <li><b>ACT</b><span>: 4 digits</span></li>
+        <li><b>IPEDS</b><span>: 6 digits</span></li>
+        <li><b>OPEID</b> <span>: 8 digits</span></li>
     </ul>
 
     <p>

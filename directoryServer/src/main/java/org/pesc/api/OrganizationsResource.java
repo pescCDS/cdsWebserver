@@ -90,6 +90,14 @@ public class OrganizationsResource {
             limit = 5;
             offset = 0;
         }
+
+        try {
+            schoolCodesService.validateCode(organizationCode, organizationCodeType);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations");
+        }
+
         PagedData<Organization> pagedData = new PagedData<Organization>(limit,offset);
 
         organizationService.search(
@@ -199,7 +207,15 @@ public class OrganizationsResource {
         schoolCode.setCode(code);
         schoolCode.setCodeType(codeType);
 
-        return schoolCodesService.create(schoolCode);
+
+        try {
+            schoolCode = schoolCodesService.create(schoolCode);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/school-code");
+        }
+
+        return schoolCode;
     }
 
 
