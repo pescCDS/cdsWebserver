@@ -1209,6 +1209,10 @@
                 editing: true
             }
 
+            if (self.networkCertificateInfo.hasOwnProperty('commonName')) {
+                endpoint.address = 'https://' + self.networkCertificateInfo.commonName + '/';
+            }
+
             self.endpoints.unshift(endpoint);
 
         }
