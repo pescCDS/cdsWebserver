@@ -148,6 +148,21 @@ public class EndpointResource {
 
     }
 
+    public static boolean wildcardCheck(String networkHostname, String endpointHostname) {
+        if (networkHostname.contains("*")){
+
+            //remove the subdomain from the endpoint's URL
+
+            String endpointDomain = endpointHostname.substring(endpointHostname.indexOf('.'));
+            String networkDomain = networkHostname.substring(networkHostname.indexOf('.'));
+
+            return endpointDomain.equalsIgnoreCase(networkDomain);
+
+        }
+
+        return false;
+    }
+
     public static String validateEndpointURL(String url, String networkHostName) throws URISyntaxException {
         URI uri = new URI(url);
         if (!"https".equalsIgnoreCase(uri.getScheme())) {
@@ -155,7 +170,10 @@ public class EndpointResource {
                     new IllegalArgumentException(String.format("HTTPS is required for endpoint URLs.", uri.getHost(), networkHostName)),
                     Response.Status.BAD_REQUEST, "/endpoints");
         }
-        if (!uri.getHost().equalsIgnoreCase(networkHostName)) {
+        //If the hostname's don't match, or if if the hostname is not contained in the certificate's comman name (wildcard might be used).
+        if (!uri.getHost().equalsIgnoreCase(networkHostName) && !wildcardCheck(networkHostName, uri.getHost())) {
+
+
             throw new ApiException(
                     new IllegalArgumentException(
                             String.format("The endpoint hostname %s does not match the network certificate hostname %s.  Have you uploaded your network certificate?", uri.getHost(), networkHostName != null ? networkHostName : "")),
