@@ -1630,7 +1630,9 @@
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/endpoints', {
-                'params': {'organizationId': [org_id]},
+                'params': {
+                    'organizationId': [org_id]
+                },
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);

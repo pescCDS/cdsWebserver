@@ -58,7 +58,7 @@
         var self = this;
 
         self.transactions = [];
-        self.status = 'Complete';
+        self.status = '';
         self.operation = 'Both';
         self.error = null;
 
@@ -71,7 +71,7 @@
         self.getOrgURL = getOrgURL;
 
         self.totalRecords = 0;
-        self.offset = 0;
+        self.offset = 1;
         self.limit = 10;
 
         self.startDatePopup = {
@@ -139,7 +139,7 @@
                 self.startDate,
                 self.endDate,
                 self.limit,
-                self.offset).then(function(response){
+                (self.offset-1) * self.limit).then(function(response){
                     self.transactions = response.data;
                     self.totalRecords = response.headers('X-Total-Count');
 

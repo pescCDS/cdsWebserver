@@ -1,7 +1,9 @@
 package org.pesc.service;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.api.StringUtils;
 import org.pesc.api.model.Endpoint;
 import org.pesc.api.model.Organization;
 import org.pesc.api.repository.EndpointRepository;
@@ -100,7 +102,8 @@ public class EndpointService {
             Integer endpointId,
             Integer hostingOrganizationId,
             List<Integer> organizationIdList,
-            String mode
+            String mode,
+            String enabled
     ) {
 
         try {
@@ -123,11 +126,14 @@ public class EndpointService {
 
             }
 
-            predicates.add(cb.equal(endpoint.get("organization").get("enabled"), true));
-
             if (hostingOrganizationId != null) {
                 predicates.add(cb.equal(endpoint.get("organization").get("id"), hostingOrganizationId));
             }
+
+            if (!StringUtils.isEmpty(enabled)) {
+                predicates.add(cb.equal(endpoint.get("organization").get("enabled"), Boolean.valueOf(enabled)));
+            }
+
             if (endpointId != null) {
                 predicates.add(cb.equal(endpoint.get("id"), endpointId));
             }

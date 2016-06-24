@@ -65,7 +65,9 @@ public class EndpointResource {
             @QueryParam("id") @ApiParam("The identifier for the endpoint.") Integer id,
             @QueryParam("hostingOrganizationId") @ApiParam("The organization ID of the member that hosts the endpoint.") Integer hostingOrganizationId,
             @QueryParam("organizationId") @ApiParam(value = "A list of organization ID that use the endpoint.") List<Integer> organizationIdList,
-            @QueryParam("mode") @ApiParam(value = "Must be either 'TEST' or 'LIVE'.") String mode
+            @QueryParam("mode") @ApiParam(value = "Must be either 'TEST' or 'LIVE'.") String mode,
+            @QueryParam("enabled") @ApiParam(value = "'true' or 'false'") String enabled
+
     ) {
 
         validateParameters(organizationIdList, baseURI + "/endpoints");
@@ -77,7 +79,8 @@ public class EndpointResource {
                 id,
                 hostingOrganizationId,
                 organizationIdList,
-                mode);
+                mode,
+                enabled);
     }
 
     @GET
