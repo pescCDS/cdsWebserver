@@ -133,6 +133,11 @@
             <a href="#upgrade-institution">Update Institution to Service Provider</a>
         </div>
 
+        <div>
+            <a href="#enable-organization">Enable an Organization</a>
+        </div>
+
+
         <div class="ed-title">Use Cases</div>
         <div>
             <a href="#transfer-document">Transfer a Document</a>
@@ -176,7 +181,7 @@
 
         <div>
             <a href="#upgrade-institution">Update Institution to Service Provider</a>
-        </div>                                 ar
+        </div>
 
         <div>
             <a href="##registration">Register an Organization</a>
@@ -792,13 +797,24 @@
     <h2 id="certificate">Publish a SSL Certificate</h2>
 
     <p>
-        An SSL certificate is required to send documents through the EDExchange network.
+        An SSL certificate is required to send and receive documents through the EDExchange network.
         The authenticity of documents tranferred within the EDExchange network is verified using the
-        SSL certificate provided by the sender. Before an organization can send a document, it must obtain
-        a certificate from a certficate authority and upload the certificate to the EDExchange directory server
+        SSL certificate provided by the sender for the purpose of generating digital signatures.
+        <p>
+        Before an organization can send a document, it must obtain a certificate from a certficate authority
+        and upload the certificate to the EDExchange directory server
         using the website or by updating the signing-certificate property on the <a
             href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
         of the REST API.
+        </p>
+
+        <p>
+            Before an organization can receive a document, it must obtain a certificate from a certficate authority
+            for the purpose of securing the network server using HTTPS, and upload the certificate to the EDExchange directory server
+            using the website or by updating the signing-certificate property on the <a
+                href="/swagger-ui/index.html#!/organizations/udpateNetworkCertificateProperty">organization resource</a>
+            of the REST API.
+        </p>
 
         <div class="well">
             <ol>
@@ -978,6 +994,22 @@
     </p>
 
 
+    <h2 id="enable-organization">Enable an Organization</h2>
+    <p>
+        There are 4 events in which an EDExchange organization can become disabled. In each case, a PESC administrator
+        must review the organization's information and explicitly enable the organization.  The enabled property can be
+        updated using the <a href="/swagger-ui/index.html#!/organizations/updateEnabledProperty">organization resource</a> or
+        through the directory server web application by a user with appropriate permissions.
+        <ol>
+            <li>A newly registered organization is created in a disabled state.</li>
+            <li>When an organization's signing certificate is created or udpated.</li>
+            <li>When an organization's network certificate is created or udpated.</li>
+            <li>Whenever a PESC administrator explicity disables an organization.</li>
+        </ol>
+    </p>
+
+
+
     <h2 id="create-endpoint">Create an Endpoint</h2>
     <p>
         Endpoints are URLs and related attributes that are hosted by the network server of a service provider. The
@@ -987,6 +1019,32 @@
         are available through the directory server web application to an authenticated user with the appropriate
         permissions.
     </p>
+    <div class="well">
+        <div>
+            <b>Preconditions:</b> The SSL certificate used to implement HTTPS on the network server has been publish to the directory.
+        </div>
+        <ol>
+            <li>
+                The receiver's organization administrator uses the <a href="">endpoint resource</a> or the directory web application to
+                create the endpoint.  The following attributes are required:
+                <ol class="alpha">
+                    <li>The URL must use HTTPS</li>
+                    <li>The hostname in the URL must match the hostname on the published SSL certificate.</li>
+                    <li><var>Endpoint Type:</var> Must be 'Web Service'.</li>
+                    <li><var>Document Format:</var> The <a href="/services/rest/v1/document-formats">document
+                        format</a> name as defined by the directory server.
+                    </li>
+                    <li><var>Document Type:</var> The <a href="/services/rest/v1/document-types">document type</a>
+                        name as defined by the directory server.
+                    </li>
+                    <li><var>Department:</var> The <a href="/services/rest/v1/departments">department</a> name as
+                        defined by the directory server.
+                    </li>
+                    <li><var>Mode:</var> Must be either 'TEST' or 'LIVE'.</li>
+                </ol>
+            </li>
+        </ol>
+    </div>
 
     <h2 id="find-endpoint">Find an Endpoint</h2>
     <div class="well">
@@ -1012,6 +1070,8 @@
         <ol>
             <li> Query the <a href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoint
                 resource</a> using the REST API.</a></li>
+            <li>The directory server returns all endpoints that fulfill the search criteria and where the endpoint is hosted
+                by a service provider that is enabled.</li>
         </ol>
 
     </div>
@@ -1150,7 +1210,7 @@
     <h2 id="receive-document">Receive a Document</h2>
     <p>
         Organizations that are service providers must host a <a href="#network-server">network server</a> in order
-        to receive documents. The reference implementation of the network server uses a
+        to receive documents and publish the certificate used to handle HTTPS. The reference implementation of the network server uses a
         <a href="#upload-document">multipart/form-data HTTP POST</a> endpoint to receive documents.
     </p>
 
@@ -1159,7 +1219,8 @@
 
     <div class="well">
         <div>
-            <b>Preconditions:</b> A <a href="#network-server">network server</a> has been implemented
+            <b>Preconditions:</b> A <a href="#network-server">network server</a> has been implemented and the nework
+            certificate has been published to the directory server.
         </div>
         <ol>
             <li>

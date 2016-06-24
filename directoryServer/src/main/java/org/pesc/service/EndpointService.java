@@ -6,9 +6,7 @@ import org.pesc.api.model.Endpoint;
 import org.pesc.api.model.Organization;
 import org.pesc.api.repository.EndpointRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -51,10 +49,13 @@ public class EndpointService {
         this.endpointRepository.delete(endpoint);
     }
 
+
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
-    public void delete(Integer id)  {
-        this.endpointRepository.delete(id);
+    @PostAuthorize("( (returnObject.organization.id == principal.organizationId AND hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN'))")
+    public Endpoint delete(Integer id)  {
+        Endpoint endpoint = endpointRepository.findOne(id) ;
+        this.endpointRepository.delete(endpoint);
+        return endpoint;
     }
 
 
@@ -121,6 +122,9 @@ public class EndpointService {
 
 
             }
+
+            predicates.add(cb.equal(endpoint.get("organization").get("enabled"), true));
+
             if (hostingOrganizationId != null) {
                 predicates.add(cb.equal(endpoint.get("organization").get("id"), hostingOrganizationId));
             }

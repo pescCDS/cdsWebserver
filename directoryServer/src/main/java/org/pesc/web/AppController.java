@@ -196,7 +196,7 @@ public class AppController {
 
         final String content = mailService.createContent(ctx, "mail/registration-admin", regForm.getOrganization(), regForm.getUser());
 
-        Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,2, null );
+        Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,1, null );
 
 
         return regMessage;

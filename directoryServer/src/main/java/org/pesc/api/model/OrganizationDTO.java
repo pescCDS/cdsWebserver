@@ -21,6 +21,17 @@ public class OrganizationDTO {
     @Column(name = "name")
     String name;
 
+    @Column(name = "enabled")
+    Boolean enabled;
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public Integer getId() {
         return id;
     }

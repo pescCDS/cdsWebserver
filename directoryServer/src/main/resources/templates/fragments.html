@@ -449,8 +449,8 @@
                         <p><span style="font-weight: bolder;">To send documents</span>, you must <a href="/documentation#certificate">publish a SSL certificate</a> to the EDExchange directory server for the purpose
                             of <a href="/documentation#sign-document">creating</a> and <a href="/documentation#verify-signature">verifying digital signatures</a>.</p>
                         <p>Institutions can alternatively use an EDExchange service provider to send documents on their behalf.</p>
-                        <p><span style="font-weight: bolder;">To receive documents</span>, you must deploy an EDExchange network server on the internet using a domain name of your choice and
-                            secure it using a valid SSL certificate.  HTTPS is required for URLs that are used to receive documents.</p>
+                        <p><span style="font-weight: bolder;">To receive documents</span>, your organization must deploy an EDExchange network server on the internet using a domain name of your choice and
+                            secure it using a valid SSL certificate. The certificate must also be published to the directory server.  HTTPS is required for URLs that are used to receive documents.</p>
                         <p>Once the network server is deployed, you must publish the <a href="/documentation#endpoint">endpoint</a> (the URL used to receive documents) on the
                             EDExchange directory server.</p>
                         <p>Insitutions can alternatively use an EDExchange service provider to receive documents on their behalf.</p>
@@ -1050,6 +1050,71 @@
 
 
         </div>
+
+
+        <div ng-show="orgCtrl.isServiceProvider()==true ">
+            <form name="networkCertificateForm" ng-submit="networkCertificateForm.$valid && orgCtrl.setNetworkCertificate()" novalidate="novalidate">
+                <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
+
+
+                        <span  ng-show="orgCtrl.showNetworkCertificateForm == false" class="glyphicon glyphicon-pencil ed-icon-btn"
+                               ng-click="orgCtrl.toggleNetworkCertificateForm()"></span>
+
+
+                    <button ng-show="orgCtrl.showNetworkCertificateForm == true" class="glyphicon glyphicon-floppy-disk ed-icon-btn" type="submit"></button>
+
+
+
+                </div>
+
+                <div class="ed-title">Network Certificate</div>
+
+                <div ng-show="orgCtrl.showNetworkCertificateForm == true">
+
+                    <div>
+                        <div class="form-group">
+                            <textarea  type="text" required="required" ng-minlength="100" style="width: 100%; height: 250px; padding: 10px;" ng-maxlength="2047" ng-model="orgCtrl.pemNetworkCertificate" placeholder="PEM Certificate"> </textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <div ng-show="orgCtrl.showNetworkCertificateForm == false">
+                    <div>
+                        <label><b>Subject Distinguished Name (DN):</b></label>
+                        <span>{{orgCtrl.networkCertificateInfo.subjectDN}}</span>
+                    </div>
+                    <div>
+                        <label><b>Issuer Distinguished Name (DN):</b></label>
+                        <span>{{orgCtrl.networkCertificateInfo.issuerDN}}</span>
+                    </div>
+                    <div>
+                        <label><b>Invalid Before:</b></label>
+                        <span>{{orgCtrl.networkCertificateInfo.notBefore | date:'MM/dd/yyyy'}}</span>
+                    </div>
+                    <div>
+                        <label><b>Invalid After:</b></label>
+                        <span>{{orgCtrl.networkCertificateInfo.notAfter | date:'MM/dd/yyyy'}}</span>
+                    </div>
+                    <div>
+                        <label><b>Serial Number:</b></label>
+                        <span>{{orgCtrl.networkCertificateInfo.serialNumber}}</span>
+                    </div>
+                    <div>
+                        <label><b>Version:</b></label>
+                        <span>{{orgCtrl.networkCertificateInfo.version}}</span>
+                    </div>
+                    <div>
+                        <label><b>Network Domain Name:</b></label>
+                        <span>{{orgCtrl.networkCertificateInfo.commonName}}</span>
+                    </div>
+                </div>
+            </form>
+
+
+
+        </div>
+
+
 
         <div ng-show="orgCtrl.isServiceProvider()==true ">
             <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">

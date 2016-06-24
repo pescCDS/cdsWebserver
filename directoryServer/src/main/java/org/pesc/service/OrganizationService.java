@@ -3,6 +3,7 @@ package org.pesc.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
+import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.*;
 import org.pesc.api.repository.OrganizationRepository;
 import org.pesc.api.repository.OrganizationTypeRepository;
@@ -14,18 +15,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import sun.security.x509.X500Name;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.Exchanger;
 
 /**
  * Created by james on 3/21/16.
@@ -72,6 +77,7 @@ public class OrganizationService {
     private OrganizationRepository organizationRepository;
     @Autowired
     SchoolCodesRepository schoolCodesRepository;
+
 
     @Transactional(readOnly = true)
     public Iterable<Organization> findAll() {
@@ -158,7 +164,7 @@ public class OrganizationService {
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("(hasRole('ROLE_SYSTEM_ADMIN') OR (hasRole('ROLE_ORG_ADMIN') AND #serviceProviderID == principal.organizationId) )")
     public void secureLinkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
-       insecureLinkInstitutionWithServiceProvider(institutionID,serviceProviderID);
+       insecureLinkInstitutionWithServiceProvider(institutionID, serviceProviderID);
 
     }
 
@@ -275,7 +281,7 @@ public class OrganizationService {
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
-    public CertificateInfo setCertificate(Integer orgID, String pemCert) throws CertificateException {
+    public CertificateInfo setSigningCertificate(Integer orgID, String pemCert) throws CertificateException {
 
         log.info(String.format("Updating signing certificate for org %d\n%s", orgID, pemCert));
 
@@ -283,18 +289,46 @@ public class OrganizationService {
         X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
         PublicKey key = cer.getPublicKey();
 
-        jdbcTemplate.update("update organization set signing_certificate = ?, public_key = ? where id = ?", pemCert, convertPublicKeyToPEM(key), orgID);
+        jdbcTemplate.update("update organization set signing_certificate = ?, public_key = ?, enabled = false where id = ?", pemCert, convertPublicKeyToPEM(key), orgID);
+
+        return buildCertificateInfo(pemCert);
+    }
+
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public CertificateInfo setNetworkCertificate(Integer orgID, String pemCert) throws CertificateException, IOException {
+
+        log.info(String.format("Updating network certificate for org %d\n%s", orgID, pemCert));
+
+
+        CertificateFactory fact = CertificateFactory.getInstance("X.509");
+        X509Certificate cer = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(pemCert.getBytes()));
+
+        String domainName = X500Name.asX500Name(cer.getSubjectX500Principal()).getCommonName();
+        jdbcTemplate.update("update organization set network_certificate = ?, network_domain = ?, enabled = false where id = ?", pemCert, domainName, orgID);
+
+
 
         return buildCertificateInfo(pemCert);
     }
 
     @Transactional(readOnly = true)
     //@PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
-    public CertificateInfo getPEMCertificate(Integer orgID) throws CertificateException {
+    public CertificateInfo getSigningCertificate(Integer orgID) throws CertificateException {
 
         log.info(String.format("Retrieving signing certificate for org %d", orgID));
 
-        return buildCertificateInfo(jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class) );
+        return buildCertificateInfo(jdbcTemplate.queryForObject("SELECT signing_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class));
+    }
+
+    @Transactional(readOnly = true)
+    //@PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public CertificateInfo getNetworkCertificate(Integer orgID) throws CertificateException {
+
+        log.info(String.format("Retrieving signing certificate for org %d", orgID));
+
+        return buildCertificateInfo(jdbcTemplate.queryForObject("SELECT network_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class) );
     }
 
     @Transactional(readOnly = true)
@@ -321,6 +355,16 @@ public class OrganizationService {
             info.setVersion(cer.getVersion());
             info.setSubjectDN(cer.getSubjectDN().getName());
             info.setPem(pemCert);
+
+            try {
+                String domainName = X500Name.asX500Name(cer.getSubjectX500Principal()).getCommonName();
+                info.setCommonName(domainName);
+
+            }
+            catch (IOException e) {
+                log.error(e);
+            }
+
         }
 
 
@@ -344,6 +388,15 @@ public class OrganizationService {
 
 
         return buildCertificateInfo(pemCert);
+
+    }
+
+
+    @Transactional(readOnly = true)
+    //@PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public String getNetworkDomainName(Integer orgID) {
+
+        return jdbcTemplate.queryForObject("SELECT network_domain FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
 
     }
 

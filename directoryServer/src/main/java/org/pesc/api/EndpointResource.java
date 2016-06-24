@@ -9,6 +9,7 @@ import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.Endpoint;
 import org.pesc.service.EndpointService;
+import org.pesc.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,9 @@ public class EndpointResource {
     //Security is enforced using method level annotations on the service.
     @Autowired
     private EndpointService endpointService;
+
+    @Autowired
+    private OrganizationService organizationService;
 
 
     private void validateParameters(List<Integer> organizationIdList, String path) {
@@ -90,6 +96,7 @@ public class EndpointResource {
         return results;
     }
 
+
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)
     @POST
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -97,9 +104,14 @@ public class EndpointResource {
     public Endpoint createEndpoint(Endpoint endpoint) {
 
         //validate the url.
-        if (!endpoint.getAddress().toLowerCase().startsWith("https")) {
-            throw new ApiException(new IllegalArgumentException("HTTPS is required for endpint URLs."), Response.Status.BAD_REQUEST, "/endpoints") ;
+        try {
+            validateEndpointURL(endpoint.getAddress(), organizationService.getNetworkDomainName(endpoint.getOrganization().getId()));
+
         }
+        catch (URISyntaxException e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "Invalid URL");
+        }
+
 
         return endpointService.create(endpoint);
     }
@@ -109,6 +121,17 @@ public class EndpointResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the endpoint with the given ID.")
     public Endpoint saveEndpoint(@PathParam("id") @ApiParam("The identifier for the endpoint.") Integer id, Endpoint endpoint) {
+
+        //validate the url.
+        try {
+            validateEndpointURL(endpoint.getAddress(), organizationService.getNetworkDomainName(endpoint.getOrganization().getId()));
+
+        }
+        catch (URISyntaxException e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "Invalid URL");
+        }
+
+
         return endpointService.update(endpoint);
     }
 
@@ -119,6 +142,23 @@ public class EndpointResource {
     @ApiOperation("Delete the endpoint with the given ID.")
     public void removeEndpoint(@PathParam("id") @ApiParam("The identifier for the endpoint.") Integer id) {
         endpointService.delete(id);
+
+    }
+
+    public static String validateEndpointURL(String url, String networkHostName) throws URISyntaxException {
+        URI uri = new URI(url);
+        if (!"https".equalsIgnoreCase(uri.getScheme())) {
+            throw new ApiException(
+                    new IllegalArgumentException(String.format("HTTPS is required for endpoint URLs.", uri.getHost(), networkHostName)),
+                    Response.Status.BAD_REQUEST, "/endpoints");
+        }
+        if (!uri.getHost().equalsIgnoreCase(networkHostName)) {
+            throw new ApiException(
+                    new IllegalArgumentException(
+                            String.format("The endpoint hostname %s does not match the network certificate hostname %s.  Have you uploaded your network certificate?", uri.getHost(), networkHostName != null ? networkHostName : "")),
+                    Response.Status.BAD_REQUEST, "/endpoints");
+        }
+        return uri.getHost();
 
     }
 
