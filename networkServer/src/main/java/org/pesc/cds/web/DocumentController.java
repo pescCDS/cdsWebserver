@@ -1,6 +1,5 @@
 package org.pesc.cds.web;
 
-import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -23,8 +22,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.service.PKIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
