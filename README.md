@@ -20,6 +20,7 @@ edex
 |-- docker-compose.yml  ( docker compose config intended for QA and integration tests. )
 |-- network-server-dev-setup.sh  ( shell script use to prepare for network server development )
 |-- docker-compose-network-dev.yml ( docker compose config use with the shell script to setup a dev environment )
+|-- directory-server-pilot.template ( cloudformation template - describes AWS infrastructure )
 |-- pom.xml (Maven config for Ed Exchange project)
 |-- README.md ( this README file )
 |-- docker ( Docker related resources )
@@ -135,8 +136,38 @@ You can alternatively run the directory server with
 
 Login Credentials: when required to login, the default login is "admin" / "password"
 
+----------------------------------
+DIRECTORY SERVER PILOT ENVIRONMENT
+----------------------------------
+Review the Architecture diagram DirectoryServerAWSArchitecture.pn
+
+Prerequisites: 
+> An AWS account
+> The aws cli configured with the appropriate credentials
+> An AWS keypair that will be used to access the environment
+
+This process provisions in AWS, using cloudformation, the following resources:
+> A Virtual Private Cloud, its associated network resources, and security groups (VPC)
+> 2 Directory Server instances (EC2)
+> A Load Balancer (ELB)
+> A MariaDb instance (RDS)
+> A DNS entry for directory-server-pilot.ccctechcenter.org (Route 53)
+
+Initial stack creation: 
+> If desired, modify the command below to supply a different value for the cloudformation template file location, the desired Dns entry (RecordSetName), and the Aws keypair to use (KeyPairName)
+```aws cloudformation create-stack --stack-name directory-server-pilot --template-body file:////home/git/cdsWebserver/directory-server-pilot.template --parameters "ParameterKey=RecordSetName,ParameterValue=edex-directory-pilot.ccctechcenter.org.,ParameterKey=KeyPairName,ParameterValue=edExchange_Pilot_Key"```
+
+Stack update: NOTE: this is destructive - it will re-create any instances that have been modified in the template
+```aws cloudformation update-stack --stack-name directory-server-pilot --template-body file:////home/git/cdsWebserver/directory-server-pilot.template --parameters "ParameterKey=RecordSetName,ParameterValue=edex-directory-pilot.ccctechcenter.org.,ParameterKey=KeyPairName,ParameterValue=edExchange_Pilot_Key"```
+
+Directory server deployment process (manual steps outlined below. Initially, at CCCTC, our Jenkins server will be utilized to automate this process): 
+> On each directory server in the stack:
+```git clone https://github.com/owenwe/cdsWebserver```
+```mvn -DskipTests -am -pl networkServer,directoryServer package docker:build```
+```profile=pilot DIRECTORY_DB_HOST=<hostname of database> docker-compose -f docker-compose-directory-pilot.yml up -d```
+
 -------------------------------
-Full Stack Environment
+Full Stack Environment (QA)
 -------------------------------
 
 The full stack environment is configured in the docker-compose.yml file. It comprises of a network server, a directory server, and a separate mysql database for each. This environment can be initialized with the following steps. 
