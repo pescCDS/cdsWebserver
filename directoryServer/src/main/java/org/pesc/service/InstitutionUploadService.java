@@ -45,6 +45,9 @@ public class InstitutionUploadService {
     private OrganizationService organizationService;
 
     @Autowired
+    private SchoolCodesService schoolCodesService;
+
+    @Autowired
     private InstitutionUploadsRepository uploadsRepository;
 
     @Autowired
@@ -131,6 +134,7 @@ public class InstitutionUploadService {
             SchoolCode schoolCode = new SchoolCode();
             schoolCode.setCodeType(codeType);
             schoolCode.setCode(code);
+            schoolCodesService.validateSchoolCode(schoolCode);
             schoolCodes.add(schoolCode);
         }
     }
@@ -176,18 +180,32 @@ public class InstitutionUploadService {
                     if (record.isMapped("website"))
                         organization.setWebsite(record.get("website").trim());
 
-                    Set<SchoolCode> schoolCodes = new HashSet<SchoolCode>();
-
-                    addSchoolCode(schoolCodes, "ATP", record.get("atp").trim());
-                    addSchoolCode(schoolCodes, "FICE", record.get("fice").trim());
-                    addSchoolCode(schoolCodes, "IPEDS", record.get("ipeds").trim());
-                    addSchoolCode(schoolCodes, "OPEID", record.get("opeid").trim());
-                    addSchoolCode(schoolCodes, "ACT", record.get("act").trim());
-
                     InstitutionsUploadResult result = new InstitutionsUploadResult();
                     result.setInstitutionUploadID(institutionsUpload.getId());
                     result.setOrganizationID(serviceProviderID);
                     result.setLineNumber((int)parser.getCurrentLineNumber());
+
+
+                    Set<SchoolCode> schoolCodes = new HashSet<SchoolCode>();
+
+                    try {
+                        addSchoolCode(schoolCodes, "ATP", record.get("atp").trim());
+                        addSchoolCode(schoolCodes, "FICE", record.get("fice").trim());
+                        addSchoolCode(schoolCodes, "IPEDS", record.get("ipeds").trim());
+                        addSchoolCode(schoolCodes, "OPEID", record.get("opeid").trim());
+                        addSchoolCode(schoolCodes, "ACT", record.get("act").trim());
+                    }
+                    catch (IllegalArgumentException e) {
+                        result.setLineNumber((int) parser.getCurrentLineNumber());
+
+                        result.setOutcome(InstitutionUploadResultsRepository.ERROR);
+
+                        if (e.getMessage() != null) {
+                            result.setMessage(e.getMessage());
+                        }
+                        this.create(result);
+                        continue;
+                    }
 
                     List<Organization> institutions = organizationService.findBySchoolCodes(schoolCodes);
 

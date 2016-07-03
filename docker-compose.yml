@@ -16,6 +16,7 @@ directoryserver_app_image:
      - ./directoryServer/target:/opt/edexchange
   ports:
    - 8080:8080
+   - 8443:8443
   environment:
    - SPRING_PROFILES_ACTIVE=${profile}
    - DB_SERVER=directory-db
@@ -29,6 +30,7 @@ networkserver_app_image:
      - ./networkServer/target:/opt/edexchange
   ports:
    - 8081:9000
+   - 9443:9443
   environment:
    - SPRING_PROFILES_ACTIVE=${profile}
    - DB_SERVER=network-db

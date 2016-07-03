@@ -29,10 +29,8 @@ public class AppController {
 
     private static final Log log = LogFactory.getLog(AppController.class);
 
-    @Value("${directory.server}")
+    @Value("${directory.server.base.url}")
     private String directoryServer;
-    @Value("${directory.server.port}")
-    private String directortyServerPort;
 
     private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
         boolean hasRole = false;
@@ -47,7 +45,7 @@ public class AppController {
 
 
     private boolean buildCommonModel(Model model) {
-        model.addAttribute("directoryServer", directoryServer + ":" + directortyServerPort);
+        model.addAttribute("directoryServer", directoryServer);
 
         boolean isAuthenticated = false;
 

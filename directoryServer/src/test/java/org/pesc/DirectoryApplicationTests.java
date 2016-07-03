@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pesc.api.EndpointResource;
 import org.pesc.api.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -17,6 +18,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @WebIntegrationTest("server.port=0")  //let Spring select a random port to use.
 public class DirectoryApplicationTests {
 
-	@Value("${local.server.port}")   //Injects that actual port used in the test
+	@Value("${http.port}")   //Injects that actual port used in the test
 	int port;
 
 	final String USERNAME = "sallen";
@@ -65,6 +67,23 @@ public class DirectoryApplicationTests {
 
 
 	}
+
+
+	@Test
+	public void testDomainComparison() {
+
+		String certificateName = "*.ccctechcenter.org";
+		String endpointURL = "https://edex-network-qa.ccctechcenter.org:9443/api/v1/documents/inbox";
+
+		try {
+			EndpointResource.validateEndpointURL(endpointURL, certificateName);
+
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	@Test
 	public void testOrganizationsAPI() {
 
@@ -144,21 +163,26 @@ public class DirectoryApplicationTests {
 
 
 		Endpoint endpoint = new Endpoint();
-		endpoint.setAddress("http://localhost:8000/api/documents/outbox");
+		endpoint.setAddress("https://localhost:8000/api/documents/outbox");
 		endpoint.setConfirmDelivery(true);
 		endpoint.setDeliveryMethod(deliveryMethod);
 		endpoint.setDocumentType(documentType);
 		endpoint.setDepartment(department);
 		endpoint.setDocumentFormat(documentFormat);
 		endpoint.setOrganization(getServiceProvider());
+		endpoint.setError(false);
+		endpoint.setMode("LIVE");
+
 
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
 		headers.add("Content-Type", "application/json");
+		headers.add("Accept", "application/json");
 
 		HttpEntity<Endpoint> request = new HttpEntity<Endpoint>(endpoint, headers);
 
 		Endpoint persistedEndpoint = secureRestTemplate.postForObject("http://localhost:" + port + "/services/rest/v1/endpoints", request, Endpoint.class);
+
 
 		assertThat("Endpoint was not saved correctly.", persistedEndpoint.getId() > 0);
 

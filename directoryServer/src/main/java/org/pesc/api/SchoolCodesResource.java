@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
+import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.service.SchoolCodesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Created by james on 3/22/16.
@@ -36,7 +38,15 @@ public class SchoolCodesResource {
     @ApiOperation("Create an school code for an organization.")
     public SchoolCode createSchoolCode(SchoolCode schoolCode) {
 
-        return schoolCodesService.create(schoolCode);
+
+        try {
+            schoolCode = schoolCodesService.create(schoolCode);
+        }
+        catch (Exception e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/school-codes");
+        }
+
+        return schoolCode;
     }
 
     @Path("/{id}")
@@ -44,7 +54,16 @@ public class SchoolCodesResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the school code with the given ID.")
     public SchoolCode updateSchoolCode(@PathParam("id") @ApiParam("The unique id for the school code.") Integer id, SchoolCode schoolCode) {
-        return schoolCodesService.update(schoolCode);
+
+        try {
+            schoolCode = schoolCodesService.update(schoolCode);
+        }
+        catch (Exception e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/school-codes/" + id.toString());
+        }
+
+        return schoolCode;
+
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)

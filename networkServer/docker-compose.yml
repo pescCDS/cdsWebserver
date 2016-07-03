@@ -8,8 +8,8 @@ app_image:
   volumes:
      - ./target:/opt/edexchange
   ports:
-   - "8080:8080"
-   - "8000:8000"
+   - "9000:9000"
+   - "9449:9443"
   links:
    - db_image
   environment:

@@ -82,7 +82,7 @@ public class TransactionService {
         }
 
 
-        if(status != null) {
+        if(!StringUtils.isEmpty(status)) {
             predicates.add(cb.equal(transactionRoot.get("acknowledged"), "complete".equalsIgnoreCase(status) ? true : false));
         }
 

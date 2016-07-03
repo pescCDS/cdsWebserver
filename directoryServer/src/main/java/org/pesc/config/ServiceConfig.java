@@ -65,6 +65,12 @@ public class ServiceConfig {
     public ExceptionMapper apiExceptionMapper() {
         return new ExceptionHandler();
     }
+
+    @Bean
+    public CORSFilter corsFilter() {
+        return new CORSFilter();
+    }
+
     @Bean
     public ApiListingResourceJSON apiListingResourceJSON() {
         return new ApiListingResourceJSON();
@@ -253,7 +259,7 @@ public class ServiceConfig {
         beans.add(userResource);
         beans.add(contactResource);
 
-        endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider(), apiExceptionMapper()));
+        endpoint.setProviders(Arrays.<Object>asList(jacksonJaxbJsonProvider(), apiExceptionMapper(), corsFilter()));
 
         endpoint.setServiceBeans(beans);
 

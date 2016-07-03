@@ -17,6 +17,15 @@ public class CertificateInfo {
     private BigInteger serialNumber;
     private String algorithmUsedToSign;
     private String pem;
+    private String commonName;
+
+    public String getCommonName() {
+        return commonName;
+    }
+
+    public void setCommonName(String commonaName) {
+        this.commonName = commonaName;
+    }
 
     public Integer getVersion() {
         return version;

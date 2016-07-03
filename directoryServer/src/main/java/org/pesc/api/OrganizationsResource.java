@@ -9,8 +9,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.CertificateInfo;
+import org.pesc.api.model.MessageTopic;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.SchoolCode;
+import org.pesc.service.MessageService;
 import org.pesc.service.OrganizationService;
 import org.pesc.service.PagedData;
 import org.pesc.service.SchoolCodesService;
@@ -24,6 +26,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +57,8 @@ public class OrganizationsResource {
     @Context
     private HttpServletResponse servletResponse;
 
+    @Autowired
+    private MessageService messageService;
 
 
     @GET
@@ -85,6 +90,14 @@ public class OrganizationsResource {
             limit = 5;
             offset = 0;
         }
+
+        try {
+            schoolCodesService.validateCode(organizationCode, organizationCodeType);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations");
+        }
+
         PagedData<Organization> pagedData = new PagedData<Organization>(limit,offset);
 
         organizationService.search(
@@ -171,6 +184,12 @@ public class OrganizationsResource {
         else if ("remove".equalsIgnoreCase(operation)) {
             organizationService.removeEndpointToOrganization(id, endpointID);
         }
+        else {
+            throw new ApiException(
+                    new IllegalArgumentException("The opration parameter must be either 'add' or 'remove'."),
+                    Response.Status.BAD_REQUEST, baseURI + "/organizations/" + id );
+
+        }
 
     }
 
@@ -188,7 +207,15 @@ public class OrganizationsResource {
         schoolCode.setCode(code);
         schoolCode.setCodeType(codeType);
 
-        return schoolCodesService.create(schoolCode);
+
+        try {
+            schoolCode = schoolCodesService.create(schoolCode);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/school-code");
+        }
+
+        return schoolCode;
     }
 
 
@@ -201,7 +228,13 @@ public class OrganizationsResource {
     @ApiOperation("Update the enabled property of the organization.")
     public void updateEnabledProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String enabled) {
 
-        organizationService.setProperty(id, "enabled", Boolean.valueOf(enabled));
+        try {
+            organizationService.setProperty(id, "enabled", Boolean.valueOf(enabled));
+
+        }
+        catch (Exception e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/enabled");
+        }
 
     }
 
@@ -210,20 +243,50 @@ public class OrganizationsResource {
     @PUT
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the signing certificate of the organization.")
-    public CertificateInfo udpateCertificateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String pemCert) {
+    public CertificateInfo udpateSendingCertificateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String pemCert) {
 
+        CertificateInfo info;
         try {
 
-            return organizationService.setCertificate(id, pemCert);
+            info = organizationService.setSigningCertificate(id, pemCert);
+            //TODO: create template for message.
+            messageService.createMessage(MessageTopic.NETWORK_CERTIFICATE_CHANGED.name(),
+                    String.format("<div>The signing certificate for <a href='organizations/%d'>%d</a> changed and requires approval.</div>", id, id), true,1, null );
+            return info;
 
 
         } catch (CertificateException e) {
             log.error("Failed to read signing certificate.", e);
             throw new WebApplicationException("Failed to save certificate", e);
         }
+    }
+
+    @Path("/{id}/network-certificate")
+    @PUT
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Update the network certificate of the organization.")
+    public CertificateInfo udpateNetworkCertificateProperty(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String pemCert) {
+
+        CertificateInfo info;
+        try {
+            //TODO: create template for message.
+            info = organizationService.setNetworkCertificate(id, pemCert);
+            messageService.createMessage(MessageTopic.NETWORK_CERTIFICATE_CHANGED.name(),
+                    String.format("<div>The network certificate for <a href='organizations/%d'>%d</a> changed and requires approval.</div>", id, id), true,1, null );
+            return info;
+
+        } catch (CertificateException e) {
+            log.error("Failed to set network certificate.", e);
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/network-certificate");
+        }
+        catch (IOException e) {
+            log.error("Failed to set network certificate.", e);
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/network-certificate");
+        }
 
 
     }
+
 
     @Path("/{id}/signing-certificate")
     @GET
@@ -233,11 +296,27 @@ public class OrganizationsResource {
 
         try {
 
-            return organizationService.getPEMCertificate(id);
+            return organizationService.getSigningCertificate(id);
 
         } catch (CertificateException e) {
             log.error("Failed to retrieve signing certificate.", e);
-            throw new WebApplicationException("Failed to retrieve certificate", e);
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/signing-certificate");
+        }
+    }
+
+    @Path("/{id}/network-certificate")
+    @GET
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Get the certificate info including the PEM formatted network certificate for the given organization.")
+    public CertificateInfo getNetworkCertificate(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id) {
+
+        try {
+
+            return organizationService.getNetworkCertificate(id);
+
+        } catch (CertificateException e) {
+            log.error("Failed to retrieve network certificate.", e);
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/network-certificate");
         }
     }
 

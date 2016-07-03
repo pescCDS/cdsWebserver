@@ -35,6 +35,10 @@ public class AppController {
 
     private static final Log log = LogFactory.getLog(AppController.class);
 
+    @Value("${rest.api.host}")
+    private String restAPIHost;
+
+
     @Autowired
     private RegistrationService registrationService;
 
@@ -43,6 +47,8 @@ public class AppController {
 
     @Autowired
     private MessageService messageService;
+
+
 
     @Autowired
     private EmailService mailService;
@@ -110,6 +116,8 @@ public class AppController {
         buildUserModel(model);
 
         model.addAttribute("github", githubURL);
+        model.addAttribute("apiURL", "https://" + restAPIHost);
+
         return "documentation";
     }
 
@@ -188,7 +196,7 @@ public class AppController {
 
         final String content = mailService.createContent(ctx, "mail/registration-admin", regForm.getOrganization(), regForm.getUser());
 
-        Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,2, null );
+        Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,1, null );
 
 
         return regMessage;

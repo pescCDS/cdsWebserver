@@ -342,10 +342,10 @@
         }
         function dismissMessage(msg) {
             messageService.dismissMessage(msg).then(function(data){
-                //var index = self.messageList.indexOf(msg);
-                //if (index > -1) {
-                //    self.messageList.splice(index, 1);
-                //}
+                var index = self.messageList.indexOf(msg);
+                if (index > -1) {
+                    self.messageList[index].dismissed = true;
+                }
             },function(error){
                //TODO: handle
             }) ;
@@ -775,7 +775,9 @@
         self.deleteEndpoint = deleteEndpoint;
         self.endpoints = [];
         self.pemCertificate = '';
+        self.pemNetworkCertificate = '';
         self.certificateInfo = {};
+        self.networkCertificateInfo = {};
         self.publicKey = '';
         self.addSchoolCode = addSchoolCode;
         self.editingSchoolCode = editingSchoolCode;
@@ -803,9 +805,13 @@
         self.servicedSchoolsOffset = 1;
         self.pageSize = 30;
         self.showCertificateForm = false;
+        self.showNetworkCertificateForm = false;
         self.setCertificate = setCertificate;
+        self.setNetworkCertificate = setNetworkCertificate;
         self.toggleCertificateForm = toggleCertificateForm;
+        self.toggleNetworkCertificateForm = toggleNetworkCertificateForm;
         self.getCertificate = getCertificate;
+        self.getNetworkCertificate = getNetworkCertificate;
         self.saveContact = saveContact;
         self.showContactForm = showContactForm;
         self.editContact = editContact;
@@ -897,10 +903,31 @@
         }
 
 
+        function getNetworkCertificate() {
+            organizationService.getNetworkCertificate(self.org).then(function(response){
+                if (response.status = 200) {
+                    self.networkCertificateInfo = response.data;
+                    self.pemNetworkCertificate = self.networkCertificateInfo.pem;
+                }
+                else {
+                    toasterService.error("Failed to retrieve current network certificate information.");
+                }
+
+            });
+        }
+
+
         function toggleCertificateForm () {
             self.showCertificateForm = !self.showCertificateForm;
             if (self.showCertificateForm == true && self.pemCertificate == '') {
                  getCertificate();
+            }
+        }
+
+        function toggleNetworkCertificateForm () {
+            self.showNetworkCertificateForm = !self.showNetworkCertificateForm;
+            if (self.showNetworkCertificateForm == true && self.pemNetworkCertificate == '') {
+                getNetworkCertificate();
             }
         }
 
@@ -915,6 +942,26 @@
                 }
                 else {
                     toasterService.error("Failed to uopdate signing certificate.");
+                }
+
+            },function(data){
+                toasterService.error(data);
+            })
+
+        };
+
+
+        function setNetworkCertificate() {
+
+            organizationService.updateNetworkCertificate(self.org,self.pemNetworkCertificate).then(function(response){
+
+                if (response.status == 200) {
+                    self.networkCertificateInfo = response.data;
+                    self.showNetworkCertificateForm = false;
+                    toasterService.success("Successfully updated network certificate.");
+                }
+                else {
+                    toasterService.error("Failed to udpate network certificate.");
                 }
 
             },function(data){
@@ -1043,10 +1090,12 @@
             }
         }
 
+        /* TOOD: combine into single call */
         getEndpoints();
         getServiceProvidersForInstitution();
         getInstitutionsForServiceProvider();
         getCertificate();
+        getNetworkCertificate();
 
         function getEndpoints() {
             endpointService.getEndpoints(self.org).then(function (data) {
@@ -1158,6 +1207,10 @@
                 department: {},
                 instructions: '',
                 editing: true
+            }
+
+            if (self.networkCertificateInfo.hasOwnProperty('commonName')) {
+                endpoint.address = 'https://' + self.networkCertificateInfo.commonName + '/';
             }
 
             self.endpoints.unshift(endpoint);
@@ -1577,7 +1630,9 @@
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/endpoints', {
-                'params': {'organizationId': [org_id]},
+                'params': {
+                    'organizationId': [org_id]
+                },
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
@@ -1673,7 +1728,9 @@
             isInstitution: isInstitution,
             getUploads: getUploads,
             getUploadResults: getUploadResults,
-            getCertificate: getCertificate
+            getCertificate: getCertificate,
+            getNetworkCertificate: getNetworkCertificate,
+            updateNetworkCertificate: updateNetworkCertificate
         };
 
         return service;
@@ -1841,6 +1898,19 @@
             return deferred.promise;
         }
 
+        function updateNetworkCertificate(org, pemCert) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/organizations/' + org.id + '/network-certificate', pemCert ).then(function (response) {
+                deferred.resolve(response);
+            },function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
         function getCertificate(org) {
 
             var deferred = $q.defer();
@@ -1852,6 +1922,17 @@
             return deferred.promise;
         }
 
+
+        function getNetworkCertificate(org) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations/' + org.id + '/network-certificate' ).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
 
 
         function createOrg(org) {

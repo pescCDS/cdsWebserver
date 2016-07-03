@@ -142,6 +142,12 @@ form[name="userForm"] label {
     border-bottom: 1px dotted #CCCCCC;
 }
 
+.ed-faq {
+    margin: 0 0 15px 0;
+    border-bottom: 1px dotted #CCCCCC;
+}
+
+
 .ed-heading {
     font: 16px/20px 'ProximaNova Semibold', ProximaNova Semi-Bold, Helvetica, Arial, sans-serif;
     text-transform: uppercase;
@@ -202,4 +208,55 @@ form[name="userForm"] label {
     white-space: normal;
     width: 250px;
     margin-right: 10px;
+}
+
+.numbers-style {
+    list-style-type: decimal;
+    padding: 15px;
+}
+
+.square-style {
+    list-style-type: square;
+    padding: 15px;
+
+}
+
+ol {
+    margin:0 0 1.5em;
+    padding:0;
+    counter-reset:item;
+}
+
+ol>li {
+    margin:0;
+    padding:0 0 0 2em;
+    text-indent:-2em;
+    list-style-type:none;
+    counter-increment:item;
+}
+
+ol>li:before {
+    display:inline-block;
+    width:1.5em;
+    padding-right:0.5em;
+    font-weight:bold;
+    text-align:right;
+    content:counter(item) ".";
+}
+
+ol.alpha>li{
+    margin:0 0 0 5em;
+    padding:0 0 0 0;
+    text-indent:0;
+    list-style-type:lower-alpha;
+    counter-increment:item;
+}
+
+ol.alpha>li:before {
+    display:inline-block;
+    width:1.5em;
+    padding-right:0;
+    font-weight:bold;
+    text-align:right;
+    content: "";
 }

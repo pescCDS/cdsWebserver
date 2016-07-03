@@ -71,23 +71,13 @@ public class Organization implements Serializable {
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = OrganizationType.class, cascade = CascadeType.MERGE)
     private Set<OrganizationType> organizationTypes;
 
+    @ApiModelProperty(value = "Enabled", allowableValues = "true/false")
     @Column(name = "enabled")
     private boolean enabled;
 
     @Column(name = "active")
     private boolean active;
 
-    @Column(name = "ein")
-    private String ein;
-
-    @Column(name = "organization_id")
-    private String organizationCode;
-
-    @Column(name = "organization_id_type")
-    private String organizationCodeType;
-
-    @Column(name = "subcode")
-    private String subcode;
 
     @OneToMany(fetch = FetchType.EAGER,
             targetEntity = SchoolCode.class,
@@ -216,37 +206,6 @@ public class Organization implements Serializable {
         this.active = active;
     }
 
-    public String getEin() {
-        return ein;
-    }
-
-    public void setEin(String ein) {
-        this.ein = ein;
-    }
-
-    public String getOrganizationCodeType() {
-        return organizationCodeType;
-    }
-
-    public void setOrganizationCodeType(String organizationCodeType) {
-        this.organizationCodeType = organizationCodeType;
-    }
-
-    public String getOrganizationCode() {
-        return organizationCode;
-    }
-
-    public void setOrganizationCode(String organizationCode) {
-        this.organizationCode = organizationCode;
-    }
-
-    public String getSubcode() {
-        return subcode;
-    }
-
-    public void setSubcode(String subcode) {
-        this.subcode = subcode;
-    }
 
     public Set<SchoolCode> getSchoolCodes() {
         return schoolCodes;

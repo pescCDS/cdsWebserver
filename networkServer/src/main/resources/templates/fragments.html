@@ -258,8 +258,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">
-                    <a href="http://www.pesc.org/interior.php?page_id=217">EDExchange by the Common Data Services (CDS)
-                        Task Force</a>
+                    <a href="http://www.pesc.org/interior.php?page_id=217">EDExchange by the Common Data Services (CDS) Task Force</a>
                 </h1>
             </div>
             <div class="col-md-4">
@@ -269,13 +268,16 @@
                     </div>
                     <div class="panel-body">
                         <p>
-                            The mission of the PESC Common Data Services taskforce is to improve security, reliability,
-                            efficiency and speed in the transfer of all educational data types by developing an open web
-                            services network and associated standards to benefit the education of students, streamline
-                            processes for institutions, and facilitate the advancement of services offered for
-                            education. (12.2011)
+                            EDExchange is a way for your college to exchange transcripts in a secure, standardized way with any other college
+                            in the EDEXchange network.
                         </p>
-                        <a href="#about" class="btn btn-default">Learn More</a>
+                        <p></p>
+                        <p>
+                            Before EDExchange, there was no consistent way for colleges to request and exchange documents with each other. Service provider exchange networks operated in isolation from one another and any available legacy exchange platforms were built on old standards without delivery confirmation.
+                        </p>
+
+                        <p>See who's using EDExchange now!  <a class="btn btn-lg btn-default btn-block" th:href="${directoryServer} + '#directory'">Directory</a></p>
+
                     </div>
                 </div>
             </div>
@@ -285,9 +287,11 @@
                         <h4><i class="fa fa-fw fa-gift"></i> Free &amp; Open Source</h4>
                     </div>
                     <div class="panel-body">
-                        <p>The establishment of an open, data exchange network for the education community.</p>
-                        <a href="#about" class="btn btn-default">Learn More</a>
+                        <p>Because EDExchange is open source you can extend it to suit your specific needs.</p>
+
+                        <p>Learn more  <a class="btn btn-lg btn-default btn-block" th:href="${directoryServer} + 'documentation#faq'">FAQ</a></p>
                     </div>
+
                 </div>
             </div>
             <div class="col-md-4">
@@ -296,53 +300,95 @@
                         <h4><i class="fa fa-fw fa-compass"></i> Easy to Use</h4>
                     </div>
                     <div class="panel-body">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque, optio corporis quae nulla
-                            aspernatur in alias at numquam rerum ea excepturi expedita tenetur assumenda voluptatibus
-                            eveniet incidunt dicta nostrum quod?</p>
-                        <a href="#about" class="btn btn-default">Learn More</a>
+                        <p>Sending a transcript to a college in the EDExchange network is as easy as entering the receiving school information, uploading the transcript, and clicking Send.</p>
+                        <p></p>
+                        <p>What you <u>won’t</u> have to do? Wonder whether or not the transcript was received or worry about file format or data security.</p>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- /.row -->
 
-        <!-- Portfolio Section -->
+        <!-- Features Section -->
         <div class="row">
             <div class="col-lg-12">
-                <h2 class="page-header">Portfolio Heading</h2>
+                <h2 class="page-header">How it Works</h2>
             </div>
-            <div class="col-md-4 col-sm-6">
-                <a href="portfolio-item.html">
-                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-                </a>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>Register</b>
+                    </div>
+                    <div class="panel-body">
+                        Only members of the EDExchange network can send and receive documents over the network.  To become
+                        a member, fill out the <a th:href="${directoryServer} + 'home#/registration-form'">registration form </a>.
+
+                        <p>Once you complete
+                            your registration form, you can login and begin to configure your organization to send and/or
+                            receive documents.  Once your organization is reviewed and approved by PESC, you may begin to
+                            use the network to send and receive documents.</p>
+                    </div>
+                </div>
+
             </div>
-            <div class="col-md-4 col-sm-6">
-                <a href="portfolio-item.html">
-                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-                </a>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>Configure</b>
+                    </div>
+                    <div class="panel-body">
+                        <p>EDExchange member organizations can be configured to send and receive documents, just send, or just receive.  Alternatively, an
+                            organization can utilize an EDExchange service provider to send and receive documents on it's behalf.</p>
+                        <p><span style="font-weight: bolder;">To send documents</span>, you must publish a SSL certificate to the EDExchange directory server for the purpose
+                            of creating and verifying digital signatures.</p>
+                        <p>Institutions can alternatively use an EDExchange service provider to send documents on their behalf.</p>
+                        <p><span style="font-weight: bolder;">To receive documents</span>, you must deploy an EDExchange network server on the internet using a domain name of your choice and
+                            secure it using an SSL certificate.  HTTPS is required for URLs that are used to receive documents.</p>
+                        <p>Once the network server is deployed, you must publish the endpoint (the URL used to receive documents) on the
+                            EDExchange directory server.</p>
+                        <p>Insitutions can alternatively use an EDExchange service provider to receive documents on their behalf.</p>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-4 col-sm-6">
-                <a href="portfolio-item.html">
-                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-                </a>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>Send a Document</b>
+                    </div>
+                    <div class="panel-body">
+
+                        <p>Note that the process of sending a document is implemented in the free <a th:href="${directoryServer} + '/documentation#network-server'">reference implementation</a> of the network server.</p>
+                        <p>First, the sender obtains the published URL for the the receiver, based on attributes of the document and the intended recipient, from the EDExchange directory server.</p>
+                        <p>Next, the sender must generate a digital signature for the document.</p>
+                        <p>Next, create a transaction about the document for reporting purposes.</p>
+                        <p>Send the document and digital signature to the receiving URL along with the directory ID
+                            of the sender and the recipient, and optionally with a transaction ID and acknowledgment
+                            URL.</p>
+                        <p>Update the transaction with information about the delivery provided by the receiving
+                            network server</p>
+
+
+                    </div>
+                </div>
+
             </div>
-            <div class="col-md-4 col-sm-6">
-                <a href="portfolio-item.html">
-                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-                </a>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <a href="portfolio-item.html">
-                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-                </a>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <a href="portfolio-item.html">
-                    <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-                </a>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>Receive a Document</b>
+                    </div>
+                    <div class="panel-body">
+                        <p>Note that the process of receiving a document is implemented in the free <a href="/documentation#network-server">reference implementation</a> of the network server.</p>
+                        <p>When a document and it's digital signature are received by the the receiver's hosted network server over the published URL, </p>
+                        the network server creates a transaction about the document for reporting purposes.</p>
+                        <p>The network server then verifies the document's digital signature by obtaining the sender's published SSL certificate from the EDExchange directory server.</p>
+                        <p>Once the document's signature is verified, the network server delivers the document to the recipient and sends an acknowledgement back to the sender,
+                            with the sender's transaction ID, to indicate that the document has been delivered.</p>
+
+                    </div>
+                </div>
+
             </div>
         </div>
-        <!-- /.row -->
 
         <!-- Features Section -->
         <div class="row">
@@ -359,31 +405,10 @@
                     <li>Network Server</li>
                     <li>Exchange any type of document with member organizations.</li>
                 </ul>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis, omnis doloremque non cum id
-                    reprehenderit, quisquam totam aspernatur tempora minima unde aliquid ea culpa sunt. Reiciendis quia
-                    dolorum ducimus unde.</p>
-            </div>
-            <div class="col-md-6">
-                <img class="img-responsive" src="http://placehold.it/700x450" alt="">
+                <p>Both SOAP web services and a REST API are available for extending functionality.</p>
             </div>
         </div>
         <!-- /.row -->
-
-        <hr>
-
-        <!-- Call to Action Section -->
-        <div class="well">
-            <div class="row">
-                <div class="col-md-8">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias, expedita, saepe, vero rerum
-                        deleniti beatae veniam harum neque nemo praesentium cum alias asperiores commodi.</p>
-                </div>
-                <div class="col-md-4">
-                    <a class="btn btn-lg btn-default btn-block" href="#directory">Directory</a>
-                </div>
-            </div>
-        </div>
-
         <hr>
 
         <!-- Footer -->

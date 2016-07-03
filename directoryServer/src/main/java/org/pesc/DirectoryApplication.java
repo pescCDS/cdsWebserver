@@ -1,7 +1,12 @@
 package org.pesc;
 
+import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.cxf.transport.servlet.CXFServlet;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
@@ -34,7 +39,7 @@ public class DirectoryApplication {
      * @return TomcatEmbeddedServletContainerFactory
      */
     @Bean
-    public TomcatEmbeddedServletContainerFactory tomcatFactory() {
+    public TomcatEmbeddedServletContainerFactory tomcatFactory(@Value("${http.port}") Integer port, @Value("${server.port}")Integer securePort) {
         TomcatEmbeddedServletContainerFactory factory =  new TomcatEmbeddedServletContainerFactory() {
 
             @Override
@@ -43,7 +48,26 @@ public class DirectoryApplication {
                 tomcat.enableNaming();
                 return super.getTomcatEmbeddedServletContainer(tomcat);
             }
+
+            //Uncomment the code below if the server is used without a load balancer that's handling HTTPS.
+            /*
+
+            @Override
+            protected void postProcessContext(Context context) {
+                SecurityConstraint securityConstraint = new SecurityConstraint();
+                securityConstraint.setUserConstraint("CONFIDENTIAL");
+                SecurityCollection collection = new SecurityCollection();
+                collection.addPattern("/*");
+                securityConstraint.addCollection(collection);
+                context.addConstraint(securityConstraint);
+            }
+            */
+
         };
+
+        //HTTPS
+        factory.addAdditionalTomcatConnectors(createStandardConnector(port,securePort));
+
 
         /* Not using AJP do to reverse proxy issues revolving around redirects that use an absolute path.  The
         funny thing is that the exact same configuration for HTTP works fine, so something up with AJP. */
@@ -62,6 +86,15 @@ public class DirectoryApplication {
         return factory;
     }
 
+
+    private Connector createStandardConnector(Integer port, Integer securePort) {
+        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+        connector.setScheme("http");
+        connector.setSecure(false);
+        connector.setRedirectPort(securePort);
+        connector.setPort(port);
+        return connector;
+    }
 
 
 
