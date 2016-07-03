@@ -30,7 +30,7 @@ networkserver_app_image:
     volumes:
        - ./networkServer/target:/opt/edexchange
     expose:
-     - "8080"
+     - "9000"
     environment:
      - SPRING_PROFILES_ACTIVE=qa
      - DB_SERVER=network-db
