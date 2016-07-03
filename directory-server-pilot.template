@@ -509,9 +509,11 @@
         },
         "Instances": [
           {
-            "Ref": "edexDirectoryServer1",
+            "Ref": "edexDirectoryServer1"
+          },
+          {
             "Ref": "edexDirectoryServer2"
-          }
+          } 
         ],
         "SecurityGroups": [
           {
