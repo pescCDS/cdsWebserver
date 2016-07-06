@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.jws.WebService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +89,15 @@ public class UserResource {
     @ApiOperation("Update the user with the given ID.")
     public DirectoryUser saveUser(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, DirectoryUser user) {
         return userService.update(user);
+    }
+
+    @Path("/{id}/password")
+    @PUT
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation("Update the user with the given ID.")
+    public Response updatePassword(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, String password) {
+        userService.updatePassword(id, password);
+        return Response.ok().build();
     }
 
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true, maxAge = 1)

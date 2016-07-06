@@ -7,6 +7,16 @@
 </head>
 <body>
 
+<div th:fragment="change-password">
+    <div>
+        <label><b>Password:</b></label>
+        <input type="password" placeholder="Password" ng-model="userCtrl.newPassword" style="min-width: 375px;"  > </input>
+
+        <label><b>Confirm Password:</b></label>
+        <input type="password" placeholder="Password" ng-model="userCtrl.confirmPassword" style="min-width: 375px;"  > </input>
+    </div>
+</div>
+
 <div th:fragment="user">
 
     <form name="userForm"  ng-submit="userForm.$valid && usersCtrl.save(user)" novalidate="novalidate" class="glow">
@@ -111,7 +121,6 @@
 
         </div>
     </form>
-
 </div>
 
 
@@ -302,12 +311,29 @@
                     <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus" popover-placement="right" class="btn btn-default">
                         <span class="glyphicon glyphicon-remove-circle"></span> Delete
                     </button>
-
+                    <button type="button" class="btn btn-default" ng-click="userCtrl.showPasswordForm = true">
+                        <span class="glyphicon glyphicon-edit"></span> Change Password
+                    </button>
                 </div>
             </div>
 
         </div>
     </form>
+    <div ng-show="userCtrl.showPasswordForm == true" style="width: 300px; padding: 20px 0 20px 0;">
+        <label>
+            <b>Password:</b>
+            <input type="password" placeholder="Password" ng-model="userCtrl.newPassword" class="form-control" style="min-width: 375px;"  > </input>
+        </label>
+        <label>
+            <b>Confirm Password:</b>
+            <input type="password" placeholder="Password" ng-model="userCtrl.confirmPassword" class="form-control"  style="min-width: 375px;"  > </input>
+        </label>
+
+        <button type="button" style="margin-top: 20px;" class="btn btn-primary" ng-click="userCtrl.updatePassword()">Update</button>
+
+    </div>
+
+
 </div>
 
 <div th:fragment="settings">

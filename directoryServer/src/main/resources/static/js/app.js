@@ -569,6 +569,10 @@
         self.roles = $window.roles;
         self.updateRole = updateRole;
         self.hasRole = hasRole;
+        self.newPassword = '';
+        self.confirmPassword = '';
+        self.showPasswordForm = false;
+        self.updatePassword = updatePassword;
 
         function edit() {
             self.user['editing'] = true;
@@ -616,6 +620,26 @@
                         self.user.roles.splice(i, 1);
                     }
                 }
+            }
+        };
+
+        function updatePassword() {
+            if (/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(self.newPassword) == false) {
+                toasterService.error("The password must be at least 8 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$!%*#?&.");
+            }
+            else if (self.newPassword !== self.confirmPassword) {
+               toasterService.error("The passwords don't match. Please reenter your password.");
+            }
+            else {
+                userService.changePassword(self.user, self.newPassword).then(function(response){
+                    if (response.status == 200) {
+                        toasterService.info("Successfully changed password.");
+                    }
+                    else {
+                        toasterService.ajaxInfo(response.data);
+                    }
+                    self.showPasswordForm = false;
+                })
             }
         };
 
@@ -2275,6 +2299,7 @@
             deleteUser: deleteUser,
             updateUser: updateUser,
             createUser: createUser,
+            changePassword: changePassword,
             find: find,
             hasRole: hasRole,
             hasRoleByName: hasRoleByName,
@@ -2336,6 +2361,20 @@
             }).error(function (data) {
                 toasterService.ajaxInfo(data);
                 deferred.reject("An error occured while updating a user.");
+            });
+
+            return deferred.promise;
+        }
+
+
+        function changePassword(user, password) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/users/' + user.id + '/password', password).then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.resolve(response);
             });
 
             return deferred.promise;

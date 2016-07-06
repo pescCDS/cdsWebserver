@@ -7,6 +7,7 @@ import org.pesc.api.model.Role;
 import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,10 +41,22 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
     public UserService(EntityManagerFactory entityManagerFactory, RolesRepository rolesRepo) {
         roles = (List<Role>)rolesRepo.findAll();
         this.entityManagerFactory = entityManagerFactory;
     }
+
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @PreAuthorize("(#userID == principal.id AND hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
+    public void updatePassword(Integer userID, String password) {
+        jdbcTemplate.update(
+                "update users set password = ? where id = ?", passwordEncoder.encode(password), userID);
+    }
+
 
     @Autowired
     private UserRepository userRepository;
