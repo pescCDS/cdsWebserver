@@ -1,7 +1,7 @@
 package org.pesc;
 
 /**
- * Created by james on 3/3/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/3/16.
  */
 import java.util.Properties;
 

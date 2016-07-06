@@ -21,7 +21,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by james on 2/23/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 2/23/16.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by james on 3/30/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/30/16.
  */
 @Service
 class CredentialsService implements UserDetailsService {

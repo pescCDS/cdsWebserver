@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
 /**
- * Created by james on 4/7/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/7/16.
  */
 @XmlRootElement(name="SchoolCode")
 @Entity

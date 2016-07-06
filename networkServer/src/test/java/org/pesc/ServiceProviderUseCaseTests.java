@@ -24,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by james on 6/13/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/13/16.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = NetworkServerApplication.class)

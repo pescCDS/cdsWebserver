@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by james on 3/21/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/21/16.
  */
 @Service
 public class UserService {

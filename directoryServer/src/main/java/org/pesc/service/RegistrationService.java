@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by james on 4/26/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/26/16.
  */
 @Service
 public class RegistrationService {

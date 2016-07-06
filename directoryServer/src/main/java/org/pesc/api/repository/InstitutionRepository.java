@@ -5,7 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Created by james on 3/21/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/21/16.
  */
 @Repository
 public interface InstitutionRepository extends CrudRepository<Institution, Integer> {

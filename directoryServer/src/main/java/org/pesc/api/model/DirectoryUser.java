@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Set;
 
 /**
- * Created by james on 3/17/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/17/16.
  */
 @XmlRootElement(name = "User")
 @Entity

@@ -4,7 +4,7 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Created by james on 4/6/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/6/16.
  */
 @XmlRootElement(name = "DeliveryMethod")
 @Entity

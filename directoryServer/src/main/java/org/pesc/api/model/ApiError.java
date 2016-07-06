@@ -3,7 +3,7 @@ package org.pesc.api.model;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Created by james on 6/15/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/15/16.
  */
 //Useing "Map" here so that the XML representation will match the built-in spring boot errors.
 @XmlRootElement(name="Map")

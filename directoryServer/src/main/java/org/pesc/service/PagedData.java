@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
- * Created by james on 5/10/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 5/10/16.
  */
 public class PagedData<T> {
 

@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by james on 3/17/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/17/16.
  */
 @XmlRootElement(name = "InstitutionUpload")
 @Entity

@@ -1,7 +1,7 @@
 package org.pesc.cds.model;
 
 /**
- * Created by james on 4/11/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/11/16.
  */
 public class User {
 

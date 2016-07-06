@@ -1,7 +1,7 @@
 package org.pesc.api.exception;
 
 /**
- * Created by james on 6/14/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/14/16.
  */
 
 import javax.ws.rs.core.Response;

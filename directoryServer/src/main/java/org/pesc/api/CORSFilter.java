@@ -10,7 +10,7 @@ import javax.ws.rs.ext.Provider;
 
 
 /**
- * Created by james on 6/22/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/22/16.
  */
 @Provider
 public class CORSFilter implements ContainerResponseFilter {

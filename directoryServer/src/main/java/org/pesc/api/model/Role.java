@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
- * Created by james on 3/30/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/30/16.
  */
 @XmlRootElement(name = "Role")
 @Entity

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Created by james on 3/21/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/21/16.
  */
 @Repository
 public interface UserRepository extends CrudRepository<DirectoryUser, Integer>, JpaSpecificationExecutor {

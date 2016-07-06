@@ -6,7 +6,7 @@ import javax.ws.rs.core.Response;
 import java.util.Calendar;
 
 /**
- * Created by james on 6/14/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/14/16.
  */
 public class ApiException extends RuntimeException {
 

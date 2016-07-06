@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.concurrent.Exchanger;
 
 /**
- * Created by james on 3/21/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/21/16.
  * <p>
  * This service mixes JDBC and JPA.  The database configuration for this app instantiates the JpaTransactionManager
  * and according the documentation for JpaTransactionManager for Spring 4,

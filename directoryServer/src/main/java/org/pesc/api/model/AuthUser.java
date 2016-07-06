@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Extending the Spring User, which is used as the principal during and after authentication so that the additional
  * properties can be used in method level security SpEL expressions in the service layer.
- * Created by james on 3/17/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/17/16.
  */
 public class AuthUser extends User {
     private Integer id;

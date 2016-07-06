@@ -17,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 /**
- * Created by james on 4/6/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/6/16.
  */
 @Component
 @WebService

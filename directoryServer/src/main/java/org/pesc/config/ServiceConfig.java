@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by james on 2/25/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 2/25/16.
  */
 @Configuration
 public class ServiceConfig {

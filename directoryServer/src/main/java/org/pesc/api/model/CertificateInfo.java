@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import java.util.Date;
 
 /**
- * Created by james on 5/24/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 5/24/16.
  */
 @XmlRootElement(name="CertificateInfo")
 public class CertificateInfo {

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Created by james on 6/21/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/21/16.
  */
 @Service
 public class InstitutionService {

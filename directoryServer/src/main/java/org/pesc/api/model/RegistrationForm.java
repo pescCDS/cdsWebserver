@@ -1,7 +1,7 @@
 package org.pesc.api.model;
 
 /**
- * Created by james on 4/26/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/26/16.
  */
 public class RegistrationForm {
     private Organization organization;

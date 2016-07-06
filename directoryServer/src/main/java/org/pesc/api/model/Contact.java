@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 /**
- * Created by james on 4/6/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/6/16.
  */
 @XmlRootElement(name = "Contact")
 @Entity

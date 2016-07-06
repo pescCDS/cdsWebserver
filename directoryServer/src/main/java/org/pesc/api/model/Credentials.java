@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by james on 4/1/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/1/16.
  */
 @Entity
 @Table(name = "users")

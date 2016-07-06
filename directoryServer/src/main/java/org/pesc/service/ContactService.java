@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by james on 6/6/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/6/16.
  */
 @Service
 public class ContactService {

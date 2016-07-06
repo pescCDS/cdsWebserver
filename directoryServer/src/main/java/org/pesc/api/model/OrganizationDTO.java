@@ -6,7 +6,7 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Created by james on 5/12/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 5/12/16.
  */
 @XmlRootElement(name = "Organization")
 @Entity

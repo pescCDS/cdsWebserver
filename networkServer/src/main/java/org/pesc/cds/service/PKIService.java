@@ -17,7 +17,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Enumeration;
 
 /**
- * Created by james on 6/1/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/1/16.
  */
 @Service
 public class PKIService {

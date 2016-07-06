@@ -1,7 +1,7 @@
 package org.pesc.api.model;
 
 /**
- * Created by james on 2/23/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 2/23/16.
  */
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

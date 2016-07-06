@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Created by james on 5/10/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 5/10/16.
  */
 @Repository
 public interface InstitutionUploadResultsRepository extends CrudRepository<InstitutionsUploadResult, Integer> {

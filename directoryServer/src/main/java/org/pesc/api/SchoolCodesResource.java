@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Created by james on 3/22/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/22/16.
  */
 @Component
 @WebService

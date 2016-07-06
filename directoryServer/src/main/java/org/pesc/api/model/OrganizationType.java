@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * Created by james on 4/6/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/6/16.
  */
 @XmlRootElement(name = "OrganizationType")
 @Entity

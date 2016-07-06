@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 /**
- * Created by james on 5/18/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 5/18/16.
  */
 @XmlRootElement(name="CSVStatus")
 public class CSVStatusDTO {
