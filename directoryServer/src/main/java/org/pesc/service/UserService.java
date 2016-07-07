@@ -2,6 +2,7 @@ package org.pesc.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Role;
 import org.pesc.api.repository.RolesRepository;
@@ -22,9 +23,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/21/16.
@@ -36,6 +39,10 @@ public class UserService {
 
     protected EntityManagerFactory entityManagerFactory;
     private List<Role> roles;
+
+    public static final String PASSWORD_REQUIREMENTS = "The password must be at least 8 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$!%*#?&.";
+
+    private Pattern passwordPattern = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$");
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -50,9 +57,17 @@ public class UserService {
     }
 
 
+    public void validatePassword(String password) {
+        if (!passwordPattern.matcher(password).matches()) {
+            throw new IllegalArgumentException(PASSWORD_REQUIREMENTS);
+        }
+    }
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("(#userID == principal.id AND hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
-    public void updatePassword(Integer userID, String password) {
+    public void updatePassword(Integer userID, String password) throws IllegalArgumentException {
+
+        validatePassword(password);
         jdbcTemplate.update(
                 "update users set password = ? where id = ?", passwordEncoder.encode(password), userID);
     }
@@ -104,6 +119,17 @@ public class UserService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public DirectoryUser create(DirectoryUser user)  {
+
+        return unsecuredCreate(user);
+    }
+
+    /**
+     * Used during registration
+     * @param user
+     * @return
+     */
+    public DirectoryUser unsecuredCreate(DirectoryUser user) {
+        validatePassword(user.getPassword());
 
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);

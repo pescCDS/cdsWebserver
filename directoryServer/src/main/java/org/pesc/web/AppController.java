@@ -2,6 +2,7 @@ package org.pesc.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Message;
 import org.pesc.api.model.MessageTopic;
@@ -179,7 +180,9 @@ public class AppController {
 
         final WebContext ctx = new WebContext(request,response, request.getServletContext());
 
+
         registrationService.register(regForm.getOrganization(), regForm.getUser());
+
 
         try {
             final String content = mailService.createContent(ctx, "mail/registration", regForm.getOrganization(), regForm.getUser());

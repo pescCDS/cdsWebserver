@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
+import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/22/16.
@@ -33,7 +35,6 @@ public class UserResource {
     //Security is enforced using method level annotations on the service.
     @Autowired
     private UserService userService;
-
 
     private void checkOrganizationParameter(Integer organizationId) {
         if (organizationId == null) {
@@ -96,7 +97,14 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the user with the given ID.")
     public Response updatePassword(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, String password) {
-        userService.updatePassword(id, password);
+
+        try {
+            userService.updatePassword(id, password);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/users/" + id + "/password");
+        }
+
         return Response.ok().build();
     }
 
