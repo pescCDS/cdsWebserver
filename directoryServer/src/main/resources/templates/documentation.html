@@ -212,8 +212,7 @@
             The EDExchange REST API has predictable, resource-oriented URLs, and uses HTTP response codes to indicate
             API errors. We use built-in HTTP features, like HTTP authentication and HTTP verbs, which are understood
             by off-the-shelf HTTP clients. We support cross-origin resource sharing, allowing you to interact securely
-            with our API from a client-side web application (though you should never expose your secret API key in any
-            public website's client-side code). Depending on the value of the HTTP "Accept" header in each HTTP request,
+            with our API from a client-side web application. Depending on the value of the HTTP "Accept" header in each HTTP request,
             which must be one of "application/json" or "application/xml", JSON or XML is returned by all API responses,
             including errors.
         </p>
@@ -256,7 +255,7 @@
         <p>
             The EDExchange API uses basic authentication.
             All API requests must be made over HTTPS. Calls made over plain HTTP will fail. Some API requests require authentication,
-            and certain permissions.  OAuth will most likely be implemented in the future, and an API key will be required.
+            and certain permissions.
         </p>
 
         <h2 id="errors">Errors</h2>
@@ -307,11 +306,11 @@
             <dt>400 - Bad Request</dt>
             <dd>The request was unacceptable, often due to missing a required parameter.</dd>
             <dt>401 - Unauthorized</dt>
-            <dd>No valid API key provided.</dd>
+            <dd>Invalid or missing credentials.</dd>
             <dt>402 - Request Failed</dt>
             <dd>The parameters were valid but the request failed.</dd>
             <dt>403 - Access Denied</dt>
-            <dd>No valid API key provided or inadequate permissions.</dd>
+            <dd>Invalid credentials or inadequate permissions.</dd>
             <dt>409 - Conflict</dt>
             <dd>The request conflicts with another request (perhaps due to using the same idempotent key).</dd>
             <dt>429 - Too Many Requests</dt>

@@ -1,5 +1,7 @@
 package org.pesc.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.Contact;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Organization;
@@ -24,6 +26,8 @@ import java.util.Set;
 @Service
 public class RegistrationService {
 
+    private static final Log log = LogFactory.getLog(RegistrationService.class);
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -31,7 +35,7 @@ public class RegistrationService {
     OrganizationRepository organizationRepository;
 
     @Autowired
-    UserRepository userRepository;
+    UserService userService;
 
     @Autowired
     ContactsRepository contactsRepository;
@@ -62,6 +66,7 @@ public class RegistrationService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     public void register(Organization organization, DirectoryUser user){
 
+
         if (organization.getOrganizationTypes().contains(new Integer(0))) {
             throw new IllegalArgumentException("Organization type of 'System' is not allowed for registration.");
         }
@@ -78,12 +83,15 @@ public class RegistrationService {
 
         user.setRoles(roles);
 
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
 
-        user.setEnabled(true);
+        try {
+            userService.unsecuredCreate(user);
+        }
+        catch (Exception e) {
+            log.warn(e);
+            throw new IllegalArgumentException(String.format("Username '%s' is not available. Please try a different username.", user.getUsername()));
+        }
 
-        userRepository.save(user);
 
     }
 }

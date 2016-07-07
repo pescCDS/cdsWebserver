@@ -390,6 +390,11 @@
                 'organization': self.org
             };
 
+            if (isValidPassword(self.user.password) == false) {
+                toasterService.error(PASSWORD_REQUIREMENTS);
+                return;
+            }
+
             organizationService.register(bag).then(function (data) {
                     toasterService.success("Thank you for registering.  An email will be sent to " + self.user.email + " when your organization becomes activated.");
                     $location.path('/registration-thank-you')
@@ -624,8 +629,8 @@
         };
 
         function updatePassword() {
-            if (/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(self.newPassword) == false) {
-                toasterService.error("The password must be at least 8 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$!%*#?&.");
+            if (isValidPassword(self.newPassword) == false) {
+                toasterService.error(PASSWORD_REQUIREMENTS);
             }
             else if (self.newPassword !== self.confirmPassword) {
                toasterService.error("The passwords don't match. Please reenter your password.");
@@ -2597,6 +2602,9 @@
         };
     };
 
+    function isValidPassword(password) {
+        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(password);
+    }
     function friendlyRoleName() {
         return function (input) {
 
@@ -2619,6 +2627,8 @@
             return friendlyName;
         };
     }
+
+    var PASSWORD_REQUIREMENTS = "The password must be at least 8 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$!%*#?&.";
 
 
 })();
