@@ -91,7 +91,7 @@ public class DirectoryApplication {
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setScheme("http");
         connector.setSecure(false);
-        connector.setRedirectPort(securePort);
+        //connector.setRedirectPort(securePort);
         connector.setPort(port);
         return connector;
     }

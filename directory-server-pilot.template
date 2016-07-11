@@ -529,7 +529,7 @@
         "Listeners": [
           {
             "InstancePort": "8080",
-            "LoadBalancerPort": "8443",
+            "LoadBalancerPort": "443",
             "Protocol": "HTTPS",
             "InstanceProtocol": "HTTP",
             "SSLCertificateId": "arn:aws:iam::788941008930:server-certificate/STAR_ccctechcenter.org",
@@ -1041,6 +1041,18 @@
         "IpProtocol": "tcp",
         "FromPort": "8081",
         "ToPort": "8081",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress9": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgedexchangestack"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "443",
+        "ToPort": "443",
         "CidrIp": "0.0.0.0/0"
       }
     },
