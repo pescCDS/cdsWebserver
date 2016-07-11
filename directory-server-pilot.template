@@ -493,6 +493,9 @@
             "Ref": "subnete85089b1"
           }
         ],
+        "LBCookieStickinessPolicy" : [{
+            "PolicyName" : "CookieBasedPolicy"
+        }],
         "HealthCheck": {
           "HealthyThreshold": "2",
           "Interval": "30",
@@ -526,18 +529,13 @@
         "Listeners": [
           {
             "InstancePort": "8080",
-            "LoadBalancerPort": "8080",
-            "Protocol": "HTTP",
-            "InstanceProtocol": "HTTP"
-          },
-          {
-            "InstancePort": "8080",
             "LoadBalancerPort": "8443",
             "Protocol": "HTTPS",
             "InstanceProtocol": "HTTP",
             "SSLCertificateId": "arn:aws:iam::788941008930:server-certificate/STAR_ccctechcenter.org",
             "PolicyNames": [
-              "AWSConsole-SSLNegotiationPolicy-elb-ed-exchange-qa-1466025771576"
+              "AWSConsole-SSLNegotiationPolicy-elb-ed-exchange-qa-1466025771576",
+              "CookieBasedPolicy"
             ]
           }
         ],
