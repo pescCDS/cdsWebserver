@@ -13,5 +13,6 @@ app_image:
   links:
    - db_image
   environment:
-   - SPRING_PROFILES_ACTIVE=qa
+   - SPRING_PROFILES_ACTIVE=dev
+   - DB_SERVER=directory-db
   container_name: directory-app

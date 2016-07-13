@@ -62,6 +62,13 @@ public class SchoolCodesService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#schoolCode.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public SchoolCode create(SchoolCode schoolCode) throws IllegalArgumentException {
+       return nonSecuredCreate(schoolCode);
+    }
+
+
+    //This is secured via PreAuthorize on the originating resource, upstream.
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    public SchoolCode nonSecuredCreate(SchoolCode schoolCode) throws IllegalArgumentException {
         validateSchoolCode(schoolCode);
         return this.schoolCodesRepository.save(schoolCode);
     }

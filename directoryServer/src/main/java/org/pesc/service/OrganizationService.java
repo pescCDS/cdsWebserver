@@ -123,7 +123,7 @@ public class OrganizationService {
         Organization savedOrg = organizationRepository.save(organization);
         for (SchoolCode schoolCode : schoolCodes) {
             schoolCode.setOrganizationId(savedOrg.getId());
-            schoolCodesService.create(schoolCode);
+            schoolCodesService.nonSecuredCreate(schoolCode);
         }
         savedOrg.setSchoolCodes(schoolCodes);
 

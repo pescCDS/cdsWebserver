@@ -16,6 +16,7 @@ import org.pesc.service.PagedData;
 import org.pesc.web.AppController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -123,6 +124,7 @@ public class InstitutionResource {
     @ApiOperation("Accepts a CSV file where each row represents and institution that should be associated with the service " +
             "provider.  If the institution already exists in the system, the service provider is granted permissions to " +
             "handle endpoints for the institution. The file header and the columns for the data are state,name,city,ipeds,fice,act,atp,opeid")
+    @PreAuthorize("(#providerID == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public InstitutionsUpload associateInstitutions(@Multipart("org_id") @ApiParam("The service provider's directory ID.") Integer providerID,
                                       @Multipart("file") @ApiParam("The csv file.") Attachment attachment) {
 
