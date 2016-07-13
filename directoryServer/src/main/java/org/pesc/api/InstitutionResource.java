@@ -124,35 +124,50 @@ public class InstitutionResource {
     @ApiOperation("Accepts a CSV file where each row represents and institution that should be associated with the service " +
             "provider.  If the institution already exists in the system, the service provider is granted permissions to " +
             "handle endpoints for the institution. The file header and the columns for the data are state,name,city,ipeds,fice,act,atp,opeid")
-    @PreAuthorize("(#providerID == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public InstitutionsUpload associateInstitutions(@Multipart("org_id") @ApiParam("The service provider's directory ID.") Integer providerID,
                                       @Multipart("file") @ApiParam("The csv file.") Attachment attachment) {
 
 
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
+                //when Anonymous Authentication is enabled
+                !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
+
+            AuthUser auth = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 
-        DataHandler handler = attachment.getDataHandler();
-        try {
-            InputStream stream = handler.getInputStream();
-            //MultivaluedMap<String, String> map = attachment.getHeaders();
-            //System.out.println("fileName Here" + getFileName(map));
+            //Ideally, this should be done with an annotation, but for some reason, the annotation was conflicting
+            //with the Context annotation, making the HttpServletResponse null.
+            if (AppController.hasRole(auth.getAuthorities(), "ROLE_SYSTEM_ADMIN") ||
+                    (AppController.hasRole(auth.getAuthorities(), "ROLE_ORG_ADMIN") && auth.getOrganizationId().equals(providerID))) {
 
 
-            File outfile = new File(csvDir + File.separator + UUID.randomUUID().toString() + ".csv");
-            Files.copy(stream, outfile.toPath());
+                DataHandler handler = attachment.getDataHandler();
+                try {
+                    InputStream stream = handler.getInputStream();
+                    //MultivaluedMap<String, String> map = attachment.getHeaders();
+                    //System.out.println("fileName Here" + getFileName(map));
 
-            InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath(), providerID);
 
-            uploadService.processCSVFile(institutionsUpload, outfile.getPath(), providerID);
+                    File outfile = new File(csvDir + File.separator + UUID.randomUUID().toString() + ".csv");
+                    Files.copy(stream, outfile.toPath());
 
-            return institutionsUpload;
+                    InstitutionsUpload institutionsUpload = persistUploadRecord(outfile.getAbsolutePath(), providerID);
 
-        } catch (Exception e) {
-            log.error("Failed to save uploaded CSV file", e);
+                    uploadService.processCSVFile(institutionsUpload, outfile.getPath(), providerID);
 
-            throw new RuntimeException("Failed to save uploaded CSV file");
+                    return institutionsUpload;
 
+                } catch (Exception e) {
+                    log.error("Failed to save uploaded CSV file", e);
+
+                    throw new RuntimeException("Failed to save uploaded CSV file");
+
+                }
+            }
         }
+
+        throw new NotAuthorizedException("You must be authenticated to create institutions.") ;
 
     }
 
