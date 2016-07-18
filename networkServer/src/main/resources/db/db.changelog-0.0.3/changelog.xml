@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="3" author="owenwe" context="dev, ci, prod" >
+        <comment>Adding colums to the transcaction table to handle attributes related to delivery status.</comment>
+
+        <sql dbms="mysql" >ALTER TABLE `transactions` ADD COLUMN `delivery_message` VARCHAR(512) NULL DEFAULT NULL AFTER `acknowledged`;</sql>
+        <sql dbms="mysql" >ALTER TABLE `transactions` ADD COLUMN `delivery_status` VARCHAR(32) NULL DEFAULT NULL AFTER `delivery_message`;</sql>
+
+    </changeSet>
+</databaseChangeLog>

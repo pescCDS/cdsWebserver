@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.PagedData;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -91,7 +92,9 @@ public class TransactionsController {
 
 
 	@RequestMapping(method= RequestMethod.POST)
-	public void markAsReceived(@RequestParam(value="transactionId", required=true) Integer transactionId) {
+	public void markAsReceived(@RequestParam(value="transactionId", required=true) Integer transactionId,
+							   @RequestParam(value = "status", required = true) TransactionStatus status,
+							   @RequestParam(value = "message", required = false) String message) {
 		Transaction tx = transactionService.findById(transactionId);
 		if(tx!=null) {
 			tx.setAcknowledged(true);

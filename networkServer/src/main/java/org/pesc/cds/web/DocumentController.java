@@ -23,6 +23,7 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.service.PKIService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -591,7 +592,10 @@ public class DocumentController {
 
                 HttpPost post = new HttpPost(ackURL);
 
-                post.setEntity(new UrlEncodedFormEntity(Form.form().add("transactionId", transactionId.toString()).build()));
+                post.setEntity(new UrlEncodedFormEntity(
+                        Form.form().add("transactionId", transactionId.toString())
+                                .add("status", TransactionStatus.SUCCESS.name())
+                                .add("message", "Successfully delivered document.").build()));
 
                 CloseableHttpResponse response = client.execute(post);
 
