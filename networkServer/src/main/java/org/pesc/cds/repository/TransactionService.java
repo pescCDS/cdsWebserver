@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.PagedData;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.TransactionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,7 @@ public class TransactionService {
     public Predicate[] createPredicates(CriteriaBuilder cb, Root<Transaction> transactionRoot,  Integer senderId,
                                         String status,
                                         String operation,
+                                        TransactionStatus deliveryStatus,
                                         Date startDate,
                                         Date endDate) {
         List<Predicate> predicates = new LinkedList<Predicate>();
@@ -96,6 +98,10 @@ public class TransactionService {
 
         }
 
+        if (deliveryStatus != null) {
+            predicates.add(cb.equal(transactionRoot.get("status"), deliveryStatus));
+        }
+
 
         Predicate[] predicateArray = new Predicate[predicates.size()];
         predicates.toArray(predicateArray);
@@ -107,6 +113,7 @@ public class TransactionService {
     private Long getResultLength(  Integer senderId,
                                    String status,
                                    String operation,
+                                   TransactionStatus deliveryStatus,
                                    Date startDate,
                                    Date endDate ) {
 
@@ -122,11 +129,12 @@ public class TransactionService {
                     senderId,
                     status,
                     operation,
+                    deliveryStatus,
                     startDate,
                     endDate
                     );
 
-
+            countQuery.orderBy(cb.desc(countRoot.get("occurredAt")));
             countQuery.where(predicates);
 
             return entityManager.createQuery(countQuery).getSingleResult();
@@ -150,6 +158,7 @@ public class TransactionService {
             Integer senderId,
             String status,
             String operation,
+            TransactionStatus deliveryStatus,
             Date startDate,
             Date endDate,
             PagedData<Transaction> pagedData
@@ -163,16 +172,16 @@ public class TransactionService {
             Root<Transaction> transactionRoot = cq.from(Transaction.class);
             cq.select(transactionRoot);
 
-            Predicate[] predicates = createPredicates(cb, transactionRoot, senderId, status, operation, startDate, endDate);
+            Predicate[] predicates = createPredicates(cb, transactionRoot, senderId, status, operation, deliveryStatus, startDate, endDate);
 
-
+            cq.orderBy(cb.desc(transactionRoot.get("occurredAt")));
             cq.where(predicates);
             TypedQuery<Transaction> q = entityManager.createQuery(cq);
             q.setFirstResult(pagedData.getOffset());
             q.setMaxResults(pagedData.getLimit());
             pagedData.setData(q.getResultList());
 
-            pagedData.setTotal(getResultLength(senderId,status, operation, startDate,endDate));
+            pagedData.setTotal(getResultLength(senderId,status, operation, deliveryStatus,  startDate,endDate));
 
             return pagedData;
 

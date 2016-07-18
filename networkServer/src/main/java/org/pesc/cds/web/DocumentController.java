@@ -50,6 +50,8 @@ public class DocumentController {
 
     private static final Log log = LogFactory.getLog(DocumentController.class);
 
+    private static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
+
     @Value("${directory.server.base.url}")
     private String directoryServer;
 
@@ -526,6 +528,8 @@ public class DocumentController {
         tx.setOccurredAt(occurredAt);
         tx.setAcknowledgedAt(occurredAt);
         tx.setAcknowledged(true);
+        tx.setStatus(TransactionStatus.SUCCESS);
+        tx.setMessage(DEFAULT_DELIVERY_MESSAGE);
 
         Transaction savedTx = transactionService.create(tx);
 
@@ -595,7 +599,7 @@ public class DocumentController {
                 post.setEntity(new UrlEncodedFormEntity(
                         Form.form().add("transactionId", transactionId.toString())
                                 .add("status", TransactionStatus.SUCCESS.name())
-                                .add("message", "Successfully delivered document.").build()));
+                                .add("message", DEFAULT_DELIVERY_MESSAGE).build()));
 
                 CloseableHttpResponse response = client.execute(post);
 

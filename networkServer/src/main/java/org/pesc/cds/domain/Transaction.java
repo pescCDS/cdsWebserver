@@ -1,5 +1,7 @@
 package org.pesc.cds.domain;
 
+import org.pesc.cds.model.TransactionStatus;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 
@@ -43,6 +45,13 @@ public class Transaction {
 	
 	@Column(name="error", columnDefinition = "text")
 	private String error;
+
+	@Column(name="delivery_message")
+	private String message;
+
+	@Column(name="delivery_status")
+	@Enumerated(EnumType.STRING)
+	private TransactionStatus status;
 	
 	@Column(name="acknowledged")
 	private Boolean acknowledged = false;
@@ -151,5 +160,21 @@ public class Transaction {
 
 	public void setAcknowledged(Boolean acknowledged) {
 		this.acknowledged = acknowledged;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public TransactionStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TransactionStatus status) {
+		this.status = status;
 	}
 }

@@ -12,36 +12,39 @@
 
             <form name="transactionFrom" ng-submit="transactionCtrl.getTransactions()" novalidate="novalidate" class="glow">
                 <div class="row">
-                <div class="col-sm-5">
-                    <div class="col-sm-6">
-                        <b>From Date</b>
-                        <p class="input-group">
-                            <input type="text" class="form-control" placeholder="MM/DD/YYYY"
-                                   uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.startDate"
-                                   is-open="transactionCtrl.startDatePopup.opened" datepicker-options="dateOptions"
-                                   close-text="Close"/>
+                <div class="col-sm-3">
+
+                        <div>
+                            <b>From Date</b>
+                            <p class="input-group">
+                                <input type="text" class="form-control" placeholder="MM/DD/YYYY"
+                                       uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.startDate"
+                                       is-open="transactionCtrl.startDatePopup.opened" datepicker-options="dateOptions"
+                                       close-text="Close"/>
                               <span class="input-group-btn">
                                 <button type="button" class="btn btn-default"
                                         ng-click="transactionCtrl.openStartDatePopup()"><i
                                         class="glyphicon glyphicon-calendar"></i></button>
                               </span>
-                        </p>
-                    </div>
-                    <div class="col-sm-6">
-                        <b>To Date</b>
-                        <p class="input-group">
-                            <input type="text" class="form-control" placeholder="MM/DD/YYYY"
-                                   uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.endDate"
-                                   is-open="transactionCtrl.endDatePopup.opened" datepicker-options="dateOptions"
-                                   close-text="Close"/>
+                            </p>
+                        </div>
+                        <div>
+                            <b>To Date</b>
+                            <p class="input-group">
+                                <input type="text" class="form-control" placeholder="MM/DD/YYYY"
+                                       uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.endDate"
+                                       is-open="transactionCtrl.endDatePopup.opened" datepicker-options="dateOptions"
+                                       close-text="Close"/>
                             <span class="input-group-btn">
                                <button type="button" class="btn btn-default" ng-click="transactionCtrl.openEndDatePopup()">
                                    <i class="glyphicon glyphicon-calendar"></i></button>
                             </span>
-                        </p>
-                    </div>
+                            </p>
+                        </div>
+
+
                 </div>
-                <div class="col-sm-7">
+                <div class="col-sm-9">
                     <div class="col-sm-4">
                     <b>Status</b>
                     <div>
@@ -54,7 +57,7 @@
                     </div>
                     </div>
 
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                     <b>Operation</b>
                     <div>
                         <div class="btn-group">
@@ -76,7 +79,18 @@
                         </button>
                     </div>
                     -->
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
+                        <b>Delivery Status</b>
+                        <div>
+                            <div class="btn-group">
+                                <label class="btn btn-primary" ng-model="transactionCtrl.deliveryStatus"
+                                       uib-btn-radio="'SUCCESS'">Success</label>
+                                <label class="btn btn-primary" ng-model="transactionCtrl.deliveryStatus"
+                                       uib-btn-radio="'FAILURE'">Failure</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
                         <b>Fetch Size</b>
 
                         <div>
@@ -85,10 +99,14 @@
                     </div>
                 </div>
         </div>
-        <div style="padding: 15px;">
+        <div style="margin: 20px 0 0 0;">
 
-            <button type="submit" class="btn btn-default">
+            <button type="submit" class="btn btn-primary">
                 <span class="glyphicon glyphicon-search"></span> Apply Filter
+            </button>
+
+            <button type="button" class="btn btn-default" ng-click="transactionCtrl.reset()">
+                <span class="glyphicon glyphicon-refresh"></span> Reset
             </button>
         </div>
         </form>
@@ -125,6 +143,8 @@
                 <th>Acknowledged At</th>
                 <th>Error</th>
                 <th>Acknowledgement sent/received</th>
+                <th>Delivery Status</th>
+                <th>Delivery Message</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -146,6 +166,8 @@
                 <td>{{tran.acknowledgedAt | date:'medium'}}</td>
                 <td>{{tran.error}}</td>
                 <td>{{tran.acknowledged}}</td>
+                <td>{{tran.status}}</td>
+                <td>{{tran.message}}</td>
                 <td>
                     <button ng-show="tran.operation == 'SEND'" type="button" ng-click="transactionCtrl.resend(tran)" class="btn btn-primary btn-sm">
                         <span class="glyphicon glyphicon-send"></span> Resend

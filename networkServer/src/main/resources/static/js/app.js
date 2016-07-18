@@ -53,14 +53,15 @@
             });
     }
 
-    TransactionController.$inject = ['transactionService', 'toasterService'];
-    function TransactionController(transactionService, toasterService) {
+    TransactionController.$inject = ['transactionService', 'toasterService', '$scope'];
+    function TransactionController(transactionService, toasterService, $scope) {
         var self = this;
 
         self.transactions = [];
         self.status = '';
         self.operation = 'Both';
         self.error = null;
+        self.deliveryStatus = '';
 
         self.startDate = '';
         self.stopDate = '';
@@ -73,6 +74,8 @@
         self.totalRecords = 0;
         self.offset = 1;
         self.limit = 10;
+        self.reset = resetParameters;
+
 
         self.startDatePopup = {
             opened: false
@@ -97,6 +100,18 @@
 
             getTransactions();
 
+        }
+
+        function resetParameters() {
+            $scope.transactionFrom.$setPristine();
+
+            self.status = '';
+            self.operation = 'Both';
+            self.error = null;
+            self.deliveryStatus = '';
+
+            self.startDate = '';
+            self.stopDate = '';
         }
 
         function getOrgURL(orgID) {
@@ -138,6 +153,7 @@
                 self.operation,
                 self.startDate,
                 self.endDate,
+                self.deliveryStatus,
                 self.limit,
                 (self.offset-1) * self.limit).then(function(response){
                     self.transactions = response.data;
@@ -444,13 +460,14 @@
         }
 
 
-        function getTransactions(status, operation, startDate, endDate, limit, offset) {
+        function getTransactions(status, operation, startDate, endDate, deliveryStatus, limit, offset) {
 
             var deferred = $q.defer();
 
             $http.get('/api/v1/transactions', {
                 'params': {
                     'operation' : operation,
+                    'delivery-status': deliveryStatus,
                     'offset' : offset,
                     'limit' : limit,
                     'from': startDate,
