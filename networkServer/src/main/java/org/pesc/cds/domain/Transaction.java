@@ -18,6 +18,9 @@ public class Transaction {
 
 	@Column(name="sender_id")
 	private Integer senderId;
+
+	@Column(name="sender_transaction_id")
+	private Integer senderTransactionId;
 	
 	@Column(name="file_format")
 	private String fileFormat;
@@ -187,5 +190,13 @@ public class Transaction {
 
 	public void setAckURL(String ackURL) {
 		this.ackURL = ackURL;
+	}
+
+	public Integer getSenderTransactionId() {
+		return senderTransactionId;
+	}
+
+	public void setSenderTransactionId(Integer senderTransactionId) {
+		this.senderTransactionId = senderTransactionId;
 	}
 }

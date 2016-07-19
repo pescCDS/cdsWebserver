@@ -14,6 +14,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -63,14 +64,7 @@ public class FileProcessorService {
         return httpclient;
     }
 
-
-    /**
-     * This asynchronous method is intended to be starting point for modeling and automating the receiver's delivery process.
-     * @param ackURL The acknowledgment URL can also be obtained from the transaction object.
-     * @param transactionId
-     */
-    @Async
-    public void deliverFile(String ackURL, Integer transactionId){
+    public void sendAck(String ackURL, Integer transactionId) {
         // send response back to sending network server
         CloseableHttpClient client = makeHttpClient();
 
@@ -108,9 +102,9 @@ public class FileProcessorService {
 
             }
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            log.error(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
         }
         finally {
             try {
@@ -119,5 +113,18 @@ public class FileProcessorService {
                 log.error(e);
             }
         }
+    }
+
+    /**
+     * This asynchronous method is intended to be starting point for modeling and automating the receiver's delivery process.
+     * When this method is invoked, the document has already been received and stored in the file system.
+     * transaction.getFilePath() returns the location of the file.
+     */
+    @Async
+    public void deliverFile(Transaction transaction){
+
+        //If appropriate add logic here to model your custom file processing logic.
+
+        sendAck(transaction.getAckURL(), transaction.getSenderTransactionId());
     }
 }

@@ -479,6 +479,7 @@ public class DocumentController {
         // we need the directoryId for this organization in the organizations table
         tx.setRecipientId(recipientId);
         tx.setSenderId(senderId);
+        tx.setSenderTransactionId(transactionId);
         tx.setFileFormat(fileFormat);
         tx.setFileSize(multipartFile.getSize());
         tx.setDepartment(department);
@@ -553,7 +554,7 @@ public class DocumentController {
         transactionService.update(tx);
 
         if (tx.getStatus() == TransactionStatus.SUCCESS) {
-            fileProcessorService.deliverFile(ackURL, transactionId);
+            fileProcessorService.deliverFile(tx);
         }
 
 
