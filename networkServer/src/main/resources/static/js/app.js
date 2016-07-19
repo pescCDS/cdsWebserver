@@ -187,7 +187,7 @@
         self.department = '';
 
 
-        //initialize();
+        initialize();
 
         function uploadFile() {
             console.log("Transfer file.");
@@ -224,11 +224,13 @@
         }
 
 
+
+
         function initialize() {
             getDocumentFormats();
-            //getDocumentTypes();
-          //  getDepartments();
-            //getDeliveryMethods();
+            getDocumentTypes();
+            getDepartments();
+            getDeliveryMethods();
         }
 
         function getSupportedDocumentTypes() {
@@ -262,7 +264,7 @@
             ];
         }
         function getSupportedDocumentFormatsForEndpoint() {
-            //TODO : ajax call to endpont to get supported doc formats.
+
             return [{ id: 1, name: 'XML', description: 'EXtensible Markup Language.'},
                 { id: 2, name: 'PDF', description: 'Adobe Portable Document Format.'},
                 { id: 3, name: 'PESCXML', description: 'PESC’s Core Component Naming convention is based on the Core Component naming convention described in the UNCEFACT Core Component Technical Specification. The UNCEFACT Core Component Technical Specification’s naming convention is based on the standards outlined ISO 11179 Part 5 – Naming and Identification Principles for Data Elements. The Core Component Technical Specification expands upon the ISO 11179 naming convention standards to include Core Component Types and Business Information Entities.'},
@@ -335,10 +337,10 @@
                 headers: {'Content-Type': undefined}
             })
             .success(function(data){
-                toasterService.renderHtml('info', 'Upload', data);
+                toasterService.success('Successfully sent document.');
             })
             .error(function(data){
-                toasterService.renderHtml('error', 'Upload', data);
+                toasterService.ajaxInfo(data);
             });
         }
 
@@ -377,9 +379,6 @@
             var deferred = $q.defer();
 
             $http.get( $window.directoryServer + '/services/rest/v1/document-formats', {
-                headers: {
-                    'Access-Control-Allow-Origin': 'http://localhost:8000'
-                },
                 cache: true
             }).success(function (data) {
                 deferred.resolve(data);
@@ -420,6 +419,8 @@
 
             return deferred.promise;
         }
+
+
 
 
     }

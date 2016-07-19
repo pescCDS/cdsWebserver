@@ -33,6 +33,9 @@ public class Transaction {
 	
 	@Column(name="file_path")
 	private String filePath;
+
+	@Column(name="ack_url")
+	private String ackURL;
 	
 	@Column(name="operation")
 	private String operation;
@@ -176,5 +179,13 @@ public class Transaction {
 
 	public void setStatus(TransactionStatus status) {
 		this.status = status;
+	}
+
+	public String getAckURL() {
+		return ackURL;
+	}
+
+	public void setAckURL(String ackURL) {
+		this.ackURL = ackURL;
 	}
 }

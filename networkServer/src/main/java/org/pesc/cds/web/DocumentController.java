@@ -5,13 +5,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.fluent.Form;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -19,19 +15,18 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
+import org.pesc.cds.repository.StringUtils;
 import org.pesc.cds.repository.TransactionService;
+import org.pesc.cds.service.FileProcessorService;
 import org.pesc.cds.service.PKIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Produces;
@@ -49,8 +44,6 @@ import java.util.List;
 public class DocumentController {
 
     private static final Log log = LogFactory.getLog(DocumentController.class);
-
-    private static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
 
     @Value("${directory.server.base.url}")
     private String directoryServer;
@@ -87,43 +80,14 @@ public class DocumentController {
     @Value("${api.public_key}")
     private String publicKeyApiPath;
 
-    @Value("${networkServer.ssl.trust-certificates}")
-    private Boolean trustCertificates;
-
     @Autowired
     private TransactionService transactionService;
 
     @Autowired
     PKIService pkiService;
 
-
-
-    private CloseableHttpClient makeHttpClient()  {
-
-        CloseableHttpClient httpclient = null;
-
-        if (trustCertificates == true) {
-
-            try {
-                SSLContextBuilder builder = new SSLContextBuilder();
-                builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                        builder.build());
-                httpclient = HttpClients.custom().setSSLSocketFactory(
-                        sslsf).build();
-            }
-            catch (Exception e) {
-                log.error("Failed to create test HTTPS client.");
-            }
-
-
-        }
-        else {
-            httpclient = HttpClients.createDefault();
-        }
-
-        return httpclient;
-    }
+    @Autowired
+    FileProcessorService fileProcessorService;
 
 
     @RequestMapping(value="/send", method= RequestMethod.GET)
@@ -155,7 +119,7 @@ public class DocumentController {
             throw new RuntimeException("No endpoint found for this organization and document type.");
         }
         // send http post to network server
-        CloseableHttpClient client = makeHttpClient();
+        CloseableHttpClient client = fileProcessorService.makeHttpClient();
         try {
 
             HttpPost post = new HttpPost(endpointURI);
@@ -357,33 +321,29 @@ public class DocumentController {
      * @param department
      * @param schoolCode
      * @param schoolCodeType
-     * @param redir
      * @return
      */
     @RequestMapping(value="/outbox", method= RequestMethod.POST)
-    public ModelAndView sendFile(
+    @ResponseBody
+    public Transaction sendFile(
             @RequestParam(value="file") MultipartFile multipartFile,
             @RequestParam(value="file_format", required=true) String fileFormat,
             @RequestParam(value="document_type", required=false) String documentType,
             @RequestParam(value="department", required=false) String department,
             @RequestParam(value="school_code", required=true) String schoolCode,
-            @RequestParam(value="school_code_type", required=true) String schoolCodeType,
-            RedirectAttributes redir
+            @RequestParam(value="school_code_type", required=true) String schoolCodeType
     ) {
 
-        ModelAndView mav = new ModelAndView("redirect:/upload-status");
-
-        Transaction tran = null;
+        Transaction tx = new Transaction();
 
         if (!multipartFile.isEmpty()) {
+            String endpointURI = getEndpointURIForSchool(schoolCode, schoolCodeType, fileFormat, documentType, department, tx);
+
+            if (endpointURI == null) {
+                throw new IllegalArgumentException("No endpoint URI exists for the given school and document format.");
+            }
+
             try {
-
-                Transaction tx = new Transaction();
-                String endpointURI = getEndpointURIForSchool(schoolCode, schoolCodeType, fileFormat, documentType, department, tx);
-
-                if (endpointURI == null) {
-                    throw new IllegalArgumentException("No endpoint URI exists for the given school and document format.");
-                }
 
                 File outboxDirectory = new File(localServerOutboxPath);
                 outboxDirectory.mkdirs();
@@ -391,34 +351,34 @@ public class DocumentController {
                 File outboxFile = new File(outboxDirectory, multipartFile.getOriginalFilename());
                 multipartFile.transferTo(outboxFile);
 
-                tx.setSenderId( Integer.valueOf(localServerId) );
+                tx.setSenderId(Integer.valueOf(localServerId));
                 tx.setFileFormat(fileFormat);
                 tx.setFilePath(outboxFile.getAbsolutePath());
                 tx.setFileSize(multipartFile.getSize());
                 tx.setDocumentType(documentType);
                 tx.setDepartment(department);
+                tx.setAckURL(localServerWebServiceURL);
                 tx.setOperation("SEND");
                 tx.setOccurredAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
-                // update response map
-                tran = transactionService.create(tx);
+                tx = transactionService.create(tx);
+
 
                 log.debug(String.format(
                         "saved Transaction: {%n  recipientId: %s,%n  senderId: %s,%n  fileFormat: %s%n}",
-                        tran.getRecipientId(),
-                        tran.getSenderId(),
-                        tran.getFileFormat()
+                        tx.getRecipientId(),
+                        tx.getSenderId(),
+                        tx.getFileFormat()
                 ));
 
-                redir.addFlashAttribute("error", false);
-                redir.addFlashAttribute("status", "Upload successfull");
+
 
                 byte[] fileSignature = pkiService.createDigitalSignature(new FileInputStream(outboxFile), pkiService.getSigningKeys().getPrivate());
 
                 ContentBody signature = new ByteArrayBody(fileSignature, "signature.dat");
 
                 // send http post to network server
-                CloseableHttpClient client = makeHttpClient();
+                CloseableHttpClient client = fileProcessorService.makeHttpClient();
                 try {
                     HttpPost post = new HttpPost(endpointURI);
 
@@ -466,20 +426,20 @@ public class DocumentController {
 
             } catch (Exception e) {
 
-                tran.setError(e.getMessage());
-                transactionService.update(tran);
+                tx.setError(e.getMessage());
+                transactionService.update(tx);
 
                 log.error(e);
+
+                throw new IllegalArgumentException(e);
 
             }
 
         } else {
-
-            redir.addFlashAttribute("error", true);
-            redir.addFlashAttribute("status", "Missing file");
+            throw new IllegalArgumentException("No file was present in the upload.") ;
         }
 
-        return mav;
+        return tx;
     }
 
 
@@ -528,8 +488,11 @@ public class DocumentController {
         tx.setOccurredAt(occurredAt);
         tx.setAcknowledgedAt(occurredAt);
         tx.setAcknowledged(true);
-        tx.setStatus(TransactionStatus.SUCCESS);
-        tx.setMessage(DEFAULT_DELIVERY_MESSAGE);
+        tx.setStatus(TransactionStatus.FAILURE);
+
+        if (!StringUtils.isEmpty(ackURL)){
+            tx.setAckURL(ackURL);
+        }
 
         Transaction savedTx = transactionService.create(tx);
 
@@ -572,68 +535,28 @@ public class DocumentController {
                         BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(f));
                         stream.write(bytes);
                         stream.close();
+                        tx.setStatus(TransactionStatus.SUCCESS);
                     }
 
 
                 } catch(IOException ioex) {
+                    tx.setMessage(ioex.getMessage());
                     tx.setError(ioex.getMessage());
                 }
             }
         } catch(Exception ex) {
             log.error(ex);
+            tx.setMessage(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
             tx.setError(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
         }
 
         transactionService.update(tx);
 
-        // send response back to sending network server
-        CloseableHttpClient client = makeHttpClient();
-
-        try {
-
-            if (ackURL != null && !ackURL.isEmpty() && transactionId != null) {
-
-
-                HttpPost post = new HttpPost(ackURL);
-
-                post.setEntity(new UrlEncodedFormEntity(
-                        Form.form().add("transactionId", transactionId.toString())
-                                .add("status", TransactionStatus.SUCCESS.name())
-                                .add("message", DEFAULT_DELIVERY_MESSAGE).build()));
-
-                CloseableHttpResponse response = client.execute(post);
-
-                try {
-                    log.debug(response.getStatusLine());
-                    if (response.getStatusLine().getStatusCode() != 200)  {
-                        throw new RuntimeException(response.getStatusLine().toString());
-                    }
-                    else {
-                        HttpEntity resEntity = response.getEntity();
-                        if (resEntity != null) {
-                            log.debug("Response content length: " + resEntity.getContentLength());
-                        }
-                        EntityUtils.consume(resEntity);
-                    }
-
-                }
-                finally {
-                    response.close();
-                }
-
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (tx.getStatus() == TransactionStatus.SUCCESS) {
+            fileProcessorService.deliverFile(ackURL, transactionId);
         }
-        finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                log.error(e);
-            }
-        }
+
+
     }
 
 

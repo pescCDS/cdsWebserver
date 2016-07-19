@@ -1,4 +1,4 @@
-package org.pesc;
+package org.pesc.cds.config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,18 +94,6 @@ public class DatabaseConfig {
         transactionManager.setEntityManagerFactory(
                 entityManagerFactory.getObject());
         return transactionManager;
-    }
-
-    /**
-     * PersistenceExceptionTranslationPostProcessor is a bean post processor
-     * which adds an advisor to any bean annotated with Repository so that any
-     * platform-specific exceptions are caught and then rethrown as one
-     * Spring's unchecked data access exceptions (i.e. a subclass of
-     * DataAccessException).
-     */
-    @Bean
-    public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
-        return new PersistenceExceptionTranslationPostProcessor();
     }
 
 

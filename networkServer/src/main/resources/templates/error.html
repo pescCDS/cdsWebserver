@@ -1,10 +1,17 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Error page</title>
+    <title>EDExchange Network Server Error</title>
 </head>
 <body>
-<h1 th:text="${errorCode}">500</h1>
-<p th:text="${errorMessage}">java.lang.NullPointerException</p>
+<div style="margin: 20px;">
+    <div>An error occurred.</div>
+    <div><span>HTTP status code:</span> <b th:text="${status}">500</b></div>
+
+    <div><span>Exception type:</span> <b th:text="${error}">java.lang.NullPointerException</b></div>
+
+    <p th:text="${message}"></p>
+</div>
+
 </body>
 </html>
