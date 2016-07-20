@@ -1746,7 +1746,7 @@
                     'offset' : offset,
                     'organization_id': orgID
                 },
-                cache: true
+                cache: false
             }).then(function (response) {
                 deferred.resolve(response);
             }, function (response) {

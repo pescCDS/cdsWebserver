@@ -1417,7 +1417,7 @@
         </div>
         <div>Topic: <b>{{msg.topic}}</b></div>
         <div>Action Required:  <b>{{msg.actionRequired  | trueFalse}}</b> </div>
-
+        <div>Message Date: <b>{{msg.createdTime | date: 'medium'}}</b></div>
         <div>Dismissed:  <b>{{msg.dismissed  | trueFalse}}</b> </div>
         <p ng-bind-html="msg.content"></p>
 

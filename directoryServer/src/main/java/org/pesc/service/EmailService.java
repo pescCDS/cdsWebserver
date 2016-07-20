@@ -39,6 +39,9 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
+    @Autowired
+    private UserService userService;
+
     @Value("${url.login}")
     private String loginURL;
 
@@ -54,29 +57,6 @@ public class EmailService {
     @Value("${email.from}")
     private String fromEmailAddress;
 
-    private Set<String> systemAdminEmailAddresses;
-
-
-    @Autowired
-    public EmailService(UserService userService, RolesRepository rolesRepository) {
-
-
-        Role systemAdminRole =  rolesRepository.findByName("ROLE_SYSTEM_ADMIN");
-        List<DirectoryUser> sysadminsList = userService.findByRole(systemAdminRole);
-
-        systemAdminEmailAddresses = new HashSet<String>();
-
-        for(DirectoryUser user: sysadminsList) {
-            String emailAddress = user.getEmail();
-
-            if (!StringUtils.isEmpty(emailAddress)){
-                systemAdminEmailAddresses.add(user.getEmail()) ;
-            }
-
-        }
-
-
-    }
 
     public String createContent(WebContext ctx, String templateName, Organization org, DirectoryUser user) {
 
@@ -102,12 +82,18 @@ public class EmailService {
     public void sendEmailToSysAdmins(final String subject, final String htmlContent) {
 
         try {
+            Set<String> recipients = userService.getSystemAdminEmailAddresses();
+
+            if (recipients.isEmpty()) {
+                return;
+            }
+
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
             message.setSubject(subject);
             message.setFrom(fromEmailAddress);
-            String[] emailRecipients = new String[systemAdminEmailAddresses.size()];
-            systemAdminEmailAddresses.toArray(emailRecipients);
+            String[] emailRecipients = new String[recipients.size()];
+            recipients.toArray(emailRecipients);
             message.setTo(emailRecipients);
 
             message.setText(htmlContent, true);
@@ -143,15 +129,6 @@ public class EmailService {
         catch (MessagingException e) {
             log.error(e);
         }
-    }
-
-
-    public Set<String> getSystemAdminEmailAddresses() {
-        return systemAdminEmailAddresses;
-    }
-
-    public void setSystemAdminEmailAddresses(Set<String> systemAdminEmailAddresses) {
-        this.systemAdminEmailAddresses = systemAdminEmailAddresses;
     }
 
     public String getLoginURL() {

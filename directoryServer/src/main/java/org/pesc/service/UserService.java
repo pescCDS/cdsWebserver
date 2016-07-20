@@ -2,15 +2,18 @@ package org.pesc.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pesc.api.exception.ApiException;
+import org.pesc.api.StringUtils;
+import org.pesc.api.model.AuthUser;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Role;
 import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
+import org.pesc.web.AppController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,12 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -48,10 +50,21 @@ public class UserService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+
+    private Role systemAdminRole;
+
+    private Set<String> systemAdminEmailAddresses;
+
     @Autowired
     public UserService(EntityManagerFactory entityManagerFactory, RolesRepository rolesRepo) {
-        roles = (List<Role>)rolesRepo.findAll();
+
         this.entityManagerFactory = entityManagerFactory;
+
+        roles = (List<Role>)rolesRepo.findAll();
+        systemAdminRole = rolesRepo.findByName("ROLE_SYSTEM_ADMIN");
+
+        systemAdminEmailAddresses = getEmailAddressesForUsersWithSystemAdminRole();
+
     }
 
 
@@ -137,14 +150,53 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
+    @Transactional(readOnly=true,propagation = Propagation.NEVER)
+    public void updateSystemAdminEmails() {
+        AuthUser auth = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        //If the current user is a system admin, we need to re-generate the email list for system admins because it's
+        //used by the email server to send automated emails to those users.
+        if (AppController.hasRole(auth.getAuthorities(), "ROLE_SYSTEM_ADMIN")){
+            //Atomic operation is thread safe.
+            systemAdminEmailAddresses = getEmailAddressesForUsersWithSystemAdminRole();
+        }
+    }
+
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public DirectoryUser update(DirectoryUser user)  {
 
-        return this.userRepository.save(user);
+        return userRepository.save(user);
     }
 
 
+    private Set<String> getEmailAddressesForUsersWithSystemAdminRole() {
+        return getEmailAddressesForUsersByRole(this.systemAdminRole);
+    }
+
+    /**
+     * Obtain a list of email address for users that have a particular role.  Originally created to obtain email
+     * addresses for system admins but usable for other purposes.
+     * @param role
+     * @return set of email addresses
+     */
+    private Set<String> getEmailAddressesForUsersByRole(Role role) {
+
+        List<DirectoryUser> sysadminsList = findByRole(role);
+
+        Set<String> emailAddresses = new HashSet<String>();
+
+        for(DirectoryUser user: sysadminsList) {
+            String emailAddress = user.getEmail();
+
+            if (!StringUtils.isEmpty(emailAddress)){
+                emailAddresses.add(user.getEmail()) ;
+            }
+
+        }
+        return emailAddresses;
+
+    }
 
     public List<DirectoryUser> findByRole(Role role) {
 
@@ -231,4 +283,7 @@ public class UserService {
         return new ArrayList<DirectoryUser>();
     }
 
+    public Set<String> getSystemAdminEmailAddresses() {
+        return systemAdminEmailAddresses;
+    }
 }

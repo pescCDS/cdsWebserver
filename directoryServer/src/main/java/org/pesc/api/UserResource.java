@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -89,7 +90,10 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation("Update the user with the given ID.")
     public DirectoryUser saveUser(@PathParam("id") @ApiParam("The identifier for the user.") Integer id, DirectoryUser user) {
-        return userService.update(user);
+        userService.update(user);
+        userService.updateSystemAdminEmails();
+
+        return user;
     }
 
     @Path("/{id}/password")

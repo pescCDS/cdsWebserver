@@ -21,6 +21,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -187,6 +188,7 @@ public class MessageService {
 
         msg.setTopic(topic);
         msg.setContent(content);
+        msg.setCreatedTime(new Date());
         msg.setActionRequired(actionRequired);
         msg.setDismissed(false);
         msg.setOrganizationId(orgID);
