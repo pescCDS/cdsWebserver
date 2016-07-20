@@ -15,4 +15,7 @@ app_image:
   environment:
    - SPRING_PROFILES_ACTIVE=dev
    - DB_SERVER=directory-db
+   - MAIL_SMTP_HOST=${MAIL_SMTP_HOST}
+   - MAIL_SMTP_USERNAME=${MAIL_SMTP_USERNAME}
+   - MAIL_SMTP_PASSWORD=${MAIL_SMTP_PASSWORD}
   container_name: directory-app
