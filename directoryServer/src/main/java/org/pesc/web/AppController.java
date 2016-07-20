@@ -180,29 +180,22 @@ public class AppController {
 
         final WebContext ctx = new WebContext(request,response, request.getServletContext());
 
-
         registrationService.register(regForm.getOrganization(), regForm.getUser());
 
+        String content = mailService.createContent(ctx, "mail/registration", regForm.getOrganization(), regForm.getUser());
 
-        try {
-            final String content = mailService.createContent(ctx, "mail/registration", regForm.getOrganization(), regForm.getUser());
+        mailService.sendSimpleMail(regForm.getUser().getEmail(),MessageTopic.REGISTRATION.getFriendlyName(), content);
+        messageService.createMessage(MessageTopic.REGISTRATION.name(), content, false, regForm.getOrganization().getId(), null);
 
-            mailService.sendSimpleMail(regForm.getUser().getEmail(), "noreply@edexchange.net", MessageTopic.REGISTRATION.getFriendlyName(), content);
-            messageService.createMessage(MessageTopic.REGISTRATION.name(), content, false,regForm.getOrganization().getId(), null );
+        content = mailService.createContent(ctx, "mail/registration-admin", regForm.getOrganization(), regForm.getUser());
 
-
-        }
-        catch (MessagingException e) {
-            log.error("Failed to send registration email.", e);
-        }
-
-
-        final String content = mailService.createContent(ctx, "mail/registration-admin", regForm.getOrganization(), regForm.getUser());
+        mailService.sendEmailToSysAdmins(MessageTopic.REGISTRATION.getFriendlyName(),content);
 
         Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,1, null );
 
-
         return regMessage;
+
+
 
     }
 

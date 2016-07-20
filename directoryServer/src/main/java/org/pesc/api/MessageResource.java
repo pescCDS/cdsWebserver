@@ -6,12 +6,16 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.Message;
+import org.pesc.api.model.Message;
 import org.pesc.service.MessageService;
+import org.pesc.service.PagedData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,28 +34,43 @@ public class MessageResource {
     @Autowired
     private MessageService messageService;
 
+    @Context
+    private HttpServletResponse servletResponse;
 
     @GET
     @ApiOperation("Return messages that belong to the given id.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Message> getMessagesForOrganization(@QueryParam("organization_id") @ApiParam(value="The organization id.", required=true) Integer orgID) {
+    public List<Message> getMessages(@QueryParam("organization_id") @ApiParam(value="The organization id.", required=true) Integer orgID,
+                                                    @QueryParam("topic") @ApiParam(value="The topic.", required=false) String topic,
+                                                    @QueryParam("content") @ApiParam(value="Content search terms.", required=false) String content,
+                                                    @QueryParam("action_required") @ApiParam(value="Action required true/false.", required=false) Boolean actionRequired,
+                                                    @QueryParam("created_time") @ApiParam(value="The create time.", required=false) Long createdTime,
+                                                    @QueryParam("limit") @DefaultValue("5") Integer limit,
+                                                    @QueryParam("offset") @DefaultValue("0") Integer offset
+
+
+    ) {
+
+        if (limit == null || offset == null) {
+            limit = 5;
+            offset = 0;
+        }
 
         checkParameter(orgID, "organization_id");
 
-        List<Message> results = messageService.findByOrganizationId(orgID);
+        PagedData<Message> pagedData = new PagedData<Message>(limit,offset);
 
-        if (results == null) {
-            results = new ArrayList<Message>();
+        messageService.search(orgID,topic,content,createdTime,actionRequired, pagedData);
 
-        }
-        return results;
+        servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()) );
+        return pagedData.getData();
     }
 
     @Path("/{id}")
     @PUT
     @ApiOperation("Update a message property.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void getMessagesForOrganization(@PathParam("id")Integer id, @QueryParam("dismiss") @ApiParam(value="Dismiss property.", required=true) Boolean dismiss) {
+    public void dismissMessage(@PathParam("id")Integer id, @QueryParam("dismiss") @ApiParam(value="Dismiss property.", required=true) Boolean dismiss) {
 
         checkParameter(dismiss, "dismiss");
 

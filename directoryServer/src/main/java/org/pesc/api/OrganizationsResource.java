@@ -12,10 +12,7 @@ import org.pesc.api.model.CertificateInfo;
 import org.pesc.api.model.MessageTopic;
 import org.pesc.api.model.Organization;
 import org.pesc.api.model.SchoolCode;
-import org.pesc.service.MessageService;
-import org.pesc.service.OrganizationService;
-import org.pesc.service.PagedData;
-import org.pesc.service.SchoolCodesService;
+import org.pesc.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,10 +40,16 @@ public class OrganizationsResource {
 
     private static final Log log = LogFactory.getLog(OrganizationsResource.class);
 
+    public static final String NETWORK_CERTFICATE_CHANGED_MESSAGE = "<div>The network certificate for <a href='%s'>%d</a> changed and requires approval.</div>";
+    public static final String SIGNING_CERTIFICATION_CHANGED_MESSAGE = "<div>The signing certificate for <a href='%s'>%d</a> changed and requires approval.</div>";
+
+
     @Value("${api.base.uri}")
     private String baseURI;
 
 
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private OrganizationService organizationService;
@@ -249,9 +252,12 @@ public class OrganizationsResource {
         try {
 
             info = organizationService.setSigningCertificate(id, pemCert);
-            //TODO: create template for message.
-            messageService.createMessage(MessageTopic.NETWORK_CERTIFICATE_CHANGED.name(),
-                    String.format("<div>The signing certificate for <a href='organizations/%d'>%d</a> changed and requires approval.</div>", id, id), true,1, null );
+           String message = String.format(SIGNING_CERTIFICATION_CHANGED_MESSAGE, emailService.getOrganizationURL() + id, id);
+
+            messageService.createMessage(MessageTopic.SIGNING_CERTIFICATE_CHANGED.name(), message, true,1, null );
+
+            emailService.sendEmailToSysAdmins(MessageTopic.SIGNING_CERTIFICATE_CHANGED.name(), message);
+
             return info;
 
 
@@ -269,10 +275,13 @@ public class OrganizationsResource {
 
         CertificateInfo info;
         try {
-            //TODO: create template for message.
             info = organizationService.setNetworkCertificate(id, pemCert);
+            String message = String.format(NETWORK_CERTFICATE_CHANGED_MESSAGE, emailService.getOrganizationURL() + id, id);
+
             messageService.createMessage(MessageTopic.NETWORK_CERTIFICATE_CHANGED.name(),
-                    String.format("<div>The network certificate for <a href='organizations/%d'>%d</a> changed and requires approval.</div>", id, id), true,1, null );
+                    message, true,1, null );
+
+            emailService.sendEmailToSysAdmins(MessageTopic.NETWORK_CERTIFICATE_CHANGED.name(),message);
             return info;
 
         } catch (CertificateException e) {

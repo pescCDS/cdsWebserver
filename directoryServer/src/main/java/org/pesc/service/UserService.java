@@ -19,14 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -146,6 +144,38 @@ public class UserService {
         return this.userRepository.save(user);
     }
 
+
+
+    public List<DirectoryUser> findByRole(Role role) {
+
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        try {
+
+
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+            CriteriaQuery<DirectoryUser> cq = cb.createQuery(DirectoryUser.class);
+            Root<DirectoryUser> user = cq.from(DirectoryUser.class);
+            cq.select(user);
+
+            cq.where(cb.isMember(role, user.<Set<Role>>get("roles")));
+            TypedQuery<DirectoryUser> q = entityManager.createQuery(cq);
+
+            return q.getResultList();
+
+
+        } catch(Exception ex) {
+            log.error("Failed to execute user search query.", ex);
+        }
+        finally {
+            entityManager.close();
+        }
+        return new ArrayList<DirectoryUser>();
+
+
+    }
 
     /**
      * @param userId

@@ -5,28 +5,33 @@ package org.pesc.service;
  */
 
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.pesc.api.StringUtils;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Organization;
+import org.pesc.api.model.Role;
+import org.pesc.api.repository.RolesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 import org.thymeleaf.context.WebContext;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Locale;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 @Service
 public class EmailService {
+
+    private static final Log log = LogFactory.getLog(EmailService.class);
 
     @Autowired
     private JavaMailSender mailSender;
@@ -34,6 +39,44 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
+    @Value("${url.login}")
+    private String loginURL;
+
+    @Value("${url.user}")
+    private String userURL;
+
+    @Value("${url.organization}")
+    private String organizationURL;
+
+    @Value("${url.messages}")
+    private String messagesURL;
+
+    @Value("${email.from}")
+    private String fromEmailAddress;
+
+    private Set<String> systemAdminEmailAddresses;
+
+
+    @Autowired
+    public EmailService(UserService userService, RolesRepository rolesRepository) {
+
+
+        Role systemAdminRole =  rolesRepository.findByName("ROLE_SYSTEM_ADMIN");
+        List<DirectoryUser> sysadminsList = userService.findByRole(systemAdminRole);
+
+        systemAdminEmailAddresses = new HashSet<String>();
+
+        for(DirectoryUser user: sysadminsList) {
+            String emailAddress = user.getEmail();
+
+            if (!StringUtils.isEmpty(emailAddress)){
+                systemAdminEmailAddresses.add(user.getEmail()) ;
+            }
+
+        }
+
+
+    }
 
     public String createContent(WebContext ctx, String templateName, Organization org, DirectoryUser user) {
 
@@ -41,6 +84,11 @@ public class EmailService {
 
         ctx.setVariable("organization", org);
         ctx.setVariable("user", user);
+        ctx.setVariable("loginURL", loginURL);
+        ctx.setVariable("userURL", userURL + user.getId());
+        ctx.setVariable("organizationURL", organizationURL + org.getId());
+        ctx.setVariable("messagesURL", messagesURL);
+
         final String htmlContent = this.templateEngine.process(templateName, ctx);
         return htmlContent;
     }
@@ -50,104 +98,91 @@ public class EmailService {
         return htmlContent;
     }
 
+    @Async
+    public void sendEmailToSysAdmins(final String subject, final String htmlContent) {
+
+        try {
+            final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+            message.setSubject(subject);
+            message.setFrom(fromEmailAddress);
+            String[] emailRecipients = new String[systemAdminEmailAddresses.size()];
+            systemAdminEmailAddresses.toArray(emailRecipients);
+            message.setTo(emailRecipients);
+
+            message.setText(htmlContent, true);
+
+            this.mailSender.send(mimeMessage);
+
+        }
+        catch (MessagingException e) {
+            log.error(e);
+        }
+
+    }
     /*
      * Send HTML mail (simple)
      */
     @Async
-    public String sendSimpleMail(
-            final String recipientEmail, final String from, final String subject, final String htmlContent)
-            throws MessagingException {
+    public void sendSimpleMail(
+            final String recipientEmail, final String subject, final String htmlContent) {
+
+         try {
+            final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+            message.setSubject(subject);
+            message.setFrom(fromEmailAddress);
+            message.setTo(recipientEmail);
+
+            message.setText(htmlContent, true);
 
 
-        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-        message.setSubject(subject);
-        message.setFrom(from);
-        message.setTo(recipientEmail);
+            this.mailSender.send(mimeMessage);
 
-        message.setText(htmlContent, true);
-
-
-        this.mailSender.send(mimeMessage);
-
-        return htmlContent;
-
+        }
+        catch (MessagingException e) {
+            log.error(e);
+        }
     }
 
 
-
-
-    /*
-     * Send HTML mail with attachment.
-     */
-    public void sendMailWithAttachment(
-            final String recipientName, final String recipientEmail, final String attachmentFileName,
-            final byte[] attachmentBytes, final String attachmentContentType, final Locale locale)
-            throws MessagingException {
-
-// Prepare the evaluation context
-        final Context ctx = new Context(locale);
-        ctx.setVariable("name", recipientName);
-        ctx.setVariable("subscriptionDate", new Date());
-        ctx.setVariable("hobbies", Arrays.asList("Cinema", "Sports", "Music"));
-
-// Prepare message using a Spring helper
-        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        final MimeMessageHelper message =
-                new MimeMessageHelper(mimeMessage, true /* multipart */, "UTF-8");
-        message.setSubject("Example HTML email with attachment");
-        message.setFrom("thymeleaf@example.com");
-        message.setTo(recipientEmail);
-
-// Create the HTML body using Thymeleaf
-        final String htmlContent = this.templateEngine.process("email-withattachment.html", ctx);
-        message.setText(htmlContent, true /* isHtml */);
-
-// Add the attachment
-        final InputStreamSource attachmentSource = new ByteArrayResource(attachmentBytes);
-        message.addAttachment(
-                attachmentFileName, attachmentSource, attachmentContentType);
-
-        // Send mail
-        this.mailSender.send(mimeMessage);
-
+    public Set<String> getSystemAdminEmailAddresses() {
+        return systemAdminEmailAddresses;
     }
 
+    public void setSystemAdminEmailAddresses(Set<String> systemAdminEmailAddresses) {
+        this.systemAdminEmailAddresses = systemAdminEmailAddresses;
+    }
 
+    public String getLoginURL() {
+        return loginURL;
+    }
 
-    /*
-     * Send HTML mail with inline image
-     */
-    public void sendMailWithInline(
-            final String recipientName, final String recipientEmail, final String imageResourceName,
-            final byte[] imageBytes, final String imageContentType, final Locale locale)
-            throws MessagingException {
+    public void setLoginURL(String loginURL) {
+        this.loginURL = loginURL;
+    }
 
-// Prepare the evaluation context
-        final Context ctx = new Context(locale);
-        ctx.setVariable("name", recipientName);
-        ctx.setVariable("subscriptionDate", new Date());
-        ctx.setVariable("hobbies", Arrays.asList("Cinema", "Sports", "Music"));
-        ctx.setVariable("imageResourceName", imageResourceName); // so that we can reference it from HTML
+    public String getUserURL() {
+        return userURL;
+    }
 
-// Prepare message using a Spring helper
-        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        final MimeMessageHelper message =
-                new MimeMessageHelper(mimeMessage, true /* multipart */, "UTF-8");
-        message.setSubject("Example HTML email with inline image");
-        message.setFrom("thymeleaf@example.com");
-        message.setTo(recipientEmail);
+    public void setUserURL(String userURL) {
+        this.userURL = userURL;
+    }
 
-// Create the HTML body using Thymeleaf
-        final String htmlContent = this.templateEngine.process("email-inlineimage.html", ctx);
-        message.setText(htmlContent, true /* isHtml */);
+    public String getOrganizationURL() {
+        return organizationURL;
+    }
 
-// Add the inline image, referenced from the HTML code as "cid:${imageResourceName}"
-        final InputStreamSource imageSource = new ByteArrayResource(imageBytes);
-        message.addInline(imageResourceName, imageSource, imageContentType);
+    public void setOrganizationURL(String organizationURL) {
+        this.organizationURL = organizationURL;
+    }
 
-        // Send mail
-        this.mailSender.send(mimeMessage);
+    public String getMessagesURL() {
+        return messagesURL;
+    }
 
+    public void setMessagesURL(String messagesURL) {
+        this.messagesURL = messagesURL;
     }
 }

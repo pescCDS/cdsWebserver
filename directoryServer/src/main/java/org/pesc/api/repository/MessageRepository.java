@@ -18,6 +18,6 @@ public interface MessageRepository extends CrudRepository<Message, Integer>, Jpa
     @Query("from Message where actionRequired = ?1 AND organizationId = ?2")
     List<Message> findByActionRequiredAndOrganization(boolean isActionRequired, Integer organizationId);
 
-    @Query("from Message where organizationId = ?1")
+    @Query("from Message where organizationId = ?1 order by createdTime desc")
     List<Message> findByOrganizationId(Integer organizationId);
 }

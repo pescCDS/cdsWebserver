@@ -819,6 +819,16 @@
         <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow">
             <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
                 <div class="btn-group">
+                    <button th:if="${hasSystemAdminRole}"  type="button" class="btn btn-default" ng-show="orgCtrl.org.enabled == false"
+                            ng-click="orgCtrl.setEnabled(true)">
+                        <span class="glyphicon glyphicon-plus"></span> Enable
+                    </button>
+
+                    <button th:if="${hasSystemAdminRole}"  type="button" class="btn btn-default" ng-show="orgCtrl.org.enabled == true"
+                            ng-click="orgCtrl.setEnabled(false)">
+                        <span class="glyphicon glyphicon-remove"></span> Disable
+                    </button>
+
                     <button ng-show="!orgCtrl.showOrgForm()" type="button" class="btn btn-default" ng-click="orgCtrl.editOrg()">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
                     </button>
@@ -1419,8 +1429,21 @@
 
 
 <div th:fragment="messages">
+
     <div>
         <h1>{{messageCtrl.org.name}} Messages</h1>
+
+        <uib-pagination
+                total-items="messageCtrl.totalRecords"
+                ng-model="messageCtrl.offset"
+                max-size="5"
+                class="pagination-sm"
+                items-per-page="messageCtrl.limit"
+                boundary-link-numbers="true"
+                rotate="false" ng-change="messageCtrl.getMessages()"></uib-pagination>
+
+
+
         <div ng-repeat="msg in messageCtrl.messageList">
             <div th:include="::message"></div>
         </div>

@@ -28,7 +28,7 @@ public class MailConfig {
     private String smtpHost;
 
     @Value("${mail.smtp.port}")
-    private String smtpPort;
+    private int smtpPort;
 
     @Value("${mail.smtp.username}")
     private String username;
@@ -39,48 +39,20 @@ public class MailConfig {
 
     @Bean
     public JavaMailSender javaMailService() {
-        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        javaMailSender.setHost(smtpHost);
-        javaMailSender.setPort(Integer.valueOf(smtpPort));
-        javaMailSender.setUsername(username);
-        javaMailSender.setPassword(password);
-        javaMailSender.setJavaMailProperties(getMailProperties());
-
-        return javaMailSender;
-    }
-
-    private Properties getMailProperties() {
-
-        MailSSLSocketFactory sf = null;
-        try {
-            sf = new MailSSLSocketFactory();
-        } catch (GeneralSecurityException e) {
-            log.error("Failed to initialize SSL socket factory for mail client.", e);
-            return null;
-        }
-
-        sf.setTrustedHosts(new String[] { smtpHost });
-
-        // Setup mail server
+        mailSender.setHost(smtpHost);
+        mailSender.setPort(smtpPort);
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
+        mailSender.setProtocol("smtps");
 
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.ssl.socketFactory", sf);
-        //properties.setProperty("mail.smtp.host", smtpHost);
-        //properties.setProperty("mail.smtp.port", smtpPort);
         properties.setProperty("mail.debug", "true");
-
-
-        /*
-        properties.setProperty("mail.transport.protocol", "smtp");
-        properties.setProperty("mail.smtp.auth", "false");
-        properties.setProperty("mail.smtp.starttls.enable", "false");
-        properties.setProperty("mail.debug", "false");
-
-        */
-        return properties;
+        mailSender.setJavaMailProperties(properties);
+        return mailSender;
     }
+
+
 
 }

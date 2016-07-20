@@ -1,14 +1,13 @@
 
 <div xmlns:th="http://www.thymeleaf.org">
     <p>
-        An application for EDExchange membership has been received for <a th:href="@{'#organization/' + ${organization.id}}"><span th:text="${organization.name}"></span></a>
+        An application for EDExchange membership has been received for <a th:href="${organizationURL}"><span th:text="${organization.name}"></span></a>.
         You are required to review the application and organization information and enable the organization to accept
-        the application.  If additional actions are required by the applicant, you may send the application a message
-        <a ng-href="#message-form">here</a>.
+        the application.
     </p>
 
     <p>
-        The application was submitted by the primary contact for the organization, <a th:href="@{'#user/' + ${user.id}}"><span th:text="${user.name}"></span></a>.
+        The application was submitted by the primary contact for the organization, <a th:href="${userURL}"><span th:text="${user.name}"></span></a>.
     </p>
 </div>
 

@@ -333,13 +333,31 @@
         self.dismiss = dismissMessage;
         self.messageList = [ ];
 
-        initialize();
+        self.getMessages = getMessages;
 
-        function initialize() {
-           messageService.getMessages(self.org.id).then(function(data){
-               self.messageList = data;
-           });
+        self.totalRecords = 0;
+        self.limit = 5;
+        self.offset = 1;
+
+
+        getMessages();
+
+
+        function getMessages() {
+            messageService.getMessages(self.org.id, self.limit,
+                (self.offset-1)*self.limit).then(function(response){
+
+                    if (response.status == 200) {
+                        self.totalRecords = response.headers('X-Total-Count');
+                        self.messageList = response.data;
+                    }
+                    else {
+                        toasterService.ajaxInfo(response.data);
+                    }
+
+                });
         }
+
         function dismissMessage(msg) {
             messageService.dismissMessage(msg).then(function(data){
                 var index = self.messageList.indexOf(msg);
@@ -846,6 +864,17 @@
         self.editContact = editContact;
         self.deleteContact = deleteContact;
         self.createContact = createContact;
+        self.setEnabled = setEnabled;
+
+        function setEnabled(enable) {
+
+            organizationService.updateEnabled(self.org,enable).then(function(data){
+                self.org.enabled = enable;
+            },function(data){
+                toasterService.error(data);
+            })
+
+        };
 
         function createContact() {
             var contact = {
@@ -1707,20 +1736,21 @@
             return deferred.promise;
         }
 
-        function getMessages(orgID) {
+        function getMessages(orgID, limit, offset) {
 
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/messages', {
                 'params': {
+                    'limit' : limit,
+                    'offset' : offset,
                     'organization_id': orgID
                 },
-                cache: false
-            }).success(function (data) {
-                deferred.resolve(data);
-            }).error(function (data) {
-                toasterService.ajaxInfo(data);
-                deferred.reject("An error occured while fetching messages.");
+                cache: true
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.resolve(response);
             });
 
             return deferred.promise;
