@@ -2633,7 +2633,7 @@
     };
 
     function isValidPassword(password) {
-        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$_!%*#?&]{8,}$/.test(password);
+        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$_! %*#?&])[A-Za-z\d$@$_! %*#?&]{15,}$/.test(password);
     }
     function friendlyRoleName() {
         return function (input) {
@@ -2658,7 +2658,7 @@
         };
     }
 
-    var PASSWORD_REQUIREMENTS = "The password must be at least 8 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$_!%*#?&.";
+    var PASSWORD_REQUIREMENTS = "The password must be at least 15 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$ _!%*#?&.";
 
 
 })();

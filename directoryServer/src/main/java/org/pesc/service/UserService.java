@@ -40,9 +40,9 @@ public class UserService {
     protected EntityManagerFactory entityManagerFactory;
     private List<Role> roles;
 
-    public static final String PASSWORD_REQUIREMENTS = "The password must be at least 8 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$_!%*#?&.";
+    public static final String PASSWORD_REQUIREMENTS = "The password must be at least 15 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character @$ _!%*#?&.";
 
-    private Pattern passwordPattern = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$_!%*#?&]{8,}$");
+    private Pattern passwordPattern = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$ _!%*#?&])[A-Za-z\\d$@$ _!%*#?&]{15,}$");
 
     @Autowired
     private PasswordEncoder passwordEncoder;
