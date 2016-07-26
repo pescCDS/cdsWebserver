@@ -15,48 +15,48 @@ Docker has been utilized to streamline and automate development and testing effo
 
 PROJECT STRUCTURE
 This section describes the Ed Exchange project with brief descriptions in parentheses.
-
-edex
-|-- docker-compose.yml  ( docker compose config intended for QA and integration tests. )
-|-- network-server-dev-setup.sh  ( shell script use to prepare for network server development )
-|-- docker-compose-network-dev.yml ( docker compose config use with the shell script to setup a dev environment )
-|-- directory-server-pilot.template ( cloudformation template - describes AWS infrastructure )
-|-- pom.xml (Maven config for Ed Exchange project)
-|-- README.md ( this README file )
-|-- docker ( Docker related resources )
-|   |-- container-data ( container mapped volumes )
-|   |   |-- edex-proxy ( mapped proxy/Apache log files )
-|   |   |   |-- logs
-|   |   |   |   |-- access.log ( Apache access log )
-|   |   |   |   |-- error.log  ( Apache error log )
-|   |   |   |   |-- other_vhosts_access.log
-|   |-- proxy-server-image ( Docker configs for the proxy server used in the QA docker environment )
-|   |   |-- 000-default.conf
-|   |   |-- Dockerfile
-|-- directoryServer ( the code and resources that make up the Ed Exchange Directory Server )
-|   |-- pom.xml
-|   |-- src
-|   |   |-- main
-|   |   |   |-- docker ( docker configs for the directory server and the directory server's database )
-|   |   |   |   |-- database
-|   |   |   |   |   |-- Dockerfile
-|   |   |   |   |-- Dockerfile
-|   |   |   |   |-- directory-server.sh (/opt/directory-server -- used to start in normal and debug mode, stop and restart the server)
-|   |   |   |   |-- redeploy.sh ( /opt/redeploy.sh -- used to redeploy the JAR and restart the server)
-|   |   |   |-- java ( Java source code )
-|   |-- target (compiled code and resources after "mvn package docker:build")
-|-- networkServer
-|   |-- pom.xml
-|   |-- src
-|   |   |-- main
-|   |   |   |-- docker
-|   |   |   |   |-- database
-|   |   |   |   |   |-- Dockerfile
-|   |   |   |   |-- Dockerfile
-|   |   |   |   |-- network-server.sh
-|   |   |   |   |-- redeploy.sh
-|   |-- target (compiled code after "mvn package docker:build")
-
+<pre>
+edex<br>
+|-- docker-compose.yml  ( docker compose config intended for QA and integration tests. )<br>
+|-- network-server-dev-setup.sh  ( shell script use to prepare for network server development )<br>
+|-- docker-compose-network-dev.yml ( docker compose config use with the shell script to setup a dev environment )<br>
+|-- directory-server-pilot.template ( cloudformation template - describes AWS infrastructure )<br>
+|-- pom.xml (Maven config for Ed Exchange project)<br>
+|-- README.md ( this README file )<br>
+|-- docker ( Docker related resources )<br>
+|   |-- container-data ( container mapped volumes )<br>
+|   |   |-- edex-proxy ( mapped proxy/Apache log files )<br>
+|   |   |   |-- logs<br>
+|   |   |   |   |-- access.log ( Apache access log )<br>
+|   |   |   |   |-- error.log  ( Apache error log )<br>
+|   |   |   |   |-- other_vhosts_access.log<br>
+|   |-- proxy-server-image ( Docker configs for the proxy server used in the QA docker environment )<br>
+|   |   |-- 000-default.conf<br>
+|   |   |-- Dockerfile<br>
+|-- directoryServer ( the code and resources that make up the Ed Exchange Directory Server )<br>
+|   |-- pom.xml<br>
+|   |-- src<br>
+|   |   |-- main<br>
+|   |   |   |-- docker ( docker configs for the directory server and the directory server's database )<br>
+|   |   |   |   |-- database<br>
+|   |   |   |   |   |-- Dockerfile<br>
+|   |   |   |   |-- Dockerfile<br>
+|   |   |   |   |-- directory-server.sh (/opt/directory-server -- used to start in normal and debug mode, stop and restart the server)<br>
+|   |   |   |   |-- redeploy.sh ( /opt/redeploy.sh -- used to redeploy the JAR and restart the server)<br>
+|   |   |   |-- java ( Java source code )<br>
+|   |-- target (compiled code and resources after "mvn package docker:build")<br>
+|-- networkServer<br>
+|   |-- pom.xml<br>
+|   |-- src<br>
+|   |   |-- main<br>
+|   |   |   |-- docker<br>
+|   |   |   |   |-- database<br>
+|   |   |   |   |   |-- Dockerfile<br>
+|   |   |   |   |-- Dockerfile<br>
+|   |   |   |   |-- network-server.sh<br>
+|   |   |   |   |-- redeploy.sh<br>
+|   |-- target (compiled code after "mvn package docker:build")<br>
+</pre>
 
 
 -----------------------------
@@ -113,7 +113,7 @@ Note: the network server utilizes Spring's dev tools.  With dev tools, whenever 
 application is automatically restarted.  In other words, if you change a class and invoke "mvn compile", your changes
 will automatically be deployed to the running server.
 
-Login Credentials: when required to login, the default login is "user" / "password"
+Login Credentials: when required to login, the default login is "admin" / "admin"
 
 ------------------------------
 DIRECTORY SERVER DEVELOPMENT
