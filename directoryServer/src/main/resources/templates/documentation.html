@@ -506,10 +506,14 @@
 
         <p>
             Another docker compose option is to invoke "setup.sh" from the project root "cdsWebserver".  This script
-            automates the build process for both the director and network servers by building the projects, creating
+            automates the build process for both the directory and network servers by building the projects, creating
             docker images and then running a the directory server and network server and their respective database images
-            with docker containers. The setup.sh script will output status of the build process and when the script
-            completes, you should see console output similar to following (IP addresses and hostnames may vary):
+            with docker containers.  Invoke the setup.sh script with the name of the dev profile:
+
+            <kdb>./setup.sh dev</kdb>
+
+            As the setup.sh script runs, it will output status of the build process. When it completes, you should
+            see console output similar to following (IP addresses and hostnames may vary):
         </p>
         <p>
             <samp>
