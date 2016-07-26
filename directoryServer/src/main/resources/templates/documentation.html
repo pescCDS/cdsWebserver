@@ -422,19 +422,20 @@
                 <div class="ed-title">Configuration</div>
                 <p>
                     The network server application is configured using the application.properties files.  There are 3 configuration profiles:
-                <ol>
-                    <li><span><b>dev</b></span>: <span>Intended for use in a development environment</span></li>
-                    <li><span><b>qa</b></span>: <span>Intended for use in a quality assurance environment</span></li>
-                    <li><span><b>prod</b></span>: <span>Intended for use in a production environment</span></li>
-                </ol>
-                <p>You can specify the configuratio profile on the command line, when invoking the application:
-                <div>
-                    <kbd>network-server.jar --spring.profiles.active=dev </kbd>
-                </div>
-                <div>Please consult the Spring documentation regarding Spring Boot configurations.
-                </div>
+                    <ol>
+                        <li><span><b>dev</b></span>: <span>Intended for use in a development environment</span></li>
+                        <li><span><b>qa</b></span>: <span>Intended for use in a quality assurance environment</span></li>
+                        <li><span><b>prod</b></span>: <span>Intended for use in a production environment</span></li>
+                    </ol>
+                    <p>You can specify the configuratio profile on the command line, when invoking the application:
+                        <div>
+                            <kbd>network-server.jar --spring.profiles.active=dev </kbd>
+                        </div>
+                        <div>Please consult the Spring documentation regarding Spring Boot configurations.
+                        </div>
+                    </p>
+                </p>
             </p>
-        </p>
         <div class="ed-title">Option 1: Docker Compose</div>
         <p>This option uses docker and docker-compose to create separate VM images for the network server application and the mysql database.
             When you've completed the steps to use this option, you should be able to use a browser open to the network server running
@@ -470,6 +471,74 @@
 
             </li>
         </ol>
+        <p>In addition, it may be desirable to run a the directory server locally, in which case there is a similar process
+        for running the directory server
+        </p>
+
+        <ol>
+            <li>
+                First, build the directory server...
+
+                <p>
+                    From the directory server project folder (cdsWebserver/directoryServer), run
+                <p>
+                    <kbd>
+                        mvn -DskipTests clean package docker:build
+                    </kbd>
+                </p>
+
+                </p>
+            </li>
+            <li>
+                Next, run the docker containers...
+                <p>
+                    From the directory server project folder (cdsWebserver/directoryServer), run
+                    <p>
+                        <kbd>
+                            docker-compose up
+                        </kbd>
+                    </p>
+
+                </p>
+
+            </li>
+        </ol>
+
+        <p>
+            Another docker compose option is to invoke "setup.sh" from the project root "cdsWebserver".  This script
+            automates the build process for both the director and network servers by building the projects, creating
+            docker images and then running a the directory server and network server and their respective database images
+            with docker containers. The setup.sh script will output status of the build process and when the script
+            completes, you should see console output similar to following (IP addresses and hostnames may vary):
+        </p>
+        <p>
+            <samp>
+
+                WARNING: The MAIL_SMTP_HOST variable is not set. Defaulting to a blank string.
+                WARNING: The MAIL_SMTP_USERNAME variable is not set. Defaulting to a blank string.
+                WARNING: The MAIL_SMTP_PASSWORD variable is not set. Defaulting to a blank string.
+                Starting network-db
+                Starting directory-db
+                Recreating directory-app
+                Recreating network-app
+                OK - network-db is running. Internal IP: 172.17.0.2, StartedAt: 2016-07-26T19:57:43.862810768Z
+                OK - network-app is running. Internal IP: 172.17.0.5, StartedAt: 2016-07-26T19:57:44.567270656Z
+                OK - directory-db is running. Internal IP: 172.17.0.3, StartedAt: 2016-07-26T19:57:43.980605401Z
+                OK - directory-app is running. Internal IP: 172.17.0.4, StartedAt: 2016-07-26T19:57:44.234935734Z
+                Ed Exchange servers can be accessed with the following URLs:
+                Network server   -- http://hostname:8081/home
+                Directory server -- http://hostname:8080/home
+            </samp>
+        </p>
+        <p>
+            Note that the WARNING output regarding the missing environment variables indicates that the automated
+            mail service within the directory service will not operate correctly unless the specified variables
+            are set to valid values.
+        </p>
+        <p>
+            The setup.sh is paired with shutdown.sh which should be used to stop the running docker containers.
+        </p>
+
 
         <div class="ed-title">Option 2: Development Script</div>
         <p>This option is intended for development.  It creates a docker image for the database, and allows the developer
