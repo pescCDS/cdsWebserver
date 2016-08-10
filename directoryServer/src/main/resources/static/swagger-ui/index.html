@@ -68,14 +68,24 @@
                 showRequestHeaders: false
             });
 
+            function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e16]+1e16).replace(/[01]/g,b)};
+
+
             function getCookie(name) {
                 function escape(s) { return s.replace(/([.*+?\^${}()|\[\]\/\\])/g, '\\$1'); };
                 var match = document.cookie.match(RegExp('(?:^|;\\s*)' + escape(name) + '=([^;]*)'));
                 return match ? match[1] : null;
             }
 
+
             var updateAuth = function() {
                 var auth = "Basic " + btoa($('#input_user')[0].value + ":" + $('#input_pass')[0].value);
+
+                var csrfCookie = getCookie("CSRF-TOKEN");
+
+                if (csrfCookie == null) {
+                    document.cookie = 'CSRF-TOKEN=' + b() + ";path=/";
+                }
 
                 window.swaggerUi.api.clientAuthorizations.add("basic_auth",new SwaggerClient.ApiKeyAuthorization("Authorization", auth, "header"));
                 window.swaggerUi.api.clientAuthorizations.add("csrf_token",new SwaggerClient.ApiKeyAuthorization("X-CSRF-TOKEN", getCookie("CSRF-TOKEN"), "header"));
