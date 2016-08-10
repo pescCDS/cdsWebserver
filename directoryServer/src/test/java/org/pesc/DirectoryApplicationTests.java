@@ -12,18 +12,18 @@ import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = DirectoryApplication.class)
@@ -103,9 +103,9 @@ public class DirectoryApplicationTests {
 		assertThat ("There should be at least 3 organizations!", organizations.size() > 2);
 
 		organizations = restTemplate.getForObject("http://localhost:" + port +  "/services/rest/v1/organizations?enabled=false&limit=5&offset=0", List.class);
-		assertThat ("There should be at 0 organizations!", organizations.isEmpty());
+		assertNotNull("Expected a list of organizations, but got null.", organizations);
 
-		organizations = restTemplate.getForObject("http://localhost:" + port +  "/services/rest/v1/organizations?enabled=true&organizationCodeType=ATP&organizationCode=4226&limit=5&offset=0", List.class);
+		organizations = restTemplate.getForObject("http://localhost:" + port +  "/services/rest/v1/organizations?enabled=true&organizationCodeType=ATP&organizationCode=004226&limit=5&offset=0", List.class);
 		assertThat ("There should be at least 1 organizations!", organizations.size() == 1);
 
 	}
@@ -139,7 +139,7 @@ public class DirectoryApplicationTests {
 	public List<DeliveryMethod> getDeliveryMethods() {
 		ParameterizedTypeReference<List<DeliveryMethod>> typeRef = new ParameterizedTypeReference<List<DeliveryMethod>>() {};
 		ResponseEntity<List<DeliveryMethod>> response = secureRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/delivery-methods", HttpMethod.GET, null, typeRef);
-		assertThat ("Delivery methods should not be null or empty.", response.getBody() != null && !response.getBody().isEmpty());
+		assertThat("Delivery methods should not be null or empty.", response.getBody() != null && !response.getBody().isEmpty());
 
 		return response.getBody();
 	}
@@ -149,13 +149,51 @@ public class DirectoryApplicationTests {
 		ResponseEntity<List<OrganizationDTO>> response = secureRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/organizations/3", HttpMethod.GET, null, typeRef);
 
 
-		assertThat ("Organization/service provider with directory ID 3 could not be found.", response.getBody() != null && !response.getBody().isEmpty() && response.getBody().size() == 1);
+		assertThat("Organization/service provider with directory ID 3 could not be found.", response.getBody() != null && !response.getBody().isEmpty() && response.getBody().size() == 1);
 
 		return response.getBody().get(0);
 	}
-	@Test
-	public void testEndpointAPI() {
 
+
+
+	@Test
+	public void testPOSTEndpointWithoutCSRFHeaders() {
+
+
+		Endpoint endpoint = buildTestEndpoint();
+
+		HttpHeaders headers = createHttpHeaders();
+
+		HttpEntity<Endpoint> request = new HttpEntity<Endpoint>(endpoint, headers);
+
+		ResponseEntity<String> response = secureRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/endpoints", HttpMethod.POST, request, String.class);
+
+        assertTrue("Expected HTTP status of 403 (Forbidden) due to missing CSRF headers.", response.getStatusCode() == HttpStatus.FORBIDDEN);
+
+
+	}
+
+
+	@Test
+	public void testPOSTEndpointWithCSRFHeaders() {
+
+
+		Endpoint endpoint = buildTestEndpoint();
+
+		HttpHeaders headers = createHttpHeaders();
+		addCSRFHeaders(headers);
+
+		HttpEntity<Endpoint> request = new HttpEntity<Endpoint>(endpoint, headers);
+
+		ResponseEntity<String> response = secureRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/endpoints", HttpMethod.POST, request, String.class);
+
+		assertTrue("Failed to POST endpoint.", response.getStatusCode() == HttpStatus.OK);
+
+	}
+
+
+
+	Endpoint buildTestEndpoint() {
 		DeliveryMethod deliveryMethod = getDeliveryMethods().get(0);
 		Department department = getDepartments().get(0);
 		DocumentFormat documentFormat = getDocumentFormats().get(0);
@@ -173,20 +211,24 @@ public class DirectoryApplicationTests {
 		endpoint.setError(false);
 		endpoint.setMode("LIVE");
 
+		return endpoint;
+	}
 
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	HttpHeaders createHttpHeaders() {
+		HttpHeaders headers = new HttpHeaders();
 
 		headers.add("Content-Type", "application/json");
 		headers.add("Accept", "application/json");
 
-		HttpEntity<Endpoint> request = new HttpEntity<Endpoint>(endpoint, headers);
-
-		Endpoint persistedEndpoint = secureRestTemplate.postForObject("http://localhost:" + port + "/services/rest/v1/endpoints", request, Endpoint.class);
-
-
-		assertThat("Endpoint was not saved correctly.", persistedEndpoint.getId() > 0);
-
+		return headers;
 	}
+
+	void addCSRFHeaders(HttpHeaders headers) {
+		final String clientSecret = "csrf-secret-token";
+		headers.set("X-CSRF-TOKEN", clientSecret);
+		headers.set("Cookie", "CSRF-TOKEN=" + clientSecret);
+	}
+
 
 
 

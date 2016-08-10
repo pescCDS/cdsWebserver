@@ -49,6 +49,7 @@ public class MessageService {
     }
     
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') OR hasRole('ROLE_ORG_ADMIN')")
     public void setDismissed(Integer messageId, Boolean dismiss) {
 
         jdbcTemplate.update(

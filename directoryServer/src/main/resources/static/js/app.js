@@ -32,7 +32,25 @@
         }]);
 
 
-    function config($routeProvider) {
+    function config($routeProvider, $httpProvider) {
+
+        //Create a random token to be used as the CSRF token.
+        function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e16]+1e16).replace(/[01]/g,b)};
+
+        $httpProvider.interceptors.push(function() {
+            return {
+                'request': function(response) {
+                    // put a new random secret into our CSRF-TOKEN Cookie before each request
+                    document.cookie = 'CSRF-TOKEN=' + b();
+                    return response;
+                }
+            };
+        });
+
+        $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-TOKEN';
+        $httpProvider.defaults.xsrfCookieName = 'CSRF-TOKEN';
+
+
         $routeProvider
             .when("/directory", {
                 templateUrl: "organizations",
@@ -2659,6 +2677,5 @@
     }
 
     var PASSWORD_REQUIREMENTS = "The password must be at least 15 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$ _!%*#?&.";
-
 
 })();

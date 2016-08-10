@@ -31,6 +31,9 @@ public class PKIService {
     @Value("${networkServer.keystore.signing_key_alias}")
     private String signingKeyAlias;
 
+    @Value("${networkServer.hash.algorithm}")
+    private String hashAlgorithm;
+
 
     public PublicKey convertPEMPublicKey(String pemPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -134,7 +137,7 @@ public class PKIService {
 
 
         try {
-            Signature sig = Signature.getInstance("SHA1withRSA");
+            Signature sig = Signature.getInstance(hashAlgorithm);
             sig.initVerify(publicKey);
 
             byte[] buffer = new byte[1024];
