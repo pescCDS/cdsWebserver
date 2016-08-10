@@ -883,6 +883,11 @@
         self.deleteContact = deleteContact;
         self.createContact = createContact;
         self.setEnabled = setEnabled;
+        self.deleteOrg = deleteOrg;
+
+        function deleteOrg() {
+            organizationService.deleteOrg(self.org);
+        }
 
         function setEnabled(enable) {
 

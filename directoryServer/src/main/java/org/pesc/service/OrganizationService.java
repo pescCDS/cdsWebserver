@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
 import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.*;
+import org.pesc.api.repository.MessageRepository;
 import org.pesc.api.repository.OrganizationRepository;
 import org.pesc.api.repository.OrganizationTypeRepository;
 import org.pesc.api.repository.SchoolCodesRepository;
@@ -75,6 +76,15 @@ public class OrganizationService {
 
     @Autowired
     private OrganizationRepository organizationRepository;
+
+    @Autowired
+    private MessageService messageService;
+
+    @Autowired
+    private ContactService contactService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private SchoolCodesService schoolCodesService;
@@ -205,6 +215,12 @@ public class OrganizationService {
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(Integer id) {
+
+        jdbcTemplate.update("DELETE FROM institutions_service_providers where institution_id = ? OR service_provider_id = ?", id, id);
+        schoolCodesService.deleteByOrgId(id);
+        this.userService.deleteByOrgId(id);
+        this.contactService.deleteByOrgId(id);
+        this.messageService.deleteByOrgId(id);
         this.organizationRepository.delete(id);
     }
 

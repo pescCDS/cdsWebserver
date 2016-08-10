@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
 import org.pesc.api.model.Message;
+import org.pesc.api.model.Organization;
 import org.pesc.api.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,6 +55,15 @@ public class MessageService {
 
         jdbcTemplate.update(
                 "update messages set dismissed=? where id = ?", dismiss, messageId);
+    }
+
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public void deleteByOrgId(Integer orgID) {
+
+        jdbcTemplate.update(
+                "delete from messages where organization_id = ?", orgID);
     }
 
 

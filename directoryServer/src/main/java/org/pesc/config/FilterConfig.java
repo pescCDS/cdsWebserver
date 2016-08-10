@@ -19,7 +19,7 @@ public class FilterConfig {
 
     @Bean
     public Filter corsFilter() {
-        return new CorsFilter("https://" + restApiHost);
+        return new CorsFilter();
     }
 
     @Bean

@@ -6,6 +6,7 @@ import org.pesc.api.StringUtils;
 import org.pesc.api.model.SchoolCode;
 import org.pesc.api.repository.SchoolCodesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,9 @@ public class SchoolCodesService {
     private static final Log log = LogFactory.getLog(SchoolCodesService.class);
 
     protected EntityManagerFactory entityManagerFactory;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     public SchoolCodesService(EntityManagerFactory entityManagerFactory) {
@@ -51,6 +55,12 @@ public class SchoolCodesService {
         this.schoolCodesRepository.delete(id);
     }
 
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public void deleteByOrgId(Integer orgID) {
+
+        jdbcTemplate.update("delete from school_codes where organization_id = ?", orgID);
+    }
 
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)

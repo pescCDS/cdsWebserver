@@ -30,6 +30,9 @@
         <div>
             <a href="#pagination">Pagination</a>
         </div>
+        <div>
+            <a href="#csrf">Cross Site Request Forgery</a>
+        </div>
 
         <div>
             <a href="#directory-server">Directory Server</a>
@@ -255,7 +258,8 @@
         <p>
             The EDExchange API uses basic authentication.
             All API requests must be made over HTTPS. Calls made over plain HTTP will fail. Some API requests require authentication,
-            and certain permissions.
+            and certain permissions.  In addition, HTTP methods that trigger side effects (e.g. POST, PUT, DELETE) require
+            custom headers that protect against <a href="#csrf">cross site request forgery</a>.
         </p>
 
         <h2 id="errors">Errors</h2>
@@ -346,6 +350,16 @@
                 </pre>
 
 
+                <pre>
+    {
+        "timestamp": 1470845258256,
+        "status": 403,
+        "error": "Forbidden",
+        "message": "Missing or non-matching CSRF-token",
+        "path": "/services/rest/v1/organizations/2/enabled"
+    }
+                </pre>
+
         <h2 id="pagination">Pagination</h2>
 
         <p>
@@ -377,6 +391,64 @@
 }
         </pre>
 
+
+        <h2 id="csrf">Cross Site Request Forgery</h2>
+
+        <p>
+            Cross-site request forgery, also known as one-click attack or session riding and abbreviated as
+            CSRF (sometimes pronounced sea-surf) or XSRF, is a type of malicious exploit of a website where
+            unauthorized commands are transmitted from a user that the website trusts.
+        </p>
+
+        <p>
+            The Directory Server utilizes a method of CSRF protection called
+            <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Double_Submit_Cookie">double submit cookie</a>
+            which requires client side generated CSRF tokens.
+
+            With this technique, clients must generate and send the same unique secret value in both a cookie and a custom HTTP header.
+            Because a website is only allowed to read/write a cookie for its own domain, only the real site can send the same value in both headers.
+        </p>
+        <p>
+            For applications that are consuming the REST API directly with technology such as Spring's RestTemplate, the developer must generate a
+            secret, for example "4a0e4a27220ceca2cfdaa7a338087a07e5" and include it in both the custom HTTP header <var>X-CSRF-TOKEN</var> and
+            the <var>Cookie</var> header.  Example HTTP response headers are shown below (note the <var>X-CSRF-TOKEN</var> header and the <var>Cookie</var>
+            headers).
+
+            <p>
+
+                <pre>
+    Accept:application/json
+    Accept-Encoding:gzip, deflate, sdch, br
+    Accept-Language:en-US,en;q=0.8
+    Authorization:Basic YWRtaW46YWRtaW4=
+    Connection:keep-alive
+    Content-Length:4
+    Content-Type:application/json
+    Cookie:CSRF-TOKEN=4a0e4a27220ceca2cfdaa7a338087a07e5; JSESSIONID=5226801215CA5DB09FD1A25739232574
+    Host:localhost:8443
+    Origin:https://localhost:8443
+    Referer:https://localhost:8443/swagger-ui/index.html
+    User-Agent:Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36
+    X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
+                </pre>
+            </p>
+            <p>
+                HTTP requests that do not pass CSRF checks will fail and the server will return a 403 status code such as
+                following:
+                <pre>
+    {
+        "timestamp": 1470845258256,
+        "status": 403,
+        "error": "Forbidden",
+        "message": "Missing or non-matching CSRF-token",
+        "path": "/services/rest/v1/organizations/2/enabled"
+    }
+                </pre>
+            </p>
+        </p>
+        <p>
+            Code examples in Java are provided as part of the directory server unit tests using Spring's RestTemplate.
+        </p>
 
         <h2 id="directory-server">Directory Server</h2>
 

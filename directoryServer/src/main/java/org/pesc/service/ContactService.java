@@ -6,6 +6,7 @@ import org.pesc.api.model.Contact;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.repository.ContactsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,6 +34,9 @@ public class ContactService {
     protected EntityManagerFactory entityManagerFactory;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
     private ContactsRepository contactsRepository;
 
     @Autowired
@@ -51,6 +55,15 @@ public class ContactService {
     @PreAuthorize("hasRole('ROLE_ORG_ADMIN') OR hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(Integer id)  {
         this.contactsRepository.delete(id);
+    }
+
+
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public void deleteByOrgId(Integer orgID) {
+
+        jdbcTemplate.update(
+                "delete from contact where organization_id = ?", orgID);
     }
 
 

@@ -74,6 +74,16 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public void deleteByOrgId(Integer orgID) {
+
+        jdbcTemplate.update("delete from users_roles where users_id in (select id from users where organization_id = ?)", orgID);
+
+        jdbcTemplate.update("delete from users where organization_id = ?", orgID);
+    }
+
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("(#userID == principal.id AND hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public void updatePassword(Integer userID, String password) throws IllegalArgumentException {
@@ -100,6 +110,7 @@ public class UserService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public void delete(DirectoryUser user)  {
+
         this.userRepository.delete(user);
     }
 
