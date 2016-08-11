@@ -438,7 +438,7 @@
                 <div ng-repeat="obj in settingsCtrl.documentTypes | orderBy:'name'">
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <form name="departmentForm" ng-submit="departmentForm.$valid && settingsCtrl.save('departments', obj)" novalidate="novalidate" class="glow">
+                            <form name="departmentForm" ng-submit="departmentForm.$valid && settingsCtrl.save('document-types', obj)" novalidate="novalidate" class="glow">
                                 <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
                                     <button type="button" class="btn btn-default"
                                             ng-click="settingsCtrl.deleteObject('document-types', obj)">
