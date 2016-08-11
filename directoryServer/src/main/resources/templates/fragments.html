@@ -340,41 +340,181 @@
     <div>
         <uib-tabset active="active">
             <uib-tab index="0" heading="Delivery Methods" select="settingsCtrl.getDeliveryMethods()">
-                <div ng-repeat="deliveryMethod in settingsCtrl.deliveryMethods | orderBy:'name'">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('delivery-methods')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+
+                </div>
+
+                <div ng-repeat="obj in settingsCtrl.deliveryMethods | orderBy:'name'">
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <h3>{{deliveryMethod.name}}</h3>
-                            <p>{{deliveryMethod.description}}</p>
+                            <form name="deliveryMethodForm" ng-submit="deliveryMethodForm.$valid && settingsCtrl.save('delivery-methods', obj)" novalidate="novalidate" class="glow">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('delivery-methods', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default" ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"  ng-class="{ 'error' : obj.name == '' }" /></h3>
+                                    <textarea   ng-maxlength="1023" style="width: 80%; padding: 10px;"  ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+                                    <p>{{obj.description}}</p>
+                                </div>
+
+                            </form>
                         </li>
                     </ul>
                 </div>
             </uib-tab>
             <uib-tab index="$index + 1" heading="Document Formats" select="settingsCtrl.getDocumentFormats()">
-                <div ng-repeat="documentFormat in settingsCtrl.documentFormats | orderBy:'name'">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('document-formats')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+
+                </div>
+
+                <div ng-repeat="obj in settingsCtrl.documentFormats | orderBy:'name'">
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <h3>{{documentFormat.name}}</h3>
-                            <p>{{documentFormat.description}}</p>
+                            <form name="documentFormatForm" ng-submit="documentFormatForm.$valid && settingsCtrl.save('document-formats', obj)" novalidate="novalidate" class="glow">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('document-formats', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default" ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"  ng-class="{ 'error' : obj.name == '' }" /></h3>
+                                    <textarea   ng-maxlength="1023" style="width: 80%; padding: 10px;"  ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+                                    <p>{{obj.description}}</p>
+                                </div>
+                            </form>
+
+
                         </li>
                     </ul>
                 </div>
             </uib-tab>
             <uib-tab index="$index + 2" heading="Document Types" select="settingsCtrl.getDocumentTypes()">
-                <div ng-repeat="documentType in settingsCtrl.documentTypes | orderBy:'name'">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('document-types')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+                    <button type="button" class="btn btn-default"
+                            ng-click="settingsCtrl.save('document-types', obj)">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+
+                </div>
+
+
+                <div ng-repeat="obj in settingsCtrl.documentTypes | orderBy:'name'">
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <h3>{{documentType.name}}</h3>
-                            <p>{{documentType.description}}</p>
+                            <form name="departmentForm" ng-submit="departmentForm.$valid && settingsCtrl.save('departments', obj)" novalidate="novalidate" class="glow">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('document-types', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default" ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"  ng-class="{ 'error' : obj.name == '' }" /></h3>
+                                    <textarea   ng-maxlength="1023" style="width: 80%; padding: 10px;"  ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+                                    <p>{{obj.description}}</p>
+                                </div>
+                            </form>
+
+
+
                         </li>
                     </ul>
                 </div>
             </uib-tab>
             <uib-tab index="$index + 3" heading="Departments" select="settingsCtrl.getDepartments()">
-                <div ng-repeat="department in settingsCtrl.departments | orderBy:'name'">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('departments')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+
+                </div>
+
+                <div ng-repeat="obj in settingsCtrl.departments | orderBy:'name'">
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <h3>{{department.name}}</h3>
-                            <p>{{department.description}}</p>
+                            <form name="departmentForm" ng-submit="departmentForm.$valid && settingsCtrl.save('departments', obj)" novalidate="novalidate" class="glow">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('departments', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default" ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"  ng-class="{ 'error' : obj.name == '' }" /></h3>
+                                    <textarea   ng-maxlength="1023" style="width: 80%; padding: 10px;"  ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+                                    <p>{{obj.description}}</p>
+                                </div>
+
+                            </form>
+
                         </li>
                     </ul>
                 </div>
@@ -582,7 +722,7 @@
                     </h4>
                     <p class="help-block">multipart/form-data</p>
                     <p>
-                        <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10" ng-maxlength="1023" ng-model="endpoint.instructions"> </textarea>
+                        <textarea class="form-control" type="text" placeholder="Description" required="required" ng-minlength="10"   ng-maxlength="1023" style="width: 80%; padding: 10px;"  ng-model="endpoint.instructions"> </textarea>
                     </p>
                     <div>
                         <strong>Document Format</strong>
