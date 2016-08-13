@@ -568,8 +568,8 @@
     }
 
 
-    UsersController.$inject = ['organizationService', '$window', 'userService', 'users'];
-    function UsersController(organizationService, $window, userService, users) {
+    UsersController.$inject = ['organizationService', '$window', 'userService', 'users', 'toasterService'];
+    function UsersController(organizationService, $window, userService, users, toasterService) {
         var self = this;
         self.users = users;
         self.roles = $window.roles;
@@ -585,6 +585,20 @@
         self.updateRole = updateRole;
         self.removeFromModel = removeFromModel;
         self.org = organizationService.getActiveOrg();
+        self.isRoleDisabled = isRoleDisabled;
+
+        function isRoleDisabled(role) {
+
+            if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                return false;
+            }
+            else {
+                //Disable roles for anything but "ROLE_ORG_ADMIN"
+                if (role.id != 2) {
+                    return true;
+                }
+            }
+        }
 
         function create() {
 
@@ -650,18 +664,21 @@
                 //update
 
                 userService.updateUser(user).then(function (data) {
-                    console.log("Successfully update user.");
+                    toasterService.info("Successfully updated user.");
+                },function(data) {
+                    user.editing = true;
+                    toasterService.ajaxInfo(data);
                 });
 
             }
             else {
                 //create
                 userService.createUser(user).then(function (data) {
-                    console.log("Successfully created user with id " + data.id);
+                    toasterService.info("Successfully created user with id " + data.id);
                 }).catch(function (e) {
                     self.edit(user);
                 });
-                ;
+
 
             }
         };
@@ -714,6 +731,20 @@
         self.confirmPassword = '';
         self.showPasswordForm = false;
         self.updatePassword = updatePassword;
+        self.isRoleDisabled = isRoleDisabled;
+
+        function isRoleDisabled(role) {
+
+            if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                return false;
+            }
+            else {
+                //Disable roles for anything but "ROLE_ORG_ADMIN"
+                if (role.id != 2) {
+                    return true;
+                }
+            }
+        }
 
         function edit() {
             self.user['editing'] = true;
@@ -727,7 +758,10 @@
             delete self.user.editing;
 
             userService.updateUser(self.user).then(function (data) {
-                console.log("Successfully updated user.");
+                toasterService.info("Successfully updated user.");
+            }, function(data) {
+                self.user.editing = true;
+                toasterService.ajaxInfo(data);
             });
         }
 
@@ -2513,8 +2547,6 @@
             var deferred = $q.defer();
 
             $http.delete('/services/rest/v1/users/' + user.id).success(function (data) {
-
-                removeUser(user);
 
                 deferred.resolve(user);
             }).error(function (data) {

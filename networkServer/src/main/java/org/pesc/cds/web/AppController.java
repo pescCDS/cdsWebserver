@@ -117,6 +117,8 @@ public class AppController {
             HttpServletResponse response) {
         try {
 
+            //TODO for security: create randomize the transaction ID with a lookup table.
+
             Transaction transaction = transactionService.findById(tranID);
 
             if (transaction == null) {
