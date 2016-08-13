@@ -11,46 +11,8 @@
 
 <div class="container">
     <div class="col-sm-3">
-        <div class="ed-title">EDExchange Documentation</div>
-        <div>
-            <a href="#whatIsEdEx">What is EDExchanage?</a>
-        </div>
-        <div>
-            <a href="#howItWorks">How Does EDExchange Work?</a>
-        </div>
-        <div>
-            <a href="#dirSer">The Directory Server</a>
-        </div>
-        <div>
-            <a href="#netSer">The Network Server</a>
-        </div>
-        <div>
-            <a href="#rolesInEdEx">Roles in EDExchange</a>
-        </div>
-        <div>
-            <a href="#endUserAdmin">EDExchange End User Administrator Documentation</a>
-        </div>
-        <div>
-            <a href="#regInEdEx">Step 1: Register in EDExchange</a>
-        </div>
-        <div>
-            <a href="#configInEdEx">Step 2: Configure Your Organization in EDExchange</a>
-        </div>
-        <div>
-            <a href="#sysAdminDoc">EDExchange System Administrator Documentation</a>
-        </div>
-        <div>
-            <a href="#devDoc">EDExchange Developer Documentation</a>
-        </div>
-
-
-
-
-
-
-
-
-        
+        <div class="ed-title">API Reference</div>
+        <div><a href="#introduction">Introduction</a></div>
         <div>
             <a href="swagger-ui/index.html">Interactive API documentation</a>
         </div>
@@ -187,7 +149,7 @@
             <a href="#transcript-request">Request a Transcript</a>
         </div>
         <div>
-            <a href="#certificate">Publish an SSL Certificate</a>
+            <a href="#certificate">Publish a SSL Certificate</a>
         </div>
         <div>
             <a href="#send-document">Send a Document</a>
@@ -237,83 +199,6 @@
 
     </div>
     <div class="col-sm-9">
-        <h2 id="whatIsEdEx">What is EDExchange?</h2>
-        <p>EDExchange is a web app that provides a secure network for exchanging documents between US educational organizations. EDExchange is open source, provides web services (SOAP and REST), and allows for customization. By becoming an EDExchange member you can send and receive documents at no cost in a secure and reliable way.</p>
-
-        <h2 id="howItWorks">How Does EDExchange Work?</h2>
-        <p>Behind the scenes, EDExchange is comprised of two servers:</p>
-        <ul><li>A Directory Server</li><li>A Network Server</li></ul>
-        <p>Why do you care about these two servers? Because your interactions with them will be determined by these questions:</p>
-        <ul><li>Do you want to only Send documents?</li><li>Do you want to both Send and Receive documents?</li><li>Do you want to not choose either of these options and just be an EDExchange Member who contracts with Service Providers in the network to send and receive documents on their behalf.</li></ul>
-        <p>If you choose to only send documents, you will register with EDExchange in the Directory Server web application as an "Institution" and you will use a Service Provider to receive documents on your behalf (most-likely a fee-based arrangement). If you choose to both send and receive documents, you will register as both an "Institution" AND as a "Service Provider" and you will also set up your own Network server for receiving documents. If you choose to register but not send or receive documents yourself, you will register as an Institution.</p>
-
-        <h3 id="dirSer">The Directory Server</h3>
-        <p>The Directory server is hosted and maintained by the PESC organization. It includes a directory of EDExchange members and all their related information. As an EDExchange member you can manage your organization through the Directory server web application UI. You can also manage operations using the hosted API that exposes directory information. The REST API allows you to manage users, endpoints, contacts, the signing certificate tasks as you would via the Directory server web app.</p>
-        <p>After registering with EDExchange, the next tasks include configuration, setting up your Network Servers (if you elect to receive documents), making any customizations, and testing. Information to do all of this follows in the sections below.</p>
-        <h3 id="netSer">The Network Server</h3>
-        <p>The EDExchange Network Server is a server that hosts endpoints (a URL that can that receives documents). A Network Server must exist for each EDExchange member that is configured to be receive documents.</p>
-        <p>A reference implementation of a Network Server can be used as a starting point for developing an EDExchange Network Server. The source code for the reference implementation of the Network Server can be found on <a href="https://github.com/owenwe/cdsWebserver.git">GitHub</a>.</p>
-        <p>If you choose to use the reference implementation of the Network Server, there are certain tasks that need to be performed to make the reference implementation live for the member, which are explained in detail in the Developer section below. When administration and the optional Network Server are complete, then EDExchange users at your organization can begin using it to exchange documents.</p>
-
-        <h3 id="rolesInEdEx">Roles in EDExchange</h3>
-        <ul>
-            <li>An end-user administrator configures and maintains your organization's EDExchange account (end users, serviceable institutions, etc.)</li>
-            <li>If you elect to receive documents and set up a Network Server:
-                <ul><li>A System Administrator sets up and configures the Network Server</li>
-                    <li>A developer at your organization will implement and perhaps customize the Network Server to handle any administration tasks via the SOAP or REST API.</li>
-                </ul>
-            </li>
-        </ul>
-
-        <h2 id="endUserAdmin">EDExchange End User Administrator Documentation</h2>
-        <p>An EDExchange Administrator is the person at your organization who initially registers for EDExchange and uses the web application's user interface (UI) to configure things like: your organization contact information (web site, address, etc.), contacts, school codes, Service Providers, additional EDExchange users, and, if you elect to receive documents, serviced schools. Your initial first steps with EDExchange start with registration and PESC review. After registration, you will configure your organization in EDExchange. You may want to coordinate with a developer at your institution to set up a signing certificate and/or a Network Server and certificate before setting up users.</p>
-        <p>Note that many of the UI tasks can also be accomplished by a developer using the EDExchange API. Any customizations and/or some of the Admin steps outlined here may be handed off to a developer at your organization or you may share some of these steps with the developer. It is noted throughout the steps below where a developer can use the Ed Exchange REST API to do the same task. A REST API is an application programming interface architecture that allows you to perform configuration and other actions programmatically instead of using the EDExchange UI.</p>
-
-        <h3 id="regInEdEx">Step 1: Register in EDExchange</h3>
-        <p>There are several ways for an organization to be added to the EDExchange network. New applicants can register by:</p>
-        <ul>
-            <li>filling out the registration form in EDExchange web application</li>
-            <li>being created by a Service Provider for the purpose of adding the institution to the provider's group of serviceable institutions</li>
-            <li>having their registration created directly by a PESC administrator</li>
-        </ul>
-        <p><b>NOTE:</b> Organizations that are registered in the first two ways must also be reviewed and approved by a PESC administrator. All new organizations' records are disabled upon registration in EDExchange. Once a PESC administrator approves an organization, it becomes enabled in the EDExchange directory.</p>
-        <p></p>
-        <p><b>Completing the Registration Form</b></p>
-        <ol>
-            <li>In your web browser, go to http://ec2-52-26-231-231.us-west-2.compute.amazonaws.com:8080/home#/home. FIXME: replace this w/the real URL.</li>
-            <li>Click Sign Up (in the upper right corner) to display the Sign Up screen.</li>
-            <li>Fill in all the required fields and be sure to select the Institution and/or Service Provider check box(es).
-                <p><b>NOTE: </b>If you don't enter values in any required fields they display in red when you click Submit. If this happens, enter values in the required fields and click Submit again.</p>
-                <p>Use the following information to help you select Institution or Service Provider:</p>
-                <p><b>Institution: </b>If you only select the Institution check box, and do not select the Service Provider check box, then you will have the ability to send documents but not receive them. You will not need to set up and hose a Network Server as you will receive documents by contracting with a Service Provider who will receive them on your behalf. The benefit to this arrangement is you don't have to stand up and maintain a Network Server. The cost to you is whatever the Service Provider charges for providing the service of receiving documents on your behalf.</p>
-                <p><b>Service Provider: </b>If you select Service Provider, you will also select Institution. This allows you to both send and receive documents. Your organization is considered both an "Institution" (can send) and a "Service Provider" (can receive documents) in EDExchange.</p>
-            </li>
-            <li>Click Submit. A "Success" message displays saying that you'll be sent an email once your organization becomes activated (by PESC). You can log in and configure your organization to send and receive documents in the meantime (but cannot actually send and receive anything yet).</li>
-        </ol>
-
-        <h3 id="configInEdEx">Step 2: Configure Your Organization in EDExchange</h3>
-
-        <p><i>DAB: more to come here</i></p>
-        
-        <h2 id="sysAdminDoc">EDExchange System Administrator Documentation</h2>
-
-        <p><i>DAB: more to come here</i></p>
-        
-        <h2 id="devDoc">EDExchange Developer Documentation</h2>
-        
-        <p><i>DAB: more to come here</i></p>        
-
-        <p>----------------------------------------------------------------------</p>
-
-
-
-
-
-
-
-
-
-
 
         <h2 id="introduction">Introduction</h2>
 
