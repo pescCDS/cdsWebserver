@@ -165,7 +165,7 @@ public class OrganizationService {
         for (SchoolCode schoolCode : schoolCodes) {
 
             schoolCode.setOrganizationId(savedOrg.getId());
-            organization.getSchoolCodes().add(schoolCodesService.create(schoolCode));
+            organization.getSchoolCodes().add(schoolCodesService.nonSecuredCreate(schoolCode));
         }
 
         return savedOrg;
