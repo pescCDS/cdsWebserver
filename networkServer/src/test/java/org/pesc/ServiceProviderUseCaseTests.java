@@ -2,23 +2,16 @@ package org.pesc;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pesc.cds.service.PKIService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -37,27 +30,13 @@ public class ServiceProviderUseCaseTests {
     final String USERNAME = "sallen";
     final String PASSWORD = "admin";
 
-    //Test RestTemplate to invoke the APIs.
-    private RestTemplate restTemplate = new RestTemplate();
-
     private RestTemplate secureRestTemplate = new TestRestTemplate(USERNAME, PASSWORD);
-
-    private HttpEntity<String> headersEntity;
 
     private String getBaseDirectoryServerURL() {
         return directoryServer;
     }
 
 
-    @Before
-    public void initialize() {
-        //Make sure that the REST API returns JSON
-        //This will be used in all API tests.
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-        headersEntity = new HttpEntity<String>("parameters", headers);
-    }
     @ClassRule
     public static DockerContainerRule dockerContainerRule = new DockerContainerRule("cdswebserver_networkserver_db_image");
 
@@ -94,9 +73,9 @@ public class ServiceProviderUseCaseTests {
         institution.put("schoolCodes", schoolCodes);
 
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+        HttpHeaders headers = Utils.createHttpHeaders();
+        Utils.addCSRFHeaders(headers);
 
-        headers.add("Content-Type", "application/json");
 
         HttpEntity<String> request = new HttpEntity<String>(institution.toString(), headers);
 
@@ -106,9 +85,6 @@ public class ServiceProviderUseCaseTests {
         assertTrue("Institution creation returned status code " + response.getStatusCode().getReasonPhrase(), response.getStatusCode() == HttpStatus.OK);
 
         JSONObject createdInstitution = new JSONObject(response.getBody());
-
-        HttpHeaders responseHeaders = response.getHeaders();
-
 
         System.out.print(createdInstitution.toString(3));
 

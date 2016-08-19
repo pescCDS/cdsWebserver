@@ -35,27 +35,11 @@ public class InstitutionUseCaseTests {
 
     private int directoryID = 2; //The directory ID for Butte College
 
-    //Test RestTemplate to invoke the APIs.
-    private RestTemplate restTemplate = new RestTemplate();
-
     private RestTemplate secureRestTemplate = new TestRestTemplate(USERNAME, PASSWORD);
 
 
     private String getBaseDirectoryServerURL() {
         return  directoryServer;
-    }
-
-    private HttpEntity<String> headersEntity;
-
-
-    @Before
-    public void initialize() {
-        //Make sure that the REST API returns JSON
-        //This will be used in all API tests.
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-        headersEntity = new HttpEntity<String>("parameters", headers);
     }
 
 
@@ -65,7 +49,7 @@ public class InstitutionUseCaseTests {
     @Test
     public void updateOrganization() {
 
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(getBaseDirectoryServerURL() + "/services/rest/v1/organizations/" + directoryID, String.class) ;
+        ResponseEntity<String> responseEntity = secureRestTemplate.getForEntity(getBaseDirectoryServerURL() + "/services/rest/v1/organizations/" + directoryID, String.class) ;
 
         assertTrue("Failed to get institution, directory id " + directoryID, responseEntity.getStatusCode() == HttpStatus.OK);
 
@@ -80,9 +64,8 @@ public class InstitutionUseCaseTests {
         //update the institution data.
         institution.put("shortDescription", "Butte College is a community college in the Butte-Glenn Community College District which is located in northern California between the towns of Chico, Oroville, and Paradise, about 80 miles north of the state capital.");
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
-        headers.add("Content-Type", "application/json");
+        HttpHeaders headers = Utils.createHttpHeaders();
+        Utils.addCSRFHeaders(headers);
 
 
         responseEntity = secureRestTemplate.exchange(getBaseDirectoryServerURL() + "/services/rest/v1/organizations/" + directoryID, HttpMethod.PUT,
