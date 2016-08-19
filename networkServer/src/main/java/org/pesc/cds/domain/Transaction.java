@@ -37,6 +37,9 @@ public class Transaction {
 	@Column(name="file_path")
 	private String filePath;
 
+	@Column(name="request_file_path")
+	private String requestFilePath;
+
 	@Column(name="ack_url")
 	private String ackURL;
 	
@@ -126,6 +129,14 @@ public class Transaction {
 
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
+	}
+
+	public String getRequestFilePath() {
+		return requestFilePath;
+	}
+
+	public void setRequestFilePath(String requestFilePath) {
+		this.requestFilePath = requestFilePath;
 	}
 
 	public String getOperation() {
