@@ -125,7 +125,7 @@ public class DocumentController {
     @Resource(name="transcriptRequestMarshaller")
     private Marshaller transcriptRequestMarshaller;
 
-    @Resource(name="DocumentInfoMarshaller")
+    @Resource(name="documentInfoMarshaller")
     private Marshaller DocumentInfoMarshaller;
 
     @Autowired
@@ -352,15 +352,15 @@ public class DocumentController {
             @RequestParam(value="source_school_code_type", required=false) String sourceSchoolCodeType,
             @RequestParam(value="destination_school_code", required=true) String destinationSchoolCode,
             @RequestParam(value="destination_school_code_type", required=true) String destinationSchoolCodeType,
-            @RequestParam(value="student_release", required=false) Boolean trStudentRelease,//required=true
-            @RequestParam(value="student_released_method", required=false) String trStudentReleasedMethod,//required=true
-            @RequestParam(value="student_birth_date", required=false) String studentBirthDate,//required=true
-            @RequestParam(value="student_first_name", required=false) String trStudentFirstName,//required=true
-            @RequestParam(value="student_middle_name", required=false) String trStudentMiddleName,//required=false
-            @RequestParam(value="student_last_name", required=false) String trStudentLastName,//required=true
-            @RequestParam(value="student_email", required=false) String trStudentEmail,//required=false
-            @RequestParam(value="student_partial_ssn", required=false) String trStudentPartialSsn,//required=false
-            @RequestParam(value="student_currently_enrolled", required=false) Boolean trStudentCurrentlyEnrolled//required=false
+            @RequestParam(value="student_release", required=false) Boolean trStudentRelease,
+            @RequestParam(value="student_released_method", required=false) String trStudentReleasedMethod,
+            @RequestParam(value="student_birth_date", required=false) String studentBirthDate,
+            @RequestParam(value="student_first_name", required=false) String trStudentFirstName,
+            @RequestParam(value="student_middle_name", required=false) String trStudentMiddleName,
+            @RequestParam(value="student_last_name", required=false) String trStudentLastName,
+            @RequestParam(value="student_email", required=false) String trStudentEmail,
+            @RequestParam(value="student_partial_ssn", required=false) String trStudentPartialSsn,
+            @RequestParam(value="student_currently_enrolled", required=false) Boolean trStudentCurrentlyEnrolled
     ) {
 
         Transaction tx = new Transaction();

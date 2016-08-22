@@ -408,10 +408,10 @@ public class TranscriptRequestBuilder {
             log.error(validationResponse.toString());
             throw new IllegalStateException(validationResponse.toString());
         } else if(validationResponse.getErrors().size()>0){
-            SyntaxErrorType warnning = functionalAcknowledgmentObjectFactory.createSyntaxErrorType();
-            warnning.setErrorMessage("Recommended content missing for documentId: "+documentID);
-            warnning.setSeverityCode(SeverityCodeType.WARNING);
-            validationResponse.addErrorToTop(warnning);//put on top
+            SyntaxErrorType warning = functionalAcknowledgmentObjectFactory.createSyntaxErrorType();
+            warning.setErrorMessage("Recommended content missing for documentId: "+documentID);
+            warning.setSeverityCode(SeverityCodeType.WARNING);
+            validationResponse.addErrorToTop(warning);//put on top
             log.warn(validationResponse.toString());
         }
         return transcriptRequest;

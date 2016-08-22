@@ -52,12 +52,11 @@ public class OrganizationService {
         if(destinationSchoolCode!=null && destinationSchoolCodeType!=null){
             uri.append("?organizationCodeType=").append(destinationSchoolCodeType).append("&organizationCode=").append(destinationSchoolCode);
         }
-        CloseableHttpClient client = HttpClients.custom().build();
-        try {
+        try(CloseableHttpClient client = HttpClients.custom().build()) {
             HttpGet get = new HttpGet(uri.toString());
             get.setHeader(HttpHeaders.ACCEPT, "application/json");
-            CloseableHttpResponse response = client.execute(get);
-            try {
+
+            try(CloseableHttpResponse response = client.execute(get)) {
 
                 HttpEntity resEntity = response.getEntity();
                 if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
@@ -68,19 +67,10 @@ public class OrganizationService {
                 }
                 EntityUtils.consume(resEntity);
             }
-            finally {
-                response.close();
-            }
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            log.error(e);
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                client.close();
-            }
-            catch (IOException e) {
-            }
+            log.error(e);
         }
         return organization;
     }

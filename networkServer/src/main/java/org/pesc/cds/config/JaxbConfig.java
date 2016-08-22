@@ -19,7 +19,7 @@ public class JaxbConfig {
         return transcriptRequestMarshaller;
     }
 
-    @Bean(name="DocumentInfoMarshaller")
+    @Bean(name="documentInfoMarshaller")
     public Jaxb2Marshaller DocumentInfoMarshaller(){
         Jaxb2Marshaller DocumentInfoMarshaller = new Jaxb2Marshaller();
         DocumentInfoMarshaller.setContextPath("org.pesc.sdk.message.documentinfo.v1_0.impl");
