@@ -36,6 +36,10 @@ public class HomeControllerTests {
 
 
     @Value("${local.server.port}")
+    private int sslPort;
+
+
+    @Value("${http.port}")
     private int port;
 
     @Test

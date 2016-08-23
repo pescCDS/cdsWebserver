@@ -1,6 +1,7 @@
 package org.pesc;
 
-import org.junit.Before;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,17 +14,14 @@ import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = DirectoryApplication.class)
@@ -38,32 +36,111 @@ public class DirectoryApplicationTests {
 
 	//Test RestTemplate to invoke the APIs.
 	private RestTemplate restTemplate = new RestTemplate();
+	private RestTemplate secureRestTemplate = new TestRestTemplate(USERNAME, PASSWORD);
+	private RestTemplate butteCollegeRestTemplate = new TestRestTemplate("jwhetstone", "admin");
+	private RestTemplate superUserRestTemplate = new TestRestTemplate("admin", "admin");
 
-	private RestTemplate secureRestTemplate = new TestRestTemplate(USERNAME, PASSWORD); //new TestRestTemplate(USERNAME, PASSWORD);
-
-	private HttpEntity<String> headersEntity;
+	private String getBaseDirectoryServerURL() {
+		return  "http://localhost:" + port;
+	}
+	private int directoryID = 2; //The directory ID for Butte College
 
 	@ClassRule
 	public static DockerContainerRule dockerContainerRule = new DockerContainerRule("cdswebserver_directoryserver_db_image");
 
-	@Test
-	public void contextLoads() {
-	}
-
-
-	@Before
-	public void initialize() {
-		//Make sure that the REST API returns JSON
-		//This will be used in all API tests.
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-		headersEntity = new HttpEntity<String>("parameters", headers);
-	}
-
 
 	@Test
-	public void testCSVOrganizationConversion() {
+	public void updateOrganization() {
+
+		HttpEntity<String> entity = new HttpEntity<String>("parameters", Utils.createHttpHeaders());
+
+		ResponseEntity<String> responseEntity = butteCollegeRestTemplate.exchange(getBaseDirectoryServerURL() + "/services/rest/v1/organizations/" + directoryID, HttpMethod.GET, entity, String.class) ;
+
+		assertTrue("Failed to get institution, directory id " + directoryID + " ERROR: " + responseEntity.getBody(), responseEntity.getStatusCode() == HttpStatus.OK);
+
+		JSONArray institutions = new JSONArray(responseEntity.getBody());
+
+		assertTrue("There should be only one institution with a directory id of " + directoryID, institutions.length() == 1);
+
+		JSONObject institution = institutions.getJSONObject(0);
+
+		System.out.println(institution.toString(3));
+
+		//update the institution data.
+		institution.put("shortDescription", "Butte College is a community college in the Butte-Glenn Community College District which is located in northern California between the towns of Chico, Oroville, and Paradise, about 80 miles north of the state capital.");
+
+		HttpHeaders headers = Utils.createHttpHeaders();
+		Utils.addCSRFHeaders(headers);
+
+
+		responseEntity = butteCollegeRestTemplate.exchange(getBaseDirectoryServerURL() + "/services/rest/v1/organizations/" + directoryID, HttpMethod.PUT,
+				new HttpEntity<String>(institution.toString(), headers), String.class);
+
+		assertTrue("Institution update returned status code " + responseEntity.getStatusCode().getReasonPhrase(), responseEntity.getStatusCode() == HttpStatus.OK);
+
+
+	}
+
+	/**
+	 * Use case; service provider can create an instition and then add the institution to the provider's group
+	 * of serviceable institutions.
+	 */
+	@Test
+	public void createInstitutionAndLinkToServiceProvider() {
+		JSONObject institution = new JSONObject();
+		institution.put("name", "Sacramento City College");
+		institution.put("website", "http://www.scc.losrios.edu/");
+		institution.put("city", "Sacramento");
+		institution.put("state", "CA");
+		institution.put("zip", "95822");
+		institution.put("street", "3835 Freeport Blvd");
+		institution.put("telephone", "(916) 558-2351");
+
+		JSONObject organizationType = new JSONObject();
+		organizationType.put("id", 2);
+		organizationType.put("name", "Institution");
+
+		JSONArray organizationTypes = new JSONArray();
+		organizationTypes.put(organizationType);
+
+		institution.put("organizationTypes", organizationTypes);
+
+		JSONObject schoolCode = new JSONObject();
+		schoolCode.put("code", "765432");
+		schoolCode.put("codeType", "ATP");
+		JSONArray schoolCodes = new JSONArray();
+		schoolCodes.put(schoolCode);
+
+		institution.put("schoolCodes", schoolCodes);
+
+
+		HttpHeaders headers = Utils.createHttpHeaders();
+		Utils.addCSRFHeaders(headers);
+
+
+		HttpEntity<String> request = new HttpEntity<String>(institution.toString(), headers);
+
+
+		ResponseEntity<String> response = secureRestTemplate.exchange(getBaseDirectoryServerURL() + "/services/rest/v1/institutions", HttpMethod.POST, request, String.class);
+
+		assertTrue("Institution creation returned status code " + response.getStatusCode().getReasonPhrase(), response.getStatusCode() == HttpStatus.OK);
+
+		JSONObject createdInstitution = new JSONObject(response.getBody());
+
+		System.out.print(createdInstitution.toString(3));
+
+		assertThat("Institution was not saved correctly.", createdInstitution.getInt("id") > 0);
+
+
+		//Now add the new institution to the provider's group of serviceable institutions...
+
+		JSONObject relation = new JSONObject();
+		relation.put("institutionID", createdInstitution.getInt("id"));
+		relation.put("serviceProviderID", 3);
+
+		response = secureRestTemplate.exchange(getBaseDirectoryServerURL() + "/services/rest/v1/institutions/relation", HttpMethod.POST, new HttpEntity<String>(relation.toString(), headers), String.class);
+
+		assertTrue("Institution relation with service provided failed." + response.getStatusCode().getReasonPhrase(), response.getStatusCode() == HttpStatus.OK);
 
 
 	}
@@ -162,7 +239,7 @@ public class DirectoryApplicationTests {
 
 		Endpoint endpoint = buildTestEndpoint();
 
-		HttpHeaders headers = createHttpHeaders();
+		HttpHeaders headers = Utils.createHttpHeaders();
 
 		HttpEntity<Endpoint> request = new HttpEntity<Endpoint>(endpoint, headers);
 
@@ -180,14 +257,27 @@ public class DirectoryApplicationTests {
 
 		Endpoint endpoint = buildTestEndpoint();
 
-		HttpHeaders headers = createHttpHeaders();
-		addCSRFHeaders(headers);
+		HttpHeaders headers = Utils.createHttpHeaders();
+		Utils.addCSRFHeaders(headers);
 
-		HttpEntity<Endpoint> request = new HttpEntity<Endpoint>(endpoint, headers);
+		String pemText = Utils.convertStreamToString(getClass().getResourceAsStream("/localhost-certificate.pem"));
 
-		ResponseEntity<String> response = secureRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/endpoints", HttpMethod.POST, request, String.class);
+		ResponseEntity<String> response = secureRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/organizations/3/network-certificate",
+				HttpMethod.PUT,
+				new HttpEntity<String>(pemText, headers),
+				String.class);
+		assertTrue("Failed to update network server certificate.", response.getStatusCode() == HttpStatus.OK);
 
-		assertTrue("Failed to POST endpoint.", response.getStatusCode() == HttpStatus.OK);
+
+		response = superUserRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/organizations/3/enabled",
+				HttpMethod.PUT,
+				new HttpEntity<String>("true", headers),
+				String.class);
+		assertTrue("Failed to enable organization.", response.getStatusCode() == HttpStatus.NO_CONTENT);
+
+		response = secureRestTemplate.exchange("http://localhost:" + port + "/services/rest/v1/endpoints", HttpMethod.POST,  new HttpEntity<Endpoint>(endpoint, headers), String.class);
+
+		assertTrue("Failed to POST endpoint. Error response: " + response.getBody(), response.getStatusCode() == HttpStatus.OK);
 
 	}
 
@@ -214,20 +304,6 @@ public class DirectoryApplicationTests {
 		return endpoint;
 	}
 
-	HttpHeaders createHttpHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-
-		headers.add("Content-Type", "application/json");
-		headers.add("Accept", "application/json");
-
-		return headers;
-	}
-
-	void addCSRFHeaders(HttpHeaders headers) {
-		final String clientSecret = "csrf-secret-token";
-		headers.set("X-CSRF-TOKEN", clientSecret);
-		headers.set("Cookie", "CSRF-TOKEN=" + clientSecret);
-	}
 
 
 
