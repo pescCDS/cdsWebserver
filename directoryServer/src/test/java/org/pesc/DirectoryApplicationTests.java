@@ -13,6 +13,7 @@ import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,23 +21,23 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = DirectoryApplication.class)
 @WebIntegrationTest("server.port=0")  //let Spring select a random port to use.
+@DirtiesContext
 public class DirectoryApplicationTests {
 
 	@Value("${http.port}")   //Injects that actual port used in the test
 	int port;
 
-	final String USERNAME = "sallen";
-	final String PASSWORD = "admin";
 
 	//Test RestTemplate to invoke the APIs.
 	private RestTemplate restTemplate = new RestTemplate();
-	private RestTemplate secureRestTemplate = new TestRestTemplate(USERNAME, PASSWORD);
+	private RestTemplate secureRestTemplate = new TestRestTemplate("sallen", "admin");
 	private RestTemplate butteCollegeRestTemplate = new TestRestTemplate("jwhetstone", "admin");
 	private RestTemplate superUserRestTemplate = new TestRestTemplate("admin", "admin");
 
@@ -48,7 +49,23 @@ public class DirectoryApplicationTests {
 	@ClassRule
 	public static DockerContainerRule dockerContainerRule = new DockerContainerRule("cdswebserver_directoryserver_db_image");
 
+	/**
+	 * Tests that the directory server home page is accessible.
+	 * @throws Exception
+	 */
+	@Test
+	public void testHome() throws Exception {
+		ResponseEntity<String> entity = new TestRestTemplate().getForEntity(
+				"http://localhost:" + this.port + "/home", String.class);
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+	}
 
+	/**
+	 * Tests the organization resource by first obtaining an organization object for an institution, in this case,
+	 * Butte college and then updating a property of the institution, in this test case, the short description,
+	 * of the institution.  Note that "institutions" and "service providers" are both organizations in the directory
+	 * server.
+	 */
 	@Test
 	public void updateOrganization() {
 
@@ -82,7 +99,7 @@ public class DirectoryApplicationTests {
 	}
 
 	/**
-	 * Use case; service provider can create an instition and then add the institution to the provider's group
+	 * This is service provider use case which verifies that a service provider can create an institution and then add the institution to the provider's group
 	 * of serviceable institutions.
 	 */
 	@Test
@@ -145,7 +162,10 @@ public class DirectoryApplicationTests {
 
 	}
 
-
+	/**
+	 * Test that verifies that code checks whether the domain name from the network SSL certificate and the domain name
+	 * supplied as part of the endpoint URL are valid.
+	 */
 	@Test
 	public void testDomainComparison() {
 
@@ -161,6 +181,9 @@ public class DirectoryApplicationTests {
 
 	}
 
+	/**
+	 * Common API calls that query the organizations resource using different criteria.
+	 */
 	@Test
 	public void testOrganizationsAPI() {
 
