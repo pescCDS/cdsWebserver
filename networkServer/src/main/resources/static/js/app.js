@@ -175,8 +175,10 @@
         self.senderName = '';
         self.endpointURL = 'http://';
         self.fileToUpload = '';
-        self.schoolCode = '';
-        self.schoolCodeType = '';
+        self.sourceSchoolCode = '';
+        self.sourceSchoolCodeType = '';
+        self.destinationSchoolCode = '';
+        self.destinationSchoolCodeType = '';
         self.deliveryMethods = [];
 
         self.documentTypes = getSupportedDocumentTypes();
@@ -185,7 +187,17 @@
 
         self.departments = getSupportedDepartments();
         self.department = '';
-
+        //Transcript Request
+        self.studentRelease = false;
+        self.studentReleasedMethod = '';
+        self.studentBirthDate = '';
+        self.studentFirstName = '';
+        self.studentMiddleName = '';
+        self.studentLastName = '';
+        self.studentEmail = '';
+        self.studentPartialSsn = '';
+        self.studentCurrentlyEnrolled = false;
+        //Transcript Request
 
         initialize();
 
@@ -195,8 +207,19 @@
                 self.documentFormat.name,
                 self.documentType.name,
                 self.department.name,
-                self.schoolCode,
-                self.schoolCodeType);
+                self.sourceSchoolCode,
+                self.sourceSchoolCodeType,
+                self.destinationSchoolCode,
+                self.destinationSchoolCodeType,
+                self.studentRelease,
+                self.studentReleasedMethod,
+                self.studentBirthDate,
+                self.studentFirstName,
+                self.studentMiddleName,
+                self.studentLastName,
+                self.studentEmail,
+                self.studentPartialSsn,
+                self.studentCurrentlyEnrolled);
         }
 
         function getDeliveryMethods() {
@@ -323,14 +346,27 @@
 
         return service;
 
-        function uploadFileToUrl(file, fileFormat, documentType, department, schoolCode, schoolCodeType){
+        function uploadFileToUrl(file, fileFormat, documentType, department, sourceSchoolCode, sourceSchoolCodeType, destinationSchoolCode, destinationSchoolCodeType, studentRelease,
+                                 studentReleasedMethod, studentBirthDate, studentFirstName, studentMiddleName, studentLastName,
+                                 studentEmail, studentPartialSsn, studentCurrentlyEnrolled){
             var fd = new FormData();
             fd.append('file', file);
             fd.append('file_format', fileFormat );
-            fd.append('school_code', schoolCode);
-            fd.append('school_code_type', schoolCodeType);
+            fd.append('source_school_code', sourceSchoolCode);
+            fd.append('source_school_code_type', sourceSchoolCodeType);
+            fd.append('destination_school_code', destinationSchoolCode);
+            fd.append('destination_school_code_type', destinationSchoolCodeType);
             fd.append('document_type', documentType);
             fd.append('department', department);
+            fd.append('student_release', studentRelease);
+            fd.append('student_released_method', studentReleasedMethod);
+            fd.append('student_birth_date', studentBirthDate);
+            fd.append('student_first_name', studentFirstName);
+            fd.append('student_middle_name', studentMiddleName);
+            fd.append('student_last_name', studentLastName);
+            fd.append('student_email', studentEmail);
+            fd.append('student_partial_ssn', studentPartialSsn);
+            fd.append('student_currently_enrolled', studentCurrentlyEnrolled);
 
             $http.post('/api/v1/documents/outbox', fd, {
                 transformRequest: angular.identity,

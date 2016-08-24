@@ -1,10 +1,13 @@
 package org.pesc.cds.web;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.json.JSONObject;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.repository.TransactionService;
+import org.pesc.cds.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -31,6 +34,12 @@ public class AppController {
 
     @Value("${directory.server.base.url}")
     private String directoryServer;
+
+    @Value("${networkServer.id}")
+    private String localServerId;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
         boolean hasRole = false;
@@ -114,6 +123,7 @@ public class AppController {
     @RequestMapping(value = "/files", method = RequestMethod.GET)
     public void getFile(
             @RequestParam("tran_id") Integer tranID,
+            @RequestParam(value = "show_request", required = false) Boolean showRequest,
             HttpServletResponse response) {
         try {
 
@@ -125,10 +135,12 @@ public class AppController {
                 throw new RuntimeException("Invalid transaction id.");
             }
 
+            String filePath = BooleanUtils.isTrue(showRequest)?transaction.getRequestFilePath():transaction.getFilePath();
+            String fileFormat = BooleanUtils.isTrue(showRequest)?"xml":transaction.getFileFormat();
 
-            InputStream is = new FileInputStream(new File(transaction.getFilePath()));
+            InputStream is = new FileInputStream(new File(filePath));
 
-            setContentType(response, transaction.getFileFormat());
+            setContentType(response, fileFormat);
             IOUtils.copy(is, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException e) {
@@ -165,7 +177,11 @@ public class AppController {
     public String getTransfersPage(Model model) {
 
         buildCommonModel(model);
-
+        //If Institution, use OrgId.  Otherwise need to ask and look up Source Institution Info.
+        //OrgId known, Source Institution (if applicable) not known.
+        JSONObject organization = organizationService.getOrganization(Integer.valueOf(localServerId));
+        boolean institution = organizationService.isInstitution(organization);
+        model.addAttribute("institution", institution);
         return "fragments :: upload";
     }
 
@@ -182,7 +198,5 @@ public class AppController {
 
         return "fragments :: about";
     }
-
-
 
 }

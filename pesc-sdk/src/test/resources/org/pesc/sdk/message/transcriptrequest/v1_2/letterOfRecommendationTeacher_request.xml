@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:TranscriptRequest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns:ns1="urn:org:pesc:message:TranscriptRequest:v1.2.0"
+                       xmlns:ns2="urn:org:pesc:message:DocumentInfo:v1.0.0"
+                       xsi:schemaLocation="urn:org:pesc:message:TranscriptRequest:v1.2.0 http://www.pesc.org/library/docs/standards/College%20Transcript/TranscriptRequest_v1.2.0.xsd
+                            urn:org:pesc:core:CoreMain:v1.12.0 http://www.pesc.org/library/docs/standards/Core%20Main/CoreMain_v1.12.0.xsd
+                            urn:org:pesc:sector:AcademicRecord:v1.7.0 http://www.pesc.org/library/docs/standards/High%20School%20Transcript/AcademicRecord_v1.7.0.xsd
+                            urn:org:pesc:message:DocumentInfo:v1.0.0">
+    <ns1:TransmissionData>
+        <DocumentID>0000ad00999999999999000000000005</DocumentID>
+        <CreatedDateTime>2014-05-14T15:51:52-05:00</CreatedDateTime>
+        <DocumentTypeCode>Application</DocumentTypeCode>
+        <TransmissionType>Original</TransmissionType>
+        <Source>
+            <Organization>
+                <CEEBACT>123456</CEEBACT>
+                <OrganizationName>Sending Institution Name</OrganizationName>
+                <Contacts>
+                    <Address>
+                        <AddressLine>Sender Street</AddressLine>
+                        <City>Roseville</City>
+                        <StateProvinceCode>CA</StateProvinceCode>
+                        <PostalCode>95678</PostalCode>
+                    </Address>
+                </Contacts>
+            </Organization>
+        </Source>
+        <Destination>
+            <Organization>
+                <CEEBACT>111111</CEEBACT>
+                <OrganizationName>CollegeName</OrganizationName>
+            </Organization>
+        </Destination>
+        <UserDefinedExtensions>
+            <ns2:DocumentInfo>
+                <ns2:FileName>0fd6ad111a83487c9536ea71602ecd7d_document.pdf</ns2:FileName>
+                <ns2:DocumentType>Letter of Recommendation</ns2:DocumentType>
+            </ns2:DocumentInfo>
+        </UserDefinedExtensions>
+    </ns1:TransmissionData>
+    <ns1:Request>
+        <CreatedDateTime>2014-05-14T15:51:52-05:00</CreatedDateTime>
+        <RequestedStudent>
+            <Person>
+                <Birth>
+                    <BirthDate>2014-05-08</BirthDate>
+                </Birth>
+                <Name>
+                    <FirstName>firstName5</FirstName>
+                    <LastName>lastName5</LastName>
+                </Name>
+                <Contacts>
+                    <Email>
+                        <EmailAddress>a</EmailAddress>
+                    </Email>
+                </Contacts>
+            </Person>
+            <Attendance>
+                <School>
+                    <OrganizationName>CurrentOrPreviouslyAttendedSchoolName</OrganizationName>
+                    <CEEBACT>aaaaaa</CEEBACT>
+                </School>
+                <EnrollDate>1957-08-13</EnrollDate>
+                <ExitDate>1957-08-13</ExitDate>
+                <AcademicAwardsReported>
+                    <AcademicAwardDate>1957-08-13</AcademicAwardDate>
+                </AcademicAwardsReported>
+            </Attendance>
+            <ReleaseAuthorizedIndicator>false</ReleaseAuthorizedIndicator>
+            <ReleaseAuthorizedMethod>LegitimateEducationalInterest</ReleaseAuthorizedMethod>
+        </RequestedStudent>
+    </ns1:Request>
+</ns1:TranscriptRequest>

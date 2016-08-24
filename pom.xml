@@ -19,6 +19,7 @@
     <modules>
         <module>directoryServer</module>
         <module>networkServer</module>
+        <module>pesc-sdk</module>
     </modules>
 
 

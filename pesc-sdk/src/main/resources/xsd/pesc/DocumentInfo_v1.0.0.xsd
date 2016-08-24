@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:org:pesc:message:DocumentInfo:v1.0.0" targetNamespace="urn:org:pesc:message:DocumentInfo:v1.0.0" elementFormDefault="qualified">
+	<xs:element name="DocumentInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="FileName" type="xs:string" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Full file name of the requested document</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="DocumentType" type="DocumentTypeCode">
+					<xs:annotation>
+						<xs:documentation>Document Type</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="DocumentTypeCode">
+		<xs:restriction base="xs:string">
+		<xs:enumeration value="Apostille Certificate"/>
+		<xs:enumeration value="CLA+Score Report"/>
+		<xs:enumeration value="Competency Based Transcript"/>
+		<xs:enumeration value="Counselor Recommendation"/>
+		<xs:enumeration value="Degree Certificate"/>
+		<xs:enumeration value="Diploma"/>
+		<xs:enumeration value="Enrollment Certificate"/>
+		<xs:enumeration value="Experiential Transcript"/>
+		<xs:enumeration value="Fee Waiver"/>
+		<xs:enumeration value="Immunization Record"/>
+		<xs:enumeration value="Letter of Recommendation"/>
+		<xs:enumeration value="Non-Degree Professional Certificate"/>
+		<xs:enumeration value="Other"/>
+		<xs:enumeration value="Professional Certificate"/>
+		<xs:enumeration value="School Profile"/>
+		<xs:enumeration value="School Report"/>
+		<xs:enumeration value="Teacher Evaluation"/>
+		<xs:enumeration value="Transcript"/>
+		<xs:enumeration value="Unofficial Test Scores"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

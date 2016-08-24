@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<jxb:bindings version="1.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+              jxb:extensionBindingPrefixes="xjc">
+    <jxb:bindings schemaLocation="CoreMain_v1.12.0.xsd" node="/xs:schema">
+
+        <jxb:globalBindings generateValueClass="false">
+            <!--XJC Default generated jaxb classes could not properly model pesc International and Domestic Addresses.
+            Both DomesticAddressDetailsGroup and InternationalAddressDetailsGroup contain 'PostalCode' which causes issues for default xjc.
+            The fix was to use xjc 'simpler&better' binding mode which allowed xjc to generate jaxb classes that properly represent
+            both PESC XSD compliant Domestic and International addresses.
+            https://jaxb.java.net/2.1.2/docs/vendorCustomizations.html#simple-->
+            <xjc:serializable uid="1"/>
+
+            <xjc:simple/>
+            
+            <jxb:javaType name= "java.util.Date" xmlType="xs:date"
+                          parseMethod="org.pesc.sdk.util.DateConverter.parseDate"
+                          printMethod="org.pesc.sdk.util.DateConverter.printDate" />
+            <jxb:javaType name= "java.util.Date" xmlType="xs:dateTime"
+                          parseMethod="org.pesc.sdk.util.DateConverter.parseDateTime"
+                          printMethod="org.pesc.sdk.util.DateConverter.printDateTime" />
+            <jxb:javaType name= "java.util.Date" xmlType="xs:time"
+                          parseMethod="org.pesc.sdk.util.DateConverter.parseTime"
+                          printMethod="org.pesc.sdk.util.DateConverter.printTime" />
+            <jxb:javaType name= "java.util.Date" xmlType="xs:gYearMonth"
+                          parseMethod="org.pesc.sdk.util.DateConverter.parseYearMonth"
+                          printMethod="org.pesc.sdk.util.DateConverter.printYearMonth" />
+            <jxb:javaType name= "java.util.Date" xmlType="xs:gYear"
+                          parseMethod="org.pesc.sdk.util.DateConverter.parseYear"
+                          printMethod="org.pesc.sdk.util.DateConverter.printYear" />
+            <jxb:javaType name= "java.lang.String" xmlType="xs:gMonthDay"
+                          parseMethod="org.pesc.sdk.util.DateConverter.parseMonthDay"
+                          printMethod="org.pesc.sdk.util.DateConverter.printMonthDay" />
+        </jxb:globalBindings>
+
+        <jxb:bindings schemaLocation="AcademicRecord_v1.7.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.sector.academicrecord.v1_7"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="CoreMain_v1.9.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.core.coremain.v1_9"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="CoreMain_v1.12.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.core.coremain.v1_12"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="FunctionalAcknowledgment_v1.0.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.functionalacknowledgment.v1_0"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="DocumentInfo_v1.0.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.documentinfo.v1_0"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="TranscriptRequest_v1.2.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.transcriptrequest.v1_2"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="TranscriptResponse_v1.2.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.transcriptresponse.v1_2"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+    </jxb:bindings>
+
+</jxb:bindings>
