@@ -438,7 +438,7 @@ public class DocumentController {
                     String trSourceOrganizationCity = organization.getString("city");
                     StateProvinceCodeType trSourceOrganizationStateProvinceCode = StateProvinceCodeType.valueOf(organization.getString("state"));
                     String trSourceOrganizationPostalCode = organization.getString("zip");
-                    String phoneNumber = organization.getString("telephone");
+                    String phoneNumber = organization.optString("telephone", "");
                     PhoneType trSendersPhone = academicRecordObjectFactory.createPhoneType();//Provided by Source Institution - optional
                     if(StringUtils.isNotBlank(phoneNumber)) {
                         int extensionIndex = org.apache.commons.lang3.StringUtils.indexOfIgnoreCase(phoneNumber, "x");//has extension?

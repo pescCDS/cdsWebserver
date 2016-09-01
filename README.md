@@ -162,7 +162,7 @@ Stack update: NOTE: this is destructive - it will re-create any instances that h
 
 Directory server deployment process (manual steps outlined below. Initially, at CCCTC, our Jenkins server will be utilized to automate this process): 
 > On each directory server in the stack:
-```git clone https://github.com/owenwe/cdsWebserver```
+```git clone https://github.com/jhwhetstone/cdsWebserver```
 ```mvn -DskipTests -am -pl directoryServer package docker:build```
 ```profile=pilot DIRECTORY_DB_HOST=<hostname of database> docker-compose -f docker-compose-directory-pilot.yml up -d```
 
