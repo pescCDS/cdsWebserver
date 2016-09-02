@@ -4,9 +4,9 @@ This README file provide a description of EDExchange and how to start developmen
 
 EDExchange is a web app that provides a secure network for exchanging documents between organizations. EDExchange is open source, provides web services (SOAP and REST), and allows for customization. By becoming an EDExchange member you can send and receive documents at no cost in a secure and reliable way.
 
-The EDExchange project contains two modules: the Directory Server module and the Network Server module. 
+The EDExchange project contains two modules: the Directory Server module and the Network Server module.
 
-The Directory Server module is the directory of Network Servers and facilitates communication between the Network Servers. The "production" Directory Server is maintained by the PESC organization (Postsecondary Electronic Standards Council). The Directory Server module code provides a reference Directory Server for your local testing purposes. 
+The Directory Server module is the directory of Network Servers and facilitates communication between the Network Servers. The "production" Directory Server is maintained by the PESC organization (Postsecondary Electronic Standards Council). The Directory Server module code provides a reference Directory Server for your local testing purposes.
 
 The Network Server module is used by vendors and institutions to exchange documents. While you can elect to only send, or both send and receive documents, in either case you can use the Network Server module code to test these transactions. It is intended that you will use the Network Server module in one of the following ways:
 
@@ -14,7 +14,7 @@ The Network Server module is used by vendors and institutions to exchange docume
 * as a reference for customizing or extending your own Network Server
 * as a model for creating your own Network Server from scratch
 
-The EDExchange API can be accessed by Both SOAP and a REST-based clients. See the Docs link here for more information: https://edex-directory-pilot.ccctechcenter.org/home#/home 
+The EDExchange API can be accessed by Both SOAP and a REST-based clients. See the Docs link here for more information: https://edex-directory-pilot.ccctechcenter.org/home#/home
 
 NOTE: If you want to receive documents you must host a Network Server on the Internet using a domain name of your choosing (E.g. edexchange.butte.edu) in addition to using the Network Server module code.  
 
@@ -148,7 +148,7 @@ DIRECTORY SERVER PILOT ENVIRONMENT
 ----------------------------------
 Review the Architecture diagram DirectoryServerAWSArchitecture.png in the cdsWebserver directory.
 
-Prerequisites: 
+Prerequisites:
 > An AWS account
 > The AWS CLI configured with the appropriate credentials
 > An AWS keypair that will be used to access the environment
@@ -160,16 +160,16 @@ This process provisions in AWS, using Cloud Formation, the following resources:
 > A MariaDB instance (RDS)
 > A DNS entry for directory-server-pilot.ccctechcenter.org (Route 53)
 
-Initial stack creation: 
+Initial stack creation:
 > If desired, modify the command below to supply a different value for the AWS CloudFormation template file location, the desired DNS entry (RecordSetName), and the AWS keypair to use (KeyPairName)
 ```aws cloudformation create-stack --stack-name directory-server-pilot --template-body file:////home/git/cdsWebserver/directory-server-pilot.template --parameters "ParameterKey=RecordSetName,ParameterValue=edex-directory-pilot.ccctechcenter.org.,ParameterKey=KeyPairName,ParameterValue=edExchange_Pilot_Key"```
 
 Stack update: NOTE: This is destructive - it will re-create any instances that have been modified in the template
 ```aws cloudformation update-stack --stack-name directory-server-pilot --template-body file:////home/git/cdsWebserver/directory-server-pilot.template --parameters "ParameterKey=RecordSetName,ParameterValue=edex-directory-pilot.ccctechcenter.org.,ParameterKey=KeyPairName,ParameterValue=edExchange_Pilot_Key"```
 
-Directory Server deployment process (manual steps outlined below. Initially, at CCCTC, our Jenkins server will be used to automate this process): 
-> On each Directory Server in the stack:
-```git clone https://github.com/owenwe/cdsWebserver```
+Directory server deployment process (manual steps outlined below. Initially, at CCCTC, our Jenkins server will be utilized to automate this process): 
+> On each directory server in the stack:
+```git clone https://github.com/jhwhetstone/cdsWebserver```
 ```mvn -DskipTests -am -pl directoryServer package docker:build```
 ```profile=pilot DIRECTORY_DB_HOST=<hostname of database> docker-compose -f docker-compose-directory-pilot.yml up -d```
 
@@ -177,21 +177,18 @@ Directory Server deployment process (manual steps outlined below. Initially, at 
 Full Stack Environment (QA)
 -------------------------------
 
-The full stack environment is configured in the docker-compose.yml file. It comprises of a Network Server, a Directory Server, and a separate MySQL database for each. Initialize this environment using the steps below. 
+The full stack environment is configured in the docker-compose.yml file. It comprises of a Network Server, a Directory Server, and a separate MySQL database for each. Initialize this environment using the steps below.
 
 Build the prerequisite Maven packages and run the Docker containers. Supply a valid Spring Boot profile as a single argument to the scripts. If no argument is specified, the default profile "dev" is used.
 
 ```. ./setup.sh [qa|dev]```
 
 These resources can be accessed locally at the following locations:
-Network Server -- http://localhost:8081/home 
-Directory Server -- http://localhost:8080/home 
+Network Server -- http://localhost:8081/home
+Directory Server -- http://localhost:8080/home
 
 Stop the environment using the following command:
 
 ```. ./shutdown.sh [qa|dev]```
 
 TODO: Create automated integration and unit tests to leverage the QA Environment.
-
-
-

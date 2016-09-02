@@ -301,8 +301,8 @@
 
     }
 
-    SettingsController.$inject = ['settingsService'];
-    function SettingsController(settingsService) {
+    SettingsController.$inject = ['settingsService', 'toasterService'];
+    function SettingsController(settingsService, toasterService) {
         var self = this;
 
         self.deliveryMethods = [];
@@ -314,9 +314,109 @@
         self.getDocumentFormats = getDocumentFormats;
         self.getDepartments = getDepartments;
         self.getDocumentTypes = getDocumentTypes;
+        self.create = create;
+        self.showForm = showForm;
+        self.deleteObject = deleteObject;
+        self.updateObject = updateObject;
+        self.save = save;
+
+        function showForm(obj) {
+            return obj.hasOwnProperty('editing') && obj.editing == true;
+        }
+
+        function removeFromModel(resourceName, obj) {
+            var list = getList(resourceName);
+
+            var index = list.indexOf(obj);
+            if (index > -1) {
+                list.splice(index, 1);
+            }
+        };
+
+        function getList(resourceName) {
+            if (resourceName == "document-types") {
+                return self.documentTypes;
+            }
+            else if (resourceName == "document-formats") {
+                return self.documentFormats;
+            }
+            else if (resourceName == "departments") {
+                return self.departments;
+            }
+            else if (resourceName == "delivery-methods") {
+                return self.deliveryMethods;
+            }
+        }
+
+        function updateObject(resourceName, obj) {
+            settingsService.updateObject(resourceName, obj).then(function(obj) {
+                toasterService.info("Successfully updated " + obj.name);
+            });
+        }
+
+        function deleteObject(resourceName, obj) {
+            if (obj.hasOwnProperty('id')) {
+                settingsService.deleteObject(resourceName, obj).then(function(obj){
+                    removeFromModel(resourceName, obj);
+                });
+            }
+            else {
+                removeFromModel(resourceName, obj);
+            }
+        }
+
 
         getDeliveryMethods();
 
+        function construct() {
+            var obj = {
+                'name'  : '',
+                'description' : '',
+                'editing' : true
+
+            }
+            return obj;
+        }
+
+        function save(resourceName, obj) {
+            delete obj.editing;
+
+            if (obj.hasOwnProperty('id')){
+                settingsService.updateObject(resourceName, obj).then(function(data){
+                   toasterService.info("Successfully updated resource.");
+                }, function(data){
+                    toasterService.ajaxInfo(data);
+                    obj.editing = true;
+                });
+            }
+            else {
+                settingsService.createObject(resourceName,obj).then(function(data){
+                    toasterService.info("Successfully created resource.");
+                },function(data){
+                    toasterService.ajaxInfo(data);
+                    obj.editing = true;
+                });
+            }
+        }
+
+        function create(what) {
+
+            var obj = construct();
+
+            if (what == "document-types") {
+                self.documentTypes.unshift(obj)
+            }
+            else if (what == "document-formats") {
+                self.documentFormats.unshift(obj);
+            }
+            else if (what == "departments") {
+                self.departments.unshift(obj);
+            }
+            else if (what == "delivery-methods") {
+                self.deliveryMethods.unshift(obj);
+            }
+
+        }
 
         function getDeliveryMethods() {
             settingsService.getDeliveryMethods().then(function (data) {
@@ -468,8 +568,8 @@
     }
 
 
-    UsersController.$inject = ['organizationService', '$window', 'userService', 'users'];
-    function UsersController(organizationService, $window, userService, users) {
+    UsersController.$inject = ['organizationService', '$window', 'userService', 'users', 'toasterService'];
+    function UsersController(organizationService, $window, userService, users, toasterService) {
         var self = this;
         self.users = users;
         self.roles = $window.roles;
@@ -485,6 +585,20 @@
         self.updateRole = updateRole;
         self.removeFromModel = removeFromModel;
         self.org = organizationService.getActiveOrg();
+        self.isRoleDisabled = isRoleDisabled;
+
+        function isRoleDisabled(role) {
+
+            if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                return false;
+            }
+            else {
+                //Disable roles for anything but "ROLE_ORG_ADMIN"
+                if (role.id != 2) {
+                    return true;
+                }
+            }
+        }
 
         function create() {
 
@@ -550,18 +664,21 @@
                 //update
 
                 userService.updateUser(user).then(function (data) {
-                    console.log("Successfully update user.");
+                    toasterService.info("Successfully updated user.");
+                },function(data) {
+                    user.editing = true;
+                    toasterService.ajaxInfo(data);
                 });
 
             }
             else {
                 //create
                 userService.createUser(user).then(function (data) {
-                    console.log("Successfully created user with id " + data.id);
+                    toasterService.info("Successfully created user with id " + data.id);
                 }).catch(function (e) {
                     self.edit(user);
                 });
-                ;
+
 
             }
         };
@@ -614,6 +731,20 @@
         self.confirmPassword = '';
         self.showPasswordForm = false;
         self.updatePassword = updatePassword;
+        self.isRoleDisabled = isRoleDisabled;
+
+        function isRoleDisabled(role) {
+
+            if (userService.hasRoleByName(userService.activeUser, 'ROLE_SYSTEM_ADMIN')) {
+                return false;
+            }
+            else {
+                //Disable roles for anything but "ROLE_ORG_ADMIN"
+                if (role.id != 2) {
+                    return true;
+                }
+            }
+        }
 
         function edit() {
             self.user['editing'] = true;
@@ -627,7 +758,10 @@
             delete self.user.editing;
 
             userService.updateUser(self.user).then(function (data) {
-                console.log("Successfully updated user.");
+                toasterService.info("Successfully updated user.");
+            }, function(data) {
+                self.user.editing = true;
+                toasterService.ajaxInfo(data);
             });
         }
 
@@ -2274,10 +2408,53 @@
             getDeliveryMethods: getDeliveryMethods,
             getDocumentFormats: getDocumentFormats,
             getDocumentTypes: getDocumentTypes,
-            getDepartments: getDepartments
+            getDepartments: getDepartments,
+            createObject: createObject,
+            updateObject: updateObject,
+            deleteObject: deleteObject
         };
 
         return service;
+
+        function createObject(resourceName, obj) {
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/' + resourceName, obj).success(function (data) {
+                angular.extend(obj, data);
+                deferred.resolve(obj);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while creating a " + resourceName + " resource.");
+            });
+
+            return deferred.promise;
+        }
+
+        function updateObject(resourceName, obj) {
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/' + resourceName + '/' + obj.id, obj).success(function (data) {
+                deferred.resolve(obj);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while updating a " + resourceName + " resource.");
+            });
+
+            return deferred.promise;
+        }
+
+        function deleteObject(resourceName, obj) {
+            var deferred = $q.defer();
+
+            $http.delete('/services/rest/v1/' + resourceName + '/' + obj.id).success(function (data) {
+                deferred.resolve(obj);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while deleting a " + resourceName + " resource.");
+            });
+
+            return deferred.promise;
+        }
 
         function getDeliveryMethods() {
             var deferred = $q.defer();
@@ -2370,8 +2547,6 @@
             var deferred = $q.defer();
 
             $http.delete('/services/rest/v1/users/' + user.id).success(function (data) {
-
-                removeUser(user);
 
                 deferred.resolve(user);
             }).error(function (data) {

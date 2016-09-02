@@ -92,14 +92,6 @@ a:hover
     vertical-align: top;
 }
 
-form .ng-invalid.ng-dirty {
-    border-color: #FA787E;
-}
-
-form .ng-valid.ng-dirty {
-    border-color: #78FA89;
-}
-
 .inner-margin7 > * {
     margin-bottom:7px;
     box-sizing: border-box;
@@ -115,6 +107,15 @@ form .ng-valid.ng-dirty {
     border: solid 1px #707070;
     box-shadow: 0 0 5px 1px #969696;
 }
+
+form .ng-invalid.ng-dirty, form .error {
+    border-color: #FA787E;
+}
+
+form .ng-valid.ng-dirty {
+    border-color: #78FA89;
+}
+
 
 .tab-pane {
     border-bottom: 1px solid #ddd;

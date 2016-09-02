@@ -138,7 +138,8 @@
                 <th>Type</th>
                 <th>Dept.</th>
                 <th>Size</th>
-                <th>Path</th>
+                <th>Document</th>
+                <th>Transcript Request</th>
                 <th>Occurred At</th>
                 <th>Acknowledged At</th>
                 <th>Error</th>
@@ -160,6 +161,10 @@
                 <td>{{tran.fileSize | bytes}}</td>
                 <td>
                     <a ng-href="files?tran_id={{tran.id}}">{{tran.filePath}}</a>
+
+                </td>
+                <td>
+                    <a ng-href="files?tran_id={{tran.id}}&show_request=true">{{tran.requestFilePath}}</a>
 
                 </td>
                 <td>{{tran.occurredAt | date:'medium'}}</td>
@@ -194,16 +199,35 @@
 
 
         <div>
-            <div class="form-group">
-                <strong>School Code</strong>
+            <div th:if="${institution}==false" class="form-group" ng-show="uploadCtrl.documentFormat.name!='PESCXML'">
+                <strong>Source School Code</strong>
                 <div class="form-inline">
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.sourceSchoolCode.$invalid && (!uploadForm.sourceSchoolCode.$pristine || uploadForm.$submitted) }">
+                        <input name="sourceSchoolCode" class="form-control" type="text" th:required="${institution}==false" ng-model="uploadCtrl.sourceSchoolCode" placeholder="Code" style="width: 110px;"> </input>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.sourceSchoolCodeType.$invalid && (!uploadForm.sourceSchoolCodeType.$pristine || uploadForm.$submitted) }">
+                        <select name="sourceSchoolCodeType" class="form-control" style="width: 110px;" th:required="${institution}==false"
+                                ng-model="uploadCtrl.sourceSchoolCodeType">
+                            <option value="">Code Type</option>
+                            <option value="ACT">ACT</option>
+                            <option value="ATP">ATP</option>
+                            <option value="FICE">FICE</option>
+                            <option value="IPEDS">IPEDS</option>
+                            <option value="OPEID">OPEID</option>
+                        </select>
 
-                        <input class="form-control" type="text" ng-model="uploadCtrl.schoolCode" placeholder="Code" style="width: 110px;"> </input>
-
-
-                        <select class="form-control" style="width: 110px;" required="required"
-                                ng-model="uploadCtrl.schoolCodeType">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <strong>Destination School Code</strong>
+                <div class="form-inline">
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.destinationSchoolCode.$invalid && (!uploadForm.destinationSchoolCode.$pristine || uploadForm.$submitted) }">
+                        <input name="destinationSchoolCode" class="form-control" type="text" required="required" ng-model="uploadCtrl.destinationSchoolCode" placeholder="Code" style="width: 110px;"> </input>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.destinationSchoolCodeType.$invalid && (!uploadForm.destinationSchoolCodeType.$pristine || uploadForm.$submitted) }">
+                        <select name="destinationSchoolCodeType" class="form-control" style="width: 110px;" required="required"
+                                ng-model="uploadCtrl.destinationSchoolCodeType">
                             <option value="">Code Type</option>
                             <option value="ACT">ACT</option>
                             <option value="ATP">ATP</option>
@@ -216,9 +240,9 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-class="{ 'has-error' : uploadForm.documentFormat.$invalid && (!uploadForm.documentFormat.$pristine || uploadForm.$submitted) }">
                 <strong>Document Format</strong>
-                <select class="form-control" style="width: 160px;" required="required"
+                <select name="documentFormat" class="form-control" style="width: 160px;" required="required"
                         ng-model="uploadCtrl.documentFormat"
                         ng-options="documentFormat.name for documentFormat in uploadCtrl.documentFormats track by documentFormat.id">
 
@@ -229,9 +253,9 @@
                 </p>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-class="{ 'has-error' : uploadForm.documentType.$invalid && (!uploadForm.documentType.$pristine || uploadForm.$submitted) }">
                 <strong>Document Type</strong>
-                <select class="form-control" style="width: 160px;" required="required"
+                <select name="documentType" class="form-control" style="width: 160px;" required="required"
                         ng-model="uploadCtrl.documentType"
                         ng-options="documentType.name for documentType in uploadCtrl.documentTypes track by documentType.id">
 
@@ -242,9 +266,9 @@
                 </p>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-class="{ 'has-error' : uploadForm.department.$invalid && (!uploadForm.department.$pristine || uploadForm.$submitted) }">
                 <strong>Department</strong>
-                <select class="form-control" style="width: 160px;" required="required"
+                <select name="department" class="form-control" style="width: 160px;" required="required"
                         ng-model="uploadCtrl.department"
                         ng-options="department.name for department in uploadCtrl.departments track by department.id">
 
@@ -255,7 +279,6 @@
                 </p>
             </div>
 
-
             <div class="form-group">
                 <div><strong>Transcript File</strong></div>
                 <div class="btn btn-default btn-file">
@@ -264,6 +287,60 @@
 
                 <span>{{uploadCtrl.fileToUpload.name}}</span>
             </div>
+<!--Transcript Request-->
+            <div class="form-group" ng-show="uploadCtrl.documentFormat.name!='PESCXML'">
+                <div class="form-group">
+                    <div><strong>Student Release Authorized Indicator</strong></div>
+                    <input type="checkbox" ng-model="uploadCtrl.studentRelease" checked="false"/>
+                </div>
+
+                <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentReleasedMethod.$invalid && (!uploadForm.studentReleasedMethod.$pristine || uploadForm.$submitted) }">
+                    <div><strong>Student Release Authorized Method</strong></div>
+                    <select name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="uploadCtrl.studentReleasedMethod" ng-required="uploadCtrl.documentFormat.name!='PESCXML'">
+                        <option value=""></option>
+                        <option value="SIGNATURE">SIGNATURE</option>
+                        <option value="ELECTRONIC_SIGNATURE">ELECTRONIC_SIGNATURE</option>
+                        <option value="LEGITIMATE_EDUCATIONAL_INTEREST">LEGITIMATE_EDUCATIONAL_INTEREST</option>
+                        <option value="OTHER">OTHER</option>
+                    </select>
+                </div>
+
+                <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentBirthDate.$invalid && (!uploadForm.studentBirthDate.$pristine || uploadForm.$submitted) }">
+                    <div><strong>Student Date of Birth</strong></div>
+                    <input name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentBirthDate" placeholder="format: 01/01/1995" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
+                </div>
+
+                <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentFirstName.$invalid && (!uploadForm.studentFirstName.$pristine || uploadForm.$submitted) }">
+                    <div><strong>Student First Name</strong></div>
+                    <input name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentFirstName" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
+                </div>
+
+                <div class="form-group">
+                    <div><strong>Student Middle Name</strong></div>
+                    <input class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentMiddleName"> </input>
+                </div>
+
+                <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentLastName.$invalid && (!uploadForm.studentLastName.$pristine || uploadForm.$submitted) }">
+                    <div><strong>Student Last Name</strong></div>
+                    <input name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentLastName" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
+                </div>
+
+                <div class="form-group">
+                    <div><strong>Student Email</strong></div>
+                    <input class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentEmail"> </input>
+                </div>
+
+                <div class="form-group">
+                    <div><strong>Student Last 4 SSN</strong></div>
+                    <input class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentPartialSsn"> </input>
+                </div>
+
+                <div class="form-group">
+                    <div><strong>Student Current Enrollment Indicator</strong></div>
+                    <input type="checkbox" ng-model="uploadCtrl.studentCurrentlyEnrolled" checked="false"/>
+                </div>
+            </div>
+<!--Transcript Request-->
         </div>
 
         <div class="btn-group">

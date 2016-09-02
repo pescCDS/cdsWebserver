@@ -66,6 +66,7 @@ public class TransactionService {
     }
     
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Transaction findById(Integer id)  {
 
         return this.transactionRepository.findOne(id);

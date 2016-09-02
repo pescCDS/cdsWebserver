@@ -52,6 +52,7 @@ public class UserService {
 
 
     private Role systemAdminRole;
+    private Role supportRole;
 
     private Set<String> systemAdminEmailAddresses;
 
@@ -62,6 +63,7 @@ public class UserService {
 
         roles = (List<Role>)rolesRepo.findAll();
         systemAdminRole = rolesRepo.findByName("ROLE_SYSTEM_ADMIN");
+        supportRole = rolesRepo.findByName("ROLE_SUPPORT");
 
         systemAdminEmailAddresses = getEmailAddressesForUsersWithSystemAdminRole();
 
@@ -138,10 +140,33 @@ public class UserService {
         return this.userRepository.findOne(id);
     }
 
+    void validateRoles(DirectoryUser user) {
+        if (user.getRoles().isEmpty()) {
+            throw new IllegalArgumentException("A user must have at least one assigned role.");
+        }
+    }
+
+    void checkPermissionsForRoleAssignment(DirectoryUser user) {
+
+        AuthUser auth = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+
+        if (!AppController.hasRole(auth.getAuthorities(), "ROLE_SYSTEM_ADMIN")) {
+            if (user.getRoles().contains(systemAdminRole)) {
+                throw new IllegalArgumentException("You do not have the authority to create a system administrator.") ;
+            }
+            else if ( user.getRoles().contains(supportRole)){
+                throw new IllegalArgumentException("You do not have the authority to create a support engineer.") ;
+            }
+        }
+
+    }
+
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public DirectoryUser create(DirectoryUser user)  {
-
+        checkPermissionsForRoleAssignment(user);
+        validateRoles(user);
         return unsecuredCreate(user);
     }
 
@@ -176,7 +201,8 @@ public class UserService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#user.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public DirectoryUser update(DirectoryUser user)  {
-
+        checkPermissionsForRoleAssignment(user);
+        validateRoles(user);
         return userRepository.save(user);
     }
 

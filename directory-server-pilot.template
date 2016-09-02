@@ -17,7 +17,7 @@
     "dnsEdexDirectory": {
       "Type": "AWS::Route53::RecordSetGroup",
       "Properties": {
-        "HostedZoneName": "ccctechcenter.org.",
+        "HostedZoneId": "Z1Z22LUT060Y36",
         "RecordSets": [
           {
             "Name": { "Ref" : "RecordSetName" },
