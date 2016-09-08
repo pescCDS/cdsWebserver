@@ -279,69 +279,6 @@
 
 
             <plugin>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-codegen-plugin</artifactId>
-                <version>${cxf.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <!-- Use the extraarg elements if you need to generate default constructors
-                                and constructors that populate all the class properties, then un-comment
-                                the defaultOptions element along with the jaxb2-value-constructor and jaxb2-basics
-                                dependencies below <defaultOptions> <extraargs> <extraarg>-xjc-Xvalue-constructor</extraarg>
-                                </extraargs> </defaultOptions> -->
-                            <defaultOptions>
-                                <extraargs>
-                                    <extraarg>-keep</extraarg>
-                                </extraargs>
-                                <bindingFiles>
-                                    <bindingFile>${basedir}/src/main/resources/xsd/bindings.xjb.xml</bindingFile>
-                                </bindingFiles>
-                            </defaultOptions>
-                            <wsdlOptions>
-                                <wsdlOption>
-                                    <extraargs>
-                                        <extraarg>-xjc-Xinheritance</extraarg>
-                                    </extraargs>
-                                    <wsdl>src/main/resources/CDS_v0.1.wsdl</wsdl>
-                                    <frontEnd>jaxws</frontEnd>
-                                    <!-- to generate JAX-WS 2.1 compliant code <frontEnd>jaxws21</frontEnd> -->
-                                    <faultSerialVersionUID>1</faultSerialVersionUID>
-                                </wsdlOption>
-                            </wsdlOptions>
-                        </configuration>
-                        <goals>
-                            <goal>wsdl2java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                        <version>${commons.logging.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.jvnet.jaxb2_commons</groupId>
-                        <artifactId>jaxb2-basics</artifactId>
-                        <version>${jaxb2-basics.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                        <version>${junit.version}</version>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>docker-client</artifactId>
-                        <version>3.5.12</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
                 <!-- This generates some static documentation from the Swagger annotations -->
                 <groupId>com.github.kongchen</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
