@@ -53,7 +53,7 @@
 
                 <div ng-show="usersCtrl.showForm(user)">
                     <h1>
-                        <input type="text" placeholder="Name" required="required" ng-model="user.name" ng-class="{ jw : userForm.$submitted === true}"> </input>
+                        <input type="text" placeholder="Name" required="required" ng-model="user.name"> </input>
                     </h1>
                     <div>
                         <label><b>Title:</b></label>
@@ -250,7 +250,7 @@
 
                 <div ng-show="userCtrl.showForm()">
                     <h1>
-                        <input type="text" placeholder="Name" required="required" ng-model="userCtrl.user.name" ng-class="{ jw : userForm.$submitted === true}"> </input>
+                        <input type="text" placeholder="Name" required="required" ng-model="userCtrl.user.name"> </input>
                     </h1>
                     <div>
                         <label><b>Title:</b></label>
@@ -984,7 +984,7 @@
 
                 <div ng-show="orgCtrl.showOrgForm()">
                     <h1>
-                        <input type="text" placeholder="Name" required="required" ng-model="orgCtrl.org.name" ng-class="{ jw : orgForm.$submitted === true}"> </input>
+                        <input type="text" placeholder="Name" required="required" ng-model="orgCtrl.org.name"> </input>
                     </h1>
                 </div>
 
@@ -1393,14 +1393,14 @@
 
 </div>
 <div th:fragment="organization">
-    <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate" class="glow" style="position: relative;">
+    <form name="orgForm"  ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate" class="glow" style="position: relative;" >
         <div class="sub-nav">
             <div class="inner-margin7">
                 <h1 ng-show="!orgCtrl.showOrgForm(org)"><a ng-href="#organization/{{org.id}}">{{org.name}}</a></h1>
 
                 <div ng-show="orgCtrl.showOrgForm(org)">
                     <h1>
-                        <input type="text" placeholder="Name" required="required" ng-model="org.name" ng-class="{ jw : orgForm.$submitted === true}"> </input>
+                        <input type="text" placeholder="Name" required="required" ng-model="org.name" > </input>
                     </h1>
                 </div>
 
