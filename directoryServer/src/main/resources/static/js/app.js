@@ -1961,10 +1961,9 @@
                     getInstitutionsForServiceProvider(activeOrg).then(function (response) {
                         activeOrg.institutions = response.data;
                     });
+
+                    //organizationService.getCertificate(activeOrg);
                 });
-
-                organizationService.getCertificate();
-
             }
         }
 
