@@ -1963,7 +1963,7 @@
                     });
                 });
 
-                organizationService.getCertificate
+                organizationService.getCertificate();
 
             }
         }
