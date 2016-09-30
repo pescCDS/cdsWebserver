@@ -173,6 +173,7 @@ public class DocumentController {
             HttpEntity reqEntity = MultipartEntityBuilder.create()
                     .addPart("recipient_id", new StringBody(tran.getRecipientId().toString()))
                     .addPart("sender_id", new StringBody(tran.getSenderId().toString()))
+                    .addPart("signer_id", new StringBody(localServerId))
                     .addPart("file_format", new StringBody(tran.getFileFormat()))
                     .addPart("document_type", new StringBody(tran.getDocumentType()))
                     .addPart("department", new StringBody(tran.getDepartment()))
@@ -366,6 +367,21 @@ public class DocumentController {
         Transaction tx = new Transaction();
 
         if (!multipartFile.isEmpty()) {
+
+            int recordHolderDirectoryID = Integer.valueOf(localServerId);
+
+            if (sourceSchoolCode != null && sourceSchoolCodeType != null) {
+                JSONObject recordHolder = organizationService.getOrganization(sourceSchoolCode, sourceSchoolCodeType);
+
+                if (recordHolder == null) {
+                    throw new IllegalArgumentException(String.format("No organization exists with %s code %s.", sourceSchoolCodeType, sourceSchoolCode));
+                }
+
+                recordHolderDirectoryID = recordHolder.getInt("id");
+            }
+
+
+
             List<String> trDestinationOrganizationNames = Lists.newArrayList();//Provided by Source Institution
             String endpointURI = getEndpointURIForSchool(destinationSchoolCode, destinationSchoolCodeType, fileFormat, documentType, department, tx, trDestinationOrganizationNames);
 
@@ -382,8 +398,8 @@ public class DocumentController {
                 File outboxFile = new File(outboxDirectory, trFileName);
                 multipartFile.transferTo(outboxFile);
                 File requestFile = null;
-
-                tx.setSenderId(Integer.valueOf(localServerId));
+                tx.setSenderId(recordHolderDirectoryID);
+                tx.setSignerId(Integer.valueOf(localServerId));
                 tx.setFileFormat(fileFormat);
                 tx.setFilePath(outboxFile.getAbsolutePath());
                 tx.setFileSize(multipartFile.getSize());
@@ -539,7 +555,8 @@ public class DocumentController {
 
                     MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
                             .addPart("recipient_id", new StringBody(tx.getRecipientId().toString()))
-                            .addPart("sender_id", new StringBody(localServerId))
+                            .addPart("sender_id", new StringBody(tx.getSenderId().toString()))
+                            .addPart("signer_id", new StringBody(localServerId))
                             .addPart("file_format", new StringBody(fileFormat))
                             .addPart("document_type", new StringBody(documentType))
                             .addPart("department", new StringBody(department))
@@ -615,6 +632,7 @@ public class DocumentController {
     public void receiveFile(
             @RequestParam(value="recipient_id", required=false) Integer recipientId,
             @RequestParam(value="sender_id", required=false) Integer senderId,
+            @RequestParam(value="signer_id", required=false) Integer signerId,
             @RequestParam(value="file") MultipartFile multipartFile,
             @RequestParam(value="signature") MultipartFile signatureFile,
             @RequestParam(value="file_format", required=false) String fileFormat,
@@ -639,6 +657,7 @@ public class DocumentController {
         // we need the directoryId for this organization in the organizations table
         tx.setRecipientId(recipientId);
         tx.setSenderId(senderId);
+        tx.setSignerId(signerId);
         tx.setSenderTransactionId(transactionId);
         tx.setFileFormat(fileFormat);
         tx.setFileSize(multipartFile.getSize());
@@ -675,7 +694,7 @@ public class DocumentController {
                 requestFileBytes = transcriptRequestFile.getBytes();
             }
 
-            String pemPublicKey = getPEMPublicKeyByOrgID(senderId);
+            String pemPublicKey = getPEMPublicKeyByOrgID(signerId);
 
 
             if (pemPublicKey == null) {
@@ -750,15 +769,7 @@ public class DocumentController {
     @Produces(MediaType.APPLICATION_JSON)
     @ResponseBody
     public List<String> listFilesFromOutbox() {
-        List<String> retList = new ArrayList<String>();
-        File directory = new File(localServerOutboxPath);
-        File[] fList = directory.listFiles();
-        for (File file : fList) {
-            if (file.isFile()){
-                retList.add(file.getName());
-            }
-        }
-        return retList;
+       return fileProcessorService.getOutboxDocumentList();
     }
 
 
@@ -772,14 +783,6 @@ public class DocumentController {
     @Produces(MediaType.APPLICATION_JSON)
     @ResponseBody
     public List<String> listFilesFromInbox() {
-        List<String> retList = new ArrayList<String>();
-        File directory = new File(localServerInboxPath);
-        File[] fList = directory.listFiles();
-        for (File file : fList) {
-            if (file.isFile()){
-                retList.add(file.getName());
-            }
-        }
-        return retList;
+       return fileProcessorService.getInboxDocumentList();
     }
 }

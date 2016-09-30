@@ -8,6 +8,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -18,9 +19,13 @@ import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 7/19/16.
@@ -32,6 +37,14 @@ public class FileProcessorService {
 
     @Value("${networkServer.ssl.trust-certificates}")
     private Boolean trustCertificates;
+
+    @Value("${networkServer.outbox.path}")
+    private String localServerOutboxPath;
+
+    @Value("${networkServer.inbox.path}")
+    private String localServerInboxPath;
+
+
 
     public static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
     public static final String DEFAULT_RECEIVE_MESSAGE = "Received document.";
@@ -47,7 +60,7 @@ public class FileProcessorService {
                 SSLContextBuilder builder = new SSLContextBuilder();
                 builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
                 SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                        builder.build());
+                        builder.build(), NoopHostnameVerifier.INSTANCE);
                 httpclient = HttpClients.custom().setSSLSocketFactory(
                         sslsf).build();
             }
@@ -126,5 +139,32 @@ public class FileProcessorService {
         //If appropriate add logic here to model your custom file processing logic.
 
         sendAck(transaction.getAckURL(), transaction.getSenderTransactionId());
+    }
+
+
+    @PreAuthorize("(hasRole('ROLE_ADMIN')")
+    public List<String> getInboxDocumentList() {
+        List<String> retList = new ArrayList<String>();
+        File directory = new File(localServerInboxPath);
+        File[] fList = directory.listFiles();
+        for (File file : fList) {
+            if (file.isFile()){
+                retList.add(file.getName());
+            }
+        }
+        return retList;
+    }
+
+    @PreAuthorize("(hasRole('ROLE_ADMIN')")
+    public List<String> getOutboxDocumentList() {
+        List<String> retList = new ArrayList<String>();
+        File directory = new File(localServerOutboxPath);
+        File[] fList = directory.listFiles();
+        for (File file : fList) {
+            if (file.isFile()){
+                retList.add(file.getName());
+            }
+        }
+        return retList;
     }
 }

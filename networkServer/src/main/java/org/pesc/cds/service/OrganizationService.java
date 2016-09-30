@@ -39,18 +39,18 @@ public class OrganizationService {
         return getOrganization(organizationId, null, null);
     }
 
-    public JSONObject getOrganization(String destinationSchoolCode, String destinationSchoolCodeType){
-        return getOrganization(null, destinationSchoolCode, destinationSchoolCodeType);
+    public JSONObject getOrganization(String schoolCode, String schoolCodeType){
+        return getOrganization(null, schoolCode, schoolCodeType);
     }
 
-    private JSONObject getOrganization(Integer organizationId, String destinationSchoolCode, String destinationSchoolCodeType){
+    private JSONObject getOrganization(Integer organizationId, String schoolCode, String schoolCodeType){
         JSONObject organization = null;
         StringBuilder uri = new StringBuilder(directoryServer + organizationApiPath);
         if(organizationId!=null) {
             uri.append("?id=").append(organizationId);
         }
-        if(destinationSchoolCode!=null && destinationSchoolCodeType!=null){
-            uri.append("?organizationCodeType=").append(destinationSchoolCodeType).append("&organizationCode=").append(destinationSchoolCode);
+        if(schoolCode!=null && schoolCodeType!=null){
+            uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
         }
         try(CloseableHttpClient client = HttpClients.custom().build()) {
             HttpGet get = new HttpGet(uri.toString());

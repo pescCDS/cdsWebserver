@@ -19,6 +19,9 @@ public class Transaction {
 	@Column(name="sender_id")
 	private Integer senderId;
 
+	@Column(name="signer_id")
+	private Integer signerId;
+
 	@Column(name="sender_transaction_id")
 	private Integer senderTransactionId;
 	
@@ -209,5 +212,13 @@ public class Transaction {
 
 	public void setSenderTransactionId(Integer senderTransactionId) {
 		this.senderTransactionId = senderTransactionId;
+	}
+
+	public Integer getSignerId() {
+		return signerId;
+	}
+
+	public void setSignerId(Integer signerId) {
+		this.signerId = signerId;
 	}
 }

@@ -354,7 +354,7 @@ public class OrganizationService {
 
         log.info(String.format("Retrieving public key for org %d", orgID));
 
-        return jdbcTemplate.queryForObject("SELECT public_key FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
+        return jdbcTemplate.queryForObject("SELECT public_key FROM organization WHERE id = ? and enabled = ?", new Object[]{orgID, true}, String.class);
     }
 
     private CertificateInfo buildCertificateInfo(String pemCert) throws CertificateException{

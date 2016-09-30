@@ -332,7 +332,8 @@ public class OrganizationsResource {
     @Path("/{id}/public-key")
     @GET
     @Produces({MediaType.TEXT_HTML})
-    @ApiOperation("Get PEM formatted public key associated with the signing certificate used to digitally sign documents.")
+    @ApiOperation("Get PEM formatted public key associated with the signing certificate used to digitally sign documents. If the organization that owns the key is disabled" +
+            ", no key is returned.")
     public String getPublicKey(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id) {
 
         try {
@@ -341,8 +342,13 @@ public class OrganizationsResource {
 
         } catch (CertificateException e) {
             log.error("Failed to retrieve public key.", e);
-            throw new RuntimeException("Failed to retrieve public key", e);
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/network-certificate");
         }
+        catch (Exception e) {
+            log.error("Failed to retrieve public key.", e);
+        }
+
+        return null;
     }
 
     public static void checkParameter(Object param, String parameterName, String path) {
