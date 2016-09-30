@@ -1140,6 +1140,19 @@
         "CidrIp": "162.202.162.177/32"
       }
     },
+    "ingress18": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgsshcustomremoteIPs"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "52.89.189.0/32"
+      }
+    },
+
     "ingress17": {
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
