@@ -72,7 +72,7 @@ public class TransactionService {
         return this.transactionRepository.findOne(id);
     }
 
-    public Predicate[] createPredicates(CriteriaBuilder cb, Root<Transaction> transactionRoot,  Integer senderId,
+    private Predicate[] createPredicates(CriteriaBuilder cb, Root<Transaction> transactionRoot,  Integer senderId,
                                         String status,
                                         String operation,
                                         TransactionStatus deliveryStatus,
@@ -154,6 +154,7 @@ public class TransactionService {
      *
      * @return
      */
+    @PreAuthorize("(hasRole('ROLE_ADMIN')")
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public PagedData<Transaction> search(
             Integer senderId,
