@@ -23,6 +23,10 @@
 		<java.version>1.8</java.version>
 		<pesc.sdk.version>0.0.1-SNAPSHOT</pesc.sdk.version>
 		<docker.image.prefix>edex</docker.image.prefix>
+
+		<!-- OAuth2 -->
+		<spring-security-oauth2.version>2.0.11.RELEASE</spring-security-oauth2.version>
+
 	</properties>
 
 	<dependencies>
@@ -142,6 +146,12 @@
 			<groupId>org.pesc</groupId>
 			<artifactId>pesc-sdk</artifactId>
 			<version>${pesc.sdk.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>${spring-security-oauth2.version}</version>
 		</dependency>
 
 

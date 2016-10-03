@@ -41,6 +41,12 @@ import org.pesc.sdk.sector.academicrecord.v1_7.ReleaseAuthorizedMethodType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.oxm.Marshaller;
+import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -112,6 +118,9 @@ public class DocumentController {
 
     @Value("${api.public_key}")
     private String publicKeyApiPath;
+
+    @Value("${authentication.oauth.accessTokenUri}")
+    private String accessTokenUri;
 
     @Autowired
     private TransactionService transactionService;
@@ -547,6 +556,23 @@ public class DocumentController {
                 byte[] fileSignature = pkiService.createDigitalSignature(new FileInputStream(outboxFile), pkiService.getSigningKeys().getPrivate());
 
                 ContentBody signature = new ByteArrayBody(fileSignature, "signature.dat");
+
+                ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
+
+                resource.setAccessTokenUri(accessTokenUri);
+                resource.setClientId("sallen");
+                resource.setId("sparklr");
+                resource.setScope(Arrays.asList("trust"));
+
+                ResourceOwnerPasswordAccessTokenProvider provider = new ResourceOwnerPasswordAccessTokenProvider();
+                OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
+
+                OAuth2RestTemplate template = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessToken));
+
+
+                //String result = template.getForObject(serverRunning.getUrl("/sparklr2/photos/trusted/message"), String.class);
+                //assertEquals("Hello, Trusted Client", result);
+
 
                 // send http post to network server
                 CloseableHttpClient client = fileProcessorService.makeHttpClient();

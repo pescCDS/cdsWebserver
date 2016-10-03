@@ -2,6 +2,7 @@ package org.pesc.api.model;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Date;
 @XmlRootElement(name = "Contact")
 @Entity
 @Table(name="contact")
-public class Contact {
+public class Contact implements Serializable {
 
     @Id
     @Column(name = "id")

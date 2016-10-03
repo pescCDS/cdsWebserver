@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/6/16.
@@ -12,7 +13,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement(name = "OrganizationType")
 @Entity
 @Table(name="organization_type")
-public class OrganizationType {
+public class OrganizationType implements Serializable {
 
     @Id
     @Column(name = "id")
