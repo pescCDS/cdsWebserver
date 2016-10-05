@@ -29,6 +29,7 @@ import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.model.TranscriptRequestBuilder;
 import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.service.FileProcessorService;
+import org.pesc.cds.service.OAuthService;
 import org.pesc.cds.service.OrganizationService;
 import org.pesc.cds.service.PKIService;
 import org.pesc.sdk.core.coremain.v1_12.DocumentTypeCodeType;
@@ -39,19 +40,21 @@ import org.pesc.sdk.message.transcriptrequest.v1_2.TranscriptRequest;
 import org.pesc.sdk.sector.academicrecord.v1_7.PhoneType;
 import org.pesc.sdk.sector.academicrecord.v1_7.ReleaseAuthorizedMethodType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -139,6 +142,18 @@ public class DocumentController {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private OAuthService oAuthService;
+
+
+    @Autowired
+    @Qualifier("myRestTemplate")
+    private OAuth2RestOperations restTemplate;
+    @Autowired
+    @Qualifier("myClientOnlyRestTemplate")
+    private OAuth2RestOperations clientOnlyrestTemplate;
+
 
     @RequestMapping(value="/send", method= RequestMethod.GET)
     @ResponseBody
@@ -328,6 +343,22 @@ public class DocumentController {
             log.debug("Getting endpoint for org");
         }
         return orgID;
+    }
+
+    @RequestMapping(value = "/token", method = RequestMethod.GET)
+    public String getToken() {
+
+        String result = restTemplate.getForObject("http://localhost:9000/api/v1/documents/test", String.class);
+
+        //return oAuthService.getOAuthToken();
+
+        return result;
+    }
+
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public String test(@RequestHeader org.springframework.http.HttpHeaders headers) {
+
+      return "Yeah!";
     }
 
     /**
@@ -561,8 +592,11 @@ public class DocumentController {
 
                 resource.setAccessTokenUri(accessTokenUri);
                 resource.setClientId("sallen");
-                resource.setId("sparklr");
-                resource.setScope(Arrays.asList("trust"));
+                resource.setClientSecret("admin");
+                resource.setUsername("sallen");
+                resource.setPassword("admin");
+                //resource.setId("edexchange");
+                resource.setScope(Arrays.asList("read", "write"));
 
                 ResourceOwnerPasswordAccessTokenProvider provider = new ResourceOwnerPasswordAccessTokenProvider();
                 OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
@@ -570,11 +604,33 @@ public class DocumentController {
                 OAuth2RestTemplate template = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessToken));
 
 
+                LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+                map.add("recipient_id", tx.getRecipientId());
+                map.add("sender_id", tx.getSenderId());
+                map.add("signer_id", localServerId);
+                map.add("file_format", fileFormat);
+                map.add("document_type", documentType);
+                map.add("department", department);
+                map.add("transaction_id", tx.getId());
+                map.add("ack_url", localServerWebServiceURL);
+                map.add("file", outboxFile);
+                map.add("signature", signature);
+
+                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
+
+
+                ResponseEntity<String> response = template.exchange
+                        (endpointURI, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
+
+                log.info(response.getStatusCode().getReasonPhrase());
+
                 //String result = template.getForObject(serverRunning.getUrl("/sparklr2/photos/trusted/message"), String.class);
                 //assertEquals("Hello, Trusted Client", result);
 
 
                 // send http post to network server
+                /*
                 CloseableHttpClient client = fileProcessorService.makeHttpClient();
                 try {
                     HttpPost post = new HttpPost(endpointURI);
@@ -624,6 +680,7 @@ public class DocumentController {
                         log.error(e);
                     }
                 }
+                */
 
 
             } catch (Exception e) {
