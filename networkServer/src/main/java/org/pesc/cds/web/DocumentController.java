@@ -54,6 +54,7 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -348,15 +349,33 @@ public class DocumentController {
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public String getToken() {
 
-        String result = restTemplate.getForObject("http://localhost:9000/api/v1/documents/test", String.class);
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("recipient_id", "1");
+        map.add("sender_id", "2");
+        map.add("signer_id", "3");
+        map.add("file_format", "PDF");
+        map.add("document_type", "Transcript");
+        map.add("department", "Administration");
+        map.add("transaction_id", "100");
+        map.add("ack_url", localServerWebServiceURL);
+
+       org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+       headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
+
+
+        ResponseEntity<String> response = restTemplate.exchange
+                ("http://localhost:9000/api/v1/documents/test", HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
+
+
+        //String result = restTemplate.getForObject("http://localhost:9000/api/v1/documents/test", String.class);
 
         //return oAuthService.getOAuthToken();
 
-        return result;
+        return response.getBody();
     }
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public String test(@RequestHeader org.springframework.http.HttpHeaders headers) {
+    @RequestMapping(value = "/test", method = RequestMethod.POST)
+    public String test(@RequestBody MultiValueMap<String,String> formData, @RequestHeader org.springframework.http.HttpHeaders headers) {
 
       return "Yeah!";
     }
