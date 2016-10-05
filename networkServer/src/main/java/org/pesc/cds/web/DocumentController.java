@@ -42,6 +42,7 @@ import org.pesc.sdk.sector.academicrecord.v1_7.ReleaseAuthorizedMethodType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -363,9 +365,15 @@ public class DocumentController {
        headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
 
 
+        //RestTemplate testTemplate = new TestRestTemplate();
+
         ResponseEntity<String> response = restTemplate.exchange
                 ("http://localhost:9000/api/v1/documents/test", HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
 
+
+        log.info("TOKEN: " + restTemplate.getAccessToken().getValue());
+        log.info("REFRESH TOKEN:" + restTemplate.getAccessToken().getRefreshToken());
+        log.info(restTemplate.getAccessToken().toString());
 
         //String result = restTemplate.getForObject("http://localhost:9000/api/v1/documents/test", String.class);
 

@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.TokenRequest;
@@ -62,6 +63,7 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
 
         endpoints
                 .tokenStore(tokenStore())
+                //Approval handler not needed.  Approval is handled via enabling or disabling an organization.
                 //.userApprovalHandler(userApprovalHandler())
                 .authenticationManager(authenticationManager);
     }
@@ -78,6 +80,12 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
                 .secret(secret)
                 .accessTokenValiditySeconds(tokenValiditySeconds);
 
+    }
+
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+        //Allow the resource server to validate tokens...
+        security.checkTokenAccess("isAuthenticated()");    //change to permitAll() for public access.
     }
 
 }
