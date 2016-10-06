@@ -29,7 +29,6 @@ import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.model.TranscriptRequestBuilder;
 import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.service.FileProcessorService;
-import org.pesc.cds.service.OAuthService;
 import org.pesc.cds.service.OrganizationService;
 import org.pesc.cds.service.PKIService;
 import org.pesc.sdk.core.coremain.v1_12.DocumentTypeCodeType;
@@ -42,22 +41,16 @@ import org.pesc.sdk.sector.academicrecord.v1_7.ReleaseAuthorizedMethodType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.TestRestTemplate;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
-import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
-import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -66,23 +59,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+
+;
 
 @RestController
 @RequestMapping(value="api/v1/documents")
@@ -145,9 +129,6 @@ public class DocumentController {
 
     @Autowired
     private OrganizationService organizationService;
-
-    @Autowired
-    private OAuthService oAuthService;
 
 
     @Autowired
@@ -344,41 +325,6 @@ public class DocumentController {
         return orgID;
     }
 
-    @RequestMapping(value = "/token", method = RequestMethod.GET)
-    public String getToken() {
-
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("recipient_id", "1");
-        map.add("sender_id", "2");
-        map.add("signer_id", "3");
-        map.add("file_format", "PDF");
-        map.add("document_type", "Transcript");
-        map.add("department", "Administration");
-        map.add("transaction_id", "100");
-        map.add("ack_url", localServerWebServiceURL);
-
-       org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-       headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
-
-
-        //RestTemplate testTemplate = new TestRestTemplate();
-
-        ResponseEntity<String> response = restTemplate.exchange
-                ("http://localhost:9000/api/v1/documents/test", HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
-
-
-        log.info("TOKEN: " + restTemplate.getAccessToken().getValue());
-        log.info("REFRESH TOKEN:" + restTemplate.getAccessToken().getRefreshToken());
-
-
-        return response.getBody();
-    }
-
-    @RequestMapping(value = "/test", method = RequestMethod.POST)
-    public String test(@RequestBody MultiValueMap<String,String> formData, @RequestHeader org.springframework.http.HttpHeaders headers) {
-
-      return "Yeah!";
-    }
 
     /**
      *
@@ -605,23 +551,6 @@ public class DocumentController {
 
                 byte[] fileSignature = pkiService.createDigitalSignature(new FileInputStream(outboxFile), pkiService.getSigningKeys().getPrivate());
 
-                ContentBody signature = new ByteArrayBody(fileSignature, "signature.dat");
-
-                ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
-
-                resource.setAccessTokenUri(accessTokenUri);
-                resource.setClientId("sallen");
-                resource.setClientSecret("admin");
-                resource.setUsername("sallen");
-                resource.setPassword("admin");
-                //resource.setId("edexchange");
-                resource.setScope(Arrays.asList("read", "write"));
-
-                ResourceOwnerPasswordAccessTokenProvider provider = new ResourceOwnerPasswordAccessTokenProvider();
-                OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
-
-                OAuth2RestTemplate template = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessToken));
-
 
                 LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
                 map.add("recipient_id", tx.getRecipientId());
@@ -632,14 +561,23 @@ public class DocumentController {
                 map.add("department", department);
                 map.add("transaction_id", tx.getId());
                 map.add("ack_url", localServerWebServiceURL);
-                map.add("file", outboxFile);
-                map.add("signature", signature);
+                map.add("file", new FileSystemResource(outboxFile));
+                map.add("signature", new ByteArrayResource(fileSignature){
+                    @Override
+                    public String getFilename(){
+                        return "signature.dat";
+                    }
+                });
+                if(createTranscriptRequest && requestFile!=null){
+                    map.add("transcript_request_file", new FileSystemResource(requestFile));
+                }
+
 
                 org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
                 headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
 
 
-                ResponseEntity<String> response = template.exchange
+                ResponseEntity<String> response = restTemplate.exchange
                         (endpointURI, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
 
                 log.info(response.getStatusCode().getReasonPhrase());

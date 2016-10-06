@@ -17,10 +17,17 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +51,10 @@ public class FileProcessorService {
     @Value("${networkServer.inbox.path}")
     private String localServerInboxPath;
 
+
+    @Autowired
+    @Qualifier("myRestTemplate")
+    private OAuth2RestOperations restTemplate;
 
 
     public static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
@@ -79,53 +90,28 @@ public class FileProcessorService {
 
     public void sendAck(String ackURL, Integer transactionId) {
         // send response back to sending network server
-        CloseableHttpClient client = makeHttpClient();
 
-        try {
+        if (ackURL != null && !ackURL.isEmpty() && transactionId != null) {
 
-            if (ackURL != null && !ackURL.isEmpty() && transactionId != null) {
+            LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+            map.add("transactionId", transactionId.toString());
+            map.add("status", TransactionStatus.SUCCESS.name());
+            map.add("message", DEFAULT_DELIVERY_MESSAGE);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
 
 
-                HttpPost post = new HttpPost(ackURL);
+            ResponseEntity<String> response = restTemplate.exchange
+                    (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
 
-                post.setEntity(new UrlEncodedFormEntity(
-                        Form.form().add("transactionId", transactionId.toString())
-                                .add("status", TransactionStatus.SUCCESS.name())
-                                .add("message", DEFAULT_DELIVERY_MESSAGE).build()));
-
-                CloseableHttpResponse response = client.execute(post);
-
-                try {
-                    log.debug(response.getStatusLine());
-                    if (response.getStatusLine().getStatusCode() != 200)  {
-                        throw new RuntimeException(response.getStatusLine().toString());
-                    }
-                    else {
-                        HttpEntity resEntity = response.getEntity();
-                        if (resEntity != null) {
-                            log.debug("Response content length: " + resEntity.getContentLength());
-                        }
-                        EntityUtils.consume(resEntity);
-                    }
-
-                }
-                finally {
-                    response.close();
-                }
-
+            log.debug(response.getStatusCode());
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new RuntimeException(response.getStatusCode().getReasonPhrase());
             }
-        } catch (ClientProtocolException e) {
-            log.error(e);
-        } catch (IOException e) {
-            log.error(e);
+
         }
-        finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                log.error(e);
-            }
-        }
+
     }
 
     /**

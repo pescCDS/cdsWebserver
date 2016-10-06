@@ -25,14 +25,8 @@ import javax.sql.DataSource;
  */
 @Configuration
 @EnableAuthorizationServer
-public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
-
-    @Value("${authentication.oauth.secret}")
-    private String secret;
-
-    @Value("${authentication.oauth.clientid}")
-    private String clientID;
 
     @Value("${authentication.oauth.tokenValidityInSeconds}")
     private Integer tokenValiditySeconds;

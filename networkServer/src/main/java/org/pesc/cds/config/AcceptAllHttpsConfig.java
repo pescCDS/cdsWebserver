@@ -1,4 +1,4 @@
-package oauth.client.demo.config;
+package org.pesc.cds.config;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -24,7 +24,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
  * and using self-signed certificate you have to uncomment below annotations 
  */
 @Configuration
-@Profile("https_connection")
+@Profile("dev")
 public class AcceptAllHttpsConfig {
 
     @Bean

@@ -29,6 +29,8 @@ public class OAuthClientConfig {
     @Autowired(required = false)
     ClientHttpRequestFactory clientHttpRequestFactory;
 
+
+
     /*
      * ClientHttpRequestFactory is autowired and checked in case somewhere in
      * your configuration you provided {@link ClientHttpRequestFactory}
@@ -46,20 +48,17 @@ public class OAuthClientConfig {
     @Qualifier("myRestTemplate")
     public OAuth2RestOperations restTemplate(@Value("${authentication.oauth.accessTokenUri}") String tokenUrl,
                                                        @Value("${authentication.oauth.secret}") String secret,
-                                                       @Value("${networkServer.id}") String clientId,
-                                             @Value("${networkServer.ssl.trust-certificates}") Boolean trustAllCertificates) {
+                                                       @Value("${networkServer.id}") String clientId) {
 
         OAuth2RestTemplate template = new OAuth2RestTemplate(fullAccessresourceDetailsClientOnly(tokenUrl, secret, clientId), new DefaultOAuth2ClientContext(
                 new DefaultAccessTokenRequest()));
-        return prepareTemplate(template, trustAllCertificates);
+        return prepareTemplate(template);
     }
 
-    public OAuth2RestTemplate prepareTemplate(OAuth2RestTemplate template, Boolean trustAllCertificates) {
-        if (trustAllCertificates) {
-            template.setRequestFactory(getClientHttpRequestFactory());
-        }
+    public OAuth2RestTemplate prepareTemplate(OAuth2RestTemplate template) {
 
-        template.setAccessTokenProvider(clientAccessTokenProvider());
+        template.setRequestFactory(getClientHttpRequestFactory());
+
 
         return template;
     }
