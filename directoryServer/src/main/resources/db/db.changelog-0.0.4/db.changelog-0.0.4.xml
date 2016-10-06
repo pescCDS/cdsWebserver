@@ -14,5 +14,14 @@
 		
 	</changeSet>
 
+	<changeSet id="2" author="jwhetstone" context="dev, ci, qa, prod">
+		<comment>
+			Updating organization table to add oauth secret.
+		</comment>
+
+		<sqlFile encoding="utf8" path="oauth-secret-column.sql" relativeToChangelogFile="true" />
+
+	</changeSet>
+
 
 </databaseChangeLog>

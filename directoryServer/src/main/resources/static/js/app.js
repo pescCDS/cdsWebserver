@@ -1018,6 +1018,20 @@
         self.createContact = createContact;
         self.setEnabled = setEnabled;
         self.deleteOrg = deleteOrg;
+        self.showOAuthSecret = false;
+        self.oauthSecret = '';
+        self.showOAuthForm = false;
+        self.toggleOAuthForm = toggleOAuthForm;
+        self.setOAuthSecret = setOAuthSecret;
+        self.getOAuthSecret = getOAuthSecret;
+
+        function getOAuthSecret() {
+           organizationService.getOAuthSecret(self.org).then(function(response){
+               if (response.status == 200) {
+                   self.oauthSecret = response.data;
+               }
+           });
+        }
 
         function deleteOrg() {
             organizationService.deleteOrg(self.org);
@@ -1139,6 +1153,10 @@
             }
         }
 
+        function toggleOAuthForm () {
+            self.showOAuthForm = !self.showOAuthForm;
+        }
+
         function toggleNetworkCertificateForm () {
             self.showNetworkCertificateForm = !self.showNetworkCertificateForm;
             if (self.showNetworkCertificateForm == true && self.pemNetworkCertificate == '') {
@@ -1161,9 +1179,28 @@
 
             },function(data){
                 toasterService.error(data);
-            })
+            });
 
         };
+
+        function setOAuthSecret() {
+
+            organizationService.updateOAuthSecret(self.org,self.oauthSecret).then(function(response){
+
+                if (response.status == 200) {
+                    self.showOAuthForm = false;
+                    toasterService.success("Successfully updated OAuth secret.");
+                }
+                else {
+                    toasterService.error("Failed to update OAuth secret.");
+                }
+
+            },function(data){
+                toasterService.error(data);
+            });
+
+        };
+
 
 
         function setNetworkCertificate() {
@@ -1311,6 +1348,10 @@
         getInstitutionsForServiceProvider();
         getCertificate();
         getNetworkCertificate();
+
+        if (isEditableByUser()) {
+            getOAuthSecret();
+        }
 
         function getEndpoints() {
             endpointService.getEndpoints(self.org).then(function (data) {
@@ -1946,7 +1987,9 @@
             getUploadResults: getUploadResults,
             getCertificate: getCertificate,
             getNetworkCertificate: getNetworkCertificate,
-            updateNetworkCertificate: updateNetworkCertificate
+            updateNetworkCertificate: updateNetworkCertificate,
+            updateOAuthSecret: udpateOAuthSecret,
+            getOAuthSecret: getOAuthSecret
         };
 
         return service;
@@ -2113,6 +2156,17 @@
             return deferred.promise;
         }
 
+        function udpateOAuthSecret(org, oauthSecret) {
+
+            var deferred = $q.defer();
+
+            $http.put('/services/rest/v1/organizations/' + org.id + '/oauth-secret', oauthSecret ).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
         function updateNetworkCertificate(org, pemCert) {
 
             var deferred = $q.defer();
@@ -2131,6 +2185,19 @@
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/organizations/' + org.id + '/signing-certificate' ).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+        function getOAuthSecret(org) {
+
+            var deferred = $q.defer();
+
+            $http.get('/services/rest/v1/organizations/' + org.id + '/oauth-secret' ).then(function (response) {
+                deferred.resolve(response);
+            },function(response){
                 deferred.resolve(response);
             });
 

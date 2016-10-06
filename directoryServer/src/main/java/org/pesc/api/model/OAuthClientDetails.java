@@ -1,25 +1,23 @@
 package org.pesc.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 5/12/16.
+ * Created by James Whetstone on 10/6/16.
  */
 @XmlRootElement(name = "Organization")
 @Entity
 @Table(name = "organization")
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class OrganizationDTO {
+public class OAuthClientDetails {
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "oauth_secret")
+    private String oauthSecret;
 
     @Column(name = "enabled")
     private Boolean enabled;
@@ -40,11 +38,11 @@ public class OrganizationDTO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getOauthSecret() {
+        return oauthSecret;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOauthSecret(String oauthSecret) {
+        this.oauthSecret = oauthSecret;
     }
 }

@@ -1168,7 +1168,44 @@
             </div>
         </div>
 
-        <div>
+    <div  ng-show="orgCtrl.isEditableByUser()" >
+        <form name="oauthSecretForm" ng-submit="oauthSecretForm.$valid && orgCtrl.setOAuthSecret()" novalidate="novalidate">
+            <div style="float:right;">
+
+
+
+                    <span  ng-show="orgCtrl.showOAuthForm == false" class="glyphicon glyphicon-pencil ed-icon-btn"
+                           ng-click="orgCtrl.toggleOAuthForm()"></span>
+
+
+                <button ng-show="orgCtrl.showOAuthForm == true" class="glyphicon glyphicon-floppy-disk ed-icon-btn" type="submit"></button>
+            </div>
+            <div class="ed-title">OAuth Secret</div>
+
+            <div ng-show="orgCtrl.showOAuthForm == true">
+
+                <div>
+                    <div class="form-group">
+                        <input  type="text" ng-model="orgCtrl.oauthSecret" placeholder="OAuth Secret"> </input>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+        <div ng-show="orgCtrl.showOAuthForm == false">
+
+             <input ng-show="orgCtrl.showOAuthSecret == false" readonly type="password" ng-model="orgCtrl.oauthSecret" />
+             <input ng-show="orgCtrl.showOAuthSecret == true" readonly type="text" ng-model="orgCtrl.oauthSecret" />
+
+             <span class="glyphicon glyphicon-eye-open ed-icon-btn"
+                    ng-mousedown="orgCtrl.showOAuthSecret = true" ng-mouseup="orgCtrl.showOAuthSecret = false">
+             </span>
+        </div>
+
+    </div>
+
+    <div>
             <form name="certificateForm" ng-submit="certificateForm.$valid && orgCtrl.setCertificate()" novalidate="novalidate">
                 <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
 
@@ -1178,9 +1215,6 @@
 
 
                     <button ng-show="orgCtrl.showCertificateForm == true" class="glyphicon glyphicon-floppy-disk ed-icon-btn" type="submit"></button>
-
-
-
                 </div>
 
                 <div class="ed-title">Signing Certificate</div>

@@ -582,63 +582,6 @@ public class DocumentController {
 
                 log.info(response.getStatusCode().getReasonPhrase());
 
-                //String result = template.getForObject(serverRunning.getUrl("/sparklr2/photos/trusted/message"), String.class);
-                //assertEquals("Hello, Trusted Client", result);
-
-
-                // send http post to network server
-                /*
-                CloseableHttpClient client = fileProcessorService.makeHttpClient();
-                try {
-                    HttpPost post = new HttpPost(endpointURI);
-
-                    MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
-                            .addPart("recipient_id", new StringBody(tx.getRecipientId().toString()))
-                            .addPart("sender_id", new StringBody(tx.getSenderId().toString()))
-                            .addPart("signer_id", new StringBody(localServerId))
-                            .addPart("file_format", new StringBody(fileFormat))
-                            .addPart("document_type", new StringBody(documentType))
-                            .addPart("department", new StringBody(department))
-                            .addPart("transaction_id", new StringBody(tx.getId().toString()))
-                            .addPart("ack_url", new StringBody(localServerWebServiceURL))
-                            .addPart("file", new FileBody(outboxFile))
-                            .addPart("signature", signature);
-                    if(createTranscriptRequest && requestFile!=null){
-                        multipartEntityBuilder.addPart("transcript_request_file", new FileBody(requestFile));
-                    }
-                    HttpEntity reqEntity = multipartEntityBuilder.build();
-
-                    post.setEntity(reqEntity);
-
-                    CloseableHttpResponse response = client.execute(post);
-
-                    try {
-                        log.debug(response.getStatusLine());
-                        if (response.getStatusLine().getStatusCode() != 200)  {
-                            throw new RuntimeException(response.getStatusLine().toString());
-                        }
-                        else {
-                            HttpEntity resEntity = response.getEntity();
-                            if (resEntity != null) {
-                                log.debug("Response content length: " + resEntity.getContentLength());
-                            }
-                            EntityUtils.consume(resEntity);
-                        }
-
-                    }
-                    finally {
-                        response.close();
-                    }
-
-                } finally {
-                    try {
-                        client.close();
-                    } catch (IOException e) {
-                        log.error(e);
-                    }
-                }
-                */
-
 
             } catch (Exception e) {
 

@@ -1,7 +1,8 @@
 package org.pesc.oauth;
 
 import org.jvnet.hk2.annotations.Service;
-import org.pesc.api.model.Organization;
+import org.pesc.api.StringUtils;
+import org.pesc.api.model.OAuthClientDetails;
 import org.pesc.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,9 +31,9 @@ public class EdExClientDetailsService implements ClientDetailsService {
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
 
-        Organization org = organizationService.findById(Integer.valueOf(clientId));
+        OAuthClientDetails org = organizationService.getOAuthClientDetails(Integer.valueOf(clientId));
 
-        if (org.isEnabled() == false) {
+        if (org == null || org.getEnabled() == false || StringUtils.isEmpty(org.getOauthSecret()) ) {
             return null;
         }
 
@@ -41,13 +42,13 @@ public class EdExClientDetailsService implements ClientDetailsService {
         List<String> scopes = Arrays.asList("read", "write");
 
 
-        clientDetails.setClientId("3");
+        clientDetails.setClientId(clientId);
         clientDetails.setScope(scopes);
         clientDetails.setAutoApproveScopes(scopes);
         clientDetails.setAuthorizedGrantTypes(Arrays.asList("client_credentials", "refresh_token"));
         clientDetails.setAuthorities(AuthorityUtils.createAuthorityList("ROLE_SENDER"));
         clientDetails.setAccessTokenValiditySeconds(tokenValiditySeconds);
-        clientDetails.setClientSecret("secret");
+        clientDetails.setClientSecret(org.getOauthSecret());
 
         return clientDetails;
     }

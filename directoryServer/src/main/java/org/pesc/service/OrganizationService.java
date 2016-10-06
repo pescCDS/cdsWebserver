@@ -3,12 +3,9 @@ package org.pesc.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.api.StringUtils;
-import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.*;
-import org.pesc.api.repository.MessageRepository;
-import org.pesc.api.repository.OrganizationRepository;
-import org.pesc.api.repository.OrganizationTypeRepository;
-import org.pesc.api.repository.SchoolCodesRepository;
+import org.pesc.api.repository.*;
+import org.pesc.api.model.OAuthClientDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,7 +19,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PublicKey;
@@ -31,7 +27,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.Exchanger;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/21/16.
@@ -73,6 +68,9 @@ public class OrganizationService {
         this.entityManagerFactory = entityManagerFactory;
 
     }
+
+    @Autowired
+    private OAuthClientDetailsRepository oAuthClientDetailsRepository;
 
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -230,6 +228,11 @@ public class OrganizationService {
         return this.organizationRepository.findByName(name);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public OAuthClientDetails getOAuthClientDetails(Integer orgID) {
+        return this.oAuthClientDetailsRepository.findOne(orgID);
+    }
+
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     //TODO: add PreAuthorize
@@ -327,6 +330,24 @@ public class OrganizationService {
     }
 
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public String getOAuthSecret(Integer orgID) {
+
+        String oauthSecret = jdbcTemplate.queryForObject("select oauth_secret from organization where id= ?", new Object[]{orgID}, String.class);
+
+        return oauthSecret == null ? "" : oauthSecret;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    public void setOAuthSecret(Integer orgID, String secret) {
+
+        jdbcTemplate.update("update organization set oauth_secret = ? where id = ?", secret, orgID);
+    }
+
+
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public CertificateInfo setNetworkCertificate(Integer orgID, String pemCert) throws CertificateException, IOException {
@@ -360,7 +381,7 @@ public class OrganizationService {
 
         log.info(String.format("Retrieving signing certificate for org %d", orgID));
 
-        return buildCertificateInfo(jdbcTemplate.queryForObject("SELECT network_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class) );
+        return buildCertificateInfo(jdbcTemplate.queryForObject("SELECT network_certificate FROM organization WHERE id = ?", new Object[]{orgID}, String.class));
     }
 
     @Transactional(readOnly = true)
