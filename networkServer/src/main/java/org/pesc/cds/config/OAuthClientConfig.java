@@ -44,46 +44,24 @@ public class OAuthClientConfig {
 
     @Bean
     @Qualifier("myRestTemplate")
-    public OAuth2RestOperations restTemplate(@Value("${authentication.oauth.accessTokenUri}") String tokenUrl) {
+    public OAuth2RestOperations restTemplate(@Value("${authentication.oauth.accessTokenUri}") String tokenUrl,
+                                                       @Value("${authentication.oauth.secret}") String secret,
+                                                       @Value("${networkServer.id}") String clientId,
+                                             @Value("${networkServer.ssl.trust-certificates}") Boolean trustAllCertificates) {
 
-        OAuth2RestTemplate template = new OAuth2RestTemplate(fullAccessresourceDetails(tokenUrl), new DefaultOAuth2ClientContext(
+        OAuth2RestTemplate template = new OAuth2RestTemplate(fullAccessresourceDetailsClientOnly(tokenUrl, secret, clientId), new DefaultOAuth2ClientContext(
                 new DefaultAccessTokenRequest()));
-        return prepareTemplate(template, false);
+        return prepareTemplate(template, trustAllCertificates);
     }
 
-    @Bean
-    @Qualifier("myClientOnlyRestTemplate")
-    public OAuth2RestOperations restClientOnlyTemplate(@Value("${authentication.oauth.accessTokenUri}") String tokenUrl) {
-
-        OAuth2RestTemplate template = new OAuth2RestTemplate(fullAccessresourceDetailsClientOnly(tokenUrl), new DefaultOAuth2ClientContext(
-                new DefaultAccessTokenRequest()));
-        return prepareTemplate(template, true);
-    }
-
-    public OAuth2RestTemplate prepareTemplate(OAuth2RestTemplate template, boolean isClient) {
-        template.setRequestFactory(getClientHttpRequestFactory());
-        if (isClient) {
-            template.setAccessTokenProvider(clientAccessTokenProvider());
-        } else {
-            template.setAccessTokenProvider(userAccessTokenProvider());
+    public OAuth2RestTemplate prepareTemplate(OAuth2RestTemplate template, Boolean trustAllCertificates) {
+        if (trustAllCertificates) {
+            template.setRequestFactory(getClientHttpRequestFactory());
         }
-        return template;
-    }
 
-    /**
-     * {@link AccessTokenProviderChain} throws
-     * InsufficientAuthenticationException in
-     * obtainAccessToken(OAuth2ProtectedResourceDetails resource,
-     * AccessTokenRequest request) if user is not authorized, but since we are
-     * setting our own accessTokenProvider() on OAuth2RestTemplate this
-     * condition is not being checked, thus exception is not being thrown and
-     * requirement for user to be logged in is skipped
-     */
-    @Bean
-    public AccessTokenProvider userAccessTokenProvider() {
-        ResourceOwnerPasswordAccessTokenProvider accessTokenProvider = new ResourceOwnerPasswordAccessTokenProvider();
-        accessTokenProvider.setRequestFactory(getClientHttpRequestFactory());
-        return accessTokenProvider;
+        template.setAccessTokenProvider(clientAccessTokenProvider());
+
+        return template;
     }
 
     @Bean
@@ -93,27 +71,13 @@ public class OAuthClientConfig {
         return accessTokenProvider;
     }
 
-    @Bean
-    @Qualifier("myFullAcessDetails")
-    public OAuth2ProtectedResourceDetails fullAccessresourceDetails(String tokenUrl) {
-        ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
-        resource.setAccessTokenUri(tokenUrl);
-        resource.setClientId("sallen");
-        resource.setGrantType("password");
-        resource.setClientSecret("admin");
-        resource.setScope(Arrays.asList("read", "write"));
-        resource.setUsername("sallen");
-        resource.setPassword("admin");
-        return resource;
-    }
 
     @Bean
-    @Qualifier("myClientOnlyFullAcessDetails")
-    public OAuth2ProtectedResourceDetails fullAccessresourceDetailsClientOnly(String tokenUrl) {
+    public OAuth2ProtectedResourceDetails fullAccessresourceDetailsClientOnly(String tokenUrl, String secret, String clientId) {
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
         resource.setAccessTokenUri(tokenUrl);
-        resource.setClientId("sallen");
-        resource.setClientSecret("secret");
+        resource.setClientId(clientId);
+        resource.setClientSecret(secret);
         resource.setGrantType("client_credentials");
         resource.setScope(Arrays.asList("read", "write"));
         return resource;

@@ -1,5 +1,6 @@
 package org.pesc.cds.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,12 +18,15 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 @EnableResourceServer
 public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
 
+    @Value("${authentication.oauth.secret}") String secret;
+    @Value("${networkServer.id}") String clientId;
+
     @Bean
     public ResourceServerTokenServices tokenServices() {
         RemoteTokenServices remoteTokenServices = new RemoteTokenServices();
         remoteTokenServices.setCheckTokenEndpointUrl("http://localhost/oauth/check_token");
-        remoteTokenServices.setClientId("sallen");
-        remoteTokenServices.setClientSecret("admin");
+        remoteTokenServices.setClientId(clientId);
+        remoteTokenServices.setClientSecret(secret);
         return remoteTokenServices;
     }
     @Override

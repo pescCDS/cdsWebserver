@@ -266,9 +266,20 @@ public class OrganizationService {
     public void setEnabledForOrganization(Integer orgID, Boolean enable) {
 
         jdbcTemplate.update(
-                "update organization set enabled = ? where id = ?", orgID, enable);
+                "update organization set enabled = ? where id = ?", enable, orgID);
+
+        if (enable == false) {
+            revokeOAuthTokens(orgID);
+        }
+
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    private void revokeOAuthTokens(Integer orgID) {
+
+            jdbcTemplate.update("delete from oauth_access_token where client_id = ?", orgID);
+    }
+    /*
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
     public void setProperty(Integer orgID, String propertyName, Object propertyValue) {
@@ -277,6 +288,7 @@ public class OrganizationService {
         jdbcTemplate.update(
                 String.format("update organization set %s = ? where id = ?", propertyName), propertyValue, orgID);
     }
+    */
 
 
     private String convertPublicKeyToPEM(PublicKey key) {
@@ -309,6 +321,8 @@ public class OrganizationService {
 
         jdbcTemplate.update("update organization set signing_certificate = ?, public_key = ?, enabled = false where id = ?", pemCert, convertPublicKeyToPEM(key), orgID);
 
+        revokeOAuthTokens(orgID);
+
         return buildCertificateInfo(pemCert);
     }
 
@@ -326,7 +340,7 @@ public class OrganizationService {
         String domainName = X500Name.asX500Name(cer.getSubjectX500Principal()).getCommonName();
         jdbcTemplate.update("update organization set network_certificate = ?, network_domain = ?, enabled = false where id = ?", pemCert, domainName, orgID);
 
-
+        revokeOAuthTokens(orgID);
 
         return buildCertificateInfo(pemCert);
     }

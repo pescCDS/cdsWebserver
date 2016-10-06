@@ -153,10 +153,6 @@ public class DocumentController {
     @Autowired
     @Qualifier("myRestTemplate")
     private OAuth2RestOperations restTemplate;
-    @Autowired
-    @Qualifier("myClientOnlyRestTemplate")
-    private OAuth2RestOperations clientOnlyrestTemplate;
-
 
     @RequestMapping(value="/send", method= RequestMethod.GET)
     @ResponseBody
@@ -373,11 +369,7 @@ public class DocumentController {
 
         log.info("TOKEN: " + restTemplate.getAccessToken().getValue());
         log.info("REFRESH TOKEN:" + restTemplate.getAccessToken().getRefreshToken());
-        log.info(restTemplate.getAccessToken().toString());
 
-        //String result = restTemplate.getForObject("http://localhost:9000/api/v1/documents/test", String.class);
-
-        //return oAuthService.getOAuthToken();
 
         return response.getBody();
     }
