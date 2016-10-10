@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,12 +103,23 @@ public class FileProcessorService {
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
 
 
-            ResponseEntity<String> response = restTemplate.exchange
-                    (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
+            try {
+                ResponseEntity<String> response = restTemplate.exchange
+                        (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
 
-            log.debug(response.getStatusCode());
-            if (response.getStatusCode() != HttpStatus.OK) {
-                throw new RuntimeException(response.getStatusCode().getReasonPhrase());
+                log.debug(response.getStatusCode());
+                if (response.getStatusCode() != HttpStatus.OK) {
+                    throw new RuntimeException(response.getStatusCode().getReasonPhrase());
+                }
+
+            }
+            catch(ResourceAccessException e) {
+
+                //Force the OAuth client to retrieve the token again whenever it is used again.
+                restTemplate.getOAuth2ClientContext().setAccessToken(null);
+
+                log.error(e);
+                throw e;
             }
 
         }

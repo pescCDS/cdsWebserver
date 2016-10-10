@@ -47,10 +47,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
-import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -582,6 +581,18 @@ public class DocumentController {
 
                 log.info(response.getStatusCode().getReasonPhrase());
 
+
+            } catch(ResourceAccessException e) {
+
+                //Force the OAuth client to retrieve the token again whenever it is used again.
+
+                restTemplate.getOAuth2ClientContext().setAccessToken(null);
+
+                tx.setError(e.getMessage());
+                transactionService.update(tx);
+
+                log.error(e);
+                throw new IllegalArgumentException(e);
 
             } catch (Exception e) {
 
