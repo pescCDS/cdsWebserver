@@ -1187,26 +1187,20 @@
 
                 <div class="form-inline" ng-show="orgCtrl.showOAuthForm == true">
                     <div class="form-group">
-                        <label style="width: 70px;">Secret: </label><input  type="text" ng-model="orgCtrl.oauthSecret" placeholder="OAuth Secret"> </input>
+                        <label style="width: 70px;">Secret: </label><input  type="text" ng-model="orgCtrl.oauthSecretReplacement" placeholder="OAuth Secret"> </input>
                     </div>
 
                 </div>
         </form>
 
         <div ng-show="orgCtrl.showOAuthForm == false">
-
             <div class="form-inline">
                 <div class="form-group">
                     <label style="width: 70px;">Secret: </label>
-                    <input ng-show="orgCtrl.showOAuthSecret == false" readonly type="password" ng-model="orgCtrl.oauthSecret" />
-                    <input ng-show="orgCtrl.showOAuthSecret == true" readonly type="text" ng-model="orgCtrl.oauthSecret" />
-                     <div class="glyphicon glyphicon-eye-open ed-icon-btn"
-                           ng-mousedown="orgCtrl.showOAuthSecret = true" ng-mouseup="orgCtrl.showOAuthSecret = false">
-                    </div>
+                    <input ng-show="orgCtrl.oauthSecret.length > 0" readonly type="password" value="***************" />
+                    <input ng-show="orgCtrl.oauthSecret.length == 0" readonly type="password"/>
                 </div>
             </div>
-
-
         </div>
 
     </div>

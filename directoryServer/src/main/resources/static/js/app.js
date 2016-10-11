@@ -1024,6 +1024,7 @@
         self.toggleOAuthForm = toggleOAuthForm;
         self.setOAuthSecret = setOAuthSecret;
         self.getOAuthSecret = getOAuthSecret;
+        self.oauthSecretReplacement = '';
 
         function getOAuthSecret() {
            organizationService.getOAuthSecret(self.org).then(function(response){
@@ -1185,12 +1186,12 @@
 
         function setOAuthSecret() {
 
-            if (isValidPassword(self.oauthSecret) == false) {
-                toasterService.error(PASSWORD_REQUIREMENTS);
+            if (isValidPassword(self.oauthSecretReplacement) == false) {
+                toasterService.error(OAUTH_SECRET_REQUIREMENTS);
                 return;
             }
 
-            organizationService.updateOAuthSecret(self.org,self.oauthSecret).then(function(response){
+            organizationService.updateOAuthSecret(self.org,self.oauthSecretReplacement).then(function(response){
 
                 if (response.status == 200) {
                     self.showOAuthForm = false;
@@ -2928,5 +2929,5 @@
     }
 
     var PASSWORD_REQUIREMENTS = "The password must be at least 15 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$ _!%*#?&.";
-
+    var OAUTH_SECRET_REQUIREMENTS = "The OAuth secret must be at least 15 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character $@$ _!%*#?&.";
 })();

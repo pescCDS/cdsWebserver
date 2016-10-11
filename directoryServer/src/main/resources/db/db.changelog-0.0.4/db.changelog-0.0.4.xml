@@ -23,5 +23,14 @@
 
 	</changeSet>
 
+	<changeSet id="3" author="jwhetstone" context="dev, ci, qa, prod">
+		<comment>
+			Updating organization table to add default oauth token for development purposes for organization 3
+		</comment>
+
+		<sqlFile encoding="utf8" path="default-oauth-token.sql" relativeToChangelogFile="true" />
+
+	</changeSet>
+
 
 </databaseChangeLog>
