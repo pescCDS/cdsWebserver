@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mvn -DskipTests package docker:build
+mvn -DskipTests install
 
 docker-compose -f docker-compose-network-dev.yml up -d
 

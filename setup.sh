@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mvn -DskipTests -am -pl networkServer,directoryServer package docker:build
+mvn -DskipTests -am -pl networkServer,directoryServer install 
 
 profile=${1:-dev} docker-compose up -d
 

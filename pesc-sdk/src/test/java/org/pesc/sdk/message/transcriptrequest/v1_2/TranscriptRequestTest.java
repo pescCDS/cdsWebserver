@@ -95,7 +95,7 @@ public class TranscriptRequestTest {
             JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
             Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
             SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/documentinfo_v1.0.0.xsd");
+            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
             Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
             documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
             DocumentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
@@ -129,7 +129,7 @@ public class TranscriptRequestTest {
             JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
             Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
             SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/documentinfo_v1.0.0.xsd");
+            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
             Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
             documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
             try {
@@ -168,7 +168,7 @@ public class TranscriptRequestTest {
             JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
             Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
             SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/documentinfo_v1.0.0.xsd");
+            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
             Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
             documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
             DocumentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
@@ -207,7 +207,7 @@ public class TranscriptRequestTest {
                 JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
                 Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
                 SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/documentinfo_v1.0.0.xsd");
+                URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
                 Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
                 documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
                 DocumentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
@@ -650,7 +650,7 @@ public class TranscriptRequestTest {
             JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
             Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
             SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/documentinfo_v1.0.0.xsd");
+            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
             Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
             documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
             documentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
@@ -692,7 +692,7 @@ public class TranscriptRequestTest {
                 JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
                 Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
                 SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/documentinfo_v1.0.0.xsd");
+                URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
                 Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
                 documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
                 DocumentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
