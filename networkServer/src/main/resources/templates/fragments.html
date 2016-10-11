@@ -199,7 +199,6 @@
 
 
         <div>
-
             <div th:if="${institution}==false" class="form-group">
                 <strong>Source School Code</strong>
                 <div class="form-inline">
@@ -220,7 +219,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="form-group">
                 <strong>Destination School Code</strong>
                 <div class="form-inline">
@@ -290,7 +288,7 @@
                 <span>{{uploadCtrl.fileToUpload.name}}</span>
             </div>
 <!--Transcript Request-->
-            <div class="form-group">
+            <div class="form-group" ng-show="uploadCtrl.documentFormat.name!='PESCXML'">
                 <div class="form-group">
                     <div><strong>Student Release Authorized Indicator</strong></div>
                     <input type="checkbox" ng-model="uploadCtrl.studentRelease" checked="false"/>
@@ -298,7 +296,7 @@
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentReleasedMethod.$invalid && (!uploadForm.studentReleasedMethod.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student Release Authorized Method</strong></div>
-                    <select name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="uploadCtrl.studentReleasedMethod" >
+                    <select name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="uploadCtrl.studentReleasedMethod" ng-required="uploadCtrl.documentFormat.name!='PESCXML'">
                         <option value=""></option>
                         <option value="SIGNATURE">SIGNATURE</option>
                         <option value="ELECTRONIC_SIGNATURE">ELECTRONIC_SIGNATURE</option>
@@ -309,12 +307,12 @@
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentBirthDate.$invalid && (!uploadForm.studentBirthDate.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student Date of Birth</strong></div>
-                    <input name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentBirthDate" placeholder="format: 01/01/1995"> </input>
+                    <input name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentBirthDate" placeholder="format: 01/01/1995" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
                 </div>
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentFirstName.$invalid && (!uploadForm.studentFirstName.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student First Name</strong></div>
-                    <input name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentFirstName" > </input>
+                    <input name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentFirstName" ng-required="uploadCtrl.documentFormat.name!='PESCXML' "> </input>
                 </div>
 
                 <div class="form-group">
@@ -324,7 +322,7 @@
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentLastName.$invalid && (!uploadForm.studentLastName.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student Last Name</strong></div>
-                    <input name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentLastName" > </input>
+                    <input name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentLastName" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
                 </div>
 
                 <div class="form-group">
