@@ -347,11 +347,16 @@ public class OrganizationService {
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
-    public void setOAuthSecret(Integer orgID, String secret) {
+    public String setOAuthSecret(Integer orgID, String secret) {
 
         validateOAuthSecret(secret);
-        jdbcTemplate.update("update organization set oauth_secret = ? where id = ?", passwordEncoder.encode(secret), orgID);
+
+        String encodedSecret = passwordEncoder.encode(secret);
+
+        jdbcTemplate.update("update organization set oauth_secret = ? where id = ?", encodedSecret, orgID);
         //jdbcTemplate.update("update organization set oauth_secret = ? where id = ?", secret, orgID);
+
+        return encodedSecret;
     }
 
 

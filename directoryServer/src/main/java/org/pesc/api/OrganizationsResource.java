@@ -228,13 +228,11 @@ public class OrganizationsResource {
     @ApiOperation("Add or update the oauth secret for the organization.")
     public String updateOAuthSecret(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id, String oauthSecret) {
         try {
-            organizationService.setOAuthSecret(id, oauthSecret);
+            return organizationService.setOAuthSecret(id, oauthSecret);
         }
         catch (Exception e) {
             throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/oauth-secret");
         }
-
-        return oauthSecret;
     }
 
     @Path("/{id}/oauth-secret")

@@ -1195,6 +1195,7 @@
 
                 if (response.status == 200) {
                     self.showOAuthForm = false;
+                    self.oauthSecret = response.data;
                     toasterService.success("Successfully updated OAuth secret.");
                 }
                 else {
