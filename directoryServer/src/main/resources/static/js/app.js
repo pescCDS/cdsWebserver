@@ -1185,6 +1185,11 @@
 
         function setOAuthSecret() {
 
+            if (isValidPassword(self.oauthSecret) == false) {
+                toasterService.error(PASSWORD_REQUIREMENTS);
+                return;
+            }
+
             organizationService.updateOAuthSecret(self.org,self.oauthSecret).then(function(response){
 
                 if (response.status == 200) {

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -41,6 +42,9 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
 
     @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     @Qualifier("authenticationManagerBean")
     private AuthenticationManager authenticationManager;
 
@@ -58,7 +62,6 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
         endpoints
                 .tokenStore(tokenStore())
                 //Approval handler not needed.  Approval is handled via enabling or disabling an organization.
-                //.userApprovalHandler(userApprovalHandler())
                 .authenticationManager(authenticationManager);
     }
 
@@ -71,6 +74,7 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
         //Allow the resource server to validate tokens...
+        security.passwordEncoder(passwordEncoder);
         security.checkTokenAccess("isAuthenticated()");    //change to permitAll() for public access.
     }
 

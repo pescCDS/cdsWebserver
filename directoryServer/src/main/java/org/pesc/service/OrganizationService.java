@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/21/16.
@@ -52,6 +54,9 @@ public class OrganizationService {
 
     private EntityManagerFactory entityManagerFactory;
 
+    public static final String SECRET_REQUIREMENTS = "The OAuth secret must be at least 15 characters long, contain 1 upper case letter, 1 lower case letter, 1 number and 1 special character @$ _!%*#?&.";
+
+    private Pattern oauthSecretPattern = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$ _!%*#?&])[A-Za-z\\d$@$ _!%*#?&]{15,}$");
 
     private List<OrganizationType> organizationTypes;
 
@@ -68,6 +73,9 @@ public class OrganizationService {
         this.entityManagerFactory = entityManagerFactory;
 
     }
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private OAuthClientDetailsRepository oAuthClientDetailsRepository;
@@ -170,11 +178,10 @@ public class OrganizationService {
     }
 
 
-
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     @PreAuthorize("(hasRole('ROLE_SYSTEM_ADMIN') OR (hasRole('ROLE_ORG_ADMIN') AND #serviceProviderID == principal.organizationId) )")
     public void secureLinkInstitutionWithServiceProvider(Integer institutionID, Integer serviceProviderID) {
-       insecureLinkInstitutionWithServiceProvider(institutionID, serviceProviderID);
+        insecureLinkInstitutionWithServiceProvider(institutionID, serviceProviderID);
 
     }
 
@@ -187,7 +194,6 @@ public class OrganizationService {
         }
 
     }
-
 
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -280,7 +286,7 @@ public class OrganizationService {
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     private void revokeOAuthTokens(Integer orgID) {
 
-            jdbcTemplate.update("delete from oauth_access_token where client_id = ?", orgID);
+        jdbcTemplate.update("delete from oauth_access_token where client_id = ?", orgID);
     }
     /*
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -301,7 +307,7 @@ public class OrganizationService {
         String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
         pem.append(encodedKey.replaceAll("(.{64})", "$1\r\n"));
 
-        if (pem.charAt(pem.length()-1) != '\n') {
+        if (pem.charAt(pem.length() - 1) != '\n') {
             pem.append("\r\n");
         }
 
@@ -343,9 +349,10 @@ public class OrganizationService {
     @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public void setOAuthSecret(Integer orgID, String secret) {
 
-        jdbcTemplate.update("update organization set oauth_secret = ? where id = ?", secret, orgID);
+        validateOAuthSecret(secret);
+        jdbcTemplate.update("update organization set oauth_secret = ? where id = ?", passwordEncoder.encode(secret), orgID);
+        //jdbcTemplate.update("update organization set oauth_secret = ? where id = ?", secret, orgID);
     }
-
 
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -392,7 +399,7 @@ public class OrganizationService {
         return jdbcTemplate.queryForObject("SELECT public_key FROM organization WHERE id = ? and enabled = ?", new Object[]{orgID, true}, String.class);
     }
 
-    private CertificateInfo buildCertificateInfo(String pemCert) throws CertificateException{
+    private CertificateInfo buildCertificateInfo(String pemCert) throws CertificateException {
 
         CertificateInfo info = new CertificateInfo();
 
@@ -413,8 +420,7 @@ public class OrganizationService {
                 String domainName = X500Name.asX500Name(cer.getSubjectX500Principal()).getCommonName();
                 info.setCommonName(domainName);
 
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 log.error(e);
             }
 
@@ -452,8 +458,6 @@ public class OrganizationService {
         return jdbcTemplate.queryForObject("SELECT network_domain FROM organization WHERE id = ?", new Object[]{orgID}, String.class);
 
     }
-
-
 
 
     /**
@@ -517,18 +521,18 @@ public class OrganizationService {
                 "where isp.service_provider_id = ? LIMIT ? OFFSET ?";
 
 
-        List<Map<String,Object>> rows = jdbcTemplate.queryForList(sql, serviceProviderId, pagedData.getLimit(), pagedData.getOffset());
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, serviceProviderId, pagedData.getLimit(), pagedData.getOffset());
 
         ArrayList<OrganizationDTO> institutionList = new ArrayList<OrganizationDTO>();
 
-        for(Map row : rows) {
+        for (Map row : rows) {
             OrganizationDTO org = new OrganizationDTO();
-            org.setId( ((Long)row.get("id")).intValue() );
-            org.setName((String)row.get("name"));
+            org.setId(((Long) row.get("id")).intValue());
+            org.setName((String) row.get("name"));
             institutionList.add(org);
         }
 
-        pagedData.setTotal((Long)jdbcTemplate.queryForObject("SELECT COUNT(*) FROM institutions_service_providers WHERE service_provider_id=?",  new Object[] { serviceProviderId }, Long.class));
+        pagedData.setTotal((Long) jdbcTemplate.queryForObject("SELECT COUNT(*) FROM institutions_service_providers WHERE service_provider_id=?", new Object[]{serviceProviderId}, Long.class));
         pagedData.setData(institutionList);
         return pagedData;
     }
@@ -631,7 +635,6 @@ public class OrganizationService {
             predicates.add(types.get("id").in(typeIds));
 
 
-
         }
 
         Predicate[] predicateArray = new Predicate[predicates.size()];
@@ -640,19 +643,19 @@ public class OrganizationService {
         return predicateArray;
     }
 
-    private Long getResultLength(  Integer directoryId,
-                                   String organizationCode,
-                                   String organizationCodeType,
-                                   String organizationName,
-                                   String organizationSubcode,
-                                   String organizationType,
-                                   String organizationEin,
-                                   Long createdTime,
-                                   Long modifiedTime,
-                                   Boolean active,
-                                   Boolean enabled,
-                                   Boolean isServiceProvider,
-                                   Boolean isInstitution) {
+    private Long getResultLength(Integer directoryId,
+                                 String organizationCode,
+                                 String organizationCodeType,
+                                 String organizationName,
+                                 String organizationSubcode,
+                                 String organizationType,
+                                 String organizationEin,
+                                 Long createdTime,
+                                 Long modifiedTime,
+                                 Boolean active,
+                                 Boolean enabled,
+                                 Boolean isServiceProvider,
+                                 Boolean isInstitution) {
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
@@ -681,16 +684,15 @@ public class OrganizationService {
             countQuery.where(predicates);
 
             return entityManager.createQuery(countQuery).getSingleResult();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to retrieve result length.", e);
-        }
-        finally {
+        } finally {
             entityManager.close();
         }
 
         return 0L;
     }
+
     /**
      * @param directoryId
      * @param organizationCode
@@ -774,8 +776,7 @@ public class OrganizationService {
 
         } catch (Exception ex) {
             log.error("Failed to execute organization search query.", ex);
-        }
-        finally {
+        } finally {
             entityManager.close();
         }
         //return new PageImpl<Organization>(new ArrayList<Organization>());
@@ -785,6 +786,13 @@ public class OrganizationService {
         pagedData.setTotal(0L);
         pagedData.setData(new ArrayList<Organization>());
         return pagedData;
+    }
+
+
+    public void validateOAuthSecret(String secret) {
+        if (!oauthSecretPattern.matcher(secret).matches()) {
+            throw new IllegalArgumentException(SECRET_REQUIREMENTS);
+        }
     }
 
 }

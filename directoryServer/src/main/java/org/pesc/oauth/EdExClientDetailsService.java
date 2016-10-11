@@ -28,6 +28,8 @@ public class EdExClientDetailsService implements ClientDetailsService {
     private OrganizationService organizationService;
 
 
+
+
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
 
@@ -40,7 +42,6 @@ public class EdExClientDetailsService implements ClientDetailsService {
         BaseClientDetails clientDetails = new BaseClientDetails();
 
         List<String> scopes = Arrays.asList("read", "write");
-
 
         clientDetails.setClientId(clientId);
         clientDetails.setScope(scopes);

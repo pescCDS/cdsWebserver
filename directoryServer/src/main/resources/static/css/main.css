@@ -261,3 +261,7 @@ ol.alpha>li:before {
     text-align:right;
     content: "";
 }
+
+#oauthForm input {
+    width: 220px;
+}
