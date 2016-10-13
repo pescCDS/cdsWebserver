@@ -12,12 +12,6 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -149,6 +143,7 @@ public class DocumentController {
         tran.setFilePath(tx.getFilePath());
         tran.setRecipientId(tx.getRecipientId());
         tran.setSenderId(tx.getSenderId());
+        tran.setSignerId(tx.getSignerId());
         tran.setFileSize(tx.getFileSize());
         tran.setOccurredAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
@@ -162,65 +157,64 @@ public class DocumentController {
             transactionService.update(tran);
             throw new RuntimeException("No endpoint found for this organization and document type.");
         }
-        // send http post to network server
-        CloseableHttpClient client = fileProcessorService.makeHttpClient();
+
+        File outboxFile = new File(tran.getFilePath());
         try {
+            byte[] fileSignature = pkiService.createDigitalSignature(new FileInputStream(outboxFile), pkiService.getSigningKeys().getPrivate());
 
-            HttpPost post = new HttpPost(endpointURI);
 
-            File outboxFile = new File(tran.getFilePath());
-            byte[] fileSignature = pkiService.createDigitalSignature(new FileInputStream(tran.getFilePath()), pkiService.getSigningKeys().getPrivate());
-
-            ContentBody signature = new ByteArrayBody(fileSignature, "signature.dat");
-
-            HttpEntity reqEntity = MultipartEntityBuilder.create()
-                    .addPart("recipient_id", new StringBody(tran.getRecipientId().toString()))
-                    .addPart("sender_id", new StringBody(tran.getSenderId().toString()))
-                    .addPart("signer_id", new StringBody(localServerId))
-                    .addPart("file_format", new StringBody(tran.getFileFormat()))
-                    .addPart("document_type", new StringBody(tran.getDocumentType()))
-                    .addPart("department", new StringBody(tran.getDepartment()))
-                    .addPart("transaction_id", new StringBody(tran.getId().toString()))
-                    .addPart("ack_url", new StringBody(localServerWebServiceURL))
-                    .addPart("file", new FileBody(outboxFile))
-                    .addPart("signature", signature)
-                    .build();
-            post.setEntity(reqEntity);
-
-            CloseableHttpResponse response = client.execute(post);
-
-            try {
-                log.debug(response.getStatusLine());
-                if (response.getStatusLine().getStatusCode() != 200)  {
-                    throw new RuntimeException(response.getStatusLine().toString());
+            LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+            map.add("recipient_id", tran.getRecipientId());
+            map.add("sender_id", tran.getSenderId());
+            map.add("signer_id", localServerId);
+            map.add("file_format", tran.getFileFormat());
+            map.add("document_type", tran.getDocumentType());
+            map.add("department", tran.getDepartment());
+            map.add("transaction_id", tran.getId());
+            map.add("ack_url", localServerWebServiceURL);
+            map.add("file", new FileSystemResource(outboxFile));
+            map.add("signature", new ByteArrayResource(fileSignature){
+                @Override
+                public String getFilename(){
+                    return "signature.dat";
                 }
-                else {
-                    HttpEntity resEntity = response.getEntity();
-                    if (resEntity != null) {
-                        log.debug("Response content length: " + resEntity.getContentLength());
-                    }
-                    EntityUtils.consume(resEntity);
-
-                    return tran;
-                }
+            });
 
 
-            }
-            finally {
-                response.close();
-            }
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
+
+
+            ResponseEntity<String> response = restTemplate.exchange
+                    (endpointURI, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
+
+            log.info(response.getStatusCode().getReasonPhrase());
+
+
+        } catch(ResourceAccessException e) {
+
+            //Force the OAuth client to retrieve the token again whenever it is used again.
+
+            restTemplate.getOAuth2ClientContext().setAccessToken(null);
+
+            tx.setError(e.getMessage());
+            transactionService.update(tx);
+
+            log.error(e);
+            throw new IllegalArgumentException(e);
 
         } catch (Exception e) {
-            tran.setError(e.getMessage());
-            transactionService.update(tran);
+
+            tx.setError(e.getMessage());
+            transactionService.update(tx);
+
             log.error(e);
-        } finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                log.error(e);
-            }
+
+            throw new IllegalArgumentException(e);
+
         }
+
 
         return tran;
     }
@@ -763,7 +757,7 @@ public class DocumentController {
     @Produces(MediaType.APPLICATION_JSON)
     @ResponseBody
     public List<String> listFilesFromOutbox() {
-       return fileProcessorService.getOutboxDocumentList();
+        return fileProcessorService.getOutboxDocumentList();
     }
 
 
@@ -777,6 +771,6 @@ public class DocumentController {
     @Produces(MediaType.APPLICATION_JSON)
     @ResponseBody
     public List<String> listFilesFromInbox() {
-       return fileProcessorService.getInboxDocumentList();
+        return fileProcessorService.getInboxDocumentList();
     }
 }
