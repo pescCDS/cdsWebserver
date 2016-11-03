@@ -97,6 +97,8 @@ public class SchoolCodesService {
     private Pattern sixDigitPattern = Pattern.compile("\\d{6}");
     private Pattern eightDigitPattern = Pattern.compile("\\d{8}");
     private Pattern fourDigitPattern = Pattern.compile("\\d{4}");
+    private Pattern fourtoSixDigitPattern = Pattern.compile("\\d{4,6}");
+    private Pattern fourteenDigitPattern = Pattern.compile("\\d{14}");
 
     private boolean validate6Digits(String code)
     {
@@ -106,6 +108,16 @@ public class SchoolCodesService {
     private boolean validate8Digits(String code)
     {
         return eightDigitPattern.matcher(code).matches();
+    }
+
+    private boolean validate4to6Digits(String code)
+    {
+        return fourtoSixDigitPattern.matcher(code).matches();
+    }
+
+    private boolean validate14Digits(String code)
+    {
+        return fourteenDigitPattern.matcher(code).matches();
     }
 
     private boolean validate4Digits(String code)
@@ -142,6 +154,15 @@ public class SchoolCodesService {
         else if (codeType.equalsIgnoreCase("OPEID")) {
             if (!validate8Digits(code)){
                 throw new IllegalArgumentException(String.format("Bad OPEID code %s. OPEID codes must be exactly 8 digits.", code));
+            }
+        }else if (codeType.equalsIgnoreCase("CEEB")) {
+            if (!validate4to6Digits(code)){
+                throw new IllegalArgumentException(String.format("Bad CEEB code %s. CEEB codes must be 4 to 6 digits.", code));
+            }
+        }
+        else if (codeType.equalsIgnoreCase("CDS")) {
+            if (!validate14Digits(code)){
+                throw new IllegalArgumentException(String.format("Bad CDS code %s. CDS codes must be exactly 14 digits.", code));
             }
         }
         else {
