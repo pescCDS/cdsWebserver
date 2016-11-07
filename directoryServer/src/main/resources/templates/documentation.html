@@ -1,11 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+	
+
     <title>EDExchange Documentation</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="css/main.css" media="screen"/>
+	
+	<style>
+	table.diana, td.diana, th.diana {
+	    border: 1px solid #ddd;
+	    text-align: left;
+	}
+
+	table.diana {
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	td.diana p, th.diana p {
+		margin: 10px;
+	}
+	
+	th.diana, td.diana {
+
+		width: 10%;
+	}
+	
+	ul.a {list-style-position:inside;}
+	
+	</style>
+	
+	
 </head>
 <body>
 
@@ -17,16 +45,10 @@
         <a href="#edExchangeWork">How Does EdExchange Work?</a>
         <!--Directory Server, Network Server,  Service Providers, Institutions, Serviceable Institutions-->
       </div>
-
-
-
-
       <div>
           <a href="#ui-and-api">Using the User Interface vs. the REST API</a>
           <!--Administrators who use the UI, Developers who use SOAP or REST-->
       </div>
-
-
       <div class="ed-title">Getting Started</div>
       <div>
           <a href="#registration">Register an Organization</a>
@@ -51,9 +73,6 @@
           <div>
           <a href="#config-endpoints">Configure Your Endpoints (For Service Providers Only)</a>
           </div>
-
-
-
 
       <div>
           <a href="#developer-doc">Developer Configuration Using the API</a>
@@ -132,11 +151,12 @@
       <div>
           <a href="#authentication">Authentication</a>
       </div>
-      <div>
-          <a href="#certificate">Publish an SSL Certificate</a>
-      </div>
+
       <div>
           <a href="#authentication">Cross Site Request Forgery</a>
+      </div>
+      <div>
+          <a href="#certificate">Publish an SSL Certificate</a>
       </div>
 
 
@@ -182,34 +202,23 @@
           <a href="#enable-organization">Enable an Organization</a>
       </div>
 
-      <!--All this stuff is original TOC
-        <div class="ed-title">API Reference</div>
-        <div><a href="#introduction">Introduction</a></div>
-
-        <div class="ed-title">General Topics</div>
-
-        <div class="ed-title">Core Resources</div>
-
-        <div class="ed-title" id="common-service-provider-tasks">Common Service Provider Tasks</div>
-
-
-        <div class="ed-title" id="common-institution-tasks">Common Institution Tasks</div>
-
-        <div class="ed-title">Common Directory Tasks</div>
-
-        <div class="ed-title">Use Cases</div>
--->
 
     </div>
+</div>
+
     <div class="col-sm-9">
         <h2 id="edExchangeWork">How Does EDExchange Work?</h2>
 
-        <p>
+        <div class="p">
           Behind the scenes, EDExchange is comprised of two servers: a Directory Server and a Network Server. You'll need to use both if you want to send and receive documents, but for receiving documents you'll need to take the additional step of hosting a network server. We've made it easy for you by providing the code for both the directory server and the network server, since it's open source.
-        </p>
-        <p>
-          If you choose to only send documents, you will register with EDExchange on the Directory Server as an "Institution." Then you can use the free Network Server code to send documents by invoking the EDExchange API, or you can integrate that functionality in your own application. In this scenario you'd use an EDExchange Service Provider to receive documents on your behalf (most-likely a fee-based arrangement). If you choose to both send and receive documents, you will register with the EDExchange as both an "Institution" AND as a "Service Provider." In addition to the steps for sending a document, you will also host your own Network server for receiving documents.
-        </p>
+		  <p></p>
+		  
+		  <ul class="a">
+          <li class="li">If you choose to only send documents, you will register with EDExchange on the Directory Server as an "Institution." Then you can use the free Network Server code to send documents by invoking the EDExchange API, or you can integrate that functionality in your own application. In this scenario you'd use an EDExchange Service Provider to receive documents on your behalf (most-likely a fee-based arrangement).</li> 
+		   <li class="li">If you choose to both send and receive documents, you will register with the EDExchange as both an "Institution" AND as a "Service Provider." In addition to the steps for sending a document, you will also host your own Network server for receiving documents.
+        	</li>
+		</ul>
+	</div>
         <p> The Directory server is hosted and maintained by the PESC organization. It includes a
         directory of EDExchange members and all their related information. As an EDExchange member
         you can manage your organization through the Directory server web application UI. You can
@@ -217,119 +226,190 @@
         allows you to manage users, endpoints, contacts, the signing certificate tasks as you would
         via the Directory server web app.</p>
 
-      <p>After registering with EDExchange, the next tasks include configuration, setting up your
+      <p>After registering with EDExchange, the next tasks include: configuration, setting up your
         Network Servers (if you elect to receive documents), making any customizations, and testing.
         Information to do all of this follows in the sections below.</p>
-        </p>
+		
+		<p id="commonTasks">
+			<b>Common Service Provider and Institution Tasks</b>			
+		</p>
+		
+        <table class="diana" id="topic_ihv_l4z_ww__table_pjh_tj1_xw">
+			<p></p>
+			
+			
+			  
+						  <tr>
+                            <th class="diana"><p>Service Provider/Institution</p></th>
+
+                            <th class="diana"><p>Task</p></th>
+                          </tr>
 
 
+                          <tr>
+                            <td class="diana"><p>Service Provider</p></td>
 
-        <div class="col-sm-9">
-            <h2 id="ui-and-api">Using the User Interface vs. the EDExchange API</h2>
+                            <td class="diana"><p>
+										<a href="#certificate">Publish an SSL Certificate</a>
+									</p>
+									<p>
+										<a href="#send-document">Send a Document</a>
+									</p>
+									<p>
+										<a href="#receive-document">Receive a Document</a>
+						  			</p>
+									<p>
+										  <a href="#config-endpoints">Create an Endpoint</a>
+						  			</p>
+									<p>
+										<a href="#create-serviceable-institution">Create a Serviceable Institution</a>
+						  			</p>
+									<p>
+										 <a href="#upload-serviceable-institutions-csv">Upload Serviceable Institutions CSV</a>
+						  			</p>
+									<p>
+										<a href="#endpoints">Assign an Endpoint</a>
+						  			</p>
+									<p>
+										<a href="#sign-document">Digitally Sign a Document</a>
+						  			</p>
+									<p>
+										 <a href="#verify-signature">Verify a Digital Signature</a>
+						  			</p>
+									<p>
+										<a href="#manage-contacts">Manage Contacts</a>
+						  			</p>
+									<p>
+										<a href="#manage-users">Manage Users</a>
+						  			</p>
+								</td>
+							</tr>
+
+                          <tr>
+                            <td class="diana"><p>Institution</p></td>
+
+                            <td class="diana"><p>
+										<a href="#certificate">Publish an SSL Certificate</a>
+									</p>
+									<p>
+										<a href="#send-document">Send a Document</a>
+						  			</p>
+									<p>
+										<a href="#manage-school-codes">Manage School Codes</a>
+						  			</p>
+									<p>
+										<a href="#sign-document">Digitally Sign a Document</a>
+						  			</p>
+									<p>
+										<a href="#manage-contacts">Manage Contacts</a>
+						  			</p>
+									<p>
+										<a href="#manage-users">Manage Users</a>
+						  			</p>
+								</td>
+							</tr>
+
+   
+        </table>
+		
+
+
+            <h3 id="ui-and-api">Using the User Interface vs. the EDExchange API</h3>
             <p>
               The EDExchange user interface allows non-technical people to sign up and manage much of the configuration. Much of this configuration can also be done programmatically by a developer accessing the API via <a href="services">SOAP services</a> or a <a href="swagger-ui/index.html">REST-based </a>client. To actually send and receive documents, a developer at your organization will need to work with the reference open-source Network Server and Directory Server code base to meet your needs. The information in this Documentation should provide both non-technical users and developers the information they need.
             </p>
 
-            <div class="col-sm-9">
+            
               <h2 id="registration">Register With EDExchange</h2>
                 <p>
                     There are various ways in which an organization can be added to the EDExchange network.</p>
                     <p>
-                        New applicants can register by filling out the <a href="home#/registration-form">registration form</a>. The registration automatically creates an administrator account for the individual listed in the registration form as the contact.  This account has administrator priveleges for the organization.  After the form is submitted, the organization's administrator receives an email confirming their registration. At that point, the organization is listed in the EDExchange directory, but disabled. It will remain disabled until a PESC administrator reviews and approves the information that was provided in the registration form. The organization's administrator can conduct normal operations such as setting up the
+                        New applicants can register by filling out the <a href="home#/registration-form">registration form</a>. The registration automatically creates an administrator account for the individual listed in the registration form as the contact.  This account has administrator privileges for the organization.  After the form is submitted, the organization's administrator receives an email confirming their registration. At that point, the organization is listed in the EDExchange directory, but disabled. It will remain disabled until a PESC administrator reviews and approves the information that was provided in the registration form. The organization's administrator can conduct normal operations such as setting up the
                 <a href="#network-server">network server</a> and <a href="#certificate">publishing an SSL certificate</a>, while
                 the application is being reviewed.
                     </p>
                     <p>
-                        An orgnanization can also be created directly by an PESC administrator.
+                        An organization can also be created directly by an PESC administrator.
                     </p>
                 <p>
                         Organization's that registered as <var><a href="#institutions">Institutions</a></var> can be created by a <a href="#service-provider">service provider</a> for the purpose of adding the institution to the provider's group of <a href="#create-serviceable-institution">serviceable institutions</a>. Institutions that are created in this way must also be reviewed and approved by a PESC administrator.
                 </p>
-                In each case, a PESC administrator is required to review and approve the organization. When a new organization account is created, it is disabled in EDExchange as shown in the directory. Once the PESC administrator approves the organization, it becomes enabled in the EDExchange direcory.
-                </p>
+                In each case, a PESC administrator is required to review and approve the organization. When a new organization account is created, it is disabled in EDExchange as shown in the directory. Once the PESC administrator approves the organization, it becomes enabled in the EDExchange directory.
 
-
-
-
-                <div class="col-sm-9">
                   <h2 id="admin-in-UI">Administrator Configuration Using the EDExchange User Interface</h2>
-
-
-
                   <p>
-                      The EDExchange user interface is mostly self explanatory. It uses consistent icons to denote actions you can take, sich as a "+" icon to add a new item, a disc icon to save an item, etc. Nonetheless, some information about the EDExchange application user interface is presented here for further reference.
+                      The EDExchange user interface is mostly self explanatory. It uses consistent icons to denote actions you can take, such as a "+" icon to add a new item, a disc icon to save an item, etc. Nonetheless, some information about the EDExchange application user interface is presented here for further reference.
                   </p>
                   <p>
-                    A menu of options displays across the top of the EDExchange web app. At any point if you want to return to this home screen, click the Ed Exchange text in the top left corner of the screen. Refer tothe table below for each menu's usage.
+                    A menu of options displays across the top of the EDExchange web app. At any point if you want to return to this home screen, click the Ed Exchange text in the top left corner of the screen. Refer to the table below for each menu's usage.
                   </p>
-                  </div>
 
-                    <div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" id="topic_ihv_l4z_ww__table_pjh_tj1_xw" class="table" frame="border" border="1" rules="all"><colgroup><col style="width:50%" /><col style="width:50%" /></colgroup><thead class="thead" style="text-align:left;">
-                                      <tr class="row">
-                                        <th class="entry cellrowborder" id="d47e190">Tab </th>
+                    <table class="diana" id="topic_ihv_l4z_ww__table_pjh_tj1_xw">
+						<p></p>
+						
+						
+						  
+									  <tr>
+                                        <th class="diana"><p>Tab</p></th>
 
-                                        <th class="entry cellrowborder" id="d47e192">Use </th>
-
+                                        <th class="diana"><p>Use</p></th>
                                       </tr>
 
-                                    </thead>
-                    <tbody class="tbody">
-                                      <tr class="row">
-                                        <td class="entry cellrowborder" headers="d47e190 ">Directory</td>
 
-                                        <td class="entry cellrowborder" headers="d47e192 ">Displays a directory of all the EDExchange organizations. Click the
+                                      <tr>
+                                        <td class="diana"><p>Directory</p></td>
+
+                                        <td class="diana"><p>Displays a directory of all the EDExchange organizations. Click the
                                           buttons in the top left to filter the display by Enabled, Service Provider, or
                                           Institution. You can also search for a specific organization if you'd
-                                          like.</td>
+                                          like.</p></td>
 
                                       </tr>
 
-                                      <tr class="row">
-                                        <td class="entry cellrowborder" headers="d47e190 ">Docs</td>
+                                      <tr>
+                                        <td class="diana"><p>Docs</p></td>
 
-                                        <td class="entry cellrowborder" headers="d47e192 ">Displays documentation for EDExchange in a new browser tab.</td>
-
-                                      </tr>
-
-                                      <tr class="row">
-                                        <td class="entry cellrowborder" headers="d47e190 ">Settings</td>
-
-                                        <td class="entry cellrowborder" headers="d47e192 ">Displays accepted document delivery methods, document formats, document
-                                          types, and departments. </td>
+                                        <td class="diana"><p>Displays documentation for EDExchange in a new browser tab.</p></td>
 
                                       </tr>
 
-                                      <tr class="row">
-                                        <td class="entry cellrowborder" headers="d47e190 ">My Organization</td>
+                                      <tr>
+                                        <td class="diana"><p>Settings</p></td>
 
-                                        <td class="entry cellrowborder" headers="d47e192 ">Displays information about your organization that you provided at
+                                        <td class="diana"><p>Displays accepted document delivery methods, document formats, document
+                                          types, and departments. </p></td>
+
+                                      </tr>
+
+                                      <tr>
+                                        <td class="diana"><p>My Organization</p></td>
+
+                                        <td class="diana"><p>Displays information about your organization that you provided at
                                           registration. You can edit, delete, and save information on this tab,
                                           including information about contacts, school codes, Service Providers, signing
-                                          and network certificates, and serviced schools.</td>
+                                          and network certificates, and serviced schools.</p></td>
 
                                       </tr>
 
-                                      <tr class="row">
-                                        <td class="entry cellrowborder" headers="d47e190 ">Users</td>
+                                      <tr>
+                                        <td class="diana"><p>Users</p></td>
 
-                                        <td class="entry cellrowborder" headers="d47e192 ">Displays the user contact information entered when you registered for
+                                        <td class="diana"><p>Displays the user contact information entered when you registered for
                                           EDExchange. You can edit the contact information as well as the type of
-                                          role.</td>
+                                          role.</p></td>
 
                                       </tr>
 
-                                      <tr class="row">
-                                        <td class="entry cellrowborder" headers="d47e190 ">Messages</td>
+                                      <tr>
+                                        <td class="diana"><p>Messages</p></td>
 
-                                        <td class="entry cellrowborder" headers="d47e192 ">Displays messages from the PESC organization regarding your registration
-                                          status, etc. </td>
+                                        <td class="diana"><p>Displays messages from the PESC organization regarding your registration
+                                          status, etc. </p></td>
 
                                       </tr>
 
-                                    </tbody>
+               
                     </table>
-                    </div>
-
 
                     <h3 id="config-sp">Configuring Service Providers for Your Organization</h3>
 
@@ -345,8 +425,8 @@
                                         <li class="li">Click the Save icon to save your selection.</li>
 
                                       </ol>
-                    </div>
-                    </li>
+ 
+                    
 
                     <h3 id="config-signing-cert">Configuring Your Signing Certificate</h3>
 
@@ -354,7 +434,7 @@
                                         also be configured programmatically by your organization's developer by updating
                                         the API's signing-certificate property on the organization resource.</div>
                     <ol class="ol" type="i" id="topic_ihv_l4z_ww__ol_vsd_dl1_xw">
-                                        <li class="li">Obtain an SSL certificate from a certificate authority.<div class="note note"><span class="notetitle">Note:</span> You can follow the instructions <a href="#self-signed-cert">here</a> for using a free, self-signing certificate for testing purposes prior to obtaining an SSL certificate from a certificate authority.
+                                        <li class="li">Obtain an SSL certificate from a certificate authority.<div class="note note"><span class="notetitle"><b>Note:</b></span> You can follow the instructions <a href="#self-signed-cert">here</a> for using a free, self-signing certificate for testing purposes prior to obtaining an SSL certificate from a certificate authority.
                                 </div>
                     </li>
 
@@ -376,7 +456,8 @@
                                           the Network Server.
                     <div class="p">Organizations are disabled automatically under any of the
                                             following conditions and require a PESC Administrator to Enable you
-                                              again:<ul class="ul" id="topic_ihv_l4z_ww__ul_qhm_3l1_xw">
+                                              again:
+											  <ul class="a">
                                               <li class="li">You just registered your organization for the first time</li>
 
                                               <li class="li">You just created or updated your organization's signing
@@ -393,7 +474,7 @@
 
                                       </ol>
                     </div>
-                    </li>
+                    
 
   <h3 id="config-network-cert">Configuring Your Network Certificate (for Service Providers Only)</h3>
 
@@ -402,7 +483,10 @@
                                       documents). Before an organization can receive a document, it must obtain a
                                       certificate from a certificate authority for the purpose of securing the Network
                                       Server using HTTPS.</p>
-                    <div class="p">Prerequisites:<ul class="ul" id="topic_ihv_l4z_ww__ul_yqw_nl1_xw">
+									  
+									  
+									  
+                    <div class="p">Prerequisites:<ul class="a">
                                         <li class="li">You must register as both an Institution AND a Service Provider with
                                           EDExchange.</li>
 
@@ -411,18 +495,22 @@
 
                                       </ul>
                     </div>
+					
+					
+					
+					
                     <div class="p">Follow the same steps as listed in above to obtain and configure a Network Certificate in addition to your Signing Certificate so that you can receive documents.<ol class="ol" type="i" id="topic_ihv_l4z_ww__ol_msr_ql1_xw">
 
                                       </ol>
                     </div>
                     <p class="p">You can also add/update the Network Certificate programmatically by updating the API's network-certificate property on the organization resource.</p>
-                    </li>
+                   
 
 
 <h3 id="config-svc-schools">Configure Your Serviced Schools (For Service Providers Only)</h3>
 
                           <p class="p">The Serviced Schools field only displays on the My Organizations tab if you are registered as a Service Provider. The Serviced Schools section is where you identify those schools on whose behalf you receive documents as a Service Provider. EDExchange allows you to upload a CSV file where each row in the file represents an EDExchange Institution (school) and adds it to your group of serviceable institutions. Download the CSV template file here (be sure to retain the file's header). Consult the school codes section for information about code requirements.</p>
-                    <div class="p">You can programatically add a serviced school by using the API's institution resource to create the institution and then add it to the Service Provider's group of serviceable institutions using the API's relation
+                    <div class="p">You can programmatically add a serviced school by using the API's institution resource to create the institution and then add it to the Service Provider's group of serviceable institutions using the API's relation
                                         resource.<ol class="ol" type="i" id="topic_ihv_l4z_ww__ol_ixm_vl1_xw">
                                         <li class="li">From My Organization -> Service Providers, click the Upload (Up Arrow) icon to display the Institutions Upload dialog box. </li>
 
@@ -446,7 +534,7 @@
 
                                       </ol>
                     </div>
-                    </li>
+    
 
 
 
@@ -462,7 +550,7 @@
                                       endpoints resource of the REST API.</p>
                     <p class="p">Work with your local developer to create
                                       an endpoint (URL) as well as to associate one or more endpoints with the institution.</p>
-
+                            <ol>
                                         <li class="li">Click the Expand (+) icon to the left of the Endpoints field label to
                                           display the Endpoints form fields.</li>
 
@@ -491,29 +579,30 @@
                                         <li class="li">Click Save.</li>
 
                                       </ol>
-                    </div>
-                    </li>
 
-                                </ol>
-                    </li>
 
-                              <li class="li">Manage Users: You can maintain a group of users that can manager your organization on
+
+                              <p>Manage Users: You can maintain a group of users that can manager your organization on
                                 the Users tab in the EDExchange web application, whether you registered as a Service
                                 Provider or an Institution. You must be an authenticated Ed Exchange user with the
-                                appropriate permissions (i.e. configured as an Organization Admin).<p class="p">Note:
+                                appropriate permissions (i.e. configured as an Organization Admin). Note:
                                   Alternatively, users can be managed via the API's users resource by your
                                   organization's developer.</p>
-                    <div class="p">Use the steps below to add users using the EDExchange
-                                  web application (Directory Server).<ol class="ol" type="a" id="topic_ihv_l4z_ww__ol_gbg_3m1_xw">
+                    <p>Use the steps below to add users using the EDExchange
+                                  web application (Directory Server).</p>
+                                <ol class="ol" type="a" id="topic_ihv_l4z_ww__ol_gbg_3m1_xw">
                                     <li class="li">On the Users tab. click the User button that displays under your organization's name to display a
                                       User field group.</li>
 
-                                    <li class="li">Enter values in the fields provided. Most of the field values are self
+                                    <li class="li">
+										Enter values in the fields provided. Most of the field values are self
                                       explanatory, but a few details that may not be obvious are described further
-                                      below: <ul class="ul" id="topic_ihv_l4z_ww__ul_err_jm1_xw">
-                                        <li class="li">
-                                          <div class="p"><strong class="ph b">Roles:</strong> Select a check box for the administrative privilege for the
-                                            user. <ul class="ul" id="topic_ihv_l4z_ww__ul_edm_mm1_xw">
+                                      below: 
+                                       
+                                          
+										  <div class="p"><strong class="ph b">Roles:</strong> Select a check box for the administrative privilege for the
+                                            user.
+												<ul class="a">
                                               <li class="li">A System Administrator provides access to all the My Organization
                                                 fields but CANNOT create new users.</li>
 
@@ -523,10 +612,10 @@
                                               <li class="li">The Support Technician role is not currently used and displays for
                                                 future use only.</li>
 
-                                            </ul>
-                    </div>
+                                         
 
-                                        </li>
+
+                                
 
                                         <li class="li">The Password for the user must be at least 15 characters long, contain one
                                           upper case letter, one lower case letter, one number, and one special
@@ -541,14 +630,9 @@
                                       again.</li>
 
                                   </ol>
-                    </div>
-                    </li>
 
-                            </ol>
 
-                          </div>
-<!--&&&&&&&&&&&&&&&&&&&&&&&&& DEVELOPER DOC &&&&&&&&&&&&&&&&&&&&&&&-->
-      <div class="col-sm-9">
+
          <h2 id="developer-doc">Developer Configuration Using the API</h2>
 
            <p>
@@ -557,7 +641,7 @@
                The remainder of the API documentation is specific to the REST API and is intended to
                supplement the <a href="swagger-ui/index.html">interactive API documentation</a> by providing descriptions
                of higher level tasks.
-               Tasks are typically composed of different API invocations on various resourcess to accomplish a goal.
+               Tasks are typically composed of different API invocations on various resources to accomplish a goal.
            </p>
 
            <p>
@@ -586,27 +670,26 @@
                       in the EDExchange network that have different capabilities within the network: <var>service providers</var> and <var>institutions</var>. An organization can be of
                       type <var><a href="#service-provider">Service Provider</a></var>
                       or <var><a href="#institutions">Institution</a></var> or both. When an organization is created, a number is assigned to it that uniquely
-                      idenifies the organization in the EDExchange network.
+                      identifies the organization in the EDExchange network.
                       All members of the EDExchange network are included in the searchable EDExchange directory. Operations on an organization object can be
                       invoked using the <a href="/swagger-ui/index.html#!/orgnizations">organizations resource</a> of the REST API
                       or
                       through the directory server web application by an authenticated user with the appropriate permissions.
                   </p>
 
-                             <h3 id="directory-server">Directory Server</h3>
+                  <h3 id="directory-server">Directory Server</h3>
 
                              <p>
-                                 The EDExchange directory server maintains a directory of EDExchange members and all relateded information.
+                                 The EDExchange directory server maintains a directory of EDExchange members and all related information.
                                  This is the
-                                 server that hosts the API and exposes the directory information. It is hosted and maintained by the<a
-                                     href="www.pesc.org">PESC</a> organization.
+                                 server that hosts the API and exposes the directory information. It is hosted and maintained by the PESC organization.
                                  EDExchange members can also manage their organization through the directory server web application. Operations
                                  can be conducted using the REST API, including the management of users, endpoints, contacts
                                  and the signing certificate, and in many cases, through the directory server web application by an authenticated
                                  user with the appropriate permissions.
                              </p>
 
-                             <h3 id="network-server">Network Server</h3>
+                  <h3 id="network-server">Network Server</h3>
 
                              <p>
                                  The EDExchange network server is a server that hosts endpoints (a URL that can that receives documents). A network server must
@@ -616,8 +699,7 @@
                   <div id="institutions" class="ed-title">Institutions</div>
                   <p>
                       An organization that is an <var>Institution</var> can send documents through EDExchange. To send documents,
-                      the organization must <a href="#certificate">publish a SSL certificate</a>, obtained from a certificate authority, to the directory server. The certificate is
-                      used to verify the authenticity of a document transferred through EDExchange using digital signatures.
+                      the organization must <a href="#certificate">publish an SSL certificate</a>, obtained from a certificate authority, to the directory server. The certificate is used to verify the authenticity of a document transferred through EDExchange using digital signatures.
                   </p>
 
                   <div id="service-provider" class="ed-title">Service Providers</div>
@@ -628,7 +710,7 @@
                         href="#network-server">network server</a>.
                     </p>
 
-                           <h3 id="pagination">Pagination</h3>
+                    <h3 id="pagination">Pagination</h3>
 
                            <p>
                                Certain resources that have large results sets can be paginated. Whenever pagination is available,
@@ -637,7 +719,7 @@
                                a custom HTTP header <var>X-Total-Count</var> in the response to indicate the total number of records
                                in the result set.
 
-                           <pre th:text="${apiURL} + '/services/rest/v1/organizations?limit=5&offset=0'"></pre>
+
                            </p>
 
                            <div class="ed-title">Response Header Example</div>
@@ -664,7 +746,7 @@
 
                       <p>
                         An endpoint is a URL and set of attributes that identify where to <a href="#send-document">send a
-                        document</a>. Organizations that are <var>Servcice Providers</var>
+                        document</a>. Organizations that are <var>Service Providers</var>
                         can create, read, update and delete and assign endpoints to institutions that are serviceable by the
                         provider.
                         An institution can also be a service provider and can receive documents for itself. Endpoint operations can
@@ -687,8 +769,7 @@
            <div>
                <b>Preconditions:</b> The SSL certificate used to implement HTTPS on the network server has been publish to the directory.
            </div>
-           <ol>
-               <li>
+          
                    The receiver's organization administrator uses the <a href="">endpoint resource</a> or the directory web application to
                    create the endpoint.  The following attributes are required:
                    <ol class="alpha">
@@ -706,8 +787,7 @@
                        </li>
                        <li><var>Mode:</var> Must be either 'TEST' or 'LIVE'.</li>
                    </ol>
-               </li>
-           </ol>
+
        </div>
 
 
@@ -731,7 +811,7 @@
                   <div class="well">
 
                       <div><b>Preconditions:</b> The following parameters are available:
-                          <p>
+                          <p></p>
                           <ul class="list-unstyled" style="margin-left: 20px;">
                               <li><var>Recipient ID:</var> The directory ID of the recipient institution.</li>
                               <li><var>Document Format:</var> The <a href="/services/rest/v1/document-formats">document
@@ -745,12 +825,12 @@
                               </li>
                               <li><var>Mode:</var> Must be either 'TEST' or 'LIVE'.</li>
                           </ul>
-                          </p>
+                          <p></p>
 
                       </div>
                       <ol>
                           <li> Query the <a href="/swagger-ui/index.html#!/endpoints/findEndpoint">endpoint
-                              resource</a> using the REST API.</a></li>
+                              resource</a> using the REST API.</li>
                           <li>The directory server returns all endpoints that fulfill the search criteria and where the endpoint is hosted
                               by a service provider that is enabled.</li>
                       </ol>
@@ -835,7 +915,7 @@
                    A number generated by the sender that uniquely identifies a transaction that represents the file
                    transfer.
                    Used in combination with the ack_url to acknowledge that the document has been received.
-                   The sending network server uses the acknowlegement to update the transaction status.
+                   The sending network server uses the acknowledgement to update the transaction status.
                </div>
            </div>
            <div class="row">
@@ -845,7 +925,7 @@
                <div class="col-sm-9">
                    A URL used to acknowledge that the document has been received. Used in combination
                    with the transaction_id, so that the sending network server can update the transaction
-                   status with a form POST to this URL and using transction_id as a form parameter.
+                   status with a form POST to this URL and using transaction_id as a form parameter.
                </div>
            </div>
 
@@ -855,7 +935,7 @@
                   <h3 id="manage-contacts">Manage Contacts</h3>
                   <p>
                       EDExchange member organizations can have one or more contacts that are presented in the
-                      EDExchange public directory.  Contact information is intended to provide users the abiltity to contact the organization for
+                      EDExchange public directory.  Contact information is intended to provide users the ability to contact the organization for
                       support, questions, etc.
                   </p>
                   <p>
@@ -878,10 +958,10 @@
                              <p>
                                  There are a number of attributes that are used by the API that are used to search the EDExchange
                                  directory for institutions and <a href="#endpoints">endpoints</a>.  The attributes include different
-                                 types of school codes.
-
+                                 types of school codes.</p>
+                            <p>
                                  EDExchange supports and validates the following school codes:
-
+                            </p>
                              <ul class="square-style" style="margin-left: 15px;">
                                  <li><b>FICE</b><span>: 6 digits</span></li>
                                  <li><b>ATP</b><span>: 6 digits</span></li>
@@ -890,19 +970,19 @@
                                  <li><b>OPEID</b> <span>: 8 digits</span></li>
                              </ul>
 
-                             <p>
+                            <p>
                                  School codes can be managed through the directory server web application by an authenticated user
                                  with the appropriate permissions.  School codes can also be managed using the
                                  <a href="/swagger-ui/index.html#!/school-codes/createSchoolCode">school codes resource</a> or alternatively
                                  by using the school-codes property of the <a href="/swagger-ui/index.html#!/organizations/putSchoolCode">organizations resource</a>.
                              </p>
 
-                             </p>
+                             
                              <h3 id="send-document">Send a Document</h3>
 
                              <p>
                                  Both institutions and service providers can send documents through EDExchange after <a href="#certificate">providing
-                                 a SSL certificate.</a>
+                                 an SSL certificate.</a>
                              </p>
 
                              <div class="well">
@@ -922,8 +1002,8 @@
                              </div>
 
                              <h3 id="sign-document">Sign a Document</h3>
-                             <p>An institution or service provider must provide an <a href="#certificate">certificate</a> obtained from a certificate authority
-                                 to the directory server. This process requireds that a public/private key pair be generated.</p>
+                             <p>An institution or service provider must provide a <a href="#certificate">certificate</a> obtained from a certificate authority
+                                 to the directory server. This process requires that a public/private key pair be generated.</p>
 
                              <p>
                                  When a document such as transcript or transcript request is <a href="#transfer-document">transferred</a> to an endpoint, the digital
@@ -931,8 +1011,6 @@
                              </p>
 
 
-
-<!--*****************************-->
 
 <h3 id="receive-document">Receive a Document</h3>
 <p>
@@ -942,11 +1020,11 @@
 </p>
 
 <p>
-    The use case below describes the steps required to receive a document.
+    The use case below describes the steps required to receive a document.</p>
 
 <div class="well">
     <div>
-        <b>Preconditions:</b> A <a href="#network-server">network server</a> has been implemented and the nework
+        <b>Preconditions:</b> A <a href="#network-server">network server</a> has been implemented and the network
         certificate has been published to the directory server.
     </div>
     <ol>
@@ -970,7 +1048,7 @@
 
     </ol>
 </div>
-</p>
+
 
 
 
@@ -986,18 +1064,17 @@
            <p>
                The EDExchange web application allows authenticated users of the service provider to upload a <a href="assets/upload-template.csv">CSV file</a> where each row in the file creates an institution and adds it
                to the provider's group of serviceable institutions.
-               Alterntively, service providers can use the <a href="/swagger-ui/index.html#!/institutions">institution</a> API resource by first <a href="swagger-ui/index.html#!/institutions/createInstitution">creating</a>
+               Alternatively, service providers can use the <a href="/swagger-ui/index.html#!/institutions">institution</a> API resource by first <a href="swagger-ui/index.html#!/institutions/createInstitution">creating</a>
                the institution and then adding the institution to the service provider's group of serviceable institutions using the
-               <a th:href="${apiURL} + '/swagger-ui/index.html#!/institutions/relation'">relation</a>
-               API resource.
+               relation API resource.
            </p>
            <p>Download the CSV template file <a href="assets/upload-template.csv">here</a>.  Consult the <a href="#manage-school-codes">school codes</a> section for information about code requirements. </p>
 
 
            <h3 id="verify-signature">Verify a Digital Signature</h3>
-           <div>
+           <p>
                <b>Preconditions:</b> A network server is in the process of <a href="#receive-document">receiving a document</a>.
-           </div>
+		   </p>
            <ol>
                <li>
                    Receiver obtains the senders SSL certificate from the directory server.
@@ -1007,18 +1084,13 @@
                </li>
 
                <li>
-                   Receive compares the generated digital signature with the digital signature provided by the sender with
+                   Receiver compares the generated digital signature with the digital signature provided by the sender with
                    the document.
                </li>
 
            </ol>
 
 
-
-
-
-
-         <div class="col-sm-9">
 
            <h2 id="authentication">Authentication</h2>
 
@@ -1050,7 +1122,7 @@
     the <var>Cookie</var> header.  Example HTTP response headers are shown below (note the <var>X-CSRF-TOKEN</var> header and the <var>Cookie</var>
     headers).
 
-    <p>
+    </p>
 
         <pre>
 Accept:application/json
@@ -1067,10 +1139,11 @@ Referer:https://localhost:8443/swagger-ui/index.html
 User-Agent:Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36
 X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
         </pre>
-    </p>
+
     <p>
         HTTP requests that do not pass CSRF checks will fail and the server will return a 403 status code such as
         following:
+    </p>
         <pre>
 {
 "timestamp": 1470845258256,
@@ -1080,7 +1153,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
 "path": "/services/rest/v1/organizations/2/enabled"
 }
         </pre>
-    </p>
+    <p>
 </p>
 <p>
     Code examples in Java are provided as part of the directory server unit tests using Spring's RestTemplate.
@@ -1088,14 +1161,15 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
 
 
 
-           <h3 id="certificate">Publish an SSL Certificate</h2>
+           <h3 id="certificate">Publish an SSL Certificate</h3>
 
            <p>
                An SSL certificate is required to send and receive documents through the EDExchange network.
-               The authenticity of documents tranferred within the EDExchange network is verified using the
+               The authenticity of documents transferred within the EDExchange network is verified using the
                SSL certificate provided by the sender for the purpose of generating digital signatures.
-               <p>
-               Before an organization can send a document, it must obtain a certificate from a certficate authority
+               </p>
+            <p>
+               Before an organization can send a document, it must obtain a certificate from a certificate authority
                and upload the certificate to the EDExchange directory server
                using the website or by updating the signing-certificate property on the <a
                    href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization resource</a>
@@ -1103,7 +1177,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                </p>
 
                <p>
-                   Before an organization can receive a document, it must obtain a certificate from a certficate authority
+                   Before an organization can receive a document, it must obtain a certificate from a certificate authority
                    for the purpose of securing the network server using HTTPS, and upload the certificate to the EDExchange directory server
                    using the website or by updating the network-certificate property on the <a
                        href="/swagger-ui/index.html#!/organizations/udpateNetworkCertificateProperty">organization resource</a>
@@ -1115,7 +1189,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                        <li>Obtain an SSL certificate from a certificate authority, or optionally, for test
                            purposes, <a href="#self-signed-cert">create a
                                self signed certificate.</a></li>
-                       <li>Upload the signing certificate to the directory servier using the website,
+                       <li>Upload the signing certificate to the directory server using the website,
                            or by updating the signing-certificate property on the <a
                                    href="/swagger-ui/index.html#!/organizations/udpateCertificateProperty">organization
                                resource</a>
@@ -1132,12 +1206,13 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
 
                    </ol>
                </div>
-           </p>
+
 
            <div class="ed-title" id="self-signed-cert">Create a Self Signed Certificate</div>
            <p>
                A self signed SSL certificate can be created with the openssl command line utility using the following
                command:
+           </p>
 
            <p>
                <kbd>
@@ -1146,8 +1221,9 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
            </p>
 
            <p>
-               The resulting "certificate.pem" file contains the PEM encoded certificate which must be uploaded to the
+               The resulting "certificate.pem" file contains the PEM-encoded certificate that must be uploaded to the
                EDExchange directory server.
+           </p>
                              <pre>
            -----BEGIN CERTIFICATE-----
            MIIEMTCCAxmgAwIBAgIJAODgvtVzzhWlMA0GCSqGSIb3DQEBCwUAMIGuMQswCQYD
@@ -1176,12 +1252,12 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
            -----END CERTIFICATE-----
                        </pre>
 
-           </p>
+
 
            <p>
                The resulting "key.pem" file contains the private key that will be used to generate
                the digital signature for any document sent through EDExchange. The private key
-               should not be shared and kept in a secure location.
+               should not be shared and kept in a secure location.</p>
 
                          <pre>
            -----BEGIN ENCRYPTED PRIVATE KEY-----
@@ -1215,16 +1291,10 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
            nmY=
            -----END ENCRYPTED PRIVATE KEY-----
                        </pre>
-           </p>
-
-
-           </p>
 
 
 
 
-
-           <div class="col-sm-9">
              <h2 id="error-code">Error Codes</h2>
 
 
@@ -1242,7 +1312,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
 
              <div class="ed-title">Error Description</div>
 
-             <p>
+             <p></p>
              <dl class="dl-horizontal">
                  <dt>timestamp</dt>
                  <dd>A time stamp when the error occured, i.e. System.currentTimeMillis().</dd>
@@ -1256,10 +1326,10 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                  <dt>path</dt>
                  <dd>The path that was requested.</dd>
                  <dt>message</dt>
-                 <dd>A message which elaborates the problem in more detail.</dd>
+                 <dd>A message that elaborates the problem in more detail.</dd>
 
              </dl>
-             </p>
+
 
 
              <div class="ed-title">HTTP Status Code Usage</div>
@@ -1322,7 +1392,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                    and the <a href="#network-server">network server</a> are available through github.  Most of the API operations that are used
                    by institutions and service providers are implemented in the network server code.
                </p>
-               <p>The network server project includes code for the following tasks:
+               <p>The network server project includes code for the following tasks:</p>
                    <ol>
                        <li><a href="#receive-document">Receive a document</a> and all the logic that entails, including signature verification.</li>
                        <li>Create a transaction to store send/receive information</li>
@@ -1330,16 +1400,16 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                        <li><a href="#create-serviceable-institution">Create a serviceable institution</a></li>
                        <li>Updating organization information in the directory</li>
                    </ol>
-                   Code for these tasks can be seen in the network server's implemenation itself, or in the unit tests found in either
+                   Code for these tasks can be seen in the network server's implementation itself, or in the unit tests found in either
                    the network server or the directory server or both. The unit test names and comments indicate what organization type (institution or
                    service provider) the test case is designed to simulate.
 
                    <p>
                        It is likely that more sample code in the form of unit tests will be added to the network server project in the future.
                    </p>
-               </p>
+
                <p>
-                   The EDExchagne API can be accessed via <a href="services">SOAP services</a> or a <a href="swagger-ui/index.html">REST-based </a>client.
+                   The EDExchange API can be accessed via <a href="services">SOAP services</a> or a <a href="swagger-ui/index.html">REST-based </a>client.
                  </p>
 
                  <div id="reference-implementation">
@@ -1348,7 +1418,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                      The source code for the reference implementation of the network server can be found on github using the
                      following
                      url:
-                     <pre><span th:text="${github}"></span></pre>
+                     
 
                      <p>
                          The project contains the source code for both the directory server and the reference implementation of the
@@ -1361,26 +1431,26 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                          that need to be performed to make the reference implementation live for the member.  The network server is implemented
                          as a Spring Boot application and requires Java 8 to run and <a href="https://maven.apache.org/">maven</a> to build.
                          It also requires a mysql database.  Depending on what
-                         deployment options you choose, you will most likely need <h href="https://www.docker.com/">docker</a>. There are multiple options with regards to how
+                         deployment options you choose, you will most likely need <a href="https://www.docker.com/">docker</a>. There are multiple options with regards to how
                          to deploy and run the network server that are useful for different purposes.
+                     </p>
 
                          <div class="ed-title">Configuration</div>
                          <p>
-                             The network server application is configured using the application.properties files.  There are 3 configuration profiles:
+                             The network server application is configured using the application.properties files. There are 3 configuration profiles:
+                         </p>   
                              <ol>
                                  <li><span><b>dev</b></span>: <span>Intended for use in a development environment</span></li>
                                  <li><span><b>qa</b></span>: <span>Intended for use in a quality assurance environment</span></li>
                                  <li><span><b>prod</b></span>: <span>Intended for use in a production environment</span></li>
                              </ol>
-                             <p>You can specify the configuratio profile on the command line, when invoking the application:
+                             <p>You can specify the configuration profile on the command line, when invoking the application:</p>
                                  <div>
                                      <kbd>network-server.jar --spring.profiles.active=dev </kbd>
                                  </div>
                                  <div>Please consult the Spring documentation regarding Spring Boot configurations.
-                                 </div>
-                             </p>
-                         </p>
-                     </p>
+
+   
                  <div class="ed-title">Option 1: Docker Compose</div>
                  <p>This option uses docker and docker-compose to create separate VM images for the network server application and the mysql database.
                      When you've completed the steps to use this option, you should be able to use a browser open to the network server running
@@ -1394,30 +1464,30 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
 
                          <p>
                              From the network server directory (cdsWebserver/networkServer), run
-                         <p>
+                         </p>
+                     <p></p>
                              <kbd>
                                  mvn -DskipTests clean package docker:build
                              </kbd>
-                         </p>
+                         </li>
 
-                         </p>
-                     </li>
+
                      <li>
                          Next, run the docker containers...
                          <p>
                              From the network server directory (cdsWebserver/networkServer), run
-                         <p>
+                         </p>
                              <kbd>
                                  docker-compose up
                              </kbd>
-                         </p>
+                        
 
-                         </p>
+                       
 
                      </li>
                  </ol>
                  <p>In addition, it may be desirable to run the directory server locally, in which case there is a similar process
-                 for running the directory server
+                 for running the directory server:
                  </p>
 
                  <ol>
@@ -1426,11 +1496,13 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
 
                          <p>
                              From the directory server project folder (cdsWebserver/directoryServer), run
-                         <p>
+						 </p>
+						 <p>
+                  
                              <kbd>
                                  mvn -DskipTests clean package docker:build
                              </kbd>
-                         </p>
+                         
 
                          </p>
                      </li>
@@ -1438,11 +1510,13 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                          Next, run the docker containers...
                          <p>
                              From the directory server project folder (cdsWebserver/directoryServer), run
-                             <p>
+						 </p>
+						 <p>
+                        
                                  <kbd>
                                      docker-compose up
                                  </kbd>
-                             </p>
+                             
 
                          </p>
 
@@ -1453,13 +1527,13 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                      Another docker compose option is to invoke "setup.sh" from the project root "cdsWebserver".  This script
                      automates the build process for both the directory and network servers by building the projects, creating
                      docker images and then running a the directory server and network server and their respective database images
-                     with docker containers.  Invoke the setup.sh script with the name of the dev profile:
+                     with docker containers.  Invoke the setup.sh script with the name of the dev profile:</p>
 
-                     <kdb>./setup.sh dev</kdb>
+                     <kbd>./kdbsetup.sh dev</kbd>
 
-                     As the setup.sh script runs, it will output status of the build process. When it completes, you should
-                     see console output similar to following (IP addresses and hostnames may vary):
-                 </p>
+                     <p>As the setup.sh script runs, it will output status of the build process. When it completes, you should
+                     see console output similar to following (IP addresses and hostnames may vary):</p>
+              
                  <p>
                      <samp>
 
@@ -1526,11 +1600,11 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                      <li>Update the application-prod.properties to reflect your environment.</li>
                  </ol>
 
-                 </p>
+       
 
-             </div>
 
-             </p>
+
+ 
 
 
 
@@ -1544,7 +1618,8 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
             <b>A: </b>
                 <span>First, <a href="home#/registration-form">register</a> with EDExchange as an institution (as opposed to a service provider).  If you also want to be able to
                         receive documents, you must register as an <a href="#institutions">institution</a> and a <a href="#service-provider">service provider</a>.  Consult the next FAQ below
-                        for more information about receiving documents.</p>
+                        for more information about receiving documents.</span>
+        </p>
         <p>Next,
             check if the destination school is an EDExchange member using the searchable <a href="home#/directory">directory</a>.  If the school isn't an
             EDExchange member, they need to <a href="home#/registration-form">register</a> as a member.  Also, the destination school needs to be configured to receive documents.
@@ -1552,14 +1627,15 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
             either configure a <a href="#network-server">network server</a>, using the <a href="#reference-implementation">reference implementation</a>
             that's provided by EDExchange, or alternatively, use an EDExchange <a href="#service-provider"> service provider</a> to receive documents on their behalf. Service providers are
             listed in the searchable <a href="home#/directory">directory</a>.
+        </p>
         <p>
             After you've registered your institution, you'll need to obtain an <a href="#certificate">SSL certificate</a> from a certificate authority and upload it
             to the directory server.  Once you have your certificate with the corresponding private key, you can use either the free reference implementation of the network
             server to <a href="#send-document">send a document</a>. Optionally, you'll need a software developer to extend or implement
             a customized software program.
         </p>
-        </span>
-        </p>
+       
+
     </div>
 
 
@@ -1571,6 +1647,8 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
             <b>A: </b>.
                      <span>First, you must <a href="home#/registration-form">register</a> with EDExchange as both an <a href="#institutions">institution</a> and a <a href="#service-provider">provider</a>.  As a service provider, your
                         institution will be able both send and receive documents.
+                     </span>
+        </p>
 
                            <p>
                                After you have been registered and are a member of the EDExchange network, your are required to host a <a href="#network-server">network server</a> on the internet
@@ -1583,13 +1661,13 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                            </p>
 
                             <p>
-                                Once your network server has become operational, there are a number of <a href="#common-service-provider-tasks">common service provider tasks</a>
-                                and <a href="#common-institution-tasks">common institition tasks</a> that define the system.
+                                Once your network server has become operational, there are a number of <a href="#commonTasks">common service provider tasks
+                                and institition tasks</a> that define the system.
                             </p>
 
-                    </span>
-            </span>
-        </p>
+ 
+
+
     </div>
 
     <div class="ed-faq">
@@ -1598,17 +1676,17 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
         </p>
         <p>
             <b>A: </b>.
-                     <span>The EDExchange web application and API provides a way for service providers to create institutions and add them to a logical group that represents serviceable institutions.
+                     <span>The EDExchange web application and API provides a way for service providers to create institutions and add them to a logical group that represents serviceable institutions.</span>
+        </p>
 
-                            <p>Service providers <a href="#upload-serviceable-institutions-csv">upload a CSV</a>, or use the REST API to manage their group of serviceable insitutions.</p>
+                            <p>Service providers <a href="#upload-serviceable-institutions-csv">upload a CSV</a>, or use the REST API to manage their group of serviceable institutions.</p>
 
                             <p>
                                 In order to receive documents of behalf of a serviceable institution, the service provider must <a href="#assign-endpoint">assign an endpoint</a> to the institution.
                             </p>
 
-                    </span>
-            </span>
-        </p>
+
+
     </div>
 
 
@@ -1619,10 +1697,11 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
       <p>
           <b>A: </b>.
                    <span>It is possible, if unlikely, for a institution to have multiple service providers.  This means that when the EDExchange directory is queried for an endpoint, multiple
-    endpoints will be returned to the API caller.  In this case, it is up to the caller to select which endpoint in which to send the document. </p>
-                  </span>
-                </span>
-              </p>
+    endpoints will be returned to the API caller.  In this case, it is up to the caller to select which endpoint in which to send the document. 
+      </span>
+      </p>
+
+
             </div>
 
 
@@ -1642,7 +1721,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
             (a URL that identifies where to send a document using HTTP) that fulfills the required
             criteria including the document type (Transcript or Transcript Request), the file format of
             the document (PDF, text, XML, etc.), the name of the institution's department to deliver to
-            and the directory ID of the recipient insitution.
+            and the directory ID of the recipient institution.
         </li>
 
         <li>
@@ -1658,7 +1737,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
             The sender <a href="#send-document">sends a document</a> to the endpoint using HTTPS along with the document's
             digital signature, the sender's directory ID, the recipient's directory ID, the file
             format, the document type and destination department name and optionally, a transaction
-            id and acknowledegment URL.
+            id and acknowledgment URL.
         </li>
 
         <li>
@@ -1696,7 +1775,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                            One of the attributes of an <a href="#endpoints">endpoint</a> that can be used in the search criteria is the <a href="/services/rest/v1/document-types">document type</a>
                            name.  Endpoints that are intended to handle transcript requests should specify "Transcript Request" as the document type. When an EDExchange
                            member wishes to request a transcript from a particular institution, the search for an appropriate endpoint (one
-                           that specifies "Transcript Request" as the document type.
+                           that specifies "Transcript Request" as the document type.</p>
 
                        <p>
                            Note that the reference implementation does not currently implement the handling of transcript requests.
@@ -1707,7 +1786,7 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
                                    holder.</li>
                                <li>The requesting institution uses the endpoint to send a document, in this case, a transcript request such as a TS146 to the record holder.</li>
                                <li>
-                                   The receiving network server procesess the trancript request by executing the following in any particular order:
+                                   The receiving network server processes the transcript request by executing the following in any particular order:
                                    <ol class="alpha">
                                        <li>Send an acknowledgement for the transcript request to the sending network server.</li>
                                        <li><a href="#send-document">Send a document</a>, in this case, a transcript, in response to the transcript request to the requestor.</li>
@@ -1716,23 +1795,23 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
 
                            </ol>
                        </div>
-                       </p>
 
 
 
-    <div class="col-sm-9">
+
+
       <h2 id="introduction">Common Directory Tasks for PESC Administrators</h2>
     <h3 id="upgrade-institution">Update Institution to Service Provider</h3>
     <p>If an institution initially chooses to use a service provider, but later, decides to implement a network server and begin
         sending and receiving documents for themselves, it's easy for a PESC administrator to enable the institution to do so. </p>
-    <p>
+    <p></p>
     <ol>
         <li>Create a user account for the institution's administrator.</li>
-        <li>Edit the institution's organizational profile by making is a service provider, in addtion to an institution.</li>
+        <li>Edit the institution's organizational profile by making is a service provider, in addition to an institution.</li>
         <li>The institution must still go through the required step to configure itself to <a href="#send-document">send a document</a>
             and <a href="#receive-document">receive a document</a>.</li>
     </ol>
-    </p>
+
 
 
     <h3 id="enable-organization">Enable an Organization</h3>
@@ -1741,28 +1820,44 @@ X-CSRF-TOKEN:4a0e4a27220ceca2cfdaa7a338087a07e5
         must review the organization's information and explicitly enable the organization.  The enabled property can be
         updated using the <a href="/swagger-ui/index.html#!/organizations/updateEnabledProperty">organization resource</a> or
         through the directory server web application by a user with appropriate permissions.
+    </p>
+	<p>
         <ol>
             <li>A newly registered organization is created in a disabled state.</li>
-            <li>When an organization's signing certificate is created or udpated.</li>
+            <li>When an organization's signing certificate is created or updated.</li>
             <li>When an organization's network certificate is created or udpated.</li>
-            <li>Whenever a PESC administrator explicity disables an organization.</li>
+            <li>Whenever a PESC administrator explicitly disables an organization.</li>
         </ol>
-    </p>
-
-
-
-
-
+	</p>
 
 </div>
+
+
 <!-- Footer -->
 <footer>
     <div class="row">
         <div class="col-lg-12">
-            <p>EDExchange by the Common Data Services (CDS) Task Force</p>
+            <p>EDExchange by the Common Data Services (CDS) Task Force Bar</p>
         </div>
     </div>
 </footer>
 </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
