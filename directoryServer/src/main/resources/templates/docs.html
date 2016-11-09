@@ -21,7 +21,12 @@
             <div><a href="#join">Join the EDExchange Network</a></div>
 
             <div class="ed-title">Directory Server User Guide</div>
-            <div><a href="#directory-server-user-guide">Configuration through the Directory Server</a></div>
+            <div><a href="#directory-server-user-guide">Configuration Through the Directory Server</a></div>
+            <div><a href="#user-guide-select-signing-certificate">Configuring Your Signing Certificate</a></div>
+            <div><a href="#user-guide-web-server-certificate">Configuring Your Network Certificate (for Service Providers Only)</a></div>
+            <div><a href="#user-guide-create-serviceable-schools">Configure Your Serviced Schools (For Service Providers Only)</a></div>
+            <div><a href="#user-guide-configure-endpoints">Configure Your Endpoints (For Service Providers Only)</a></div>
+            <div><a href="#user-guide-manage-users">Manage Users</a></div>
 
             <div class="ed-title">API Reference</div>
             <div><a href="#introduction">Introduction</a></div>
@@ -220,14 +225,21 @@
                 You'll need to use both if you want to send and receive documents, but for receiving documents you'll
                 need to take the additional step of hosting a network server. We've made it easy for you by providing
                 the code for both the directory server and the network server, since it's open source.
+            </p>
+            <p>
+
                 If you choose to only send documents, you will register with EDExchange on the Directory Server as
                 an "Institution." Then you can use the free Network Server code to send documents by invoking the
                 EDExchange API, or you can integrate that functionality in your own application. In this scenario
                 you'd use an EDExchange Service Provider to receive documents on your behalf (most-likely a
                 fee-based arrangement).
+            </p>
+            <p>
                 If you choose to both send and receive documents, you will register with the EDExchange as
                 both an "Institution" AND as a "Service Provider." In addition to the steps for sending a document,
                 you will also host your own Network server for receiving documents.
+            </p>
+            <p>
                 The Directory server is hosted and maintained by the PESC organization. It includes a directory of
                 EDExchange members and all their related information. As an EDExchange member you can manage your
                 organization through the Directory server web application UI. You can also manage operations using
@@ -239,7 +251,7 @@
                 do all of this follows in the sections below.
             </p>
 
-            <h2 id="web-app-vs-api">Web Application vs. API</h2>
+            <h2 id="web-app-vs-api">Web Application and API</h2>
             <p>
                 The EDExchange directory server web application allows non-technical people to sign up and manage
                 much of the
@@ -279,10 +291,11 @@
             becomes enabled in the EDExchange direcory.
             </p>
 
-            <h2 id="directory-server-user-guide">Configuration through the Directory Server</h2>
+            <h2 id="directory-server-user-guide">Configuration Through the Directory Server</h2>
             <p>
-                This section describes how an organization's administrator can configure their organization using the
-                directory server web application after logging into the application.
+                This section is a user guide that describes how an organization's administrator
+                can configure their organization using the directory server web application after
+                logging into the application.
             </p>
             <p>
                 Using the directory server web application is mostly self explanatory. It uses consistent icons to 
@@ -367,7 +380,7 @@
             </table>
             
 
-            <h3 id="select-server-provider">Configuring Service Providers for Your Organization</h3>
+            <h3 id="user-guide-select-server-provider">Configuring Service Providers for Your Organization</h3>
             <p>
                 Service Provider are organizations that have registered with EDExchange and as such, have set up a Network Server,
                 and are authorized to receive documents via. If you registered with EDExchange as an Institution, then
@@ -391,6 +404,191 @@
 
             </p>
 
+            <h3 id="user-guide-select-signing-certificate">Configuring Your Signing Certificate</h3>
+
+            <p>
+                Before you can send a document you must configure a signing certificate. A signing certificate, or
+                SSL certificate, is a digital code that is issued by a certificate authority that acts as verification
+                of your organization's identity. It consists of a private key and a public key. An SSL certificate is
+                required to send and receive documents through the EDExchange network. The authenticity of documents
+                transferred within the EDExchange network is verified using the SSL certificate provided by the sender
+                for the purpose of generating digital signatures.
+            </p>
+
+            <p>
+                Note: The Signing Certificate can also be configured programmatically by your organization's developer
+                by updating the API's signing-certificate property on the organization resource.
+            </p>
+
+            <ol>
+                <li>
+                    Obtain an SSL certificate from a certificate authority. You can follow the
+                    instructions <a href="#self-signed-cert">here</a> for using a free, self-signing
+                    certificate for testing purposes prior to obtaining an SSL certificate from a certificate authority.
+                </li>
+                <li>
+                    Once you have the certificate.pem file (public key) and its corresponding key.pem file (private key):
+                    <ol>
+                        <li>
+                            From My Organization -> Signing Certificate, click the Expand (Pencil) icon.
+                        </li>
+                        <li>
+                            Copy the signing certificate (public key) and paste it into the Signing Certificate field.
+                        </li>
+                        <li>
+                            Click the Save icon to save it. When you add a Signing Certificate your account
+                            automatically becomes disabled pending a
+                            PESC administrator’s review. You will receive an email notifying you that your organization
+                            and its signing certificate are enabled. This is done for security reasons and should take
+                            no more than a day to receive.
+                        </li>
+                    </ol>
+
+
+                </li>
+                <li>
+                    After you have your Signing Certificate in place and your organization is enabled, test it by
+                    sending a document to the free reference implementation of the Network Server.
+                </li>
+            </ol>
+
+
+            <h3 id="user-guide-web-server-certificate">Configuring Your Network Certificate (for Service Providers Only)</h3>
+
+            <p>
+                The Network Certificate section only displays on the My Organizations tab if you registered as both an
+                Institution (can send documents) and a Service Provider (can receive documents). Before an organization
+                can receive a document, it must obtain a certificate from a certificate authority for the purpose of
+                securing the Network Server using HTTPS.
+            </p>
+            <p>
+                Prerequisites:
+
+                <ul class="list-unstyled" style="margin-left: 20px;">
+                    <li>
+                        You must register as both an Institution AND a Service Provider with EDExchange.
+                    </li>
+                    <li>
+                        Work with your local developer to set up/host a Network Server. This is required for all EDExchange members who want receive documents.
+                    </li>
+                </ul>
+            </p>
+            <p>
+                Follow the same steps as listed in above to obtain and configure a Network Certificate in addition
+                to your Signing Certificate so that you can receive documents.
+            </p>
+            <p>
+                You can also add/update the Network Certificate programmatically by updating the API's
+                network-certificate property on the organization resource.
+            </p>
+
+            <h3 id="user-guide-create-serviceable-schools">Configure Your Serviced Schools (For Service Providers Only)</h3>
+            <p>
+                The Serviced Schools field only displays on the My Organizations tab if you are registered as
+                a Service Provider. The Serviced Schools section is where you identify those schools on
+                whose behalf you receive documents as a Service Provider. EDExchange allows you to upload a
+                CSV file where each row in the file represents an EDExchange Institution (school) and adds
+                it to your group of serviceable institutions. Download the CSV template file here (be sure
+                to retain the file's header). Consult the school codes section for information about code requirements.
+            </p>
+            <p>
+                You can programmatically add a serviced school by using the API's institution resource to create
+                the institution and then add it to the Service Provider's group of serviceable institutions using
+                the API's relation resource.
+                <ol>
+                    <li>
+                        From My Organization -> Service Providers, click the Upload (Up Arrow) icon to display
+                        the Institutions Upload dialog box.
+                    </li>
+                    <li>
+                        Create a CSV file that includes information for all the schools you service. You can
+                        use this template to create a CSV file that you can use to upload the serviceable schools.
+                        Be sure to keep the file's header.
+                    </li>
+                    <li>
+                        Click Browse to navigate to the .csv file you just created above.
+                    </li>
+                    <li>
+                        Click Upload to upload it. If any errors occurred, click the Show history button to display
+                        the errors. Click the Success or Errors check boxes to display one or both type of history.
+                        If there are any errors, read the reason for the error, correct it in the .csv file and save
+                        the file, then try to upload the file again.
+                    </li>
+                    <li>
+                        Click OK to close the Institutions Upload dialog box. You may have to log out and
+                        then log back in to see the serviceable schools display.
+                    </li>
+                </ol>
+                <i>
+                    Note: It is possible, if unlikely, for a Institution to have multiple Service Providers.
+                </i>
+            </p>
+
+            <h3 id="user-guide-configure-endpoints">Configure Your Endpoints (For Service Providers Only)</h3>
+
+            <p>
+                An endpoint is a URL and set of attributes that identify where to send a document. Organizations
+                that are Service Providers can create, read, update and delete and assign endpoints to Institutions
+                that are serviceable by the provider. An Institution can also be a Service Provider and can receive
+                documents for itself. Endpoint operations can be invoked through the EDExchange web application by
+                an authenticated user with the appropriate permissions or by a developer using the endpoints resource
+                of the REST API.
+            </p>
+            <p>
+                Work with your software developer to create an endpoint (URL) as well as to
+                associate one or more endpoints with the institution.
+            </p>
+            <ol>
+                <li>Click the Expand (+) icon to the left of the Endpoints field label to display the Endpoints form fields.</li>
+                <li>Enter your dedicated and secure Network Server URL in the https://null/ field.</li>
+                <li>Enter a description of your service in the Description field.</li>
+                <li>Select the document format you support and receive from the Document Format drop-down list (PESCXML, XML, Text, PDF, Image, Binary, EDI, Mutually Defined).</li>
+                <li>Select the form of delivery service from the Delivery Service drop-down list (Web Service, SFTP, USPS).</li>
+                <li>Select the document type from the Document Types drop-down list.</li>
+                <li>Select a department from the Departments drop-down list.</li>
+                <li>Select a mode from the Mode drop-down list. LIVE is selected by default, but you can select TEST instead when testing.
+                    <i>Note: Clicking the Hosted By field value, which shows your Service Provider name as a link, displays your Directory listing in EDExchange.</i></li>
+                <li>Click Save.</li>
+            </ol>
+
+            <h3 id="user-guide-manage-users">Manage Users</h3>
+            <p>
+                Manage Users: You can maintain a group of users that can manager your organization on the Users tab in
+                the EDExchange web application, whether you registered as a Service Provider or an Institution.
+                You must be an authenticated Ed Exchange user with the appropriate permissions (i.e. configured as
+                an Organization Admin). Note: Alternatively, users can be managed via the API's users resource by
+                your organization's developer.
+            </p>
+            <p>
+                Use the steps below to add users using the EDExchange web application (Directory Server).
+            </p>
+            <ol>
+                <li>Click the User button that displays under your organization's name to display a User field group.</li>
+
+                <li>
+                    Enter values in the fields provided. Most of the field values are self explanatory, but a few
+                    details that may not be obvious are described further below.
+                    <div class="well">
+                        <ul class="list-unstyled" style="margin-left: 20px;">
+                            <li>The "System Administrator" role provides access to all the My Organization fields but CANNOT create new users.</li>
+                            <li>The "Organization Administrator" role provides access to all the My Organization fields and CAN create new users.</li>
+                            <li>The "Support Technician" role is not currently used and displays for future use only.</li>
+                            <li>
+                                The Password for the user must be at least 15 characters long, contain one upper case letter,
+                                one lower case letter, one number, and one special characters. If the password entered does
+                                not meet these requirements a pop-up message displays when you click Save informing you of
+                                them.
+                            </li>
+                        </ul>
+                    </div>
+
+                </li>
+                <li>
+                    Click Save. If any required fields do not have values, they display as red when you click the
+                    Save button. Enter any missing required values and click Save again.
+                </li>
+
+            </ol>
 
 <h2 id="introduction">Introduction</h2>
 
