@@ -46,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/organization-details",
                         "/swagger-ui/**",
                         "/documentation",
+                        "/docs",
                         "/home.html",
                         "/exception",
                         "/").permitAll()

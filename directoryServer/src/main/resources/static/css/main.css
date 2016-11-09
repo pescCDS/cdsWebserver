@@ -265,3 +265,24 @@ ol.alpha>li:before {
 #oauthForm input {
     width: 220px;
 }
+
+@media (min-width: 768px){
+    #sidebar {
+        position: absolute;
+        top: 0px;
+        bottom: 0;
+        left: 0;
+        overflow-y: scroll;
+        height: 100%;
+    }
+
+    #main-window {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        overflow-y: scroll;
+        height: 100%;
+        overflow-x: hidden;
+    }
+}
