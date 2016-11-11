@@ -557,6 +557,9 @@ public class TranscriptRequestBuilder {
                 case OPEID:
                     organizationType.setOPEID(schoolCodes.get(schoolCodeType));
                     break;
+                case CEEB:
+                    organizationType.setCEEBACT(schoolCodes.get(schoolCodeType));
+                    break;
                 default:
                     throw new IllegalStateException(schoolCodeType + " is not supported");
             }
