@@ -245,28 +245,32 @@
                 or more Service Provider's to send and receive documents on their behalf (most-likely a fee-based arrangement).
             </p>
             <p>
-                The following table summarizes EDExchange organization types and their capabilities.
+                The following table summarizes EDExchange organization types and their capabilities.  Note that an organization
+                can be both an Institution AND a Service Provider.
             <table class="table">
                 <thead>
                 <tr>
                     <th>Organization Type</th>
                     <th>Send</th>
                     <th>Receive</th>
-                    <th>Host Network Server</th>
+                    <th>Network Server Required</th>
+                    <th>Send/Receive for other organizations</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td>Institution</td>
-                    <td><span class="glyphicon glyphicon-ok"></span></td>
-                    <td><span class="glyphicon glyphicon-remove"></span></td>
-                    <td><span class="glyphicon glyphicon-remove"></span></td>
+                    <td><span class="glyphicon glyphicon-ok"></span> Yes</td>
+                    <td><span class="glyphicon glyphicon-remove"></span> No</td>
+                    <td><span class="glyphicon glyphicon-remove"></span> No</td>
+                    <td><span class="glyphicon glyphicon-remove"></span> No</td>
                 </tr>
                 <tr>
                     <td>Service Provider</td>
-                    <td><span class="glyphicon glyphicon-ok"></span></td>
-                    <td><span class="glyphicon glyphicon-ok"></span></td>
-                    <td><span class="glyphicon glyphicon-ok"></span></td>
+                    <td><span class="glyphicon glyphicon-ok"></span> Yes</td>
+                    <td><span class="glyphicon glyphicon-ok"></span> Yes</td>
+                    <td><span class="glyphicon glyphicon-ok"></span> Yes</td>
+                    <td><span class="glyphicon glyphicon-ok"></span> Yes</td>
                 </tr>
                 </tbody>
             </table>
