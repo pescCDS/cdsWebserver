@@ -274,6 +274,7 @@ ol.alpha>li:before {
         left: 0;
         overflow-y: scroll;
         height: 100%;
+        padding-bottom: 50px;
     }
 
     #main-window {
@@ -284,5 +285,6 @@ ol.alpha>li:before {
         overflow-y: scroll;
         height: 100%;
         overflow-x: hidden;
+        padding-bottom: 50px;
     }
 }

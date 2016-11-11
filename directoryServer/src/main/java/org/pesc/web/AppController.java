@@ -122,16 +122,6 @@ public class AppController {
         return "documentation";
     }
 
-    @RequestMapping({"/docs"})
-    public String getDocs(Model model) {
-        buildUserModel(model);
-
-        model.addAttribute("github", githubURL);
-        model.addAttribute("apiURL", "https://" + restAPIHost);
-
-        return "docs";
-    }
-
     @RequestMapping({"/endpoint-selector"})
     public String getEndpointSelectorFragment(Model model) {
         buildUserModel(model);
