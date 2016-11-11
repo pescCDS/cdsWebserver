@@ -6,7 +6,7 @@
 
 <changeSet id="1" author="prabhu" context="dev, ci, qa, prod">
         <comment>
-            Added new codetypes CEEB and CDS schools
+            Added new code types CEEB and CDS schools
         </comment>
 
         <sqlFile encoding="utf8" path="1-school-codes.sql" relativeToChangelogFile="true" />
