@@ -1,5 +1,5 @@
 directoryserver_app_image:
-  image: edex/directory-server
+  image: ccctechcenter/cccnext-directory-server:${IMAGE_TAG}
   volumes:
      - ./directoryServer/target:/opt/edexchange
   ports:
