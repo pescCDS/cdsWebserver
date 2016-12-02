@@ -12,6 +12,7 @@ import org.pesc.sdk.core.coremain.v1_12.TransmissionTypeType;
 import org.pesc.sdk.core.coremain.v1_12.UserDefinedExtensionsType;
 import org.pesc.sdk.core.coremain.v1_9.SeverityCodeType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
+import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
 import org.pesc.sdk.message.functionalacknowledgment.v1_0.SyntaxErrorType;
 import org.pesc.sdk.message.functionalacknowledgment.v1_0.ValidationResponse;
@@ -36,7 +37,6 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.util.CollectionUtils;
 import org.w3c.dom.Document;
 
-import javax.annotation.Resource;
 import javax.xml.transform.dom.DOMResult;
 import java.io.IOException;
 import java.util.Collections;
@@ -54,7 +54,7 @@ public class TranscriptRequestBuilder {
     private static final org.pesc.sdk.core.coremain.v1_12.ObjectFactory coreMainObjectFactory = new org.pesc.sdk.core.coremain.v1_12.ObjectFactory();
     private static final org.pesc.sdk.message.documentinfo.v1_0.ObjectFactory DocumentInfoObjectFactory = new org.pesc.sdk.message.documentinfo.v1_0.ObjectFactory();
     private static final org.pesc.sdk.message.functionalacknowledgment.v1_0.ObjectFactory functionalAcknowledgmentObjectFactory = new org.pesc.sdk.message.functionalacknowledgment.v1_0.ObjectFactory();
-    private Marshaller DocumentInfoMarshaller;
+    private Marshaller documentInfoMarshaller;
 
     private String documentID;
     private DocumentTypeCodeType documentTypeCode;
@@ -83,6 +83,7 @@ public class TranscriptRequestBuilder {
     //document
     private DocumentTypeCode parchmentDocumentTypeCode;
     private String fileName;
+    private String documentFormat;
     //student
     private Boolean studentRelease;
     private ReleaseAuthorizedMethodType studentReleasedMethod;
@@ -97,8 +98,8 @@ public class TranscriptRequestBuilder {
     private String studentPartialSsn;
     private Boolean studentCurrentlyEnrolled;
 
-    public TranscriptRequestBuilder DocumentInfoMarshaller(Marshaller DocumentInfoMarshaller) {
-        this.DocumentInfoMarshaller = DocumentInfoMarshaller;
+    public TranscriptRequestBuilder documentInfoMarshaller(Marshaller DocumentInfoMarshaller) {
+        this.documentInfoMarshaller = DocumentInfoMarshaller;
         return this;
     }
 
@@ -212,6 +213,11 @@ public class TranscriptRequestBuilder {
         return this;
     }
 
+    public TranscriptRequestBuilder documentFormat(String documentFormat) {
+        this.documentFormat = documentFormat;
+        return this;
+    }
+
     public TranscriptRequestBuilder studentRelease(Boolean studentRelease) {
         this.studentRelease = studentRelease;
         return this;
@@ -318,9 +324,11 @@ public class TranscriptRequestBuilder {
         /**
                   <UserDefinedExtensions>
                      <ns2:DocumentInfo>
-                        <ns2:FileName>2f7c4e21337341918d8a69ddaa15e6db_document.pdf</ns2:FileName>
-                        <ns2:DocumentType>Letter of Recommendation - Teacher</ns2:DocumentType>
-                        <ns2:ExchangeType>PESC XML Document Request and PDF or XML</ns2:ExchangeType>
+                         <ns2:document>
+                             <ns2:FileName>0fd6ad111a83487c9536ea71602ecd7d_document.pdf</ns2:FileName>
+                             <ns2:DocumentType>Letter of Recommendation</ns2:DocumentType>
+                             <ns2:DocumentFormat>PDF</ns2:DocumentFormat>
+                         </ns2:document>
                      </ns2:DocumentInfo>
                   </UserDefinedExtensions>
                </TransmissionData>
@@ -328,11 +336,17 @@ public class TranscriptRequestBuilder {
         UserDefinedExtensionsType userDefinedExtensions = coreMainObjectFactory.createUserDefinedExtensionsType();
         transmissionData.setUserDefinedExtensions(userDefinedExtensions);
         DocumentInfo documentInfo = DocumentInfoObjectFactory.createDocumentInfo();
-        documentInfo.setFileName(fileName);
-        documentInfo.setDocumentType(parchmentDocumentTypeCode);//e.g. transcript
+
+        DocumentInfoType document = DocumentInfoObjectFactory.createDocumentInfoType();
+        document.setFileName(fileName);
+        document.setDocumentType(parchmentDocumentTypeCode);//e.g. transcript
+        document.setDocumentFormat(documentFormat);
+
+        documentInfo.getDocuments().add(document);
+
         try {
             DOMResult domResult = new DOMResult();
-            DocumentInfoMarshaller.marshal(documentInfo, domResult);
+            documentInfoMarshaller.marshal(documentInfo, domResult);
             userDefinedExtensions.setAny( ((Document) domResult.getNode()).getDocumentElement());
         } catch (IOException e) {
             log.error(e.getMessage(), e);

@@ -7,6 +7,7 @@ import org.pesc.sdk.core.coremain.v1_12.SeverityCodeType;
 import org.pesc.sdk.core.coremain.v1_12.StateProvinceCodeType;
 import org.pesc.sdk.core.coremain.v1_12.TransmissionTypeType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
+import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoValidator;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
 import org.pesc.sdk.message.functionalacknowledgment.v1_0.ValidationResponse;
@@ -624,12 +625,15 @@ public class TranscriptRequestTest {
         assertTrue(validationResponse2.getErrors().size()==0);
     }
 
-    private void testdocumentInfoContentRequired(DocumentInfo DocumentInfo){
+    private void testdocumentInfoContentRequired(DocumentInfo documentInfo){
         String fileName = null;
         DocumentTypeCode documentType = null;
-        if(DocumentInfo!=null){
-            fileName = DocumentInfo.getFileName();
-            documentType = DocumentInfo.getDocumentType();
+        if(documentInfo!=null){
+            for(DocumentInfoType document : documentInfo.getDocuments()) {
+                fileName = document.getFileName();
+                documentType = document.getDocumentType();
+            }
+
         }
         assertTrue("0fd6ad111a83487c9536ea71602ecd7d_document.pdf".equals(fileName));
         assertTrue(DocumentTypeCode.TRANSCRIPT==documentType);
@@ -653,7 +657,7 @@ public class TranscriptRequestTest {
             URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
             Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
             documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
-            documentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
+           documentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
         } catch (Exception e) {
             logger.error("Error Unmarshalling TranscriptRequest", e);
             throw e;
@@ -667,11 +671,90 @@ public class TranscriptRequestTest {
         testTranscriptRequestContentRequired(transcriptRequest);
 
         DocumentInfoValidator.validateDocumentInfoRequiredContent(documentInfo);
-        String fileName = documentInfo.getFileName();
-        assertTrue(fileName.endsWith("_document.xml") || fileName.endsWith("_document.pdf"));
-        assertTrue(DocumentTypeCode.TRANSCRIPT==documentInfo.getDocumentType());
+
+
+        List<DocumentInfoType> documents = documentInfo.getDocuments();
+
+        for(DocumentInfoType document : documents) {
+            String fileName = document.getFileName();
+            assertTrue(fileName.endsWith("_document.xml") || fileName.endsWith("_document.pdf"));
+            assertTrue(DocumentTypeCode.TRANSCRIPT==document.getDocumentType());
+        }
+
+
 
     }
+
+    @Test(expected=javax.xml.bind.UnmarshalException.class)
+    public void testMissingDocumentInfoDocumentElement() throws Exception {
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        Unmarshaller u = jc.createUnmarshaller();
+        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
+        u.setSchema(schema);
+        TranscriptRequest transcriptRequest = null;
+        DocumentInfo documentInfo = null;
+        try {
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/missing_documentinfo_element.xml"));
+            JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
+            Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
+            SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
+            Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
+            documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
+            documentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
+        } catch (Exception e) {
+            logger.error("Error Unmarshalling TranscriptRequest", e);
+            throw e;
+        }
+
+        Marshaller m = jc.createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        m.marshal(transcriptRequest, byteArrayOutputStream);
+        logger.info(byteArrayOutputStream.toString());
+
+        ValidationResponse validationResponse = DocumentInfoValidator.validateDocumentInfoRequiredContent(documentInfo);
+
+    }
+
+    @Test
+    public void testPostiveValidationError() throws Exception {
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        Unmarshaller u = jc.createUnmarshaller();
+        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
+        u.setSchema(schema);
+        TranscriptRequest transcriptRequest = null;
+        DocumentInfo documentInfo = null;
+        try {
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/xmlTranscript_request_bad_documentinfo.xml"));
+            JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
+            Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
+            SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
+            Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
+            documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
+            documentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
+        } catch (Exception e) {
+            logger.error("Error Unmarshalling TranscriptRequest", e);
+            throw e;
+        }
+
+        Marshaller m = jc.createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        m.marshal(transcriptRequest, byteArrayOutputStream);
+        logger.info(byteArrayOutputStream.toString());
+
+        ValidationResponse validationResponse = DocumentInfoValidator.validateDocumentInfoRequiredContent(documentInfo);
+
+        assertTrue("There should be exactly two validation errors, but found " + String.valueOf(validationResponse.getErrors().size()), validationResponse.getErrors().size() == 2);
+
+    }
+
 
     @Test
     public void testRequestLetterOfRecommendation() throws Exception {
@@ -686,7 +769,7 @@ public class TranscriptRequestTest {
             Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
             u.setSchema(schema);
             TranscriptRequest transcriptRequest = null;
-            DocumentInfo DocumentInfo = null;
+            DocumentInfo documentInfo = null;
             try {
                 transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource(file));
                 JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
@@ -695,7 +778,7 @@ public class TranscriptRequestTest {
                 URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
                 Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
                 documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
-                DocumentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
+                documentInfo = (DocumentInfo)documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
             } catch (Exception e) {
                 logger.error("Error Unmarshalling TranscriptRequest", e);
                 throw e;
@@ -708,11 +791,15 @@ public class TranscriptRequestTest {
             logger.info(byteArrayOutputStream.toString());
             testTranscriptRequestContentRequired(transcriptRequest);
 
-            DocumentInfoValidator.validateDocumentInfoRequiredContent(DocumentInfo);
-            String fileName = DocumentInfo.getFileName();
-            assertTrue(fileName.endsWith("_document.pdf"));
-            assertTrue(DocumentTypeCode.LETTER_OF_RECOMMENDATION==DocumentInfo.getDocumentType()
-                    || DocumentTypeCode.COUNSELOR_RECOMMENDATION==DocumentInfo.getDocumentType());
+            DocumentInfoValidator.validateDocumentInfoRequiredContent(documentInfo);
+
+            for(DocumentInfoType document : documentInfo.getDocuments()) {
+                String fileName = document.getFileName();
+                assertTrue(fileName.endsWith("_document.pdf"));
+                assertTrue(DocumentTypeCode.LETTER_OF_RECOMMENDATION == document.getDocumentType()
+                        || DocumentTypeCode.COUNSELOR_RECOMMENDATION == document.getDocumentType());
+            }
+
 
         }
     }

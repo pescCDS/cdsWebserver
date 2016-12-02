@@ -34,9 +34,18 @@
         <UserDefinedExtensions>
             <ns2:DocumentInfo>
                 <ns2:document>
-                    <ns2:FileName>0fd6ad111a83487c9536ea71602ecd7d_document.xml</ns2:FileName>
+                    <ns2:DocumentType>Transcript</ns2:DocumentType>
+                </ns2:document>
+                <ns2:document>
+                    <ns2:DocumentFormat>XML</ns2:DocumentFormat>
+                </ns2:document>
+                <ns2:document>
                     <ns2:DocumentType>Transcript</ns2:DocumentType>
                     <ns2:DocumentFormat>XML</ns2:DocumentFormat>
+                </ns2:document>
+                <ns2:document>
+                    <ns2:FileName>0fd6ad111a83487c9536ea71602ecd7d_document.xml</ns2:FileName>
+                    <ns2:DocumentType>Transcript</ns2:DocumentType>
                 </ns2:document>
             </ns2:DocumentInfo>
         </UserDefinedExtensions>
