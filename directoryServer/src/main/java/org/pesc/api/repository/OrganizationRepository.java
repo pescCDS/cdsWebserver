@@ -15,6 +15,6 @@ import java.util.List;
 @Repository
 public interface OrganizationRepository extends CrudRepository<Organization, Integer>, JpaSpecificationExecutor {
 
-    @Query("from Organization where name = ?1")
+    @Query("from Organization where name = UPPER(?1)")
     List<Organization> findByName(String name);
 }

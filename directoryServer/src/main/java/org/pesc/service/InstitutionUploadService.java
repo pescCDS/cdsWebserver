@@ -34,7 +34,7 @@ public class InstitutionUploadService {
     private static final Log log = LogFactory.getLog(InstitutionUploadService.class);
 
     private static final int MAX_COLUMNS = 11;
-    private static String[] REQUIRED_COLUMNS_NAMES = {"name","city","state","atp","act","ipeds","opeid","fice" };
+    private static String[] REQUIRED_COLUMNS_NAMES = {"name","city","state","atp","act","ipeds","opeid","fice","cds","ceeb" };
     private static String[] OPTINOAL_COLUMN_NAMES = { "website","street","zip" };
 
 
@@ -194,6 +194,8 @@ public class InstitutionUploadService {
                         addSchoolCode(schoolCodes, "IPEDS", record.get("ipeds").trim());
                         addSchoolCode(schoolCodes, "OPEID", record.get("opeid").trim());
                         addSchoolCode(schoolCodes, "ACT", record.get("act").trim());
+                        addSchoolCode(schoolCodes, "CDS", record.get("cds").trim());
+                        addSchoolCode(schoolCodes, "CEEB", record.get("ceeb").trim());
                     }
                     catch (IllegalArgumentException e) {
                         result.setLineNumber((int) parser.getCurrentLineNumber());
@@ -203,6 +205,18 @@ public class InstitutionUploadService {
                         if (e.getMessage() != null) {
                             result.setMessage(e.getMessage());
                         }
+                        this.create(result);
+                        continue;
+                    }
+
+                    if (schoolCodes.isEmpty()){
+                        result.setLineNumber((int) parser.getCurrentLineNumber());
+
+                        result.setOutcome(InstitutionUploadResultsRepository.ERROR);
+
+
+                        result.setMessage(String.format("No school code was provided for %s.  At least one school code must be used to create an institution", record.get("name")));
+
                         this.create(result);
                         continue;
                     }
