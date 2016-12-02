@@ -11,7 +11,7 @@ networkserver_db_image:
     container_name: network-db
 
 directoryserver_app_image:
-  image: ccctechcenter/cccnext-directory-server:${env.IMAGE_TAG}
+  image: ccctechcenter/cccnext-directory-server:${IMAGE_TAG}
   volumes:
      - ./directoryServer/target:/opt/edexchange
   ports:
@@ -28,7 +28,7 @@ directoryserver_app_image:
   container_name: directory-app
 
 networkserver_app_image:
-  image: ccctechcenter/cccnext-network-server:${env.IMAGE_TAG}
+  image: ccctechcenter/cccnext-network-server:${IMAGE_TAG}
   volumes:
      - ./networkServer/target:/opt/edexchange
   ports:
