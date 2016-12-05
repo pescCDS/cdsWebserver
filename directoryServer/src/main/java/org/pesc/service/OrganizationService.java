@@ -231,7 +231,7 @@ public class OrganizationService {
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     //TODO: add PreAuthorize
     public List<Organization> findByName(String name) {
-        return this.organizationRepository.findByName(name);
+        return this.organizationRepository.findByName(name.toUpperCase());
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -464,7 +464,77 @@ public class OrganizationService {
 
     }
 
+    @Transactional(readOnly = true)
+    public List<Organization> findBySchoolCodesAndName(String name, Set<SchoolCode> schoolCodesList
+    ) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
 
+        try {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+            CriteriaQuery<Organization> cq = cb.createQuery(Organization.class);
+            Root<Organization> org = cq.from(Organization.class);
+            cq.select(org).distinct(true);
+
+            List<Predicate> predicates = new LinkedList<Predicate>();
+
+            //ArrayList<String> codeTypes;
+
+            addSchoolCodesPredicates(predicates,cb,org,schoolCodesList);
+            predicates.add(cb.like(cb.lower(org.get("name")), "%" + name + "%"));
+
+
+            if (schoolCodesList != null) {
+                //ArrayList<String> codes = new ArrayList<String>();
+
+                Join<SchoolCode, Organization> join = org.join("schoolCodes");
+
+                Predicate or = cb.or();
+
+                for (SchoolCode sc : schoolCodesList) {
+                    Predicate and = cb.and(cb.equal(join.get("code"), sc.getCode()), cb.equal(join.get("codeType"), sc.getCodeType()));
+                    or.getExpressions().add(and);
+                }
+
+                predicates.add(or);
+
+                //predicates.add(org.get("schoolCodes").get("code").in(schoolCodesList));
+
+            }
+
+
+            Predicate[] predicateArray = new Predicate[predicates.size()];
+            predicates.toArray(predicateArray);
+
+            cq.where(predicateArray);
+            TypedQuery<Organization> q = entityManager.createQuery(cq);
+
+            return q.getResultList();
+        } finally {
+            entityManager.close();
+        }
+
+    }
+
+    void addSchoolCodesPredicates(List<Predicate> predicates, CriteriaBuilder cb, Root<Organization> org, Set<SchoolCode> schoolCodesList){
+
+
+        if (schoolCodesList != null) {
+
+            Join<SchoolCode, Organization> join = org.join("schoolCodes");
+
+            Predicate or = cb.or();
+
+            for (SchoolCode sc : schoolCodesList) {
+                Predicate and = cb.and(cb.equal(join.get("code"), sc.getCode()), cb.equal(join.get("codeType"), sc.getCodeType()));
+                or.getExpressions().add(and);
+            }
+
+            predicates.add(or);
+
+            //predicates.add(org.get("schoolCodes").get("code").in(schoolCodesList));
+        }
+    }
     /**
      * @param schoolCodesList
      * @return
@@ -485,6 +555,7 @@ public class OrganizationService {
 
             //ArrayList<String> codeTypes;
 
+            addSchoolCodesPredicates(predicates,cb,org,schoolCodesList);
 
             if (schoolCodesList != null) {
                 //ArrayList<String> codes = new ArrayList<String>();

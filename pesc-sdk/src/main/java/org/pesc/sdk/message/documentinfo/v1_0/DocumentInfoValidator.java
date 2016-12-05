@@ -19,14 +19,28 @@ public class DocumentInfoValidator {
         ValidationResponse validationResponse = new ValidationResponse();
         String fileName = null;
         DocumentTypeCode documentType = null;
+        String format = null;
 
         Preconditions.checkNotNull(documentInfo);
-        fileName = documentInfo.getFileName();
-        documentType = documentInfo.getDocumentType();
 
-        String missingRequiredText = " is missing, this field is required.";
-        ValidationUtils.checkArgument(StringUtils.isNotBlank(fileName), "TranscriptRequest.TransmissionData.UserDefinedExtensions.DocumentInfo.FileName" + missingRequiredText, validationResponse, SeverityCodeType.ERROR);
-        ValidationUtils.checkNotNull(documentType, "TranscriptRequest.TransmissionData.UserDefinedExtensions.DocumentInfo.DocumentType" + missingRequiredText, validationResponse, SeverityCodeType.ERROR);
+
+        ValidationUtils.checkArgument(documentInfo.getDocuments() != null && !documentInfo.getDocuments().isEmpty(),
+                "At least one TranscriptRequest.TransmissionData.UserDefinedExtensions.DocumentInfo.document element must be present.",
+                validationResponse,
+                SeverityCodeType.ERROR);
+
+
+        for(DocumentInfoType document : documentInfo.getDocuments()) {
+            fileName = document.getFileName();
+            documentType = document.getDocumentType();
+            format = document.getDocumentFormat();
+
+            ValidationUtils.checkArgument(StringUtils.isNotBlank(fileName) || StringUtils.isNotBlank(format),
+                    "Either TranscriptRequest.TransmissionData.UserDefinedExtensions.DocumentInfo.document.FileName or TranscriptRequest.TransmissionData.UserDefinedExtensions.DocumentInfo.document.documentFormat must be present.", validationResponse, SeverityCodeType.ERROR);
+
+            ValidationUtils.checkNotNull(documentType, "TranscriptRequest.TransmissionData.UserDefinedExtensions.DocumentInfo.document.DocumentType is missing, this field is required.", validationResponse, SeverityCodeType.ERROR);
+        }
+
         return validationResponse;
     }
 }

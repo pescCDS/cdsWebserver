@@ -118,7 +118,7 @@ public class DocumentController {
     private Marshaller transcriptRequestMarshaller;
 
     @Resource(name="documentInfoMarshaller")
-    private Marshaller DocumentInfoMarshaller;
+    private Marshaller documentInfoMarshaller;
 
     @Autowired
     private OrganizationService organizationService;
@@ -502,7 +502,7 @@ public class DocumentController {
                     }
                     String trStudentSchoolName = trSourceOrganizationNames.get(0);//Provided by Source Institution
                     TranscriptRequest transcriptRequest = new TranscriptRequestBuilder()
-                            .DocumentInfoMarshaller(DocumentInfoMarshaller)
+                            .documentInfoMarshaller(documentInfoMarshaller)
                             .documentID(trDocumentID)
                             .documentTypeCode(trDocumentTypeCode)
                             .transmissionType(trTransmissionType)
@@ -519,6 +519,7 @@ public class DocumentController {
                             .destinationOrganizationNames(trDestinationOrganizationNames)
                             .parchmentDocumentTypeCode(trDocumentType)
                             .fileName(trFileName)
+                            .documentFormat(fileFormat)
                             .studentRelease(trStudentRelease)
                             .studentReleasedMethod(ReleaseAuthorizedMethodType.valueOf(trStudentReleasedMethod))
                             .studentBirthDate(trStudentDOB)
@@ -662,15 +663,13 @@ public class DocumentController {
             tx.setAckURL(ackURL);
         }
 
-        Transaction savedTx = transactionService.create(tx);
-
         File inboxDirectory = new File(localServerInboxPath);
         inboxDirectory.mkdirs();
 
 
         try {
             String fileName = multipartFile.getOriginalFilename();
-            File f =  new File(inboxDirectory, fileName);
+            File uploadedFile =  new File(inboxDirectory, fileName);
             byte[] bytes = multipartFile.getBytes();
 
             String requestFileName = null;
@@ -698,18 +697,20 @@ public class DocumentController {
             }
 
 
-            File fp = f.getParentFile();
+            File fp = uploadedFile.getParentFile();
             if(!fp.exists() && !fp.mkdirs()) {
                 tx.setError("Could not create directory: " + fp);
             } else {
                 try {
-                    if (!f.createNewFile()) {
+                    if (!uploadedFile.createNewFile()) {
                         tx.setError(String.format("file %s already exists", multipartFile.getOriginalFilename()));
                     }else {
-                        tx.setFilePath(f.getPath());
-                        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(f));
+                        tx.setFilePath(uploadedFile.getPath());
+                        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(uploadedFile));
                         stream.write(bytes);
                         stream.close();
+
+                        //Now save the transcript request file if it exists.
                         if(requestFile!=null) {
                             if (!requestFile.createNewFile()) {
                                 String message = tx.getError() != null ? tx.getError() : "";
