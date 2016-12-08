@@ -605,6 +605,7 @@ public class OrganizationService {
             OrganizationDTO org = new OrganizationDTO();
             org.setId(((Long) row.get("id")).intValue());
             org.setName((String) row.get("name"));
+            org.setEnabled((Boolean)row.get("enabled"));
             institutionList.add(org);
         }
 
