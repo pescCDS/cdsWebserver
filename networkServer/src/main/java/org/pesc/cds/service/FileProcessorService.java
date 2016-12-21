@@ -2,21 +2,20 @@ package org.pesc.cds.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.fluent.Form;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
+import org.pesc.cds.repository.StringUtils;
+import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
+import org.pesc.sdk.message.functionalacknowledgment.v1_2.Acknowledgment;
+import org.pesc.sdk.message.functionalacknowledgment.v1_2.AcknowledgmentDataType;
+import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
+import org.pesc.sdk.sector.academicrecord.v1_9.TransmissionDataType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +28,17 @@ import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 import java.io.File;
-import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +64,8 @@ public class FileProcessorService {
     @Qualifier("myRestTemplate")
     private OAuth2RestOperations restTemplate;
 
+    private static final org.pesc.sdk.message.functionalacknowledgment.v1_2.ObjectFactory functionalAcknowledgmentObjectFactory = new org.pesc.sdk.message.functionalacknowledgment.v1_2.ObjectFactory();
+    private static final org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
 
     public static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
     public static final String DEFAULT_RECEIVE_MESSAGE = "Received document.";
@@ -89,15 +98,22 @@ public class FileProcessorService {
         return httpclient;
     }
 
-    public void sendAck(String ackURL, Integer transactionId) {
+    public void sendPESCFunctionalAcknowledgement(Acknowledgment acknowledgment) {
+
+
+    }
+
+
+    public void sendAck(String ackURL, Integer transactionId, String message, TransactionStatus status) {
         // send response back to sending network server
 
         if (ackURL != null && !ackURL.isEmpty() && transactionId != null) {
 
             LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
             map.add("transactionId", transactionId.toString());
-            map.add("status", TransactionStatus.SUCCESS.name());
-            map.add("message", DEFAULT_DELIVERY_MESSAGE);
+            map.add("status", status.name());
+            map.add("message", message);
+
 
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
@@ -136,7 +152,81 @@ public class FileProcessorService {
 
         //If appropriate add logic here to model your custom file processing logic.
 
-        sendAck(transaction.getAckURL(), transaction.getSenderTransactionId());
+        //Only documents that are either PESCXML transcripts or a document accompanied by a transcript request
+        //will utilize the functional acknowledgement.  This is because the PESC functional ack requires information
+        //contained in the PESCXML transcript or transcript request.
+        Acknowledgment functionalAcknowledgment = null;
+        String message = DEFAULT_DELIVERY_MESSAGE;
+        TransactionStatus status = TransactionStatus.SUCCESS;
+
+        try {
+            if (transaction.getFileFormat().equalsIgnoreCase("PESCXML")){
+
+            }
+            else if (!StringUtils.isEmpty(transaction.getRequestFilePath()) ) {
+                TranscriptRequest transcriptRequest = getTranscriptRequest(transaction.getRequestFilePath());
+
+                functionalAcknowledgment = buildAcknowledgement(transcriptRequest) ;
+            }
+
+
+
+        }
+        catch (Exception e){
+            message = e.getMessage();
+            status = TransactionStatus.FAILURE;
+        }
+
+
+        if (functionalAcknowledgment == null) {
+            sendAck(transaction.getAckURL(), transaction.getSenderTransactionId(), message, status);
+        }
+        else {
+            sendPESCFunctionalAcknowledgement(functionalAcknowledgment);
+        }
+
+    }
+
+    public Acknowledgment buildAcknowledgement(TranscriptRequest transcriptRequest) {
+        Acknowledgment ack = functionalAcknowledgmentObjectFactory.createAcknowledgment();
+
+        TransmissionDataType transmissionData = academicRecordObjectFactory.createTransmissionDataType();
+
+        transmissionData.setSource(transcriptRequest.getTransmissionData().getDestination());
+
+        AcknowledgmentDataType ackData = functionalAcknowledgmentObjectFactory.createAcknowledgmentDataType();
+
+
+        ack.setTransmissionData(transmissionData);
+        ack.setAcknowledgmentData(ackData);
+
+        ack.getTransmissionData();
+
+        return ack;
+    }
+
+
+    private DocumentInfo getDocumentInfo(TranscriptRequest transcriptRequest) throws JAXBException, SAXException {
+
+        JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
+        Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
+        SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        URL documentinfochemaUrl = getClass().getClassLoader().getResource("xsd/pesc/DocumentInfo_v1.0.0.xsd");
+        Schema documentInfoXsdSchema = documentinfochemaFactory.newSchema(documentinfochemaUrl);
+        documentInfoUnmarshaller.setSchema(documentInfoXsdSchema);
+        return (DocumentInfo) documentInfoUnmarshaller.unmarshal((Node) transcriptRequest.getTransmissionData().getUserDefinedExtensions().getAny());
+
+    }
+
+    private TranscriptRequest getTranscriptRequest(String filePath) throws JAXBException, SAXException {
+
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        Unmarshaller u = jc.createUnmarshaller();
+        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
+        u.setSchema(schema);
+        return (TranscriptRequest) u.unmarshal(new File(filePath));
     }
 
 

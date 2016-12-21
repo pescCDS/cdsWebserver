@@ -6,6 +6,8 @@ import org.pesc.cds.domain.PagedData;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.TransactionService;
+import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
+import org.pesc.sdk.message.functionalacknowledgment.v1_2.Acknowledgment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -91,7 +93,44 @@ public class TransactionsController {
 	}
 
 
+	/**
+	 * An acknowledgement URL that uses the PESC Functional Acknowledgement Standard
+	 * @param acknowledgment
+	 */
+	@RequestMapping(value="/acknowledgement", method= RequestMethod.POST)
+	public void markAsReceived(@RequestBody(required = false) Acknowledgment acknowledgment) {
+		Transaction tx = transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
+		if(tx!=null) {
+			tx.setAcknowledged(true);
+			tx.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
+			acknowledgment.getAcknowledgmentData().getAcknowledgmentCode();
+
+			AcknowledgmentCodeType codeType = acknowledgment.getAcknowledgmentData().getAcknowledgmentCode();
+
+			switch (codeType){
+				case ACCEPTED:
+					tx.setStatus(TransactionStatus.SUCCESS);
+					break;
+				case REJECTED:
+					tx.setStatus(TransactionStatus.FAILURE);
+					break;
+				default:
+					tx.setStatus(TransactionStatus.FAILURE);
+			}
+
+			//TODO: persist the acknowledgement
+			transactionService.update(tx);
+		}
+	}
+
+
+	/**
+	 * Proprietary EDExchange acknowledement URL
+	 * @param transactionId
+	 * @param status
+	 * @param message
+	 */
 	@RequestMapping(method= RequestMethod.POST)
 	public void markAsReceived(@RequestParam(value="transactionId", required=true) Integer transactionId,
 							   @RequestParam(value = "status", required = true) TransactionStatus status,

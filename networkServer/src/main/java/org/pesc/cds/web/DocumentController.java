@@ -25,13 +25,13 @@ import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.service.FileProcessorService;
 import org.pesc.cds.service.OrganizationService;
 import org.pesc.cds.service.PKIService;
-import org.pesc.sdk.core.coremain.v1_12.DocumentTypeCodeType;
-import org.pesc.sdk.core.coremain.v1_12.StateProvinceCodeType;
-import org.pesc.sdk.core.coremain.v1_12.TransmissionTypeType;
+import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
+import org.pesc.sdk.core.coremain.v1_14.StateProvinceCodeType;
+import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
-import org.pesc.sdk.message.transcriptrequest.v1_2.TranscriptRequest;
-import org.pesc.sdk.sector.academicrecord.v1_7.PhoneType;
-import org.pesc.sdk.sector.academicrecord.v1_7.ReleaseAuthorizedMethodType;
+import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
+import org.pesc.sdk.sector.academicrecord.v1_9.PhoneType;
+import org.pesc.sdk.sector.academicrecord.v1_9.ReleaseAuthorizedMethodType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -368,7 +368,7 @@ public class DocumentController {
 
             int recordHolderDirectoryID = Integer.valueOf(localServerId);
 
-            if (sourceSchoolCode != null && sourceSchoolCodeType != null) {
+            if (!StringUtils.isEmpty(sourceSchoolCode) && !StringUtils.isEmpty(sourceSchoolCodeType)) {
                 JSONObject recordHolder = organizationService.getOrganization(sourceSchoolCode, sourceSchoolCodeType);
 
                 if (recordHolder == null) {
@@ -421,7 +421,7 @@ public class DocumentController {
                 boolean createTranscriptRequest = !"PESCXML".equals(fileFormat);
                 if(createTranscriptRequest) {
                     String requestFileName = uuid.toString() + "_request.xml";
-                    org.pesc.sdk.sector.academicrecord.v1_7.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_7.ObjectFactory();
+                    org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
                     String trDocumentID = tx.getId() + "";
                     DocumentTypeCodeType trDocumentTypeCode = DocumentTypeCodeType.STUDENT_REQUEST;
                     TransmissionTypeType trTransmissionType = TransmissionTypeType.ORIGINAL;

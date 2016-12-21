@@ -1,29 +1,21 @@
-package org.pesc.sdk.message.transcriptrequest.v1_2;
+package org.pesc.sdk.message.transcriptrequest.v1_4;
 
 import org.junit.Test;
-import org.pesc.sdk.core.coremain.v1_12.CountryCodeType;
-import org.pesc.sdk.core.coremain.v1_12.DocumentTypeCodeType;
-import org.pesc.sdk.core.coremain.v1_12.SeverityCodeType;
-import org.pesc.sdk.core.coremain.v1_12.StateProvinceCodeType;
-import org.pesc.sdk.core.coremain.v1_12.TransmissionTypeType;
+import org.pesc.sdk.core.coremain.v1_14.*;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoValidator;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
-import org.pesc.sdk.message.functionalacknowledgment.v1_0.ValidationResponse;
-import org.pesc.sdk.sector.academicrecord.v1_7.AcademicAwardsReportedType;
-import org.pesc.sdk.sector.academicrecord.v1_7.AddressType;
-import org.pesc.sdk.sector.academicrecord.v1_7.AttendanceType;
-import org.pesc.sdk.sector.academicrecord.v1_7.ContactsType;
-import org.pesc.sdk.sector.academicrecord.v1_7.EmailType;
-import org.pesc.sdk.sector.academicrecord.v1_7.OrganizationType;
-import org.pesc.sdk.sector.academicrecord.v1_7.PersonType;
-import org.pesc.sdk.sector.academicrecord.v1_7.PhoneType;
-import org.pesc.sdk.sector.academicrecord.v1_7.ReleaseAuthorizedMethodType;
-import org.pesc.sdk.sector.academicrecord.v1_7.RequestType;
-import org.pesc.sdk.sector.academicrecord.v1_7.RequestedStudentType;
-import org.pesc.sdk.sector.academicrecord.v1_7.SourceDestinationType;
-import org.pesc.sdk.sector.academicrecord.v1_7.TransmissionDataType;
+import org.pesc.sdk.message.functionalacknowledgment.v1_2.ValidationResponse;
+import org.pesc.sdk.sector.academicrecord.v1_9.*;
+import org.pesc.sdk.sector.academicrecord.v1_9.AddressType;
+import org.pesc.sdk.sector.academicrecord.v1_9.AttendanceType;
+import org.pesc.sdk.sector.academicrecord.v1_9.ContactsType;
+import org.pesc.sdk.sector.academicrecord.v1_9.EmailType;
+import org.pesc.sdk.sector.academicrecord.v1_9.OrganizationType;
+import org.pesc.sdk.sector.academicrecord.v1_9.PersonType;
+import org.pesc.sdk.sector.academicrecord.v1_9.PhoneType;
+import org.pesc.sdk.sector.academicrecord.v1_9.TransmissionDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -39,9 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -280,12 +270,12 @@ public class TranscriptRequestTest {
             assertTrue(vr.getErrors().size()==0);
             vr = TranscriptRequestValidator.validateTranscriptRequestRecommendedContent(transcriptRequest);
             assertTrue(vr.getErrors().size() == 1);
-            assertTrue(vr.getSeverity()==org.pesc.sdk.core.coremain.v1_9.SeverityCodeType.WARNING);
+            assertTrue(vr.getSeverity()==SeverityCodeType.WARNING);
             //Missing source address- Fail
             transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_006.xml"));
             vr = TranscriptRequestValidator.validateTranscriptRequestRequiredContent(transcriptRequest);
             assertTrue(vr.getErrors().size()==1);
-            assertTrue(vr.getSeverity()==org.pesc.sdk.core.coremain.v1_9.SeverityCodeType.ERROR);
+            assertTrue(vr.getSeverity()==SeverityCodeType.ERROR);
             vr = TranscriptRequestValidator.validateTranscriptRequestRecommendedContent(transcriptRequest);
             assertTrue(vr.getErrors().size() == 0);
             //Mix StateProvinceCode with non domestic CountryCode- Fail

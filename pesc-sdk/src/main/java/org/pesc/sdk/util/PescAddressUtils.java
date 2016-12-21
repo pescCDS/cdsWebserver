@@ -1,8 +1,8 @@
 package org.pesc.sdk.util;
 
-import org.pesc.sdk.core.coremain.v1_12.CountryCodeType;
-import org.pesc.sdk.core.coremain.v1_12.StateProvinceCodeType;
-import org.pesc.sdk.sector.academicrecord.v1_7.AddressType;
+import org.pesc.sdk.core.coremain.v1_14.CountryCodeType;
+import org.pesc.sdk.core.coremain.v1_14.StateProvinceCodeType;
+import org.pesc.sdk.sector.academicrecord.v1_9.AddressType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

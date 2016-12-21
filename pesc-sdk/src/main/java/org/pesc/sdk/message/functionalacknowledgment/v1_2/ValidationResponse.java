@@ -1,10 +1,9 @@
-package org.pesc.sdk.message.functionalacknowledgment.v1_0;
+package org.pesc.sdk.message.functionalacknowledgment.v1_2;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pesc.sdk.core.coremain.v1_9.SeverityCodeType;
+import org.pesc.sdk.core.coremain.v1_14.SeverityCodeType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

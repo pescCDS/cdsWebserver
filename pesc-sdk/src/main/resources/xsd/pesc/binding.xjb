@@ -42,6 +42,12 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
+        <jxb:bindings schemaLocation="AcademicRecord_v1.9.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.sector.academicrecord.v1_9"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
         <jxb:bindings schemaLocation="CoreMain_v1.9.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.core.coremain.v1_9"/>
@@ -54,9 +60,21 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
+        <jxb:bindings schemaLocation="CoreMain_v1.14.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.core.coremain.v1_14"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
         <jxb:bindings schemaLocation="FunctionalAcknowledgment_v1.0.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.message.functionalacknowledgment.v1_0"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="FunctionalAcknowledgment_v1.2.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.functionalacknowledgment.v1_2"/>
             </jxb:schemaBindings>
         </jxb:bindings>
 
@@ -69,6 +87,12 @@
         <jxb:bindings schemaLocation="TranscriptRequest_v1.2.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.message.transcriptrequest.v1_2"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="TranscriptRequest_v1.4.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.transcriptrequest.v1_4"/>
             </jxb:schemaBindings>
         </jxb:bindings>
 

@@ -1,27 +1,15 @@
-package org.pesc.sdk.message.transcriptrequest.v1_2;
+package org.pesc.sdk.message.transcriptrequest.v1_4;
 
 import com.google.common.base.Preconditions;
-import org.pesc.sdk.core.coremain.v1_12.DocumentTypeCodeType;
-import org.pesc.sdk.core.coremain.v1_12.TransmissionTypeType;
-import org.pesc.sdk.core.coremain.v1_9.SeverityCodeType;
-import org.pesc.sdk.message.functionalacknowledgment.v1_0.ValidationResponse;
-import org.pesc.sdk.sector.academicrecord.v1_7.AcademicAwardsReportedType;
-import org.pesc.sdk.sector.academicrecord.v1_7.AddressType;
-import org.pesc.sdk.sector.academicrecord.v1_7.AttendanceType;
-import org.pesc.sdk.sector.academicrecord.v1_7.ContactsType;
-import org.pesc.sdk.sector.academicrecord.v1_7.EmailType;
-import org.pesc.sdk.sector.academicrecord.v1_7.OrganizationType;
-import org.pesc.sdk.sector.academicrecord.v1_7.PersonType;
-import org.pesc.sdk.sector.academicrecord.v1_7.PhoneType;
-import org.pesc.sdk.sector.academicrecord.v1_7.ReleaseAuthorizedMethodType;
-import org.pesc.sdk.sector.academicrecord.v1_7.RequestType;
-import org.pesc.sdk.sector.academicrecord.v1_7.RequestedStudentType;
-import org.pesc.sdk.sector.academicrecord.v1_7.SourceDestinationType;
-import org.pesc.sdk.sector.academicrecord.v1_7.TransmissionDataType;
+import org.apache.commons.lang3.StringUtils;
+import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
+import org.pesc.sdk.core.coremain.v1_14.SeverityCodeType;
+import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
+import org.pesc.sdk.message.functionalacknowledgment.v1_2.ValidationResponse;
+import org.pesc.sdk.sector.academicrecord.v1_9.*;
 import org.pesc.sdk.util.PescAddress;
 import org.pesc.sdk.util.PescAddressUtils;
 import org.pesc.sdk.util.ValidationUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -33,9 +21,9 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class TranscriptRequestValidator {
-    private static final org.pesc.sdk.sector.academicrecord.v1_7.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_7.ObjectFactory();
+    private static final org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
 
-    public static ValidationResponse validateTranscriptRequestRequiredContent(TranscriptRequest transcriptRequest){
+    public static ValidationResponse validateTranscriptRequestRequiredContent(org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest transcriptRequest){
         ValidationResponse validationResponse = new ValidationResponse();
         String documentId = null;
         DocumentTypeCodeType documentTypeCode = null;
@@ -192,7 +180,7 @@ public class TranscriptRequestValidator {
         return validationResponse;
     }
 
-    public static ValidationResponse validateTranscriptRequestRecommendedContent(TranscriptRequest transcriptRequest){
+    public static ValidationResponse validateTranscriptRequestRecommendedContent(org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest transcriptRequest){
         ValidationResponse validationResponse = new ValidationResponse();
         String requestTrackingId = null;
         String sendersPhone = null;
