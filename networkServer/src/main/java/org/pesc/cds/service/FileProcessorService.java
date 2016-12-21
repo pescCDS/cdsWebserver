@@ -173,6 +173,7 @@ public class FileProcessorService {
 
         }
         catch (Exception e){
+            log.error(e);
             message = e.getMessage();
             status = TransactionStatus.FAILURE;
         }
@@ -220,10 +221,10 @@ public class FileProcessorService {
 
     private TranscriptRequest getTranscriptRequest(String filePath) throws JAXBException, SAXException {
 
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         return (TranscriptRequest) u.unmarshal(new File(filePath));

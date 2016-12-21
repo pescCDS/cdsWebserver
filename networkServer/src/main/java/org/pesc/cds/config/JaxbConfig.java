@@ -14,8 +14,8 @@ public class JaxbConfig {
     @Bean(name="transcriptRequestMarshaller")
     public Jaxb2Marshaller transcriptRequestMarshaller(){
         Jaxb2Marshaller transcriptRequestMarshaller = new Jaxb2Marshaller();
-        transcriptRequestMarshaller.setContextPath("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
-        transcriptRequestMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd"));
+        transcriptRequestMarshaller.setContextPath("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
+        transcriptRequestMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd"));
         return transcriptRequestMarshaller;
     }
 
@@ -30,8 +30,8 @@ public class JaxbConfig {
     @Bean(name="functionalAcknowledgmentMarshaller")
     public Jaxb2Marshaller functionalAcknowledgmentMarshaller(){
         Jaxb2Marshaller functionalAcknowledgmentMarshaller = new Jaxb2Marshaller();
-        functionalAcknowledgmentMarshaller.setContextPath("org.pesc.sdk.message.functionalacknowledgment.v1_0.impl");
-        functionalAcknowledgmentMarshaller.setSchema(new ClassPathResource("xsd/pesc/FunctionalAcknowledgment_v1.0.0.xsd"));
+        functionalAcknowledgmentMarshaller.setContextPath("org.pesc.sdk.message.functionalacknowledgment.v1_2.impl");
+        functionalAcknowledgmentMarshaller.setSchema(new ClassPathResource("xsd/pesc/FunctionalAcknowledgment_v1.2.0.xsd"));
         return functionalAcknowledgmentMarshaller;
     }
 
