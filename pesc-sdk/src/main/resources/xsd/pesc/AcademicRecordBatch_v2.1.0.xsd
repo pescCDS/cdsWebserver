@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited by XMLSpy v2008 U (http://www.altova.com) by Tuan Anh Do (AACRAO SPEEDE) -->
+<!-- edited with XMLSpy v2014 rel. 2 (x64) (http://www.altova.com) by AES (PA-S PHEAA HQ) -->
+<!-- edited with XMLSPY v5 rel. 4 U (http://www.xmlspy.com) by Bruce Robert Marton (The University of Texas at Austin) -->
+<!-- edited with XML Spy v4.4 U (http://www.xmlspy.com) by Bruce Robert Marton (The University of Texas at Austin) -->
+<xs:schema xmlns:AcRecBat="urn:org:pesc:message:AcademicRecordBatch:v2.1.0" xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.9.0" xmlns:core="urn:org:pesc:core:CoreMain:v1.14.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:org:pesc:message:AcademicRecordBatch:v2.1.0" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="v2.1.0">
+    <xs:import namespace="urn:org:pesc:core:CoreMain:v1.14.0" schemaLocation="CoreMain_v1.14.0.xsd"/>
+    <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.9.0" schemaLocation="AcademicRecord_v1.9.0.xsd"/>
+    <!--============================================================================-->
+    <!--Name:      AcademicRecordBatch-->
+    <!--Version:  2.1.0-->
+    <!--Date:       17-December-2014-->
+    <!---->
+    <!--Change Log:-->
+    <!--   Change #   JTS20070816102300 -->
+    <!--      Reviewed by Jeffrey A Funck -->
+    <!--2.0.0  14-March-2008  Tuan Anh Do - Restructured Schema to include Transmission Data Segment for sending/receiving agencies -->
+    <!-- Changes for this version is not backwards compatible with v1.0.0.  -->
+    <!-- The Batch Content is mandatory and places the data package as the child which moves it down one layer.-->
+    <!-- The Batch Envelope is entirely Optional -->
+    <!-- The Batch Envelope is entirely Optional -->
+    <!-- The Batch Envelope is entirely Optional -->
+    <!--v2.1.0 17-December-2014 Jeffrey Funck  -  -->
+    <!--Modified to use the newest version of CoreMain (v1.14.0)-->
+    <!--   Change #   MB20140606000001 -->
+    <!--============================================================================-->
+    <!---->
+    <xs:element name="AcademicRecordBatch">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="BatchEnvelope" type="AcRec:TransmissionBatchType" minOccurs="0"/>
+                <xs:element name="BatchContent" type="core:AcademicRecordBatchType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

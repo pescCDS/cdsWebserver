@@ -102,6 +102,12 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
+        <jxb:bindings schemaLocation="CollegeTranscript_v1.6.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.collegetranscript.v1_6"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
     </jxb:bindings>
 
 </jxb:bindings>

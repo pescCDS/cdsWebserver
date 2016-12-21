@@ -11,6 +11,8 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.StringUtils;
+import org.pesc.message.academicrecordbatch.v2_1.AcademicRecordBatch;
+import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
 import org.pesc.sdk.message.functionalacknowledgment.v1_2.Acknowledgment;
 import org.pesc.sdk.message.functionalacknowledgment.v1_2.AcknowledgmentDataType;
@@ -166,7 +168,7 @@ public class FileProcessorService {
             else if (!StringUtils.isEmpty(transaction.getRequestFilePath()) ) {
                 TranscriptRequest transcriptRequest = getTranscriptRequest(transaction.getRequestFilePath());
 
-                functionalAcknowledgment = buildAcknowledgement(transcriptRequest) ;
+                //functionalAcknowledgment = buildAcknowledgement(transcriptRequest) ;
             }
 
 
@@ -194,9 +196,13 @@ public class FileProcessorService {
         TransmissionDataType transmissionData = academicRecordObjectFactory.createTransmissionDataType();
 
         transmissionData.setSource(transcriptRequest.getTransmissionData().getDestination());
+        transmissionData.setDestination(transcriptRequest.getTransmissionData().getSource());
+
 
         AcknowledgmentDataType ackData = functionalAcknowledgmentObjectFactory.createAcknowledgmentDataType();
+        ackData.setDocumentID(transcriptRequest.getTransmissionData().getDocumentID());
 
+        //TODO: set remaining ack data elements here.
 
         ack.setTransmissionData(transmissionData);
         ack.setAcknowledgmentData(ackData);
@@ -205,6 +211,53 @@ public class FileProcessorService {
 
         return ack;
     }
+
+    public Acknowledgment buildAcknowledgement(CollegeTranscript transcript) {
+        Acknowledgment ack = functionalAcknowledgmentObjectFactory.createAcknowledgment();
+
+        TransmissionDataType transmissionData = academicRecordObjectFactory.createTransmissionDataType();
+
+        transmissionData.setSource(transcript.getTransmissionData().getDestination());
+        transmissionData.setDestination(transcript.getTransmissionData().getSource());
+
+
+        AcknowledgmentDataType ackData = functionalAcknowledgmentObjectFactory.createAcknowledgmentDataType();
+        ackData.setDocumentID(transcript.getTransmissionData().getDocumentID());
+
+
+        //TODO: set remaining ack data elements here.
+
+        ack.setTransmissionData(transmissionData);
+        ack.setAcknowledgmentData(ackData);
+
+        ack.getTransmissionData();
+
+        return ack;
+    }
+
+    public Acknowledgment buildAcknowledgement(AcademicRecordBatch batch) {
+        Acknowledgment ack = functionalAcknowledgmentObjectFactory.createAcknowledgment();
+
+        TransmissionDataType transmissionData = academicRecordObjectFactory.createTransmissionDataType();
+
+        transmissionData.setSource(batch.getBatchEnvelope().getDestinationAgency());
+        transmissionData.setDestination(batch.getBatchEnvelope().getSourceAgency());
+
+
+        AcknowledgmentDataType ackData = functionalAcknowledgmentObjectFactory.createAcknowledgmentDataType();
+        ackData.setBatchID(batch.getBatchEnvelope().getBatchID());
+
+
+        //TODO: set remaining ack data elements here.
+
+        ack.setTransmissionData(transmissionData);
+        ack.setAcknowledgmentData(ackData);
+
+        ack.getTransmissionData();
+
+        return ack;
+    }
+
 
 
     private DocumentInfo getDocumentInfo(TranscriptRequest transcriptRequest) throws JAXBException, SAXException {
