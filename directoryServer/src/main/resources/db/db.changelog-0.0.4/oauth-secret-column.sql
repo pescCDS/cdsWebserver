@@ -1,1 +1,0 @@
-ALTER TABLE organization ADD oauth_secret VARCHAR(500)
