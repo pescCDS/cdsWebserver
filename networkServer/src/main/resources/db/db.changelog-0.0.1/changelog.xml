@@ -10,10 +10,16 @@
 			<column name="id" type="INT UNSIGNED" autoIncrement="true">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
+			<column name="sender_transaction_id" type="INT UNSIGNED" defaultValueNumeric="0">
+				<constraints nullable="true" />
+			</column>
 			<column name="recipient_id" type="INT UNSIGNED">
 				<constraints nullable="false" />
 			</column>
 			<column name="sender_id" type="INT UNSIGNED">
+				<constraints nullable="false" />
+			</column>
+			<column name="signer_id" type="INT UNSIGNED">
 				<constraints nullable="false" />
 			</column>
 			<column name="file_format" type="varchar(32)">
@@ -28,6 +34,12 @@
 			<column name="file_size" type="BIGINT UNSIGNED"
 				defaultValueNumeric="0">
 				<constraints nullable="false" />
+			</column>
+			<column name="file_path" type="varchar(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="request_file_path" type="varchar(256)" defaultValue="null">
+				<constraints nullable="true" />
 			</column>
 			<column name="operation" type="ENUM('SEND','RECEIVE')">
 				<constraints nullable="true" />
@@ -44,13 +56,18 @@
 			<column name="acknowledged" type="BIT(1)" defaultValueBoolean="false">
 				<constraints nullable="false" />
 			</column>
+			<column name="ack_url" type="varchar(256)">
+				<constraints nullable="true" />
+			</column>
+			<column name="delivery_message" type="varchar(512)">
+				<constraints nullable="true" />
+			</column>
+			<column name="delivery_status" type="varchar(32)">
+				<constraints nullable="true" />
+			</column>
 		</createTable>
 
 	</changeSet>
 
-	<changeSet id="2" author="owenwe" context="dev, ci, prod">
-		<comment></comment>
-		<sql dbms="mysql">ALTER TABLE `transactions` ENGINE=MyISAM</sql>
-	</changeSet>
 
 </databaseChangeLog>
