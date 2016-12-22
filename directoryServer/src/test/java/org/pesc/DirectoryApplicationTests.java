@@ -317,6 +317,7 @@ public class DirectoryApplicationTests {
 		endpoint.setOrganization(getServiceProvider());
 		endpoint.setError(false);
 		endpoint.setMode("LIVE");
+		endpoint.setOperationalStatus(OperationalStatus.ACTIVE.name());
 
 		return endpoint;
 	}

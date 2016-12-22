@@ -161,6 +161,10 @@ public class OrganizationService {
     public Organization createInstitution(Organization organization) {
         organization.setEnabled(false);
         organization.setActive(true);
+
+        Date createdTime = Calendar.getInstance().getTime();
+        organization.setCreatedTime(createdTime);
+        organization.setModifiedTime(createdTime);
         organization.setOrganizationTypes(new HashSet<OrganizationType>());
         organization.getOrganizationTypes().add(this.getOrganizationTypes().get(1));
 
