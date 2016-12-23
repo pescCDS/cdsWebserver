@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ns1:TranscriptRequest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                       xmlns:ns1="urn:org:pesc:message:TranscriptRequest:v1.2.0"
+                       xmlns:ns1="urn:org:pesc:message:TranscriptRequest:v1.4.0"
                        xmlns:ns2="urn:org:pesc:message:DocumentInfo:v1.0.0"
-                       xsi:schemaLocation="urn:org:pesc:message:TranscriptRequest:v1.2.0 http://www.pesc.org/library/docs/standards/College%20Transcript/TranscriptRequest_v1.2.0.xsd
-                            urn:org:pesc:core:CoreMain:v1.12.0 http://www.pesc.org/library/docs/standards/Core%20Main/CoreMain_v1.12.0.xsd
-                            urn:org:pesc:sector:AcademicRecord:v1.7.0 http://www.pesc.org/library/docs/standards/High%20School%20Transcript/AcademicRecord_v1.7.0.xsd
+                       xsi:schemaLocation="urn:org:pesc:message:TranscriptRequest:v1.4.0 http://www.pesc.org/library/docs/standards/College%20Transcript/TranscriptRequest_v1.4.0.xsd
+                            urn:org:pesc:core:CoreMain:v1.14.0 http://www.pesc.org/library/docs/standards/Core%20Main/CoreMain_v1.14.0.xsd
+                            urn:org:pesc:sector:AcademicRecord:v1.9.0 http://www.pesc.org/library/docs/standards/High%20School%20Transcript/AcademicRecord_v1.9.0.xsd
                             urn:org:pesc:message:DocumentInfo:v1.0.0">
     <ns1:TransmissionData>
         <DocumentID>0000ad00999999999999000000000005</DocumentID>

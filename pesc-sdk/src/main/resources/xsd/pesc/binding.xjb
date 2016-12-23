@@ -4,7 +4,7 @@
               xmlns:xs="http://www.w3.org/2001/XMLSchema"
               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
               jxb:extensionBindingPrefixes="xjc">
-    <jxb:bindings schemaLocation="CoreMain_v1.12.0.xsd" node="/xs:schema">
+    <jxb:bindings schemaLocation="CoreMain_v1.14.0.xsd" node="/xs:schema">
 
         <jxb:globalBindings generateValueClass="false">
             <!--XJC Default generated jaxb classes could not properly model pesc International and Domestic Addresses.
@@ -36,11 +36,6 @@
                           printMethod="org.pesc.sdk.util.DateConverter.printMonthDay" />
         </jxb:globalBindings>
 
-        <jxb:bindings schemaLocation="AcademicRecord_v1.7.0.xsd">
-            <jxb:schemaBindings>
-                <jxb:package name="org.pesc.sdk.sector.academicrecord.v1_7"/>
-            </jxb:schemaBindings>
-        </jxb:bindings>
 
         <jxb:bindings schemaLocation="AcademicRecord_v1.9.0.xsd">
             <jxb:schemaBindings>
@@ -48,27 +43,9 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
-        <jxb:bindings schemaLocation="CoreMain_v1.9.0.xsd">
-            <jxb:schemaBindings>
-                <jxb:package name="org.pesc.sdk.core.coremain.v1_9"/>
-            </jxb:schemaBindings>
-        </jxb:bindings>
-
-        <jxb:bindings schemaLocation="CoreMain_v1.12.0.xsd">
-            <jxb:schemaBindings>
-                <jxb:package name="org.pesc.sdk.core.coremain.v1_12"/>
-            </jxb:schemaBindings>
-        </jxb:bindings>
-
         <jxb:bindings schemaLocation="CoreMain_v1.14.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.core.coremain.v1_14"/>
-            </jxb:schemaBindings>
-        </jxb:bindings>
-
-        <jxb:bindings schemaLocation="FunctionalAcknowledgment_v1.0.0.xsd">
-            <jxb:schemaBindings>
-                <jxb:package name="org.pesc.sdk.message.functionalacknowledgment.v1_0"/>
             </jxb:schemaBindings>
         </jxb:bindings>
 
@@ -84,21 +61,15 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
-        <jxb:bindings schemaLocation="TranscriptRequest_v1.2.0.xsd">
-            <jxb:schemaBindings>
-                <jxb:package name="org.pesc.sdk.message.transcriptrequest.v1_2"/>
-            </jxb:schemaBindings>
-        </jxb:bindings>
-
         <jxb:bindings schemaLocation="TranscriptRequest_v1.4.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.message.transcriptrequest.v1_4"/>
             </jxb:schemaBindings>
         </jxb:bindings>
 
-        <jxb:bindings schemaLocation="TranscriptResponse_v1.2.0.xsd">
+        <jxb:bindings schemaLocation="TranscriptResponse_v1.4.0.xsd">
             <jxb:schemaBindings>
-                <jxb:package name="org.pesc.sdk.message.transcriptresponse.v1_2"/>
+                <jxb:package name="org.pesc.sdk.message.transcriptresponse.v1_4"/>
             </jxb:schemaBindings>
         </jxb:bindings>
 

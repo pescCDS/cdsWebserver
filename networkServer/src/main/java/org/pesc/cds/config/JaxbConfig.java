@@ -38,8 +38,8 @@ public class JaxbConfig {
     @Bean(name="transcriptResponseMarshaller")
     public Jaxb2Marshaller transcriptResponseMarshaller(){
         Jaxb2Marshaller transcriptResponseMarshaller = new Jaxb2Marshaller();
-        transcriptResponseMarshaller.setContextPath("org.pesc.sdk.message.transcriptresponse.v1_2.impl");
-        transcriptResponseMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptResponse_v1.2.0.xsd"));
+        transcriptResponseMarshaller.setContextPath("org.pesc.sdk.message.transcriptresponse.v1_4.impl");
+        transcriptResponseMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptResponse_v1.4.0.xsd"));
         return transcriptResponseMarshaller;
     }
 }

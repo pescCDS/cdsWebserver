@@ -45,10 +45,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testBasicXml() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         String[] files = {"org/pesc/sdk/message/transcriptrequest/v1_2/basic_001.xml", "org/pesc/sdk/message/transcriptrequest/v1_2/basic_002.xml"};
@@ -72,10 +72,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testRequiredOnlyXml() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller transcriptRequestUnmarshaller = jc.createUnmarshaller();
         SchemaFactory transcriptRequestSchemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema transcriptRequestXsdSchema = transcriptRequestSchemaFactory.newSchema(transcriptRequestSchemaUrl);
         transcriptRequestUnmarshaller.setSchema(transcriptRequestXsdSchema);
         String transcriptRequestXml = "org/pesc/sdk/message/transcriptrequest/v1_2/RequiredOnly_001.xml";
@@ -107,10 +107,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testInvalidExtension() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller transcriptRequestUnmarshaller = jc.createUnmarshaller();
         SchemaFactory transcriptRequestSchemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema transcriptRequestXsdSchema = transcriptRequestSchemaFactory.newSchema(transcriptRequestSchemaUrl);
         transcriptRequestUnmarshaller.setSchema(transcriptRequestXsdSchema);
         String transcriptRequestXml = "org/pesc/sdk/message/transcriptrequest/v1_2/InvalidExtension_001.xml";
@@ -145,10 +145,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testRequiredAndRecommendedXml() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         String file = "org/pesc/sdk/message/transcriptrequest/v1_2/RequiredAndRecommended_001.xml";
@@ -185,10 +185,10 @@ public class TranscriptRequestTest {
         files[0] = "org/pesc/sdk/message/transcriptrequest/v1_2/modified_requiredAndRecommended_0fd6ad111a83487c9536ea71602ecd7d_request.xml";
         files[1] = "org/pesc/sdk/message/transcriptrequest/v1_2/modified_requiredOnly_0fd6ad111a83487c9536ea71602ecd7d_request.xml";
         for(String file: files){
-            JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+            JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
             Unmarshaller u = jc.createUnmarshaller();
             SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+            URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
             Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
             u.setSchema(schema);
             TranscriptRequest transcriptRequest = null;
@@ -221,10 +221,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testInternationalAddress()throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         TranscriptRequest transcriptRequest = null;
@@ -300,10 +300,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testDomesticAddress()throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         TranscriptRequest transcriptRequest = null;
@@ -631,10 +631,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testRequestPescXmlTranscript() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         TranscriptRequest transcriptRequest = null;
@@ -677,10 +677,10 @@ public class TranscriptRequestTest {
 
     @Test(expected=javax.xml.bind.UnmarshalException.class)
     public void testMissingDocumentInfoDocumentElement() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         TranscriptRequest transcriptRequest = null;
@@ -711,10 +711,10 @@ public class TranscriptRequestTest {
 
     @Test
     public void testPostiveValidationError() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
         Unmarshaller u = jc.createUnmarshaller();
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         TranscriptRequest transcriptRequest = null;
@@ -752,10 +752,10 @@ public class TranscriptRequestTest {
         files[0] = "org/pesc/sdk/message/transcriptrequest/v1_2/letterOfRecommendationCounselor_request.xml";
         files[1] = "org/pesc/sdk/message/transcriptrequest/v1_2/letterOfRecommendationTeacher_request.xml";
         for(String file: files){
-            JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
+            JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
             Unmarshaller u = jc.createUnmarshaller();
             SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd");
+            URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
             Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
             u.setSchema(schema);
             TranscriptRequest transcriptRequest = null;

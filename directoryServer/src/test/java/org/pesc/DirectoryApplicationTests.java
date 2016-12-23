@@ -2,21 +2,29 @@ package org.pesc;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pesc.api.EndpointResource;
 import org.pesc.api.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.ScriptException;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,13 +32,15 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = DirectoryApplication.class, webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
+@DirtiesContext(classMode= DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 public class DirectoryApplicationTests {
 
 	@Value("${http.port}")   //Injects that actual port used in the test
 	int port;
 
+	@Autowired
+	JdbcTemplate jdbc;
 
 	//Test RestTemplate to invoke the APIs.
 	private RestTemplate restTemplate = new RestTemplate();
@@ -42,6 +52,14 @@ public class DirectoryApplicationTests {
 		return  "http://localhost:" + port;
 	}
 	private int directoryID = 2; //The directory ID for Butte College
+
+
+	@After
+	public void after() {
+		jdbc.execute("DROP ALL OBJECTS");
+	}
+
+
 
 	/**
 	 * Tests that the directory server home page is accessible.
