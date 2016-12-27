@@ -607,7 +607,7 @@ public class OrganizationService {
 
         for (Map row : rows) {
             OrganizationDTO org = new OrganizationDTO();
-            org.setId(((Long) row.get("id")).intValue());
+            org.setId((Integer)row.get("id"));
             org.setName((String) row.get("name"));
             org.setEnabled((Boolean)row.get("enabled"));
             institutionList.add(org);

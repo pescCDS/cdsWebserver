@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name="transactions", schema="pesc_networkserver")
+@Table(name="transactions")
 public class Transaction {
 	@Id
 	@GeneratedValue

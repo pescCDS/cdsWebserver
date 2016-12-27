@@ -72,34 +72,6 @@ public class FileProcessorService {
     public static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
     public static final String DEFAULT_RECEIVE_MESSAGE = "Received document.";
 
-
-    public CloseableHttpClient makeHttpClient()  {
-
-        CloseableHttpClient httpclient = null;
-
-        if (trustCertificates == true) {
-
-            try {
-                SSLContextBuilder builder = new SSLContextBuilder();
-                builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                        builder.build(), NoopHostnameVerifier.INSTANCE);
-                httpclient = HttpClients.custom().setSSLSocketFactory(
-                        sslsf).build();
-            }
-            catch (Exception e) {
-                log.error("Failed to create test HTTPS client.");
-            }
-
-
-        }
-        else {
-            httpclient = HttpClients.createDefault();
-        }
-
-        return httpclient;
-    }
-
     public void sendPESCFunctionalAcknowledgement(Acknowledgment acknowledgment) {
 
 
