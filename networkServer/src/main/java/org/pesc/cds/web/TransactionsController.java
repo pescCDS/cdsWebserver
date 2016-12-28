@@ -10,11 +10,18 @@ import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,9 +35,7 @@ public class TransactionsController {
 	
 	private static final Log log = LogFactory.getLog(TransactionsController.class);
 
-
-	@Value("${networkServer.ack.path}")
-	private String acknowledgementsDirectory;
+	private File ackDir;
 
 	@Autowired
 	private TransactionService transactionService;
@@ -38,6 +43,10 @@ public class TransactionsController {
     @Autowired
     private HttpServletResponse servletResponse;
 
+    public TransactionsController(Environment env){
+        ackDir = new File(env.getProperty("networkServer.ack.path"));
+        ackDir.mkdirs();
+    }
 
     @RequestMapping(method= RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -100,13 +109,26 @@ public class TransactionsController {
 	 * An acknowledgement URL that uses the PESC Functional Acknowledgement Standard
 	 * @param acknowledgment
 	 */
-	@RequestMapping(value="/acknowledgement",method= RequestMethod.POST, consumes = { "text/xml"})
-	public void markAsReceived(@RequestBody AcknowledgmentImpl acknowledgment) {
+	@RequestMapping(value="/acknowledgement",method= RequestMethod.POST)
+	public ResponseEntity<String> acknowledgement(@RequestBody AcknowledgmentImpl acknowledgment) throws IOException {
+
+        if (acknowledgment.getTransmissionData().getRequestTrackingID()  == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A request tracking ID (transaction ID) is required in the acknowledgement.");
+        }
+
+        //TODO: if better performance is required, change the request body to string and marshal it manually.  This
+        //should eliminate an extra unmarshal that occurs before this method is invoked.
+        File ackFile = File.createTempFile("ack-", ".xml", ackDir);
+        BufferedOutputStream stream2 = new BufferedOutputStream(new FileOutputStream(ackFile));
+        String xml = transactionService.toXml(acknowledgment);
+        stream2.write(xml.getBytes("UTF-8"));
+        stream2.close();
 
 		Transaction tx = transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
 		if(tx!=null) {
 			tx.setAcknowledged(true);
 			tx.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            tx.setAckFilePath(ackFile.getAbsolutePath());
 
 			acknowledgment.getAcknowledgmentData().getAcknowledgmentCode();
 
@@ -125,12 +147,81 @@ public class TransactionsController {
 
 			//TODO: persist the acknowledgement
 			transactionService.update(tx);
+		}
+		else {
+			Transaction tran = new Transaction();
 
+            if (acknowledgment.getTransmissionData().getDestination().getOrganization().getMutuallyDefined() != null) {
+                tran.setRecipientId(Integer.valueOf(acknowledgment.getTransmissionData().getDestination().getOrganization().getMutuallyDefined()));
+            }
+            else {
+                tran.setRecipientId(0);
+            }
+
+            if (acknowledgment.getTransmissionData().getSource().getOrganization().getMutuallyDefined() != null) {
+                tran.setSenderId(Integer.valueOf(acknowledgment.getTransmissionData().getSource().getOrganization().getMutuallyDefined()));
+            }
+            else {
+                tran.setSenderId(0);
+            }
+
+            tran.setSignerId(0);
+
+            if (acknowledgment.getTransmissionData().getRequestTrackingID() != null) {
+                tran.setSenderTransactionId( Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID() ));
+            }
+            else {
+                tran.setSenderTransactionId(0);
+            }
+
+
+            tran.setFilePath(ackFile.getAbsolutePath());
+            tran.setFileFormat("PESCXML");
+            tran.setFileSize(Long.valueOf(xml.length()));
+            tran.setDepartment("");
+            tran.setDocumentType("PESC Functional Acknowledgement");
+            tran.setOperation("RECEIVE");
+            Timestamp occurredAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
+            tran.setOccurredAt(occurredAt);
+            tran.setAcknowledged(false);
+            tran.setStatus(TransactionStatus.FAILURE);
+            tran.setError(String.format("A acknowledgement was received, but the request tracking id (%s) was not found.", acknowledgment.getTransmissionData().getRequestTrackingID()));
+
+            transactionService.create(tran);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid request tracking ID found %s.", acknowledgment.getTransmissionData().getRequestTrackingID()));
 		}
 
 
 		log.info(acknowledgment.toString());
+
+        return ResponseEntity.ok().body(null);
 	}
+
+	/**
+	 * Proprietary EDExchange acknowledement URL
+	 * @param transactionId
+	 * @param status
+	 * @param message
+	 */
+	/*
+	@RequestMapping(value="/acknowledgement",method= RequestMethod.POST)
+	public void markAsReceived(@RequestParam(value="transactionId", required=false) Integer transactionId,
+							   @RequestParam(value = "status", required = false) TransactionStatus status,
+							   @RequestParam(value = "message", required = false) String message,
+							   @RequestBody(required = false) AcknowledgmentImpl acknowledgment) {
+		Transaction tx = transactionService.findById(transactionId);
+		if(tx!=null) {
+			tx.setAcknowledged(true);
+			tx.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+
+			tx.setStatus(status);
+			tx.setMessage(message);
+
+			transactionService.update(tx);
+		}
+	}
+	*/
 
 
 

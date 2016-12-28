@@ -453,8 +453,24 @@ public class TranscriptRequestBuilder {
      * @param email - optional
      * @return
      */
-    private SourceDestinationType createDomesticSourceDestinationType(List<String> organizationNames, List<String> organizationAddressLines, String organizationCity, StateProvinceCodeType organizationStateProvinceCode, String organizationPostalCode, Map<SchoolCodeType, String> schoolCodes, PhoneType phone, String email){
-        return createSourceDestinationType(organizationNames, organizationAddressLines, organizationCity, organizationStateProvinceCode, null, organizationPostalCode, null, schoolCodes, phone, email);
+    private SourceDestinationType createDomesticSourceDestinationType(List<String> organizationNames,
+                                                                      List<String> organizationAddressLines,
+                                                                      String organizationCity,
+                                                                      StateProvinceCodeType organizationStateProvinceCode,
+                                                                      String organizationPostalCode,
+                                                                      Map<SchoolCodeType, String> schoolCodes,
+                                                                      PhoneType phone,
+                                                                      String email){
+        return createSourceDestinationType(organizationNames,
+                organizationAddressLines,
+                organizationCity,
+                organizationStateProvinceCode,
+                null,
+                organizationPostalCode,
+                null,
+                schoolCodes,
+                phone,
+                email);
     }
 
     /**
@@ -574,6 +590,9 @@ public class TranscriptRequestBuilder {
                 case CEEB:
                     organizationType.setCEEBACT(schoolCodes.get(schoolCodeType));
                     break;
+                case EDEXCHANGE:
+                    organizationType.setMutuallyDefined(schoolCodes.get(schoolCodeType));
+                    break;
                 default:
                     throw new IllegalStateException(schoolCodeType + " is not supported");
             }
@@ -600,6 +619,9 @@ public class TranscriptRequestBuilder {
                     break;
                 case CEEB:
                     school.setCEEBACT(schoolCodes.get(schoolCodeType));
+                    break;
+                case EDEXCHANGE:
+                    school.setMutuallyDefined(schoolCodes.get(schoolCodeType));
                     break;
                 default:
                     throw new IllegalStateException(schoolCodeType + " is not supported");

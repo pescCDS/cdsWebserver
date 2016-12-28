@@ -29,7 +29,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.xml.sax.SAXException;
 
@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.spi.CalendarNameProvider;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 7/19/16.
@@ -82,14 +81,10 @@ public class FileProcessorService {
 
         if (ackURL != null && !ackURL.isEmpty()) {
 
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            //headers.setContentType(MediaType.TEXT_XML);
-            headers.add("Content-Type", "text/xml; charset=utf8");
-
 
             try {
                 ResponseEntity<String> response = restTemplate.exchange
-                        (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<Acknowledgment>((AcknowledgmentImpl)acknowledgment, headers), String.class);
+                        (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<Acknowledgment>((AcknowledgmentImpl)acknowledgment), String.class);
 
                 log.debug(response.getStatusCode());
                 if (response.getStatusCode() != HttpStatus.OK) {
@@ -103,49 +98,12 @@ public class FileProcessorService {
                 restTemplate.getOAuth2ClientContext().setAccessToken(null);
 
                 log.error(e);
-                throw e;
+            }
+            catch (HttpClientErrorException e) {
+                log.error("Failed to send PESC functional acknowledgement: ." + e.getResponseBodyAsString(), e);
             }
 
         }
-    }
-
-
-    public void sendAck(String ackURL, Integer transactionId, String message, TransactionStatus status) {
-        // send response back to sending network server
-
-        if (ackURL != null && !ackURL.isEmpty() && transactionId != null) {
-
-            LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-            map.add("transactionId", transactionId.toString());
-            map.add("status", status.name());
-            map.add("message", message);
-
-
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
-
-
-            try {
-                ResponseEntity<String> response = restTemplate.exchange
-                        (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
-
-                log.debug(response.getStatusCode());
-                if (response.getStatusCode() != HttpStatus.OK) {
-                    throw new RuntimeException(response.getStatusCode().getReasonPhrase());
-                }
-
-            }
-            catch(ResourceAccessException e) {
-
-                //Force the OAuth client to retrieve the token again whenever it is used again.
-                restTemplate.getOAuth2ClientContext().setAccessToken(null);
-
-                log.error(e);
-                throw e;
-            }
-
-        }
-
     }
 
     /**
@@ -166,7 +124,7 @@ public class FileProcessorService {
         TransactionStatus status = TransactionStatus.SUCCESS;
 
         Date currentTime = Calendar.getInstance().getTime();
-        String ackDocID = String.format("%ld-%d", currentTime.getTime(), transaction.getId());
+        String ackDocID = String.format("%d-%d", currentTime.getTime(), transaction.getId());
 
         try {
             if (transaction.getFileFormat().equalsIgnoreCase("PESCXML")){
@@ -308,33 +266,6 @@ public class FileProcessorService {
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
         return (CollegeTranscript) u.unmarshal(new File(filePath));
-    }
-
-    public String toXml(Acknowledgment acknowledgment) {
-        try {
-
-            JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl");
-            Marshaller marshaller = jc.createMarshaller();
-
-            Schema schema = ValidationUtils.getSchema(XmlFileType.FUNCTIONAL_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_2_0);
-
-            marshaller.setSchema(schema);
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
-
-            StringWriter writer = new StringWriter();
-            marshaller.marshal(acknowledgment, writer);
-
-            return writer.toString();
-
-        } catch (JAXBException e) {
-            log.error(e);
-        } catch (SAXException e) {
-            log.error(e);
-        } catch (OperationNotSupportedException e) {
-            log.error(e);
-        }
-
-        return null;
     }
 
 

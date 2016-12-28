@@ -431,6 +431,7 @@ public class DocumentController {
                     Map<SchoolCodeType, String> trStudentSchoolCodes = Maps.newHashMap();
                     JSONObject organization = organizationService.getOrganization(Integer.valueOf(localServerId));
                     boolean institution = organizationService.isInstitution(organization);
+                    trSourceSchoolCodes.put(SchoolCodeType.EDEXCHANGE, localServerId);
                     if(!institution) {
                         Preconditions.checkArgument(StringUtils.isNotBlank(sourceSchoolCode), "Source School Code is required");
                         Preconditions.checkArgument(StringUtils.isNotBlank(sourceSchoolCodeType), "Source School Code Type is required");
@@ -484,6 +485,7 @@ public class DocumentController {
                     //destination
                     Map<SchoolCodeType, String> trDestinationSchoolCodes = Maps.newHashMap();
                     trDestinationSchoolCodes.put(SchoolCodeType.valueOf(destinationSchoolCodeType), destinationSchoolCode);
+                    trDestinationSchoolCodes.put(SchoolCodeType.EDEXCHANGE, String.valueOf(tx.getRecipientId()));
                     //document
                     DocumentTypeCode trDocumentType = null;
                     try{
