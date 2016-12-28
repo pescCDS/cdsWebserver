@@ -43,6 +43,10 @@ public class Transaction {
 	@Column(name="request_file_path")
 	private String requestFilePath;
 
+	//The path to the PESC functional acknowledgement file, if there is one.
+	@Column(name="ack_file_path")
+	private String ackFilePath;
+
 	@Column(name="ack_url")
 	private String ackURL;
 	
@@ -220,5 +224,13 @@ public class Transaction {
 
 	public void setSignerId(Integer signerId) {
 		this.signerId = signerId;
+	}
+
+	public String getAckFilePath() {
+		return ackFilePath;
+	}
+
+	public void setAckFilePath(String ackFilePath) {
+		this.ackFilePath = ackFilePath;
 	}
 }

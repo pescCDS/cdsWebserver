@@ -12,6 +12,7 @@ import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.AcknowledgmentDataType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorType;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.sector.academicrecord.v1_9.SourceDestinationType;
 import org.pesc.sdk.sector.academicrecord.v1_9.TransmissionDataType;
@@ -45,7 +46,9 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.spi.CalendarNameProvider;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 7/19/16.
@@ -86,7 +89,7 @@ public class FileProcessorService {
 
             try {
                 ResponseEntity<String> response = restTemplate.exchange
-                        (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<String>(toXml(acknowledgment), headers), String.class);
+                        (ackURL, HttpMethod.POST, new org.springframework.http.HttpEntity<Acknowledgment>((AcknowledgmentImpl)acknowledgment, headers), String.class);
 
                 log.debug(response.getStatusCode());
                 if (response.getStatusCode() != HttpStatus.OK) {
@@ -162,16 +165,23 @@ public class FileProcessorService {
         String message = DEFAULT_DELIVERY_MESSAGE;
         TransactionStatus status = TransactionStatus.SUCCESS;
 
+        Date currentTime = Calendar.getInstance().getTime();
+        String ackDocID = String.format("%ld-%d", currentTime.getTime(), transaction.getId());
+
         try {
             if (transaction.getFileFormat().equalsIgnoreCase("PESCXML")){
                 CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getRequestFilePath());
 
-                functionalacknowledgement = buildAcceptedAcknowledgement(collegeTranscript) ;
+                functionalacknowledgement = buildAcceptedAcknowledgement(collegeTranscript, ackDocID) ;
             }
             else if (!StringUtils.isEmpty(transaction.getRequestFilePath()) ) {
                 TranscriptRequest transcriptRequest = getTranscriptRequest(transaction.getRequestFilePath());
 
-                functionalacknowledgement = buildAcceptedAcknowledgement(transcriptRequest) ;
+                functionalacknowledgement = buildAcceptedAcknowledgement(transcriptRequest, ackDocID) ;
+            }
+            else {
+
+
             }
 
         }
@@ -188,29 +198,34 @@ public class FileProcessorService {
 
     }
 
-    public Acknowledgment buildAcceptedAcknowledgement(TranscriptRequest transcriptRequest) {
+
+    public Acknowledgment buildAcceptedAcknowledgement(TranscriptRequest transcriptRequest, String ackDocID) {
         Acknowledgment ack = buildBaseAcknowledgement(transcriptRequest.getTransmissionData().getDestination(),
                 transcriptRequest.getTransmissionData().getSource(), transcriptRequest.getTransmissionData().getRequestTrackingID(),
-                transcriptRequest.getTransmissionData().getDocumentID(), AcknowledgmentCodeType.ACCEPTED);
+                transcriptRequest.getTransmissionData().getDocumentID(), AcknowledgmentCodeType.ACCEPTED, ackDocID);
 
         return ack;
     }
 
     public Acknowledgment buildAcceptedAcknowledgement(SourceDestinationType source, SourceDestinationType destination,
-                                                       String requestTrackingID, String documentID) {
-        Acknowledgment ack = buildBaseAcknowledgement(source,destination,requestTrackingID,documentID,AcknowledgmentCodeType.ACCEPTED);
+                                                       String requestTrackingID, String documentID, String ackDocID) {
+        Acknowledgment ack = buildBaseAcknowledgement(source,destination,requestTrackingID,documentID,AcknowledgmentCodeType.ACCEPTED, ackDocID);
         return ack;
     }
 
     public Acknowledgment buildRejectedAcknowledgement(SourceDestinationType source, SourceDestinationType destination,
-                                                        String requestTrackingID, String documentID, List<SyntaxErrorType> errors) {
-        Acknowledgment ack = buildBaseAcknowledgement(source, destination, requestTrackingID, documentID,AcknowledgmentCodeType.REJECTED);
+                                                        String requestTrackingID, String documentID, List<SyntaxErrorType> errors, String ackDocID) {
+        Acknowledgment ack = buildBaseAcknowledgement(source, destination, requestTrackingID, documentID,AcknowledgmentCodeType.REJECTED,ackDocID);
         ack.getAcknowledgmentData().getSyntaxErrors().addAll(errors);
         return ack;
     }
 
-    public Acknowledgment buildBaseAcknowledgement(SourceDestinationType source, SourceDestinationType destination,
-                                                    String requestTrackingID, String documentID, AcknowledgmentCodeType ackCode) {
+    public Acknowledgment buildBaseAcknowledgement(SourceDestinationType source,
+                                                   SourceDestinationType destination,
+                                                   String requestTrackingID,
+                                                   String documentID,
+                                                   AcknowledgmentCodeType ackCode,
+                                                   String ackDocID) {
         Acknowledgment ack = functionalacknowledgementObjectFactory.createAcknowledgment();
 
         TransmissionDataType transmissionData = academicRecordObjectFactory.createTransmissionDataType();
@@ -218,7 +233,7 @@ public class FileProcessorService {
         transmissionData.setSource(source);
         transmissionData.setDestination(destination);
         transmissionData.setCreatedDateTime(Calendar.getInstance().getTime());
-        transmissionData.setDocumentID(documentID);
+        transmissionData.setDocumentID(ackDocID); //TODO: create unique document ID for this functional ack?
         transmissionData.setDocumentTypeCode(DocumentTypeCodeType.ACKNOWLEDGMENT);
         transmissionData.setTransmissionType(TransmissionTypeType.ORIGINAL);
         //Request tracking ID here is the transaction key as defined by the sender's network server.
@@ -237,35 +252,37 @@ public class FileProcessorService {
         return ack;
     }
 
-    public Acknowledgment buildAcceptedAcknowledgement(CollegeTranscript transcript) {
+    public Acknowledgment buildAcceptedAcknowledgement(CollegeTranscript transcript, String ackDocID) {
 
         Acknowledgment ack = buildAcceptedAcknowledgement(transcript.getTransmissionData().getDestination(),
                 transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getRequestTrackingID(),
-                transcript.getTransmissionData().getDocumentID());
+                transcript.getTransmissionData().getDocumentID(),ackDocID);
 
         return ack;
     }
 
-    public Acknowledgment buildRejectedAcknowledgement(CollegeTranscript transcript, List<SyntaxErrorType> errors) {
+    public Acknowledgment buildRejectedAcknowledgement(CollegeTranscript transcript, List<SyntaxErrorType> errors, String ackDocID) {
 
         Acknowledgment ack = buildRejectedAcknowledgement(transcript.getTransmissionData().getDestination(),
                 transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getRequestTrackingID(),
-                transcript.getTransmissionData().getDocumentID(), errors);
+                transcript.getTransmissionData().getDocumentID(), errors, ackDocID);
 
         return ack;
     }
 
-    public Acknowledgment buildAcceptedBatchAcknowledgement(CollegeTranscript transcript, String batchID) {
+    public Acknowledgment buildAcceptedBatchAcknowledgement(CollegeTranscript transcript, String batchID, String ackDocID) {
 
-        Acknowledgment ack = buildAcceptedAcknowledgement(transcript);
+        Acknowledgment ack = buildAcceptedAcknowledgement(transcript, ackDocID);
         ack.getAcknowledgmentData().setBatchID(batchID);
         return ack;
     }
 
-    public Acknowledgment buildRejectedBatchAcknowledgement(CollegeTranscript transcript, List<SyntaxErrorType> errors,
-                                                            String batchID) {
+    public Acknowledgment buildRejectedBatchAcknowledgement(CollegeTranscript transcript,
+                                                            List<SyntaxErrorType> errors,
+                                                            String batchID,
+                                                            String ackDocID) {
 
-        Acknowledgment ack = buildRejectedAcknowledgement(transcript, errors);
+        Acknowledgment ack = buildRejectedAcknowledgement(transcript, errors, ackDocID);
         ack.getAcknowledgmentData().setBatchID(batchID);
         return ack;
     }

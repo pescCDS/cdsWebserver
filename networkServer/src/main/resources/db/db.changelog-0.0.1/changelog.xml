@@ -41,6 +41,9 @@
 			<column name="request_file_path" type="varchar(256)" defaultValue="null">
 				<constraints nullable="true" />
 			</column>
+			<column name="ack_file_path" type="varchar(256)">
+				<constraints nullable="false" />
+			</column>
 			<column name="operation" type="varchar(32)">
 				<constraints nullable="true" />
 			</column>

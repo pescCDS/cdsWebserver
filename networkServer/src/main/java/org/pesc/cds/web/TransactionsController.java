@@ -7,18 +7,17 @@ import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.TransactionService;
 import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
-import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +27,10 @@ import java.util.List;
 public class TransactionsController {
 	
 	private static final Log log = LogFactory.getLog(TransactionsController.class);
+
+
+	@Value("${networkServer.ack.path}")
+	private String acknowledgementsDirectory;
 
 	@Autowired
 	private TransactionService transactionService;
@@ -98,9 +101,8 @@ public class TransactionsController {
 	 * @param acknowledgment
 	 */
 	@RequestMapping(value="/acknowledgement",method= RequestMethod.POST, consumes = { "text/xml"})
-	public void markAsReceived(@RequestBody String acknowledgment) {
+	public void markAsReceived(@RequestBody AcknowledgmentImpl acknowledgment) {
 
-		/*
 		Transaction tx = transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
 		if(tx!=null) {
 			tx.setAcknowledged(true);
@@ -125,7 +127,7 @@ public class TransactionsController {
 			transactionService.update(tx);
 
 		}
-		*/
+
 
 		log.info(acknowledgment.toString());
 	}
