@@ -1,4 +1,4 @@
-package org.pesc.sdk.message.functionalacknowledgment.v1_2;
+package org.pesc.sdk.message.functionalacknowledgement.v1_2;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.builder.ToStringBuilder;

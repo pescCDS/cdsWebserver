@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
 import org.pesc.sdk.core.coremain.v1_14.SeverityCodeType;
 import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
-import org.pesc.sdk.message.functionalacknowledgment.v1_2.ValidationResponse;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.ValidationResponse;
 import org.pesc.sdk.sector.academicrecord.v1_9.*;
 import org.pesc.sdk.util.PescAddress;
 import org.pesc.sdk.util.PescAddressUtils;

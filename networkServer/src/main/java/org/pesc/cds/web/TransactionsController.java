@@ -7,7 +7,7 @@ import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.TransactionService;
 import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
-import org.pesc.sdk.message.functionalacknowledgment.v1_2.Acknowledgment;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,7 +88,7 @@ public class TransactionsController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@ResponseBody
 	public List<Transaction> getCompleted() {
-		PagedData<Transaction> pagedData = transactionService.search(1, "Complete", "Send", null, null, null, new PagedData<Transaction>(20,0));
+		PagedData<Transaction> pagedData = transactionService.search(1, "Complete", "Send", null, null, null, new PagedData<Transaction>(20, 0));
 		return pagedData.getData();
 	}
 
@@ -97,8 +97,10 @@ public class TransactionsController {
 	 * An acknowledgement URL that uses the PESC Functional Acknowledgement Standard
 	 * @param acknowledgment
 	 */
-	@RequestMapping(value="/acknowledgement", method= RequestMethod.POST)
-	public void markAsReceived(@RequestBody(required = false) Acknowledgment acknowledgment) {
+	@RequestMapping(value="/acknowledgement",method= RequestMethod.POST, consumes = { "text/xml"})
+	public void markAsReceived(@RequestBody String acknowledgment) {
+
+		/*
 		Transaction tx = transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
 		if(tx!=null) {
 			tx.setAcknowledged(true);
@@ -121,30 +123,11 @@ public class TransactionsController {
 
 			//TODO: persist the acknowledgement
 			transactionService.update(tx);
+
 		}
-	}
+		*/
 
-
-	/**
-	 * Proprietary EDExchange acknowledement URL
-	 * @param transactionId
-	 * @param status
-	 * @param message
-	 */
-	@RequestMapping(method= RequestMethod.POST)
-	public void markAsReceived(@RequestParam(value="transactionId", required=true) Integer transactionId,
-							   @RequestParam(value = "status", required = true) TransactionStatus status,
-							   @RequestParam(value = "message", required = false) String message) {
-		Transaction tx = transactionService.findById(transactionId);
-		if(tx!=null) {
-			tx.setAcknowledged(true);
-			tx.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-
-			tx.setStatus(status);
-			tx.setMessage(message);
-
-			transactionService.update(tx);
-		}
+		log.info(acknowledgment.toString());
 	}
 
 

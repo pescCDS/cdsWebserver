@@ -27,12 +27,12 @@ public class JaxbConfig {
         return DocumentInfoMarshaller;
     }
 
-    @Bean(name="functionalAcknowledgmentMarshaller")
-    public Jaxb2Marshaller functionalAcknowledgmentMarshaller(){
-        Jaxb2Marshaller functionalAcknowledgmentMarshaller = new Jaxb2Marshaller();
-        functionalAcknowledgmentMarshaller.setContextPath("org.pesc.sdk.message.functionalacknowledgment.v1_2.impl");
-        functionalAcknowledgmentMarshaller.setSchema(new ClassPathResource("xsd/pesc/FunctionalAcknowledgment_v1.2.0.xsd"));
-        return functionalAcknowledgmentMarshaller;
+    @Bean(name="functionalacknowledgementMarshaller")
+    public Jaxb2Marshaller functionalacknowledgementMarshaller(){
+        Jaxb2Marshaller functionalacknowledgementMarshaller = new Jaxb2Marshaller();
+        functionalacknowledgementMarshaller.setContextPath("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl");
+        functionalacknowledgementMarshaller.setSchema(new ClassPathResource("xsd/pesc/FunctionalAcknowledgement_v1.2.0.xsd"));
+        return functionalacknowledgementMarshaller;
     }
 
     @Bean(name="transcriptResponseMarshaller")

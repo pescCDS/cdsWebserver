@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2007 (http://www.altova.com) by PHEAA (STATE OF PA PHEAA) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:FuncAck="urn:org:pesc:message:FunctionalAcknowledgment:v1.2.0" xmlns:core="urn:org:pesc:core:CoreMain:v1.14.0" xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.9.0" targetNamespace="urn:org:pesc:message:FunctionalAcknowledgment:v1.2.0" version="v1.2.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:FuncAck="urn:org:pesc:message:functionalacknowledgement:v1.2.0" xmlns:core="urn:org:pesc:core:CoreMain:v1.14.0" xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.9.0" targetNamespace="urn:org:pesc:message:functionalacknowledgement:v1.2.0" version="v1.2.0">
     <xs:import namespace="urn:org:pesc:core:CoreMain:v1.14.0" schemaLocation="CoreMain_v1.14.0.xsd"/>
     <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.9.0" schemaLocation="AcademicRecord_v1.9.0.xsd"/>
     <!--============================================================================-->
-    <!--Name:      FunctionalAcknowledgment.xsd  -->
+    <!--Name:      functionalacknowledgement.xsd  -->
     <!--Version:  1.1.0-->
     <!--Date:       16-October-2013-->
     <!---->

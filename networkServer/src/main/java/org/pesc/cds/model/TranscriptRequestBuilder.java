@@ -14,8 +14,8 @@ import org.pesc.sdk.core.coremain.v1_14.SeverityCodeType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
-import org.pesc.sdk.message.functionalacknowledgment.v1_2.SyntaxErrorType;
-import org.pesc.sdk.message.functionalacknowledgment.v1_2.ValidationResponse;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorType;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.ValidationResponse;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequestValidator;
 import org.pesc.sdk.sector.academicrecord.v1_9.AddressType;
@@ -53,7 +53,7 @@ public class TranscriptRequestBuilder {
     private static final org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
     private static final org.pesc.sdk.core.coremain.v1_14.ObjectFactory coreMainObjectFactory = new org.pesc.sdk.core.coremain.v1_14.ObjectFactory();
     private static final org.pesc.sdk.message.documentinfo.v1_0.ObjectFactory DocumentInfoObjectFactory = new org.pesc.sdk.message.documentinfo.v1_0.ObjectFactory();
-    private static final org.pesc.sdk.message.functionalacknowledgment.v1_2.ObjectFactory functionalAcknowledgmentObjectFactory = new org.pesc.sdk.message.functionalacknowledgment.v1_2.ObjectFactory();
+    private static final org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory functionalacknowledgementObjectFactory = new org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory();
     private Marshaller documentInfoMarshaller;
 
     private String documentID;
@@ -415,14 +415,14 @@ public class TranscriptRequestBuilder {
         setSchoolCode(studentSchoolCodes, school);
         ValidationResponse validationResponse = TranscriptRequestValidator.validateTranscriptRequestRequiredContent(transcriptRequest);
         if (validationResponse.getSeverity() == SeverityCodeType.FATAL_ERROR || validationResponse.getSeverity() == SeverityCodeType.ERROR) {
-            SyntaxErrorType error = functionalAcknowledgmentObjectFactory.createSyntaxErrorType();
+            SyntaxErrorType error = functionalacknowledgementObjectFactory.createSyntaxErrorType();
             error.setErrorMessage("Required content missing for documentId: "+documentID);
             error.setSeverityCode(SeverityCodeType.ERROR);
             validationResponse.addErrorToTop(error);//put on top
             log.error(validationResponse.toString());
             throw new IllegalStateException(validationResponse.toString());
         } else if(validationResponse.getErrors().size()>0){
-            SyntaxErrorType warning = functionalAcknowledgmentObjectFactory.createSyntaxErrorType();
+            SyntaxErrorType warning = functionalacknowledgementObjectFactory.createSyntaxErrorType();
             warning.setErrorMessage("Recommended content missing for documentId: "+documentID);
             warning.setSeverityCode(SeverityCodeType.WARNING);
             validationResponse.addErrorToTop(warning);//put on top

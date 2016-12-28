@@ -49,9 +49,9 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
-        <jxb:bindings schemaLocation="FunctionalAcknowledgment_v1.2.0.xsd">
+        <jxb:bindings schemaLocation="FunctionalAcknowledgement_v1.2.0.xsd">
             <jxb:schemaBindings>
-                <jxb:package name="org.pesc.sdk.message.functionalacknowledgment.v1_2"/>
+                <jxb:package name="org.pesc.sdk.message.functionalacknowledgement.v1_2"/>
             </jxb:schemaBindings>
         </jxb:bindings>
 

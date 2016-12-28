@@ -6,7 +6,7 @@ import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoType;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoValidator;
 import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
-import org.pesc.sdk.message.functionalacknowledgment.v1_2.ValidationResponse;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.ValidationResponse;
 import org.pesc.sdk.sector.academicrecord.v1_9.*;
 import org.pesc.sdk.sector.academicrecord.v1_9.AddressType;
 import org.pesc.sdk.sector.academicrecord.v1_9.AttendanceType;
