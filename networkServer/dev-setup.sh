@@ -1,5 +1,5 @@
 #!/bin/bash
-mvn -DskipTests install  
+mvn clean install
 
 IMAGE=networkserver_db_image
 CONTAINER=network-db
