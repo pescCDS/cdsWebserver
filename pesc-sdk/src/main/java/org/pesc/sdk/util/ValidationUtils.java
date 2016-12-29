@@ -7,6 +7,10 @@ import org.xml.sax.SAXException;
 
 import javax.naming.OperationNotSupportedException;
 import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -74,7 +78,7 @@ public class ValidationUtils {
      * @throws OperationNotSupportedException thrown if
      * @throws SAXException
      */
-    public static void validatePESCXMLTranscript(InputStream is, XmlFileType fileType, XmlSchemaVersion version) throws OperationNotSupportedException, SAXException {
+    public static void validateDocument(InputStream is, XmlFileType fileType, XmlSchemaVersion version) throws OperationNotSupportedException, SAXException {
 
         Source xmlFile = new StreamSource(is);
 
@@ -87,4 +91,19 @@ public class ValidationUtils {
             logger.log(Level.SEVERE, "Unexpected IOException", e);
         }
     }
+
+    public static Marshaller createMarshaller(String resourcePath) throws JAXBException {
+
+        JAXBContext context = JAXBContext.newInstance(resourcePath);
+        return context.createMarshaller();
+
+    }
+
+    public static Unmarshaller createUnmarshaller(String resourcePath) throws JAXBException {
+
+        JAXBContext context = JAXBContext.newInstance(resourcePath);
+        return context.createUnmarshaller();
+
+    }
+
 }
