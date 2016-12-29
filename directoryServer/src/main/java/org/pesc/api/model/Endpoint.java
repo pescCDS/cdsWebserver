@@ -40,6 +40,9 @@ public class Endpoint {
     @Column(name="mode")
     private String mode;
 
+    @Column(name="operational_status")
+    private String operationalStatus;
+
     @JoinTable(
             name="endpoint_document_format",
             joinColumns=
@@ -188,5 +191,13 @@ public class Endpoint {
 
     public void setMode(String mode) {
         this.mode = mode;
+    }
+
+    public String getOperationalStatus() {
+        return operationalStatus;
+    }
+
+    public void setOperationalStatus(String operationalStatus) {
+        this.operationalStatus = operationalStatus;
     }
 }

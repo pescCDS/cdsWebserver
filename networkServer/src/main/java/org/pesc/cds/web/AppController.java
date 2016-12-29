@@ -126,6 +126,7 @@ public class AppController {
     public void getFile(
             @RequestParam("tran_id") Integer tranID,
             @RequestParam(value = "show_request", required = false) Boolean showRequest,
+            @RequestParam(value = "show_acknowledgement", required = false) Boolean showAck,
             HttpServletResponse response) {
         try {
 
@@ -150,6 +151,33 @@ public class AppController {
             throw new RuntimeException("IOError writing file to output stream");
         }
     }
+
+    @RequestMapping(value = "/files/acknowledgement", method = RequestMethod.GET)
+    public void getFile(
+            @RequestParam("tran_id") Integer tranID,
+            HttpServletResponse response) {
+        try {
+
+            Transaction transaction = transactionService.findById(tranID);
+
+            if (transaction == null) {
+                throw new RuntimeException("Invalid transaction id.");
+            }
+
+            String filePath =transaction.getAckFilePath();
+            String fileFormat = "xml";
+
+            InputStream is = new FileInputStream(new File(filePath));
+
+            setContentType(response, fileFormat);
+            IOUtils.copy(is, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException e) {
+            log.error("Error writing file to output stream. Transaction id " + tranID, e);
+            throw new RuntimeException("IOError writing file to output stream");
+        }
+    }
+
     @RequestMapping("/admin")
     public String getAdminPage(Model model) {
 

@@ -1464,6 +1464,7 @@
                 address: '',
                 error: false,
                 mode: 'LIVE',
+                operationalStatus: 'ACTIVE',
                 documentFormat: {},
                 deliveryMethod: {},
                 documentType: {},

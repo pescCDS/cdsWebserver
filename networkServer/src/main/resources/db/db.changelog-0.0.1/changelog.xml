@@ -6,14 +6,20 @@
 	<changeSet id="1" author="owenwe" context="dev, ci, prod">
 		<comment>This changeSet is the initial creation of the required base tables for the Network Server.</comment>
 
-		<createTable schemaName="pesc_networkserver" tableName="transactions">
-			<column name="id" type="INT UNSIGNED" autoIncrement="true">
+		<createTable tableName="transactions">
+			<column name="id" type="INT" autoIncrement="true">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
-			<column name="recipient_id" type="INT UNSIGNED">
+			<column name="sender_transaction_id" type="INT" defaultValueNumeric="0">
+				<constraints nullable="true" />
+			</column>
+			<column name="recipient_id" type="INT">
 				<constraints nullable="false" />
 			</column>
-			<column name="sender_id" type="INT UNSIGNED">
+			<column name="sender_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="signer_id" type="INT">
 				<constraints nullable="false" />
 			</column>
 			<column name="file_format" type="varchar(32)">
@@ -25,11 +31,20 @@
 			<column name="department" type="varchar(32)">
 				<constraints nullable="true" />
 			</column>
-			<column name="file_size" type="BIGINT UNSIGNED"
+			<column name="file_size" type="BIGINT"
 				defaultValueNumeric="0">
 				<constraints nullable="false" />
 			</column>
-			<column name="operation" type="ENUM('SEND','RECEIVE')">
+			<column name="file_path" type="varchar(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="request_file_path" type="varchar(256)" defaultValue="null">
+				<constraints nullable="true" />
+			</column>
+			<column name="ack_file_path" type="varchar(256)">
+				<constraints nullable="true" />
+			</column>
+			<column name="operation" type="varchar(32)">
 				<constraints nullable="true" />
 			</column>
 			<column name="occurred_at" type="TIMESTAMP">
@@ -41,16 +56,21 @@
 			<column name="error" type="TEXT">
 				<constraints nullable="true" />
 			</column>
-			<column name="acknowledged" type="BIT(1)" defaultValueBoolean="false">
+			<column name="acknowledged" type="boolean" defaultValueBoolean="false">
 				<constraints nullable="false" />
+			</column>
+			<column name="ack_url" type="varchar(256)">
+				<constraints nullable="true" />
+			</column>
+			<column name="delivery_message" type="varchar(512)">
+				<constraints nullable="true" />
+			</column>
+			<column name="delivery_status" type="varchar(32)">
+				<constraints nullable="true" />
 			</column>
 		</createTable>
 
 	</changeSet>
 
-	<changeSet id="2" author="owenwe" context="dev, ci, prod">
-		<comment></comment>
-		<sql dbms="mysql">ALTER TABLE `transactions` ENGINE=MyISAM</sql>
-	</changeSet>
 
 </databaseChangeLog>

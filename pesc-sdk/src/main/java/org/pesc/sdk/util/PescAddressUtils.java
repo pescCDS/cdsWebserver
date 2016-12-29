@@ -1,19 +1,13 @@
 package org.pesc.sdk.util;
 
-import org.pesc.sdk.core.coremain.v1_12.CountryCodeType;
-import org.pesc.sdk.core.coremain.v1_12.StateProvinceCodeType;
-import org.pesc.sdk.sector.academicrecord.v1_7.AddressType;
 import org.apache.commons.lang3.StringUtils;
+import org.pesc.sdk.core.coremain.v1_14.CountryCodeType;
+import org.pesc.sdk.core.coremain.v1_14.StateProvinceCodeType;
+import org.pesc.sdk.sector.academicrecord.v1_9.AddressType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.

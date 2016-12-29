@@ -5,16 +5,27 @@ import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.PagedData;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.TransactionStatus;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
+import org.pesc.sdk.util.ValidationUtils;
+import org.pesc.sdk.util.XmlFileType;
+import org.pesc.sdk.util.XmlSchemaVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.SAXException;
 
+import javax.naming.OperationNotSupportedException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.validation.Schema;
+import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -183,7 +194,7 @@ public class TransactionService {
             q.setMaxResults(pagedData.getLimit());
             pagedData.setData(q.getResultList());
 
-            pagedData.setTotal(getResultLength(senderId,status, operation, deliveryStatus,  startDate,endDate));
+            pagedData.setTotal(getResultLength(senderId, status, operation, deliveryStatus, startDate, endDate));
 
             return pagedData;
 
@@ -199,6 +210,33 @@ public class TransactionService {
         pagedData.setTotal(0L);
         pagedData.setData(new ArrayList<Transaction>());
         return pagedData;
+    }
+
+    public String toXml(Acknowledgment acknowledgment) {
+        try {
+
+            JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl");
+            Marshaller marshaller = jc.createMarshaller();
+
+            Schema schema = ValidationUtils.getSchema(XmlFileType.FUNCTIONAL_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_2_0);
+
+            marshaller.setSchema(schema);
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
+
+            StringWriter writer = new StringWriter();
+            marshaller.marshal(acknowledgment, writer);
+
+            return writer.toString();
+
+        } catch (JAXBException e) {
+            log.error(e);
+        } catch (SAXException e) {
+            log.error(e);
+        } catch (OperationNotSupportedException e) {
+            log.error(e);
+        }
+
+        return null;
     }
 
 }

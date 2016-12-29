@@ -2,8 +2,8 @@ package org.pesc.sdk.message.documentinfo.v1_0;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
-import org.pesc.sdk.core.coremain.v1_9.SeverityCodeType;
-import org.pesc.sdk.message.functionalacknowledgment.v1_0.ValidationResponse;
+import org.pesc.sdk.core.coremain.v1_14.SeverityCodeType;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.ValidationResponse;
 import org.pesc.sdk.util.ValidationUtils;
 
 /**

@@ -25,48 +25,6 @@ public class DatabaseConfig {
     // PUBLIC METHODS
     // ------------------------
 
-    @Value("${entitymanager.packagesToScan}")
-    private String[] packagesToScan;
-
-    /**
-     * Declare the JPA entity manager factory.
-     */
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, Environment env) {
-        LocalContainerEntityManagerFactoryBean entityManagerFactory =
-                new LocalContainerEntityManagerFactoryBean();
-
-        entityManagerFactory.setDataSource(dataSource);
-
-        // Classpath scanning of @Component, @Service, etc annotated class
-
-        entityManagerFactory.setPackagesToScan( packagesToScan );
-
-        // Vendor adapter
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        entityManagerFactory.setJpaVendorAdapter(vendorAdapter);
-
-        // Hibernate properties
-        Properties additionalProperties = new Properties();
-        additionalProperties.put(
-                "hibernate.dialect",
-                env.getProperty("hibernate.dialect"));
-        additionalProperties.put(
-                "hibernate.show_sql",
-                env.getProperty("hibernate.show_sql"));
-        additionalProperties.put(
-                "hibernate.hbm2ddl.auto",
-                env.getProperty("hibernate.hbm2ddl.auto"));
-
-        additionalProperties.put(
-                "hibernate.current_session_context_class",
-                env.getProperty("hibernate.current_session_context_class"));
-
-        entityManagerFactory.setJpaProperties(additionalProperties);
-
-
-        return entityManagerFactory;
-    }
 
     /**
      * Declare the transaction manager.
@@ -90,20 +48,6 @@ public class DatabaseConfig {
     @Bean
     public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
         return new PersistenceExceptionTranslationPostProcessor();
-    }
-
-    /**
-     * DataSource definition for database connection. Settings are read from
-     * the application.properties file (using the env object).
-     */
-    @Bean
-    public DataSource dataSource(Environment env) {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(env.getProperty("db.driver"));
-        dataSource.setUrl(env.getProperty("db.url"));
-        dataSource.setUsername(env.getProperty("db.username"));
-        dataSource.setPassword(env.getProperty("db.password"));
-        return dataSource;
     }
 
 

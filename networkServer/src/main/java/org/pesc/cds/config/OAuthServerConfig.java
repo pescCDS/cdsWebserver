@@ -60,10 +60,10 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http
                 .requestMatchers()
-                    .antMatchers(HttpMethod.POST, "/api/v1/transactions")
+                    .antMatchers(HttpMethod.POST, "/api/v1/transactions/acknowledgement")
                     .antMatchers(HttpMethod.POST, "/api/v1/documents/inbox").and()
                 .authorizeRequests()
-                    .antMatchers(HttpMethod.POST, "/api/v1/transactions").authenticated()
+                    .antMatchers(HttpMethod.POST, "/api/v1/transactions/acknowledgement").authenticated()
                     .antMatchers(HttpMethod.POST, "/api/v1/documents/inbox").authenticated();
     }
 }

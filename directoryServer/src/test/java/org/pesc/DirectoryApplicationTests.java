@@ -2,18 +2,20 @@ package org.pesc;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.ClassRule;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pesc.api.EndpointResource;
 import org.pesc.api.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,19 +23,19 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = DirectoryApplication.class)
-@WebIntegrationTest("server.port=0")  //let Spring select a random port to use.
-@DirtiesContext
+@SpringBootTest(classes = DirectoryApplication.class, webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode= DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ActiveProfiles("test")
 public class DirectoryApplicationTests {
 
 	@Value("${http.port}")   //Injects that actual port used in the test
 	int port;
 
+	@Autowired
+	JdbcTemplate jdbc;
 
 	//Test RestTemplate to invoke the APIs.
 	private RestTemplate restTemplate = new RestTemplate();
@@ -46,8 +48,13 @@ public class DirectoryApplicationTests {
 	}
 	private int directoryID = 2; //The directory ID for Butte College
 
-	@ClassRule
-	public static DockerContainerRule dockerContainerRule = new DockerContainerRule("cdswebserver_directoryserver_db_image");
+
+	@After
+	public void after() {
+		jdbc.execute("DROP ALL OBJECTS");
+	}
+
+
 
 	/**
 	 * Tests that the directory server home page is accessible.
@@ -323,6 +330,7 @@ public class DirectoryApplicationTests {
 		endpoint.setOrganization(getServiceProvider());
 		endpoint.setError(false);
 		endpoint.setMode("LIVE");
+		endpoint.setOperationalStatus(OperationalStatus.ACTIVE.name());
 
 		return endpoint;
 	}

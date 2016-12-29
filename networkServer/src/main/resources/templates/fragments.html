@@ -140,6 +140,7 @@
                 <th>Size</th>
                 <th>Document</th>
                 <th>Transcript Request</th>
+                <th>Acknowledgment</th>
                 <th>Occurred At</th>
                 <th>Acknowledged At</th>
                 <th>Error</th>
@@ -165,6 +166,10 @@
                 </td>
                 <td>
                     <a ng-href="files?tran_id={{tran.id}}&show_request=true">{{tran.requestFilePath}}</a>
+
+                </td>
+                <td>
+                    <a ng-href="files/acknowledgement?tran_id={{tran.id}}">{{tran.ackFilePath}}</a>
 
                 </td>
                 <td>{{tran.occurredAt | date:'medium'}}</td>

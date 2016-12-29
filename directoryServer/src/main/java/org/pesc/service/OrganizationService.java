@@ -161,6 +161,10 @@ public class OrganizationService {
     public Organization createInstitution(Organization organization) {
         organization.setEnabled(false);
         organization.setActive(true);
+
+        Date createdTime = Calendar.getInstance().getTime();
+        organization.setCreatedTime(createdTime);
+        organization.setModifiedTime(createdTime);
         organization.setOrganizationTypes(new HashSet<OrganizationType>());
         organization.getOrganizationTypes().add(this.getOrganizationTypes().get(1));
 
@@ -603,7 +607,7 @@ public class OrganizationService {
 
         for (Map row : rows) {
             OrganizationDTO org = new OrganizationDTO();
-            org.setId(((Long) row.get("id")).intValue());
+            org.setId((Integer)row.get("id"));
             org.setName((String) row.get("name"));
             org.setEnabled((Boolean)row.get("enabled"));
             institutionList.add(org);

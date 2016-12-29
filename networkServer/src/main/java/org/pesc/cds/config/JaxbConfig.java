@@ -14,8 +14,8 @@ public class JaxbConfig {
     @Bean(name="transcriptRequestMarshaller")
     public Jaxb2Marshaller transcriptRequestMarshaller(){
         Jaxb2Marshaller transcriptRequestMarshaller = new Jaxb2Marshaller();
-        transcriptRequestMarshaller.setContextPath("org.pesc.sdk.message.transcriptrequest.v1_2.impl");
-        transcriptRequestMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptRequest_v1.2.0.xsd"));
+        transcriptRequestMarshaller.setContextPath("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
+        transcriptRequestMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd"));
         return transcriptRequestMarshaller;
     }
 
@@ -27,19 +27,19 @@ public class JaxbConfig {
         return DocumentInfoMarshaller;
     }
 
-    @Bean(name="functionalAcknowledgmentMarshaller")
-    public Jaxb2Marshaller functionalAcknowledgmentMarshaller(){
-        Jaxb2Marshaller functionalAcknowledgmentMarshaller = new Jaxb2Marshaller();
-        functionalAcknowledgmentMarshaller.setContextPath("org.pesc.sdk.message.functionalacknowledgment.v1_0.impl");
-        functionalAcknowledgmentMarshaller.setSchema(new ClassPathResource("xsd/pesc/FunctionalAcknowledgment_v1.0.0.xsd"));
-        return functionalAcknowledgmentMarshaller;
+    @Bean(name="functionalacknowledgementMarshaller")
+    public Jaxb2Marshaller functionalacknowledgementMarshaller(){
+        Jaxb2Marshaller functionalacknowledgementMarshaller = new Jaxb2Marshaller();
+        functionalacknowledgementMarshaller.setContextPath("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl");
+        functionalacknowledgementMarshaller.setSchema(new ClassPathResource("xsd/pesc/FunctionalAcknowledgement_v1.2.0.xsd"));
+        return functionalacknowledgementMarshaller;
     }
 
     @Bean(name="transcriptResponseMarshaller")
     public Jaxb2Marshaller transcriptResponseMarshaller(){
         Jaxb2Marshaller transcriptResponseMarshaller = new Jaxb2Marshaller();
-        transcriptResponseMarshaller.setContextPath("org.pesc.sdk.message.transcriptresponse.v1_2.impl");
-        transcriptResponseMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptResponse_v1.2.0.xsd"));
+        transcriptResponseMarshaller.setContextPath("org.pesc.sdk.message.transcriptresponse.v1_4.impl");
+        transcriptResponseMarshaller.setSchema(new ClassPathResource("xsd/pesc/TranscriptResponse_v1.4.0.xsd"));
         return transcriptResponseMarshaller;
     }
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-mvn -DskipTests package docker:build
+mvn clean install
 
 IMAGE=directoryserver_db_image
 CONTAINER=directory-db
