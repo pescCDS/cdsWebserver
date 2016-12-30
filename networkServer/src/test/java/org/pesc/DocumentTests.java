@@ -2,11 +2,9 @@ package org.pesc;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.service.FileProcessorService;
-import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfo;
-import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoType;
-import org.pesc.sdk.message.documentinfo.v1_0.DocumentInfoValidator;
-import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.message.transcriptresponse.v1_4.TranscriptResponse;
 import org.pesc.sdk.sector.academicrecord.v1_9.HoldReasonType;
@@ -22,25 +20,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.naming.OperationNotSupportedException;
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = NetworkServerApplication.class, webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -53,10 +43,30 @@ public class DocumentTests {
     @Autowired
     FileProcessorService fileProcessorService;
 
+    @Test
+    public void testFunctionalAckCreation() throws JAXBException, SAXException, OperationNotSupportedException {
 
+        Transaction transaction = new Transaction();
+        transaction.setSenderId(4);
+        transaction.setRecipientId(5);
+
+        Acknowledgment ack = fileProcessorService.createFunctionalAcknowledgement(transaction, "ack_1");
+
+        Marshaller marshaller = ValidationUtils.createMarshaller("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl");
+        marshaller.setSchema(ValidationUtils.getSchema(XmlFileType.FUNCTIONAL_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_2_0));
+
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        marshaller.marshal(ack, byteArrayOutputStream);
+
+        ValidationUtils.validateDocument(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()),
+                XmlFileType.FUNCTIONAL_ACKNOWLEDGEMENT,
+                XmlSchemaVersion.V1_2_0);
+
+    }
 
     @Test
-    public void testTranscriptResponseCreation() throws Exception {
+    public void testTranscriptResponseCreation() throws JAXBException, SAXException, OperationNotSupportedException {
 
         Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
 
@@ -64,7 +74,6 @@ public class DocumentTests {
         u.setSchema(schema);
 
         TranscriptRequest transcriptRequest = null;
-        DocumentInfo documentInfo = null;
         try {
             transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("xmlTranscript_request.xml"));
         } catch (Exception e) {

@@ -59,7 +59,6 @@ public class FileProcessorService {
     @Value("${networkServer.inbox.path}")
     private String localServerInboxPath;
 
-
     @Autowired
     @Qualifier("myRestTemplate")
     private OAuth2RestOperations restTemplate;
@@ -139,10 +138,37 @@ public class FileProcessorService {
             log.error(e);
         }
 
-
+        //If the functional acknowledgement is null here, we need to construct one based on information in
+        //the transaction entity.
+        if (functionalacknowledgement == null) {
+            functionalacknowledgement = createFunctionalAcknowledgement(transaction, ackDocID);
+        }
 
         sendAck(transaction.getAckURL(), functionalacknowledgement);
 
+
+    }
+
+    public Acknowledgment createFunctionalAcknowledgement(Transaction transaction, String ackDocID) {
+
+        //TODO: fill in source and destination.
+        SourceDestinationType source = academicRecordObjectFactory.createSourceDestinationType();
+        OrganizationType org = academicRecordObjectFactory.createOrganizationType();
+        org.setMutuallyDefined(String.valueOf(transaction.getRecipientId()));
+        source.setOrganization(org);
+
+        SourceDestinationType destination = academicRecordObjectFactory.createSourceDestinationType();
+        org = academicRecordObjectFactory.createOrganizationType();
+        org.setMutuallyDefined(String.valueOf(transaction.getSenderId()));
+        destination.setOrganization(org);
+
+        Acknowledgment ack = buildAcceptedAcknowledgement(source,
+                destination,
+                String.valueOf(transaction.getSenderTransactionId()),
+                String.valueOf(transaction.getSenderTransactionId()),
+                ackDocID);
+
+        return ack;
 
     }
 

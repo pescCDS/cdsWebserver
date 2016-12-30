@@ -89,6 +89,7 @@ public class ValidationUtils {
         } catch (IOException e) {
             // Not sure how we could get here.
             logger.log(Level.SEVERE, "Unexpected IOException", e);
+
         }
     }
 
