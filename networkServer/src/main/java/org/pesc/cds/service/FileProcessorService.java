@@ -3,7 +3,6 @@ package org.pesc.cds.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.Transaction;
-import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.StringUtils;
 import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
@@ -14,11 +13,8 @@ import org.pesc.sdk.message.functionalacknowledgement.v1_2.AcknowledgmentDataTyp
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
-import org.pesc.sdk.sector.academicrecord.v1_9.SourceDestinationType;
-import org.pesc.sdk.sector.academicrecord.v1_9.TransmissionDataType;
-import org.pesc.sdk.util.ValidationUtils;
-import org.pesc.sdk.util.XmlFileType;
-import org.pesc.sdk.util.XmlSchemaVersion;
+import org.pesc.sdk.message.transcriptresponse.v1_4.TranscriptResponse;
+import org.pesc.sdk.sector.academicrecord.v1_9.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,16 +29,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.xml.sax.SAXException;
 
-import javax.naming.OperationNotSupportedException;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,13 +59,13 @@ public class FileProcessorService {
     @Value("${networkServer.inbox.path}")
     private String localServerInboxPath;
 
-
     @Autowired
     @Qualifier("myRestTemplate")
     private OAuth2RestOperations restTemplate;
 
     private static final org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory functionalacknowledgementObjectFactory = new org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory();
     private static final org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
+    private static final org.pesc.sdk.message.transcriptresponse.v1_4.ObjectFactory transcriptResponseObjectFactory = new org.pesc.sdk.message.transcriptresponse.v1_4.ObjectFactory();
 
     public static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
     public static final String DEFAULT_RECEIVE_MESSAGE = "Received document.";
@@ -120,8 +113,6 @@ public class FileProcessorService {
         //will utilize the functional acknowledgement.  This is because the PESC functional ack requires information
         //contained in the PESCXML transcript or transcript request.
         Acknowledgment functionalacknowledgement = null;
-        String message = DEFAULT_DELIVERY_MESSAGE;
-        TransactionStatus status = TransactionStatus.SUCCESS;
 
         Date currentTime = Calendar.getInstance().getTime();
         String ackDocID = String.format("%d-%d", currentTime.getTime(), transaction.getId());
@@ -145,17 +136,88 @@ public class FileProcessorService {
         }
         catch (Exception e){
             log.error(e);
-            message = e.getMessage();
-            status = TransactionStatus.FAILURE;
         }
 
-
+        //If the functional acknowledgement is null here, we need to construct one based on information in
+        //the transaction entity.
+        if (functionalacknowledgement == null) {
+            functionalacknowledgement = createFunctionalAcknowledgement(transaction, ackDocID);
+        }
 
         sendAck(transaction.getAckURL(), functionalacknowledgement);
 
 
     }
 
+    public Acknowledgment createFunctionalAcknowledgement(Transaction transaction, String ackDocID) {
+
+        //TODO: fill in source and destination.
+        SourceDestinationType source = academicRecordObjectFactory.createSourceDestinationType();
+        OrganizationType org = academicRecordObjectFactory.createOrganizationType();
+        org.setMutuallyDefined(String.valueOf(transaction.getRecipientId()));
+        source.setOrganization(org);
+
+        SourceDestinationType destination = academicRecordObjectFactory.createSourceDestinationType();
+        org = academicRecordObjectFactory.createOrganizationType();
+        org.setMutuallyDefined(String.valueOf(transaction.getSenderId()));
+        destination.setOrganization(org);
+
+        Acknowledgment ack = buildAcceptedAcknowledgement(source,
+                destination,
+                String.valueOf(transaction.getSenderTransactionId()),
+                String.valueOf(transaction.getSenderTransactionId()),
+                ackDocID);
+
+        return ack;
+
+    }
+
+    public ResponseHoldType createResponseHold(HoldReasonType reason, Date plannedReleaseDate) {
+        ResponseHoldType hold = academicRecordObjectFactory.createResponseHoldType();
+
+        hold.setHoldReason(reason);
+        hold.setPlannedReleaseDate(plannedReleaseDate);
+
+        return hold;
+    }
+
+    public TranscriptResponse buildBaseTranscriptResponse(SourceDestinationType source,
+                                                          SourceDestinationType destination,
+                                                          String requestTrackingID,
+                                                          String transcriptRequestTrackingID,
+                                                          String transcriptResponseDocID,
+                                                          ResponseStatusType responseStatus,
+                                                          List<ResponseHoldType> holds,
+                                                          RequestedStudentType requestedStudent) {
+        TranscriptResponse transcriptResponse = transcriptResponseObjectFactory.createTranscriptResponse();
+
+        TransmissionDataType transmissionData = academicRecordObjectFactory.createTransmissionDataType();
+
+        Date createdDateTime = Calendar.getInstance().getTime();
+
+        transmissionData.setSource(source);
+        transmissionData.setDestination(destination);
+        transmissionData.setCreatedDateTime(createdDateTime);
+        transmissionData.setDocumentID(transcriptResponseDocID);
+        transmissionData.setDocumentTypeCode(DocumentTypeCodeType.RESPONSE);
+        transmissionData.setTransmissionType(TransmissionTypeType.ORIGINAL);
+        transmissionData.setRequestTrackingID(requestTrackingID);
+
+
+        ResponseType response = academicRecordObjectFactory.createResponseType();
+        response.setCreatedDateTime( createdDateTime );
+        response.setRequestTrackingID(transcriptRequestTrackingID);
+        response.setRecipientTrackingID(requestTrackingID);
+        response.setResponseStatus(responseStatus);
+        response.getResponseHolds().addAll(holds);
+        response.setRequestedStudent(requestedStudent);
+
+        transcriptResponse.setTransmissionData(transmissionData);
+        transcriptResponse.getResponses().add(response);
+
+
+        return transcriptResponse;
+    }
 
     public Acknowledgment buildAcceptedAcknowledgement(TranscriptRequest transcriptRequest, String ackDocID) {
         Acknowledgment ack = buildBaseAcknowledgement(transcriptRequest.getTransmissionData().getDestination(),
@@ -191,7 +253,7 @@ public class FileProcessorService {
         transmissionData.setSource(source);
         transmissionData.setDestination(destination);
         transmissionData.setCreatedDateTime(Calendar.getInstance().getTime());
-        transmissionData.setDocumentID(ackDocID); //TODO: create unique document ID for this functional ack?
+        transmissionData.setDocumentID(ackDocID);
         transmissionData.setDocumentTypeCode(DocumentTypeCodeType.ACKNOWLEDGMENT);
         transmissionData.setTransmissionType(TransmissionTypeType.ORIGINAL);
         //Request tracking ID here is the transaction key as defined by the sender's network server.
@@ -201,11 +263,8 @@ public class FileProcessorService {
         ackData.setDocumentID(documentID);
         ackData.setAcknowledgmentCode(ackCode);
 
-
         ack.setTransmissionData(transmissionData);
         ack.setAcknowledgmentData(ackData);
-
-        ack.getTransmissionData();
 
         return ack;
     }

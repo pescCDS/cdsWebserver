@@ -276,6 +276,10 @@
             <column name="name" value="Transcript Request"/>
             <column name="description" value="Academic transcript request."/>
         </insert>
+        <insert tableName="document_types">
+            <column name="name" value="Transcript Response"/>
+            <column name="description" value="Transcript response."/>
+        </insert>
 
         <createTable tableName="endpoint_document_types">
             <column name="endpoint_id" type="INT">
