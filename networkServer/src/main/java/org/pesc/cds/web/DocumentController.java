@@ -694,7 +694,7 @@ public class DocumentController {
             PublicKey senderPublicKey = pkiService.convertPEMPublicKey(pemPublicKey);
 
 
-            if ( true == pkiService.verifySignature(signatureFile.getInputStream(),signatureFile.getBytes(), senderPublicKey)) {
+            if ( false == pkiService.verifySignature(multipartFile.getInputStream(),signatureFile.getBytes(), senderPublicKey)) {
                 throw new WebApplicationException("Invalid digital signature found.  File discarded.");
             }
 
