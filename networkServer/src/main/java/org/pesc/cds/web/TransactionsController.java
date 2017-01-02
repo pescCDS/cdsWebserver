@@ -198,31 +198,4 @@ public class TransactionsController {
         return ResponseEntity.ok().body(null);
 	}
 
-	/**
-	 * Proprietary EDExchange acknowledement URL
-	 * @param transactionId
-	 * @param status
-	 * @param message
-	 */
-	/*
-	@RequestMapping(value="/acknowledgement",method= RequestMethod.POST)
-	public void markAsReceived(@RequestParam(value="transactionId", required=false) Integer transactionId,
-							   @RequestParam(value = "status", required = false) TransactionStatus status,
-							   @RequestParam(value = "message", required = false) String message,
-							   @RequestBody(required = false) AcknowledgmentImpl acknowledgment) {
-		Transaction tx = transactionService.findById(transactionId);
-		if(tx!=null) {
-			tx.setAcknowledged(true);
-			tx.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-
-			tx.setStatus(status);
-			tx.setMessage(message);
-
-			transactionService.update(tx);
-		}
-	}
-	*/
-
-
-
 }

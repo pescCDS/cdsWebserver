@@ -280,6 +280,10 @@
             <column name="name" value="Transcript Response"/>
             <column name="description" value="Transcript response."/>
         </insert>
+        <insert tableName="document_types">
+            <column name="name" value="Acknowledgement"/>
+            <column name="description" value="A logical receipt sent to the sending organization by the receiving organization that provides information about the document delivery."/>
+        </insert>
 
         <createTable tableName="endpoint_document_types">
             <column name="endpoint_id" type="INT">

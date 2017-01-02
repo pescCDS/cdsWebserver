@@ -3,6 +3,8 @@ package org.pesc.cds.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.DocumentFormat;
+import org.pesc.cds.model.DocumentType;
 import org.pesc.cds.repository.StringUtils;
 import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
@@ -100,6 +102,19 @@ public class FileProcessorService {
     }
 
     /**
+     * Implementors should develop logic here to hand the transcript request---obtain the requested student's
+     * transcript and send it to the source organization using the source's EDExchange endpoint for the
+     * transcript.
+     * @param transaction
+     * @param ackDocID
+     * @return
+     */
+    private Acknowledgment handleTranscriptRequest(Transaction transaction, String ackDocID) {
+
+        return null;
+    }
+
+    /**
      * This asynchronous method is intended to be starting point for modeling and automating the receiver's delivery process.
      * When this method is invoked, the document has already been received and stored in the file system.
      * transaction.getFilePath() returns the location of the file.
@@ -112,23 +127,42 @@ public class FileProcessorService {
         //Only documents that are either PESCXML transcripts or a document accompanied by a transcript request
         //will utilize the functional acknowledgement.  This is because the PESC functional ack requires information
         //contained in the PESCXML transcript or transcript request.
-        Acknowledgment functionalacknowledgement = null;
+        Acknowledgment ack = null;
 
         Date currentTime = Calendar.getInstance().getTime();
         String ackDocID = String.format("%d-%d", currentTime.getTime(), transaction.getId());
 
         try {
-            if (transaction.getFileFormat().equalsIgnoreCase("PESCXML")){
-                CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getRequestFilePath());
+            if (DocumentType.ACKNOWLEDGEMENT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
 
-                functionalacknowledgement = buildAcceptedAcknowledgement(collegeTranscript, ackDocID) ;
             }
-            else if (!StringUtils.isEmpty(transaction.getRequestFilePath()) ) {
-                TranscriptRequest transcriptRequest = getTranscriptRequest(transaction.getRequestFilePath());
+            else if (DocumentType.TRANSCRIPT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
+                if (DocumentFormat.PESCXML.getFormatName().equalsIgnoreCase(transaction.getFileFormat())){
 
-                functionalacknowledgement = buildAcceptedAcknowledgement(transcriptRequest, ackDocID) ;
+                    CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getRequestFilePath());
+                    ack = buildAcceptedAcknowledgement(collegeTranscript, ackDocID) ;
+                }
             }
-            else {
+            else if (DocumentType.TRANSCRIPT_RESPONSE.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())){
+
+            }
+            else if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())){
+                ack = handleTranscriptRequest(transaction,ackDocID);
+            }
+
+
+            //If the functional acknowledgement is null here, we need to construct one based on information in
+            //the transaction entity.
+            if (ack == null) {
+
+                if (!StringUtils.isEmpty(transaction.getRequestFilePath()) ) {
+                    TranscriptRequest transcriptRequest = getTranscriptRequest(transaction.getRequestFilePath());
+
+                    ack = buildAcceptedAcknowledgement(transcriptRequest, ackDocID) ;
+                }
+                else {
+                    ack = createFunctionalAcknowledgement(transaction, ackDocID);
+                }
 
 
             }
@@ -138,14 +172,7 @@ public class FileProcessorService {
             log.error(e);
         }
 
-        //If the functional acknowledgement is null here, we need to construct one based on information in
-        //the transaction entity.
-        if (functionalacknowledgement == null) {
-            functionalacknowledgement = createFunctionalAcknowledgement(transaction, ackDocID);
-        }
-
-        sendAck(transaction.getAckURL(), functionalacknowledgement);
-
+        sendAck(transaction.getAckURL(), ack);
 
     }
 
