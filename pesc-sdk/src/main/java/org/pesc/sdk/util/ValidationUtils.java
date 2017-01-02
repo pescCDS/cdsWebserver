@@ -75,8 +75,10 @@ public class ValidationUtils {
      * @param is InputStream containing the contents of the file to be validated
      * @param fileType whether the PESC Transcript is a High School or College transcript
      * @param version which version of the HS/College schema to validate with
+     * @throws OperationNotSupportedException thrown if
+     * @throws SAXException
      */
-    public static boolean validateDocument(InputStream is, XmlFileType fileType, XmlSchemaVersion version) {
+    public static void validateDocument(InputStream is, XmlFileType fileType, XmlSchemaVersion version) throws OperationNotSupportedException, SAXException {
 
         Source xmlFile = new StreamSource(is);
 
@@ -87,16 +89,8 @@ public class ValidationUtils {
         } catch (IOException e) {
             // Not sure how we could get here.
             logger.log(Level.SEVERE, "Unexpected IOException", e);
-            return false;
-        } catch (SAXException e) {
-            logger.log(Level.SEVERE, "Validation error.", e);
-            return false;
-        } catch (OperationNotSupportedException e) {
-            logger.log(Level.SEVERE, "Validation error", e);
-            return false;
-        }
 
-        return true;
+        }
     }
 
     public static Marshaller createMarshaller(String resourcePath) throws JAXBException {

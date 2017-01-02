@@ -61,12 +61,9 @@ public class DocumentTests {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         marshaller.marshal(ack, byteArrayOutputStream);
 
-        boolean valid = ValidationUtils.validateDocument(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()),
+       ValidationUtils.validateDocument(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()),
                 XmlFileType.FUNCTIONAL_ACKNOWLEDGEMENT,
                 XmlSchemaVersion.V1_2_0);
-
-        assertTrue("The acknowledgement is invalid.", valid);
-
 
     }
 
@@ -113,9 +110,8 @@ public class DocumentTests {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         marshaller.marshal(response, byteArrayOutputStream);
 
-        boolean valid = ValidationUtils.validateDocument(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), XmlFileType.TRANSCRIPT_RESPONSE, XmlSchemaVersion.V1_4_0);
+        ValidationUtils.validateDocument(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), XmlFileType.TRANSCRIPT_RESPONSE, XmlSchemaVersion.V1_4_0);
 
-        assertTrue("The transcript response is invalid.", valid);
 
     }
 
