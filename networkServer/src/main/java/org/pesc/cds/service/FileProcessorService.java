@@ -178,7 +178,6 @@ public class FileProcessorService {
 
     public Acknowledgment createFunctionalAcknowledgement(Transaction transaction, String ackDocID) {
 
-        //TODO: fill in source and destination.
         SourceDestinationType source = academicRecordObjectFactory.createSourceDestinationType();
         OrganizationType org = academicRecordObjectFactory.createOrganizationType();
         org.setMutuallyDefined(String.valueOf(transaction.getRecipientId()));

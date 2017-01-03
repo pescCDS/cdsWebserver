@@ -4,9 +4,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.PagedData;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.DocumentFormat;
+import org.pesc.cds.model.DocumentType;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.TransactionService;
 import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,7 +87,7 @@ public class TransactionsController {
 
 		pagedData = transactionService.search(senderId, status, operation, deliveryStatus, start, end, pagedData);
 
-        servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()) );
+        servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()));
 
         return pagedData.getData();
 
@@ -102,6 +105,11 @@ public class TransactionsController {
 	public List<Transaction> getCompleted() {
 		PagedData<Transaction> pagedData = transactionService.search(1, "Complete", "Send", null, null, null, new PagedData<Transaction>(20, 0));
 		return pagedData.getData();
+	}
+
+	@ExceptionHandler
+	void handleIllegalArgumentException(IllegalArgumentException e, HttpServletResponse response) throws IOException {
+		response.sendError(HttpStatus.BAD_REQUEST.value());
 	}
 
 
@@ -139,13 +147,15 @@ public class TransactionsController {
 					tx.setStatus(TransactionStatus.SUCCESS);
 					break;
 				case REJECTED:
-					tx.setStatus(TransactionStatus.FAILURE);
-					break;
 				default:
 					tx.setStatus(TransactionStatus.FAILURE);
+					StringBuilder buf = new StringBuilder();
+					for(SyntaxErrorType error: acknowledgment.getAcknowledgmentData().getSyntaxErrors()){
+						buf.append(String.format("%s %s Column Number: %d Line Number: %d%n", error.getErrorMessage(), error.getSeverityCode().value(), error.getLocator().getColumnNumber(), error.getLocator().getLineNumber()));
+					}
+					tx.setError(buf.toString());
 			}
 
-			//TODO: persist the acknowledgement
 			transactionService.update(tx);
 		}
 		else {
@@ -176,10 +186,10 @@ public class TransactionsController {
 
 
             tran.setFilePath(ackFile.getAbsolutePath());
-            tran.setFileFormat("PESCXML");
+            tran.setFileFormat(DocumentFormat.PESCXML.getFormatName());
             tran.setFileSize(Long.valueOf(xml.length()));
             tran.setDepartment("");
-            tran.setDocumentType("PESC Functional Acknowledgement");
+            tran.setDocumentType(DocumentType.ACKNOWLEDGEMENT.getDocumentName());
             tran.setOperation("RECEIVE");
             Timestamp occurredAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
             tran.setOccurredAt(occurredAt);
