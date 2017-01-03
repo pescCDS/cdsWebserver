@@ -11,7 +11,6 @@
 
 @Library('jenkinsLib') _
 
-def buildNode = "build-slave"
 //def channel = "#ed-exchange" //slack notification channel
 def channel = "#jenkins-test" //slack notification channel
 def buildNode = "build-slave" //build on nodes matching label
