@@ -6,9 +6,14 @@
     <changeSet id="1" author="James Whetstone" context="dev, ci, prod">
         <comment>This changeset is to update and insert into the document types</comment>
 
+        <modifyDataType
+                        columnName="name"
+                        newDataType="varchar(64)"
+                        tableName="document_types" />
+
         <update tableName="document_types">
             <column name="name" value="Functional Acknowledgement"/>
-            <column name="description" value="Defined by the Functional Acknowledgement PESC standard, it is used to acknowledge any received PESC document and to indicate validation errors or any error that prevents processesing. "/>
+            <column name="description" value="Defined by the Functional Acknowledgement PESC standard, it is used to acknowledge any received PESC document and to indicate validation errors or any error that prevents processing. "/>
             <where>id = 4</where>
         </update>
 
