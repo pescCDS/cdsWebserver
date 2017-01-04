@@ -12,7 +12,6 @@ import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -189,7 +188,7 @@ public class TransactionsController {
             tran.setFileFormat(DocumentFormat.PESCXML.getFormatName());
             tran.setFileSize(Long.valueOf(xml.length()));
             tran.setDepartment("");
-            tran.setDocumentType(DocumentType.ACKNOWLEDGEMENT.getDocumentName());
+            tran.setDocumentType(DocumentType.FUNCTIONAL_ACKNOWLEDGEMENT.getDocumentName());
             tran.setOperation("RECEIVE");
             Timestamp occurredAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
             tran.setOccurredAt(occurredAt);

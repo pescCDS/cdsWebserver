@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="James Whetstone" context="dev, ci, prod">
+        <comment>This changeset is to update and insert into the document types</comment>
+
+        <update tableName="document_types">
+            <column name="name" value="Functional Acknowledgement"/>
+            <column name="description" value="Defined by the Functional Acknowledgement PESC standard, it is used to acknowledge any received PESC document and to indicate validation errors or any error that prevents processesing. "/>
+            <where>id = 4</where>
+        </update>
+
+        <insert tableName="document_types">
+            <column name="name" value="Transcript Acknowledgement"/>
+            <column name="description" value="Defined by the Student Transcript Acknowledgement PESC standard, it is used to acknowledge the receipt of a transcript."/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>

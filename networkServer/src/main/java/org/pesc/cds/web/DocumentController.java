@@ -18,6 +18,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.DocumentType;
 import org.pesc.cds.model.SchoolCodeType;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.model.TranscriptRequestBuilder;
@@ -32,22 +33,34 @@ import org.pesc.sdk.message.documentinfo.v1_0.DocumentTypeCode;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.sector.academicrecord.v1_9.PhoneType;
 import org.pesc.sdk.sector.academicrecord.v1_9.ReleaseAuthorizedMethodType;
+import org.pesc.sdk.util.ValidationUtils;
+import org.pesc.sdk.util.XmlFileType;
+import org.pesc.sdk.util.XmlSchemaVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.annotation.Resource;
+import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -610,6 +623,15 @@ public class DocumentController {
     }
 
 
+    @RequestMapping(value="/test", method= RequestMethod.GET)
+    public void receiveFile() throws SAXException, OperationNotSupportedException {
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[0]);
+
+        ValidationUtils.validateDocument(inputStream, XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
+
+    }
+
     /**
      * When another network server sends a file
      *
@@ -633,7 +655,7 @@ public class DocumentController {
             @RequestParam(value="ack_url", required=false) String ackURL,
             @RequestParam(value="transcript_request_file", required = false) MultipartFile transcriptRequestFile,
             HttpServletRequest request
-    ) {
+    ) throws SAXException, IOException, OperationNotSupportedException {
 
         log.info(request.getRequestURI().toString());
 
@@ -644,6 +666,12 @@ public class DocumentController {
             log.error("Incorrect number of file uploaded.  Is the digital signature file present?");
             throw new WebApplicationException("A file and it's digital signature are required.");
         }
+
+        if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(documentType)) {
+            //Validate the request
+            ValidationUtils.validateDocument(multipartFile.getInputStream(), XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
+        }
+
         Transaction tx = new Transaction();
         // we need the directoryId for this organization in the organizations table
         tx.setRecipientId(recipientId);
@@ -776,4 +804,6 @@ public class DocumentController {
     public List<String> listFilesFromInbox() {
         return fileProcessorService.getInboxDocumentList();
     }
+
+
 }

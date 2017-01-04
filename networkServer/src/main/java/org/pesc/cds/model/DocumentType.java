@@ -6,8 +6,9 @@ package org.pesc.cds.model;
 public enum DocumentType {
     TRANSCRIPT("Transcript"),
     TRANSCRIPT_RESPONSE("Transcript Response"),
-    ACKNOWLEDGEMENT("Acknowledgement"),
-    TRANSCRIPT_REQUEST("Transcript Request");
+    FUNCTIONAL_ACKNOWLEDGEMENT("Functional Acknowledgement"),
+    TRANSCRIPT_REQUEST("Transcript Request"),
+    TRANSCRIPT_ACKNOWLEDGEMENT("Transcript Acknowledgement");
 
     private final String documentName;
 

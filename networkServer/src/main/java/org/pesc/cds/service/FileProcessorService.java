@@ -8,15 +8,20 @@ import org.pesc.cds.model.DocumentType;
 import org.pesc.cds.repository.StringUtils;
 import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
+import org.pesc.sdk.core.coremain.v1_14.SeverityCodeType;
 import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
 import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.AcknowledgmentDataType;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorLocatorType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.message.transcriptresponse.v1_4.TranscriptResponse;
 import org.pesc.sdk.sector.academicrecord.v1_9.*;
+import org.pesc.sdk.util.ValidationUtils;
+import org.pesc.sdk.util.XmlFileType;
+import org.pesc.sdk.util.XmlSchemaVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +36,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.xml.sax.SAXException;
 
+import javax.naming.OperationNotSupportedException;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -38,6 +44,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -133,7 +140,7 @@ public class FileProcessorService {
         String ackDocID = String.format("%d-%d", currentTime.getTime(), transaction.getId());
 
         try {
-            if (DocumentType.ACKNOWLEDGEMENT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
+            if (DocumentType.FUNCTIONAL_ACKNOWLEDGEMENT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
 
             }
             else if (DocumentType.TRANSCRIPT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
@@ -255,7 +262,7 @@ public class FileProcessorService {
 
     public Acknowledgment buildAcceptedAcknowledgement(SourceDestinationType source, SourceDestinationType destination,
                                                        String requestTrackingID, String documentID, String ackDocID) {
-        Acknowledgment ack = buildBaseAcknowledgement(source,destination,requestTrackingID,documentID,AcknowledgmentCodeType.ACCEPTED, ackDocID);
+        Acknowledgment ack = buildBaseAcknowledgement(source, destination, requestTrackingID, documentID, AcknowledgmentCodeType.ACCEPTED, ackDocID);
         return ack;
     }
 
@@ -299,7 +306,7 @@ public class FileProcessorService {
 
         Acknowledgment ack = buildAcceptedAcknowledgement(transcript.getTransmissionData().getDestination(),
                 transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getRequestTrackingID(),
-                transcript.getTransmissionData().getDocumentID(),ackDocID);
+                transcript.getTransmissionData().getDocumentID(), ackDocID);
 
         return ack;
     }
@@ -331,24 +338,43 @@ public class FileProcessorService {
     }
 
 
-    private TranscriptRequest getTranscriptRequest(String filePath) throws JAXBException, SAXException {
+    private void addLocator(SyntaxErrorType error,  BigInteger lineNumber,BigInteger columnNumber) {
+        SyntaxErrorLocatorType locator = functionalacknowledgementObjectFactory.createSyntaxErrorLocatorType();
+        locator.setLineNumber(lineNumber);
+        locator.setColumnNumber(columnNumber);
 
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
-        Unmarshaller u = jc.createUnmarshaller();
-        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
-        Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
+        error.setLocator(locator);
+    }
+
+    private SyntaxErrorType createSyntaxError(String message, SeverityCodeType severityCode ) {
+        SyntaxErrorType error = functionalacknowledgementObjectFactory.createSyntaxErrorType();
+        error.setErrorMessage(message);
+        error.setSeverityCode(severityCode);
+
+        return error;
+    }
+
+    private SyntaxErrorType createSyntaxError(String message, SeverityCodeType severityCode, BigInteger lineNumber,BigInteger columnNumber ) {
+        SyntaxErrorType error = functionalacknowledgementObjectFactory.createSyntaxErrorType();
+        error.setErrorMessage(message);
+        error.setSeverityCode(severityCode);
+        addLocator(error, lineNumber, columnNumber);
+        return error;
+    }
+
+
+    private TranscriptRequest getTranscriptRequest(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
+
+        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
+        Schema schema = ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
         u.setSchema(schema);
         return (TranscriptRequest) u.unmarshal(new File(filePath));
     }
 
-    private CollegeTranscript getCollegeTranscript(String filePath) throws JAXBException, SAXException {
+    private CollegeTranscript getCollegeTranscript(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
 
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.collegetranscript.v1_6.impl");
-        Unmarshaller u = jc.createUnmarshaller();
-        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/CollegeTranscript_v1.6.0.xsd");
-        Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
+        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.collegetranscript.v1_6.impl");
+        Schema schema = ValidationUtils.getSchema(XmlFileType.COLLEGE_TRANSCRIPT, XmlSchemaVersion.V1_6_0);
         u.setSchema(schema);
         return (CollegeTranscript) u.unmarshal(new File(filePath));
     }
