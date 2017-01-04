@@ -26,8 +26,6 @@ network-server:
     io.rancher.scheduler.affinity:host_label: service-name=network-server
     io.rancher.container.pull_image: always
   image: ccctechcenter/cccnext-network-server:${IMAGE_TAG}
-  volumes:
-     - ./networkServer/target:/opt/edexchange
   ports:
    - 8081:9000
    - 443:9443
