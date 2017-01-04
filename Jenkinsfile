@@ -18,6 +18,7 @@ def buildCommand = "mvn clean install"
 
 Properties props
 def environment 
+def profile 
 def IMAGE_TAG
 
 /**
@@ -46,20 +47,30 @@ node(buildNode) {
             environment = "pilot"
         }
 
-        environment = environment
+        profile = environment
+        env.profile = profile 
 
         print "DEBUG: IMAGE_TAG: ${IMAGE_TAG}"
         print "DEBUG: environment: ${environment}"
+        print "DEBUG: profile: ${profile}"
 
         props = ceEnv.getEnvProperties("ed-exchange", environment)
 
-        env.DIRECTORY_DB_USERNAME = props."edex.network.db.username"
-        env.DIRECTORY_DB_PASSWORD = props."edex.network.db.password" 
-        env.DIRECTORY_DB_HOST = props."edex.network.db.dns" 
+        //env.DIRECTORY_DB_USERNAME = props."edex.directory.db.username"
+        //env.DIRECTORY_DB_PASSWORD = props."edex.directory.db.password" 
+        //env.DIRECTORY_DB_HOST = props."edex.directory.db.dns" 
+        //
+        //
+        env.DIRECTORY_HOST = props."edex.directory.dns"
+        env.DIRECTORY_URL = props."edex.directory.url"
+
+        env.NETWORK_DB_USERNAME = props."edex.network.db.username"
+        env.NETWORK_DB_PASSWORD = props."edex.network.db.password" 
+        env.NETWORK_DB_HOST = props."edex.network.db.dns" 
+
         env.MAIL_SMTP_HOST = props."edex.mail.server.host" 
         env.MAIL_SMTP_USERNAME = props."edex.mail.server.username" 
         env.MAIL_SMTP_PASSWORD = props."edex.mail.server.password" 
-
 
 		ceBuild.setupEnv() //add mvn and java tool
 		ceBuild.mvnBuild(buildCommand)
@@ -104,7 +115,7 @@ stage "deploy"
 if(environment == "qa") {
     node(buildNode){
         try {
-			ceDeploy.runDeploy("ed-exchange", "network", environment, IMAGE_TAG, props."edex.network.url", props."edex.network.port", props."edex.network.protocol", props."edex.network.health", props."rancher.key", props."rancher.pass", channel)
+			ceDeploy.runDeploy("ed-exchange", "network-server", environment, IMAGE_TAG, props."edex.network.url", props."edex.network.port", props."edex.network.protocol", props."edex.network.health", props."rancher.key", props."rancher.pass", channel)
 			ceDeploy.slackNotify(channel, "good", "Success", "network", environment ?: "(environment not set)",  props ? props."edex.network.url" + props."edex.network.health" : "(endpoint not set)", IMAGE_TAG)
 			//FIXME: add directory server deploy here
 
