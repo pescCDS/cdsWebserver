@@ -39,6 +39,9 @@ public class DocumentUtils {
         else if (DocumentType.COLLEGE_TRANSCRIPT.getDocumentName().equalsIgnoreCase(documentType)) {
             ValidationUtils.validateDocument(xmlStream, XmlFileType.COLLEGE_TRANSCRIPT, XmlSchemaVersion.V1_6_0);
         }
+        else if (DocumentType.HIGHSCHOOL_TRANSCRIPT.getDocumentName().equalsIgnoreCase(documentType)) {
+            ValidationUtils.validateDocument(xmlStream, XmlFileType.HIGH_SCHOOL_TRANSCRIPT, XmlSchemaVersion.V1_5_0);
+        }
 
     }
 }

@@ -26,6 +26,7 @@ import org.pesc.cds.repository.TransactionService;
 import org.pesc.cds.service.FileProcessorService;
 import org.pesc.cds.service.OrganizationService;
 import org.pesc.cds.service.PKIService;
+import org.pesc.cds.utils.DocumentUtils;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
 import org.pesc.sdk.core.coremain.v1_14.StateProvinceCodeType;
 import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
@@ -700,14 +701,8 @@ public class DocumentController {
 
 
         try {
-            if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(documentType)) {
-                //Validate the request
-                ValidationUtils.validateDocument(multipartFile.getInputStream(), XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
-            }
-            else if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(documentType)) {
-                //Validate the request
-                ValidationUtils.validateDocument(multipartFile.getInputStream(), XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
-            }
+
+            DocumentUtils.validate(documentType, multipartFile.getInputStream());
 
             String fileName = multipartFile.getOriginalFilename();
             File uploadedFile =  new File(inboxDirectory, fileName);
