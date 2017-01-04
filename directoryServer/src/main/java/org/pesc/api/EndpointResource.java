@@ -60,7 +60,7 @@ public class EndpointResource {
     @ApiOperation("Search endpoints based on the search parameters.")
     public List<Endpoint> findEndpoint(
             @QueryParam("documentFormat") @ApiParam(value = "Must be one of the supported documents formats (case insensitive), e.g 'text', 'pdf', 'xml', 'pescxml'. See the document-formats API for more.") String documentFormat,
-            @QueryParam("documentType") @ApiParam(value = "Must be one of the supported documents types (case insensitive), e.g 'transcript', 'transcript request'.") String documentType,
+            @QueryParam("documentType") @ApiParam(value = "Must be one of the supported documents types (case insensitive), e.g 'college transcript', 'transcript request'.") String documentType,
             @QueryParam("department") @ApiParam(value = "Must be one of the supported department definitions.") String departmentName,
             @QueryParam("id") @ApiParam("The identifier for the endpoint.") Integer id,
             @QueryParam("hostingOrganizationId") @ApiParam("The organization ID of the member that hosts the endpoint.") Integer hostingOrganizationId,

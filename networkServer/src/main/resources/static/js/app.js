@@ -260,8 +260,8 @@
             return [
                 {
                     "id": 1,
-                    "name": "Transcript",
-                    "description": "Academic transcript."
+                    "name": "College Transcript",
+                    "description": "College level transcript."
                 },
                 {
                     "id": 2,

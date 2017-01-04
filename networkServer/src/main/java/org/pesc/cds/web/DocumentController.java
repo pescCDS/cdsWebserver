@@ -66,6 +66,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.net.URLEncoder;
 import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -233,13 +234,19 @@ public class DocumentController {
     }
 
     private String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department) {
-        StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
-        uri.append("?organizationId=").append(orgID).append("&documentFormat=").append(documentFormat).append("&documentType=").append(documentType).append("&enabled=true").append("&mode=LIVE")
-                .append("&department=").append(department);
 
         CloseableHttpClient client = HttpClients.custom().build();
         String endpointURI = null;
         try {
+            StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
+            uri.
+                    append("?organizationId=").append(orgID)
+                    .append("&documentFormat=").append(documentFormat)
+                    .append("&documentType=").append(URLEncoder.encode(documentType, "UTF-8"))
+                    .append("&enabled=true").append("&mode=LIVE")
+                    .append("&department=").append(department);
+
+
             HttpGet get = new HttpGet(uri.toString());
             get.setHeader(HttpHeaders.ACCEPT, "application/json");
             CloseableHttpResponse response = client.execute(get);
