@@ -22,6 +22,9 @@ directoryserver_app_image:
   container_name: directory-app
 
 network-server:
+  labels:
+    io.rancher.scheduler.affinity:host_label: service-name=network-server
+    io.rancher.container.pull_image: always
   image: ccctechcenter/cccnext-network-server:${IMAGE_TAG}
   volumes:
      - ./networkServer/target:/opt/edexchange
