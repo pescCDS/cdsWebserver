@@ -667,11 +667,6 @@ public class DocumentController {
             throw new WebApplicationException("A file and it's digital signature are required.");
         }
 
-        if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(documentType)) {
-            //Validate the request
-            ValidationUtils.validateDocument(multipartFile.getInputStream(), XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
-        }
-
         Transaction tx = new Transaction();
         // we need the directoryId for this organization in the organizations table
         tx.setRecipientId(recipientId);
@@ -698,6 +693,15 @@ public class DocumentController {
 
 
         try {
+            if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(documentType)) {
+                //Validate the request
+                ValidationUtils.validateDocument(multipartFile.getInputStream(), XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
+            }
+            else if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(documentType)) {
+                //Validate the request
+                ValidationUtils.validateDocument(multipartFile.getInputStream(), XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
+            }
+
             String fileName = multipartFile.getOriginalFilename();
             File uploadedFile =  new File(inboxDirectory, fileName);
             byte[] bytes = multipartFile.getBytes();
@@ -768,8 +772,11 @@ public class DocumentController {
             tx.setMessage(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
             tx.setError(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
         }
+        finally {
+            transactionService.update(tx);
+        }
 
-        transactionService.update(tx);
+
 
         if (tx.getStatus() == TransactionStatus.SUCCESS) {
             fileProcessorService.deliverFile(tx);

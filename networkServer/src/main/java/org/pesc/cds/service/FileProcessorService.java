@@ -37,15 +37,11 @@ import org.springframework.web.client.ResourceAccessException;
 import org.xml.sax.SAXException;
 
 import javax.naming.OperationNotSupportedException;
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import java.io.File;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -143,7 +139,7 @@ public class FileProcessorService {
             if (DocumentType.FUNCTIONAL_ACKNOWLEDGEMENT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
 
             }
-            else if (DocumentType.TRANSCRIPT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
+            else if (DocumentType.COLLEGE_TRANSCRIPT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
                 if (DocumentFormat.PESCXML.getFormatName().equalsIgnoreCase(transaction.getFileFormat())){
 
                     CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getRequestFilePath());
