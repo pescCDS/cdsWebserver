@@ -89,7 +89,7 @@ node(buildNode) {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ccctech-dockerhub-public-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
             try { 
                 retry (5) {
-                    sh 'docker login -u "$USERNAME" -p "$PASSWORD" -e "automation@ccctechcenter.org"' //FIXME: email flag is deprecated
+                    sh 'docker login -u "$USERNAME" -p "$PASSWORD"'
                 }
                 retry (5) {
                     sh "docker push ccctechcenter/cccnext-directory-server:${IMAGE_TAG}"
