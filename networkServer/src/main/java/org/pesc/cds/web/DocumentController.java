@@ -240,12 +240,12 @@ public class DocumentController {
         String endpointURI = null;
         try {
             StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
-            uri.
-                    append("?organizationId=").append(orgID)
-                    .append("&documentFormat=").append(documentFormat)
-                    .append("&documentType=").append(URLEncoder.encode(documentType, "UTF-8"))
-                    .append("&enabled=true").append("&mode=LIVE")
-                    .append("&department=").append(department);
+            uri
+                .append("?organizationId=").append(orgID)
+                .append("&documentFormat=").append(documentFormat)
+                .append("&documentType=").append(URLEncoder.encode(documentType, "UTF-8"))
+                .append("&enabled=true").append("&mode=LIVE")
+                .append("&department=").append(department);
 
 
             HttpGet get = new HttpGet(uri.toString());
@@ -702,7 +702,9 @@ public class DocumentController {
 
         try {
 
-            DocumentUtils.validate(documentType, multipartFile.getInputStream());
+            if (fileFormat.equalsIgnoreCase("PESCXML")) {
+                DocumentUtils.validate(documentType, multipartFile.getInputStream());
+            }
 
             String fileName = multipartFile.getOriginalFilename();
             File uploadedFile =  new File(inboxDirectory, fileName);
