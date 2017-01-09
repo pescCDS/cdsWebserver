@@ -18,7 +18,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.domain.Transaction;
-import org.pesc.cds.model.DocumentType;
 import org.pesc.cds.model.SchoolCodeType;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.model.TranscriptRequestBuilder;
@@ -27,6 +26,7 @@ import org.pesc.cds.service.FileProcessorService;
 import org.pesc.cds.service.OrganizationService;
 import org.pesc.cds.service.PKIService;
 import org.pesc.cds.utils.DocumentUtils;
+import org.pesc.cds.utils.ErrorUtils;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
 import org.pesc.sdk.core.coremain.v1_14.StateProvinceCodeType;
 import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
@@ -40,34 +40,26 @@ import org.pesc.sdk.util.XmlSchemaVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import javax.annotation.Resource;
 import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.net.URLEncoder;
 import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -77,7 +69,7 @@ import java.util.*;
 ;
 
 @RestController
-@RequestMapping(value="api/v1/documents")
+@RequestMapping(value = "api/v1/documents")
 public class DocumentController {
 
     private static final Log log = LogFactory.getLog(DocumentController.class);
@@ -124,15 +116,16 @@ public class DocumentController {
     private TransactionService transactionService;
 
     @Autowired
-    PKIService pkiService;
+    private PKIService pkiService;
 
     @Autowired
-    FileProcessorService fileProcessorService;
+    private FileProcessorService fileProcessorService;
 
-    @Resource(name="transcriptRequestMarshaller")
+
+    @Resource(name = "transcriptRequestMarshaller")
     private Marshaller transcriptRequestMarshaller;
 
-    @Resource(name="documentInfoMarshaller")
+    @Resource(name = "documentInfoMarshaller")
     private Marshaller documentInfoMarshaller;
 
     @Autowired
@@ -143,10 +136,10 @@ public class DocumentController {
     @Qualifier("myRestTemplate")
     private OAuth2RestOperations restTemplate;
 
-    @RequestMapping(value="/send", method= RequestMethod.GET)
+    @RequestMapping(value = "/send", method = RequestMethod.GET)
     @ResponseBody
     @Produces(MediaType.APPLICATION_JSON)
-    public Transaction sendDocument(@RequestParam("transaction_id")Integer tranID) {
+    public Transaction sendDocument(@RequestParam("transaction_id") Integer tranID) {
 
         Transaction tx = transactionService.findById(tranID);
 
@@ -165,12 +158,13 @@ public class DocumentController {
 
         tran = transactionService.create(tran);
 
-        String endpointURI = getEndpointForOrg(tran.getRecipientId(), tran.getFileFormat(), tran.getDocumentType(), tran.getDepartment());
+        String endpointURI = organizationService.getEndpointForOrg(tran.getRecipientId(), tran.getFileFormat(), tran.getDocumentType(), tran.getDepartment());
 
         if (endpointURI == null) {
-            tran.setError("No endpoint found for this organization and document type.");
+            String error = ErrorUtils.getNoEndpointFoundMessage(tran.getRecipientId(), tran.getFileFormat(), tran.getDocumentType(), tran.getDepartment());
+            tran.setError(error);
             transactionService.update(tran);
-            throw new RuntimeException("No endpoint found for this organization and document type.");
+            throw new RuntimeException(error);
         }
 
         File outboxFile = new File(tran.getFilePath());
@@ -188,13 +182,12 @@ public class DocumentController {
             map.add("transaction_id", tran.getId());
             map.add("ack_url", localServerWebServiceURL);
             map.add("file", new FileSystemResource(outboxFile));
-            map.add("signature", new ByteArrayResource(fileSignature){
+            map.add("signature", new ByteArrayResource(fileSignature) {
                 @Override
-                public String getFilename(){
+                public String getFilename() {
                     return "signature.dat";
                 }
             });
-
 
 
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
@@ -207,7 +200,7 @@ public class DocumentController {
             log.info(response.getStatusCode().getReasonPhrase());
 
 
-        } catch(ResourceAccessException e) {
+        } catch (ResourceAccessException e) {
 
             //Force the OAuth client to retrieve the token again whenever it is used again.
 
@@ -234,56 +227,6 @@ public class DocumentController {
         return tran;
     }
 
-    private String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department) {
-
-        CloseableHttpClient client = HttpClients.custom().build();
-        String endpointURI = null;
-        try {
-            StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
-            uri
-                .append("?organizationId=").append(orgID)
-                .append("&documentFormat=").append(documentFormat)
-                .append("&documentType=").append(URLEncoder.encode(documentType, "UTF-8"))
-                .append("&enabled=true").append("&mode=LIVE")
-                .append("&department=").append(department);
-
-
-            HttpGet get = new HttpGet(uri.toString());
-            get.setHeader(HttpHeaders.ACCEPT, "application/json");
-            CloseableHttpResponse response = client.execute(get);
-            try {
-
-                HttpEntity resEntity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
-                    JSONArray endpoints = new JSONArray(EntityUtils.toString(resEntity));
-                    if (endpoints.length() > 0) {
-
-                        if (endpoints.length() != 1) {
-                            throw new RuntimeException("More than one endpoint was found that fits the given criteria.");
-                        }
-                        endpointURI = endpoints.getJSONObject(0).getString("address");
-                        log.debug(endpoints.toString(3));
-                    }
-                }
-                EntityUtils.consume(resEntity);
-            }
-            finally {
-                response.close();
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                client.close();
-            }
-            catch (IOException e) {
-
-            }
-        }
-        return endpointURI;
-    }
 
     private String getPEMPublicKeyByOrgID(int orgID) {
         StringBuilder uri = new StringBuilder(directoryServer + "/services/rest/v1/organizations/" + orgID + "/public-key");
@@ -301,8 +244,7 @@ public class DocumentController {
                     pemPublicKey = EntityUtils.toString(resEntity);
                 }
                 EntityUtils.consume(resEntity);
-            }
-            finally {
+            } finally {
                 response.close();
             }
         } catch (ClientProtocolException e) {
@@ -312,8 +254,7 @@ public class DocumentController {
         } finally {
             try {
                 client.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
 
             }
         }
@@ -325,13 +266,13 @@ public class DocumentController {
 
         int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
         tx.setRecipientId(orgID);
-        return getEndpointForOrg(orgID, documentFormat, documentType, department);
+        return organizationService.getEndpointForOrg(orgID, documentFormat, documentType, department);
     }
 
     private int getOrganizationId(String destinationSchoolCode, String destinationSchoolCodeType, List<String> destinationOrganizationNames) {
         int orgID = 0;
         JSONObject organization = organizationService.getOrganization(destinationSchoolCode, destinationSchoolCodeType);
-        if(organization!=null){
+        if (organization != null) {
             orgID = organization.getInt("id");
             destinationOrganizationNames.add(organization.getString("name"));
             log.debug("Getting endpoint for org");
@@ -341,7 +282,6 @@ public class DocumentController {
 
 
     /**
-     *
      * @param multipartFile
      * @param fileFormat
      * @param documentType
@@ -361,26 +301,26 @@ public class DocumentController {
      * @param trStudentCurrentlyEnrolled
      * @return
      */
-    @RequestMapping(value="/outbox", method= RequestMethod.POST)
+    @RequestMapping(value = "/outbox", method = RequestMethod.POST)
     @ResponseBody
     public Transaction sendFile(
-            @RequestParam(value="file") MultipartFile multipartFile,
-            @RequestParam(value="file_format", required=true) String fileFormat,
-            @RequestParam(value="document_type", required=false) String documentType,
-            @RequestParam(value="department", required=false) String department,
-            @RequestParam(value="source_school_code", required=false) String sourceSchoolCode,
-            @RequestParam(value="source_school_code_type", required=false) String sourceSchoolCodeType,
-            @RequestParam(value="destination_school_code", required=true) String destinationSchoolCode,
-            @RequestParam(value="destination_school_code_type", required=true) String destinationSchoolCodeType,
-            @RequestParam(value="student_release", required=false) Boolean trStudentRelease,
-            @RequestParam(value="student_released_method", required=false) String trStudentReleasedMethod,
-            @RequestParam(value="student_birth_date", required=false) String studentBirthDate,
-            @RequestParam(value="student_first_name", required=false) String trStudentFirstName,
-            @RequestParam(value="student_middle_name", required=false) String trStudentMiddleName,
-            @RequestParam(value="student_last_name", required=false) String trStudentLastName,
-            @RequestParam(value="student_email", required=false) String trStudentEmail,
-            @RequestParam(value="student_partial_ssn", required=false) String trStudentPartialSsn,
-            @RequestParam(value="student_currently_enrolled", required=false) Boolean trStudentCurrentlyEnrolled
+            @RequestParam(value = "file") MultipartFile multipartFile,
+            @RequestParam(value = "file_format", required = true) String fileFormat,
+            @RequestParam(value = "document_type", required = false) String documentType,
+            @RequestParam(value = "department", required = false) String department,
+            @RequestParam(value = "source_school_code", required = false) String sourceSchoolCode,
+            @RequestParam(value = "source_school_code_type", required = false) String sourceSchoolCodeType,
+            @RequestParam(value = "destination_school_code", required = true) String destinationSchoolCode,
+            @RequestParam(value = "destination_school_code_type", required = true) String destinationSchoolCodeType,
+            @RequestParam(value = "student_release", required = false) Boolean trStudentRelease,
+            @RequestParam(value = "student_released_method", required = false) String trStudentReleasedMethod,
+            @RequestParam(value = "student_birth_date", required = false) String studentBirthDate,
+            @RequestParam(value = "student_first_name", required = false) String trStudentFirstName,
+            @RequestParam(value = "student_middle_name", required = false) String trStudentMiddleName,
+            @RequestParam(value = "student_last_name", required = false) String trStudentLastName,
+            @RequestParam(value = "student_email", required = false) String trStudentEmail,
+            @RequestParam(value = "student_partial_ssn", required = false) String trStudentPartialSsn,
+            @RequestParam(value = "student_currently_enrolled", required = false) Boolean trStudentCurrentlyEnrolled
     ) {
 
         Transaction tx = new Transaction();
@@ -400,12 +340,12 @@ public class DocumentController {
             }
 
 
-
             List<String> trDestinationOrganizationNames = Lists.newArrayList();//Provided by Source Institution
             String endpointURI = getEndpointURIForSchool(destinationSchoolCode, destinationSchoolCodeType, fileFormat, documentType, department, tx, trDestinationOrganizationNames);
 
             if (endpointURI == null) {
-                throw new IllegalArgumentException("No endpoint URI exists for the given school and document format.");
+                String error = ErrorUtils.getNoEndpointFoundMessage(tx.getRecipientId(), fileFormat, documentType, department);
+                throw new IllegalArgumentException(error);
             }
 
             try {
@@ -413,7 +353,7 @@ public class DocumentController {
                 outboxDirectory.mkdirs();
                 UUID uuid = UUID.randomUUID();
                 String ext = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
-                String trFileName = uuid.toString()+"_document."+ext;
+                String trFileName = uuid.toString() + "_document." + ext;
                 File outboxFile = new File(outboxDirectory, trFileName);
                 multipartFile.transferTo(outboxFile);
                 File requestFile = null;
@@ -440,7 +380,7 @@ public class DocumentController {
 
                 //transcript request
                 boolean createTranscriptRequest = !"PESCXML".equals(fileFormat);
-                if(createTranscriptRequest) {
+                if (createTranscriptRequest) {
                     String requestFileName = uuid.toString() + "_request.xml";
                     org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
                     String trDocumentID = tx.getId() + "";
@@ -453,7 +393,7 @@ public class DocumentController {
                     JSONObject organization = organizationService.getOrganization(Integer.valueOf(localServerId));
                     boolean institution = organizationService.isInstitution(organization);
                     trSourceSchoolCodes.put(SchoolCodeType.EDEXCHANGE, localServerId);
-                    if(!institution) {
+                    if (!institution) {
                         Preconditions.checkArgument(StringUtils.isNotBlank(sourceSchoolCode), "Source School Code is required");
                         Preconditions.checkArgument(StringUtils.isNotBlank(sourceSchoolCodeType), "Source School Code Type is required");
                         SchoolCodeType srcSchoolCodeType = SchoolCodeType.valueOf(sourceSchoolCodeType);
@@ -461,9 +401,9 @@ public class DocumentController {
                         trStudentSchoolCodes.put(srcSchoolCodeType, sourceSchoolCode);
                         //lookup Sending Institution by schoolCode and schoolCodeType
                         organization = organizationService.getOrganization(sourceSchoolCode, sourceSchoolCodeType);
-                    }else{
+                    } else {
                         JSONArray schoolCodes = organization.getJSONArray("schoolCodes");
-                        for(int i =0; i<schoolCodes.length(); i++){
+                        for (int i = 0; i < schoolCodes.length(); i++) {
                             JSONObject schoolCode = schoolCodes.getJSONObject(i);
                             trSourceSchoolCodes.put(SchoolCodeType.valueOf(schoolCode.getString("codeType")), schoolCode.getString("code"));
                             trStudentSchoolCodes.put(SchoolCodeType.valueOf(schoolCode.getString("codeType")), schoolCode.getString("code"));
@@ -476,30 +416,30 @@ public class DocumentController {
                     String trSourceOrganizationPostalCode = organization.getString("zip");
                     String phoneNumber = organization.optString("telephone", "");
                     PhoneType trSendersPhone = academicRecordObjectFactory.createPhoneType();//Provided by Source Institution - optional
-                    if(StringUtils.isNotBlank(phoneNumber)) {
+                    if (StringUtils.isNotBlank(phoneNumber)) {
                         int extensionIndex = org.apache.commons.lang3.StringUtils.indexOfIgnoreCase(phoneNumber, "x");//has extension?
-                        if(extensionIndex!=-1) {
-                            if((phoneNumber.length()-1)>extensionIndex) {
+                        if (extensionIndex != -1) {
+                            if ((phoneNumber.length() - 1) > extensionIndex) {
                                 String extension = phoneNumber.substring(extensionIndex + 1);
                                 trSendersPhone.setPhoneNumberExtension(extension);
                             }
                             phoneNumber = phoneNumber.substring(0, extensionIndex - 1);
                         }
                         phoneNumber = phoneNumber.replaceAll("\\D", "");
-                        if(phoneNumber.length()>7){
-                            String basePhoneNumber = phoneNumber.substring(phoneNumber.length()-7);
+                        if (phoneNumber.length() > 7) {
+                            String basePhoneNumber = phoneNumber.substring(phoneNumber.length() - 7);
                             trSendersPhone.setPhoneNumber(basePhoneNumber);
-                            String areaCode = phoneNumber.length()>10?phoneNumber.substring(phoneNumber.length()-10, phoneNumber.length()-7):phoneNumber.substring(0, phoneNumber.length()-7);
+                            String areaCode = phoneNumber.length() > 10 ? phoneNumber.substring(phoneNumber.length() - 10, phoneNumber.length() - 7) : phoneNumber.substring(0, phoneNumber.length() - 7);
                             trSendersPhone.setAreaCityCode(areaCode);
-                            if(phoneNumber.length()>10){
-                                String countryCode = phoneNumber.substring(0, phoneNumber.length()-10);
+                            if (phoneNumber.length() > 10) {
+                                String countryCode = phoneNumber.substring(0, phoneNumber.length() - 10);
                                 trSendersPhone.setCountryPrefixCode(countryCode);
                             }
                         }
                     }
                     String trSendersEmail = null;
                     JSONArray contacts = organization.getJSONArray("contacts");
-                    if(contacts.length()>0){
+                    if (contacts.length() > 0) {
                         JSONObject contact = contacts.getJSONObject(0);
                         trSendersEmail = contact.getString("email");//optional
                     }
@@ -509,9 +449,9 @@ public class DocumentController {
                     trDestinationSchoolCodes.put(SchoolCodeType.EDEXCHANGE, String.valueOf(tx.getRecipientId()));
                     //document
                     DocumentTypeCode trDocumentType = null;
-                    try{
+                    try {
                         trDocumentType = DocumentTypeCode.fromValue(documentType);
-                    }catch (IllegalArgumentException e){
+                    } catch (IllegalArgumentException e) {
                         trDocumentType = DocumentTypeCode.OTHER;
                     }
                     //student
@@ -557,10 +497,10 @@ public class DocumentController {
                             .build();
                     requestFile = new File(outboxDirectory, requestFileName);
                     tx.setRequestFilePath(requestFile.getAbsolutePath());
-                    if(!requestFile.createNewFile()){
-                        String message = tx.getError()!=null?tx.getError():"";
+                    if (!requestFile.createNewFile()) {
+                        String message = tx.getError() != null ? tx.getError() : "";
                         tx.setError(message + ". " + String.format("file %s already exists", requestFileName));
-                    }else {
+                    } else {
                         transcriptRequestMarshaller.marshal(transcriptRequest, new StreamResult(requestFile));
                     }
                 }
@@ -579,13 +519,13 @@ public class DocumentController {
                 map.add("transaction_id", tx.getId());
                 map.add("ack_url", localServerWebServiceURL);
                 map.add("file", new FileSystemResource(outboxFile));
-                map.add("signature", new ByteArrayResource(fileSignature){
+                map.add("signature", new ByteArrayResource(fileSignature) {
                     @Override
-                    public String getFilename(){
+                    public String getFilename() {
                         return "signature.dat";
                     }
                 });
-                if(createTranscriptRequest && requestFile!=null){
+                if (createTranscriptRequest && requestFile != null) {
                     map.add("transcript_request_file", new FileSystemResource(requestFile));
                 }
 
@@ -600,7 +540,7 @@ public class DocumentController {
                 log.info(response.getStatusCode().getReasonPhrase());
 
 
-            } catch(ResourceAccessException e) {
+            } catch (ResourceAccessException e) {
 
                 //Force the OAuth client to retrieve the token again whenever it is used again.
 
@@ -624,14 +564,14 @@ public class DocumentController {
             }
 
         } else {
-            throw new IllegalArgumentException("No file was present in the upload.") ;
+            throw new IllegalArgumentException("No file was present in the upload.");
         }
 
         return tx;
     }
 
 
-    @RequestMapping(value="/test", method= RequestMethod.GET)
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
     public void receiveFile() throws SAXException, OperationNotSupportedException {
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[0]);
@@ -643,25 +583,25 @@ public class DocumentController {
     /**
      * When another network server sends a file
      *
-     * @param recipientId    In this case this is the network server that we need to send the response to
-     * @param multipartFile           The transferred file
-     * @param fileFormat     The expected format of the file
-     * @param transactionId  This is the identifier of the transaction record from the sending network server, we send it back
-     * @param ackURL  This is the url to the network server that we will send the response back to
+     * @param recipientId   In this case this is the network server that we need to send the response to
+     * @param multipartFile The transferred file
+     * @param fileFormat    The expected format of the file
+     * @param transactionId This is the identifier of the transaction record from the sending network server, we send it back
+     * @param ackURL        This is the url to the network server that we will send the response back to
      */
-    @RequestMapping(value="/inbox", method= RequestMethod.POST)
+    @RequestMapping(value = "/inbox", method = RequestMethod.POST)
     public void receiveFile(
-            @RequestParam(value="recipient_id", required=false) Integer recipientId,
-            @RequestParam(value="sender_id", required=false) Integer senderId,
-            @RequestParam(value="signer_id", required=false) Integer signerId,
-            @RequestParam(value="file") MultipartFile multipartFile,
-            @RequestParam(value="signature") MultipartFile signatureFile,
-            @RequestParam(value="file_format", required=false) String fileFormat,
-            @RequestParam(value="document_type", required=false) String documentType,
-            @RequestParam(value="department", required=false) String department,
-            @RequestParam(value="transaction_id", required=false) Integer transactionId,
-            @RequestParam(value="ack_url", required=false) String ackURL,
-            @RequestParam(value="transcript_request_file", required = false) MultipartFile transcriptRequestFile,
+            @RequestParam(value = "recipient_id", required = false) Integer recipientId,
+            @RequestParam(value = "sender_id", required = false) Integer senderId,
+            @RequestParam(value = "signer_id", required = false) Integer signerId,
+            @RequestParam(value = "file") MultipartFile multipartFile,
+            @RequestParam(value = "signature") MultipartFile signatureFile,
+            @RequestParam(value = "file_format", required = false) String fileFormat,
+            @RequestParam(value = "document_type", required = false) String documentType,
+            @RequestParam(value = "department", required = false) String department,
+            @RequestParam(value = "transaction_id", required = false) Integer transactionId,
+            @RequestParam(value = "ack_url", required = false) String ackURL,
+            @RequestParam(value = "transcript_request_file", required = false) MultipartFile transcriptRequestFile,
             HttpServletRequest request
     ) throws SAXException, IOException, OperationNotSupportedException {
 
@@ -670,7 +610,7 @@ public class DocumentController {
         log.debug(String.format("received file from network server " + recipientId));
 
 
-        if (multipartFile == null || signatureFile == null){
+        if (multipartFile == null || signatureFile == null) {
             log.error("Incorrect number of file uploaded.  Is the digital signature file present?");
             throw new WebApplicationException("A file and it's digital signature are required.");
         }
@@ -692,7 +632,7 @@ public class DocumentController {
         tx.setAcknowledged(true);
         tx.setStatus(TransactionStatus.FAILURE);
 
-        if (!StringUtils.isEmpty(ackURL)){
+        if (!StringUtils.isEmpty(ackURL)) {
             tx.setAckURL(ackURL);
         }
 
@@ -702,18 +642,14 @@ public class DocumentController {
 
         try {
 
-            if (fileFormat.equalsIgnoreCase("PESCXML")) {
-                DocumentUtils.validate(documentType, multipartFile.getInputStream());
-            }
-
             String fileName = multipartFile.getOriginalFilename();
-            File uploadedFile =  new File(inboxDirectory, fileName);
+            File uploadedFile = new File(inboxDirectory, fileName);
             byte[] bytes = multipartFile.getBytes();
 
             String requestFileName = null;
             File requestFile = null;
             byte[] requestFileBytes = null;
-            if(transcriptRequestFile!=null) {
+            if (transcriptRequestFile != null) {
                 requestFileName = transcriptRequestFile.getOriginalFilename();
                 requestFile = new File(inboxDirectory, requestFileName);
                 requestFileBytes = transcriptRequestFile.getBytes();
@@ -730,61 +666,64 @@ public class DocumentController {
             PublicKey senderPublicKey = pkiService.convertPEMPublicKey(pemPublicKey);
 
 
-            if ( false == pkiService.verifySignature(multipartFile.getInputStream(),signatureFile.getBytes(), senderPublicKey)) {
+            if (false == pkiService.verifySignature(multipartFile.getInputStream(), signatureFile.getBytes(), senderPublicKey)) {
                 throw new WebApplicationException("Invalid digital signature found.  File discarded.");
             }
 
 
             File fp = uploadedFile.getParentFile();
-            if(!fp.exists() && !fp.mkdirs()) {
+            if (!fp.exists() && !fp.mkdirs()) {
                 tx.setError("Could not create directory: " + fp);
             } else {
                 try {
                     if (!uploadedFile.createNewFile()) {
                         tx.setError(String.format("file %s already exists", multipartFile.getOriginalFilename()));
-                    }else {
+                    } else {
                         tx.setFilePath(uploadedFile.getPath());
                         BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(uploadedFile));
                         stream.write(bytes);
                         stream.close();
 
                         //Now save the transcript request file if it exists.
-                        if(requestFile!=null) {
+                        if (requestFile != null) {
                             if (!requestFile.createNewFile()) {
                                 String message = tx.getError() != null ? tx.getError() : "";
                                 tx.setError(message + ". " + String.format("file %s already exists", requestFileName));
-                            }else{
+                            } else {
                                 tx.setRequestFilePath(requestFile.getPath());
                                 BufferedOutputStream stream2 = new BufferedOutputStream(new FileOutputStream(requestFile));
                                 stream2.write(requestFileBytes);
                                 stream2.close();
                                 tx.setStatus(TransactionStatus.SUCCESS);
                             }
-                        }else {
+                        } else {
                             tx.setStatus(TransactionStatus.SUCCESS);
                         }
                     }
 
+                    if (fileFormat.equalsIgnoreCase("PESCXML")) {
+                        DocumentUtils.validate(documentType, multipartFile.getInputStream());
+                    }
 
-                } catch(IOException ioex) {
+
+
+                } catch (IOException ioex) {
                     tx.setMessage(ioex.getMessage());
                     tx.setError(ioex.getMessage());
                 }
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             log.error(ex);
             tx.setMessage(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
             tx.setError(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
-        }
-        finally {
+            tx.setStatus(TransactionStatus.FAILURE);
+        } finally {
             transactionService.update(tx);
         }
 
 
+        fileProcessorService.deliverFile(tx);
 
-        if (tx.getStatus() == TransactionStatus.SUCCESS) {
-            fileProcessorService.deliverFile(tx);
-        }
 
 
     }
@@ -795,7 +734,7 @@ public class DocumentController {
      *
      * @return <code>List&lt;String&gt;</code> A list of paths to files uploaded to the server.
      */
-    @RequestMapping(value="/outbox", method= RequestMethod.GET)
+    @RequestMapping(value = "/outbox", method = RequestMethod.GET)
     @Produces(MediaType.APPLICATION_JSON)
     @ResponseBody
     public List<String> listFilesFromOutbox() {
@@ -809,7 +748,7 @@ public class DocumentController {
      *
      * @return <code>List&lt;String&gt;</code> A list of paths to files uploaded to the server.
      */
-    @RequestMapping(value="/inbox", method= RequestMethod.GET)
+    @RequestMapping(value = "/inbox", method = RequestMethod.GET)
     @Produces(MediaType.APPLICATION_JSON)
     @ResponseBody
     public List<String> listFilesFromInbox() {

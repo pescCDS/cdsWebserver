@@ -131,7 +131,14 @@ public class TransactionsController {
         stream2.write(xml.getBytes("UTF-8"));
         stream2.close();
 
-		Transaction tx = transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
+		Transaction tx = null;
+
+		try {
+			transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
+		}
+		catch (Exception e){
+			log.error( String.format("Failed to retrieve transaction with id (%s)", acknowledgment.getTransmissionData().getRequestTrackingID()), e);
+		}
 		if(tx!=null) {
 			tx.setAcknowledged(true);
 			tx.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
@@ -175,13 +182,6 @@ public class TransactionsController {
             }
 
             tran.setSignerId(0);
-
-            if (acknowledgment.getTransmissionData().getRequestTrackingID() != null) {
-                tran.setSenderTransactionId( Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID() ));
-            }
-            else {
-                tran.setSenderTransactionId(0);
-            }
 
 
             tran.setFilePath(ackFile.getAbsolutePath());

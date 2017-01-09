@@ -55,6 +55,12 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
+        <jxb:bindings schemaLocation="TranscriptAcknowledgement_v1.3.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.transcriptacknowledgement.v1_3"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
         <jxb:bindings schemaLocation="DocumentInfo_v1.0.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.message.documentinfo.v1_0"/>
@@ -76,6 +82,12 @@
         <jxb:bindings schemaLocation="CollegeTranscript_v1.6.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.message.collegetranscript.v1_6"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
+        <jxb:bindings schemaLocation="HighSchoolTranscript_v1.5.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.highschooltranscript.v1_5"/>
             </jxb:schemaBindings>
         </jxb:bindings>
 
