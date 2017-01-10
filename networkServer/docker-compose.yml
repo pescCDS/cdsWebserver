@@ -4,7 +4,6 @@ network-db:
    - "5432:5432"
 
 network-server:
-    #build: ./target/docker
   image: edex/network-server
   ports:
    - "9000:9000"
