@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet id="1" author="James Whetstone" context="dev, ci, prod">
+		<comment>Making the file_path column nullable.  This can occur sometimes when an exception is thrown but
+		the transaction should still be persisted.</comment>
+
+		<dropNotNullConstraint
+							   columnDataType="varchar(256)"
+							   columnName="file_path"
+							   tableName="transactions"/>
+
+	</changeSet>
+</databaseChangeLog>

@@ -5,21 +5,31 @@ import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.DocumentFormat;
 import org.pesc.cds.model.DocumentType;
+import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.StringUtils;
+import org.pesc.cds.repository.TransactionService;
+import org.pesc.cds.utils.ErrorUtils;
 import org.pesc.sdk.core.coremain.v1_14.AcknowledgmentCodeType;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
+import org.pesc.sdk.core.coremain.v1_14.SeverityCodeType;
 import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
 import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.AcknowledgmentDataType;
+import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorLocatorType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.SyntaxErrorType;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentImpl;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.message.transcriptresponse.v1_4.TranscriptResponse;
 import org.pesc.sdk.sector.academicrecord.v1_9.*;
+import org.pesc.sdk.util.ValidationUtils;
+import org.pesc.sdk.util.XmlFileType;
+import org.pesc.sdk.util.XmlSchemaVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,22 +37,19 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
+import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.io.*;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.util.*;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 7/19/16.
@@ -61,6 +68,24 @@ public class FileProcessorService {
     @Value("${networkServer.inbox.path}")
     private String localServerInboxPath;
 
+    @Value("${networkServer.id}")
+    private Integer localServerId;
+
+    @Value("${networkServer.webServiceURL}")
+    private String localServerWebServiceURL;
+
+    @Autowired
+    private TranscriptAcknowledgementService transcriptAcknowledgementService;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private TransactionService transactionService;
+
+    @Autowired
+    private PKIService pkiService;
+
     @Autowired
     @Qualifier("myRestTemplate")
     private OAuth2RestOperations restTemplate;
@@ -68,9 +93,6 @@ public class FileProcessorService {
     private static final org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory functionalacknowledgementObjectFactory = new org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory();
     private static final org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
     private static final org.pesc.sdk.message.transcriptresponse.v1_4.ObjectFactory transcriptResponseObjectFactory = new org.pesc.sdk.message.transcriptresponse.v1_4.ObjectFactory();
-
-    public static final String DEFAULT_DELIVERY_MESSAGE = "Successfully delivered document.";
-    public static final String DEFAULT_RECEIVE_MESSAGE = "Received document.";
 
     public void sendAck(String ackURL, Acknowledgment acknowledgment) {
 
@@ -114,6 +136,105 @@ public class FileProcessorService {
         return null;
     }
 
+    private void sendTranscriptAcknowledgment(CollegeTranscript transcript, Integer recipientID, Integer senderID) {
+
+        Transaction tx = new Transaction();
+
+        tx.setRecipientId(recipientID);
+        tx.setSenderId(senderID);
+        tx.setSignerId(senderID);
+        tx.setFileFormat(DocumentFormat.PESCXML.getFormatName());
+        tx.setDocumentType(DocumentType.TRANSCRIPT_ACKNOWLEDGEMENT.getDocumentName());
+        tx.setDepartment("Administration");
+        tx.setAckURL(localServerWebServiceURL);
+        tx.setOperation("SEND");
+        tx.setOccurredAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+
+        tx = transactionService.create(tx);
+
+
+        File outboxDirectory = new File(localServerOutboxPath);
+        outboxDirectory.mkdirs();
+        UUID uuid = UUID.randomUUID();
+        String tranAckFilePath = "transcript-ack-" + uuid.toString()+".xml";
+
+        File ackFile = new File(outboxDirectory, tranAckFilePath);
+
+        tx.setFilePath(ackFile.getAbsolutePath());
+
+
+        try {
+            BufferedOutputStream stream2 = new BufferedOutputStream(new FileOutputStream(ackFile));
+
+            org.pesc.sdk.message.transcriptacknowledgement.v1_3.Acknowledgment acknowledgment =
+                    transcriptAcknowledgementService.buildBaseTranscriptAcknowledgement(transcript.getTransmissionData().getDestination(),
+                            transcript.getTransmissionData().getSource(), transcript, String.valueOf(tx.getId()), transcript.getTransmissionData().getRequestTrackingID());
+            String xml = transcriptAcknowledgementService.toXml(acknowledgment);
+            stream2.write(xml.getBytes("UTF-8"));
+            stream2.close();
+            tx.setFileSize(Long.valueOf(xml.getBytes().length));
+
+            String endpointURI = organizationService.getEndpointForOrg(
+                    tx.getRecipientId(), tx.getFileFormat(), tx.getDocumentType(), tx.getDepartment());
+
+
+            if (endpointURI == null) {
+                String error = ErrorUtils.getNoEndpointFoundMessage(tx.getRecipientId(), tx.getFileFormat(),
+                        tx.getDocumentType(), tx.getDepartment()) ;
+                throw new IllegalArgumentException(error);
+            }
+
+            byte[] fileSignature = pkiService.createDigitalSignature(new FileInputStream(ackFile), pkiService.getSigningKeys().getPrivate());
+
+
+            LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+            map.add("recipient_id", tx.getRecipientId());
+            map.add("sender_id", tx.getSenderId());
+            map.add("signer_id", tx.getSignerId());
+            map.add("file_format", DocumentFormat.PESCXML.getFormatName());
+            map.add("document_type", DocumentType.TRANSCRIPT_ACKNOWLEDGEMENT.getDocumentName());
+            map.add("department", tx.getDepartment());
+            map.add("transaction_id", tx.getId());
+            map.add("ack_url", localServerWebServiceURL);
+            map.add("file", new FileSystemResource(ackFile));
+            map.add("signature", new ByteArrayResource(fileSignature){
+                @Override
+                public String getFilename(){
+                    return "signature.dat";
+                }
+            });
+
+
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
+
+
+            ResponseEntity<String> response = restTemplate.exchange
+                    (endpointURI, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
+
+
+            log.info(response.getStatusCode().getReasonPhrase());
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                tx.setStatus(TransactionStatus.SUCCESS);
+            }
+            else {
+                tx.setStatus(TransactionStatus.FAILURE);
+                tx.setError("Failed to transmit PESC transcript acknowledgement document. HTTP Status  " + response.getStatusCode().getReasonPhrase());
+            }
+
+
+        }
+        catch (Exception e) {
+            log.error(e);
+            tx.setError(e.getLocalizedMessage());
+            tx.setStatus(TransactionStatus.FAILURE);
+        }
+        finally {
+            transactionService.create(tx);
+        }
+    }
     /**
      * This asynchronous method is intended to be starting point for modeling and automating the receiver's delivery process.
      * When this method is invoked, the document has already been received and stored in the file system.
@@ -133,21 +254,26 @@ public class FileProcessorService {
         String ackDocID = String.format("%d-%d", currentTime.getTime(), transaction.getId());
 
         try {
-            if (DocumentType.ACKNOWLEDGEMENT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
 
-            }
-            else if (DocumentType.TRANSCRIPT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
-                if (DocumentFormat.PESCXML.getFormatName().equalsIgnoreCase(transaction.getFileFormat())){
+            if (transaction.getStatus() == TransactionStatus.SUCCESS) {
+                if (DocumentType.FUNCTIONAL_ACKNOWLEDGEMENT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
 
-                    CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getRequestFilePath());
-                    ack = buildAcceptedAcknowledgement(collegeTranscript, ackDocID) ;
                 }
-            }
-            else if (DocumentType.TRANSCRIPT_RESPONSE.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())){
+                else if (DocumentType.COLLEGE_TRANSCRIPT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
+                    if (DocumentFormat.PESCXML.getFormatName().equalsIgnoreCase(transaction.getFileFormat())){
 
-            }
-            else if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())){
-                ack = handleTranscriptRequest(transaction,ackDocID);
+                        CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getFilePath());
+                        ack = buildAcceptedAcknowledgement(collegeTranscript, ackDocID) ;
+
+                        sendTranscriptAcknowledgment(collegeTranscript, transaction.getSenderId(), transaction.getRecipientId());
+                    }
+                }
+                else if (DocumentType.TRANSCRIPT_RESPONSE.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())){
+
+                }
+                else if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())){
+                    ack = handleTranscriptRequest(transaction,ackDocID);
+                }
             }
 
 
@@ -167,18 +293,23 @@ public class FileProcessorService {
 
             }
 
+            sendAck(transaction.getAckURL(), ack);
+
         }
         catch (Exception e){
+            transaction.setAcknowledged(false);
+            transaction.setError(e.getLocalizedMessage());
+            transactionService.update(transaction);
             log.error(e);
         }
 
-        sendAck(transaction.getAckURL(), ack);
+
 
     }
 
+
     public Acknowledgment createFunctionalAcknowledgement(Transaction transaction, String ackDocID) {
 
-        //TODO: fill in source and destination.
         SourceDestinationType source = academicRecordObjectFactory.createSourceDestinationType();
         OrganizationType org = academicRecordObjectFactory.createOrganizationType();
         org.setMutuallyDefined(String.valueOf(transaction.getRecipientId()));
@@ -256,7 +387,7 @@ public class FileProcessorService {
 
     public Acknowledgment buildAcceptedAcknowledgement(SourceDestinationType source, SourceDestinationType destination,
                                                        String requestTrackingID, String documentID, String ackDocID) {
-        Acknowledgment ack = buildBaseAcknowledgement(source,destination,requestTrackingID,documentID,AcknowledgmentCodeType.ACCEPTED, ackDocID);
+        Acknowledgment ack = buildBaseAcknowledgement(source, destination, requestTrackingID, documentID, AcknowledgmentCodeType.ACCEPTED, ackDocID);
         return ack;
     }
 
@@ -300,7 +431,7 @@ public class FileProcessorService {
 
         Acknowledgment ack = buildAcceptedAcknowledgement(transcript.getTransmissionData().getDestination(),
                 transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getRequestTrackingID(),
-                transcript.getTransmissionData().getDocumentID(),ackDocID);
+                transcript.getTransmissionData().getDocumentID(), ackDocID);
 
         return ack;
     }
@@ -332,24 +463,44 @@ public class FileProcessorService {
     }
 
 
-    private TranscriptRequest getTranscriptRequest(String filePath) throws JAXBException, SAXException {
+    private void addLocator(SyntaxErrorType error,  BigInteger lineNumber,BigInteger columnNumber) {
+        SyntaxErrorLocatorType locator = functionalacknowledgementObjectFactory.createSyntaxErrorLocatorType();
+        locator.setLineNumber(lineNumber);
+        locator.setColumnNumber(columnNumber);
 
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
-        Unmarshaller u = jc.createUnmarshaller();
-        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
-        Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
+        error.setLocator(locator);
+    }
+
+    private SyntaxErrorType createSyntaxError(String message, SeverityCodeType severityCode ) {
+        SyntaxErrorType error = functionalacknowledgementObjectFactory.createSyntaxErrorType();
+        error.setErrorMessage(message);
+        error.setSeverityCode(severityCode);
+
+        return error;
+    }
+
+    private SyntaxErrorType createSyntaxError(String message, SeverityCodeType severityCode, BigInteger lineNumber,BigInteger columnNumber ) {
+        SyntaxErrorType error = functionalacknowledgementObjectFactory.createSyntaxErrorType();
+        error.setErrorMessage(message);
+        error.setSeverityCode(severityCode);
+        addLocator(error, lineNumber, columnNumber);
+        return error;
+    }
+
+
+
+    private TranscriptRequest getTranscriptRequest(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
+
+        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
+        Schema schema = ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
         u.setSchema(schema);
         return (TranscriptRequest) u.unmarshal(new File(filePath));
     }
 
-    private CollegeTranscript getCollegeTranscript(String filePath) throws JAXBException, SAXException {
+    private CollegeTranscript getCollegeTranscript(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
 
-        JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.collegetranscript.v1_6.impl");
-        Unmarshaller u = jc.createUnmarshaller();
-        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/CollegeTranscript_v1.6.0.xsd");
-        Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
+        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.collegetranscript.v1_6.impl");
+        Schema schema = ValidationUtils.getSchema(XmlFileType.COLLEGE_TRANSCRIPT, XmlSchemaVersion.V1_6_0);
         u.setSchema(schema);
         return (CollegeTranscript) u.unmarshal(new File(filePath));
     }

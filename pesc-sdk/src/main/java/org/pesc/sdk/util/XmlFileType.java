@@ -9,6 +9,7 @@ public enum XmlFileType {
     FUNCTIONAL_ACKNOWLEDGEMENT("FunctionalAcknowledgement"),
     TRANSCRIPT_RESPONSE("TranscriptResponse"),
     TRANSCRIPT_REQUEST("TranscriptRequest"),
+    TRANSCRIPT_ACKNOWLEDGEMENT("TranscriptAcknowledgement"),
     DOCUMENT_INFO("DocumentInfo");
 
     private final String filenamePrefix;

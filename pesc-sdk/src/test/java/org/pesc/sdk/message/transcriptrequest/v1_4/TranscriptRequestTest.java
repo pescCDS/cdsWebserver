@@ -16,10 +16,15 @@ import org.pesc.sdk.sector.academicrecord.v1_9.OrganizationType;
 import org.pesc.sdk.sector.academicrecord.v1_9.PersonType;
 import org.pesc.sdk.sector.academicrecord.v1_9.PhoneType;
 import org.pesc.sdk.sector.academicrecord.v1_9.TransmissionDataType;
+import org.pesc.sdk.util.ValidationUtils;
+import org.pesc.sdk.util.XmlFileType;
+import org.pesc.sdk.util.XmlSchemaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
+import javax.naming.OperationNotSupportedException;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -28,6 +33,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
@@ -51,7 +57,7 @@ public class TranscriptRequestTest {
         URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
-        String[] files = {"org/pesc/sdk/message/transcriptrequest/v1_2/basic_001.xml", "org/pesc/sdk/message/transcriptrequest/v1_2/basic_002.xml"};
+        String[] files = {"org/pesc/sdk/message/transcriptrequest/v1_4/basic_001.xml", "org/pesc/sdk/message/transcriptrequest/v1_4/basic_002.xml"};
         for(int i=0; i<2; i++) {
             TranscriptRequest transcriptRequest = null;
             try {
@@ -78,7 +84,7 @@ public class TranscriptRequestTest {
         URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema transcriptRequestXsdSchema = transcriptRequestSchemaFactory.newSchema(transcriptRequestSchemaUrl);
         transcriptRequestUnmarshaller.setSchema(transcriptRequestXsdSchema);
-        String transcriptRequestXml = "org/pesc/sdk/message/transcriptrequest/v1_2/RequiredOnly_001.xml";
+        String transcriptRequestXml = "org/pesc/sdk/message/transcriptrequest/v1_4/RequiredOnly_001.xml";
         TranscriptRequest transcriptRequest = null;
         DocumentInfo DocumentInfo = null;
         try {
@@ -113,7 +119,7 @@ public class TranscriptRequestTest {
         URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema transcriptRequestXsdSchema = transcriptRequestSchemaFactory.newSchema(transcriptRequestSchemaUrl);
         transcriptRequestUnmarshaller.setSchema(transcriptRequestXsdSchema);
-        String transcriptRequestXml = "org/pesc/sdk/message/transcriptrequest/v1_2/InvalidExtension_001.xml";
+        String transcriptRequestXml = "org/pesc/sdk/message/transcriptrequest/v1_4/InvalidExtension_001.xml";
         TranscriptRequest transcriptRequest = null;
         try {
             transcriptRequest = (TranscriptRequest) transcriptRequestUnmarshaller.unmarshal(getClass().getClassLoader().getResource(transcriptRequestXml));
@@ -151,7 +157,7 @@ public class TranscriptRequestTest {
         URL transcriptRequestSchemaUrl = getClass().getClassLoader().getResource("xsd/pesc/TranscriptRequest_v1.4.0.xsd");
         Schema schema = sf.newSchema(transcriptRequestSchemaUrl);
         u.setSchema(schema);
-        String file = "org/pesc/sdk/message/transcriptrequest/v1_2/RequiredAndRecommended_001.xml";
+        String file = "org/pesc/sdk/message/transcriptrequest/v1_4/RequiredAndRecommended_001.xml";
         TranscriptRequest transcriptRequest = null;
         DocumentInfo DocumentInfo = null;
         try {
@@ -182,8 +188,8 @@ public class TranscriptRequestTest {
     @Test
     public void testRequestXml() throws Exception {
         String[] files = new String[2];
-        files[0] = "org/pesc/sdk/message/transcriptrequest/v1_2/modified_requiredAndRecommended_0fd6ad111a83487c9536ea71602ecd7d_request.xml";
-        files[1] = "org/pesc/sdk/message/transcriptrequest/v1_2/modified_requiredOnly_0fd6ad111a83487c9536ea71602ecd7d_request.xml";
+        files[0] = "org/pesc/sdk/message/transcriptrequest/v1_4/modified_requiredAndRecommended_0fd6ad111a83487c9536ea71602ecd7d_request.xml";
+        files[1] = "org/pesc/sdk/message/transcriptrequest/v1_4/modified_requiredOnly_0fd6ad111a83487c9536ea71602ecd7d_request.xml";
         for(String file: files){
             JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
             Unmarshaller u = jc.createUnmarshaller();
@@ -232,7 +238,7 @@ public class TranscriptRequestTest {
         SeverityCodeType s = null;
         try {
             //Valid
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_001.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_001.xml"));
             vr = TranscriptRequestValidator.validateTranscriptRequestRequiredContent(transcriptRequest);
             assertTrue(vr.getErrors().size()==0);
             vr = TranscriptRequestValidator.validateTranscriptRequestRecommendedContent(transcriptRequest);
@@ -240,7 +246,7 @@ public class TranscriptRequestTest {
 
             //Missing AddressLine- Fail
             try {
-                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_002.xml"));
+                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_002.xml"));
                 fail();
             } catch (Exception e1){
                 assert(true);
@@ -248,7 +254,7 @@ public class TranscriptRequestTest {
 
             //Missing City- Fail
             try {
-                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_003.xml"));
+                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_003.xml"));
                 fail();
             } catch (Exception e1){
                 assert(true);
@@ -259,20 +265,20 @@ public class TranscriptRequestTest {
             //Missing PostalCode- Valid
             //Missing Country- Fail
             try {
-                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_004.xml"));
+                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_004.xml"));
                 fail();
             } catch (Exception e1){
                 assert(true);
             }
             //Missing destination address- Valid
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_005.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_005.xml"));
             vr = TranscriptRequestValidator.validateTranscriptRequestRequiredContent(transcriptRequest);
             assertTrue(vr.getErrors().size()==0);
             vr = TranscriptRequestValidator.validateTranscriptRequestRecommendedContent(transcriptRequest);
             assertTrue(vr.getErrors().size() == 1);
             assertTrue(vr.getSeverity()==SeverityCodeType.WARNING);
             //Missing source address- Fail
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_006.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_006.xml"));
             vr = TranscriptRequestValidator.validateTranscriptRequestRequiredContent(transcriptRequest);
             assertTrue(vr.getErrors().size()==1);
             assertTrue(vr.getSeverity()==SeverityCodeType.ERROR);
@@ -280,14 +286,14 @@ public class TranscriptRequestTest {
             assertTrue(vr.getErrors().size() == 0);
             //Mix StateProvinceCode with non domestic CountryCode- Fail
             try {
-                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_007.xml"));
+                transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_007.xml"));
             fail();
             } catch (Exception e1){
                 assert(true);
             }
 
             //Valid
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/InternationalAddress_008.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/InternationalAddress_008.xml"));
             vr = TranscriptRequestValidator.validateTranscriptRequestRequiredContent(transcriptRequest);
             assertTrue(vr.getErrors().size()==0);
             vr = TranscriptRequestValidator.validateTranscriptRequestRecommendedContent(transcriptRequest);
@@ -309,7 +315,7 @@ public class TranscriptRequestTest {
         TranscriptRequest transcriptRequest = null;
         try {
             //Valid
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/DomesticAddress_001.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/DomesticAddress_001.xml"));
             ValidationResponse validationResponse1 = TranscriptRequestValidator.validateTranscriptRequestRequiredContent(transcriptRequest);
             assertTrue(validationResponse1.getSeverity()==null);
             assertTrue(validationResponse1.getErrors().size()==0);
@@ -640,7 +646,7 @@ public class TranscriptRequestTest {
         TranscriptRequest transcriptRequest = null;
         DocumentInfo documentInfo = null;
         try {
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/xmlTranscript_request.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/xmlTranscript_request.xml"));
             JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
             Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
             SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -686,7 +692,7 @@ public class TranscriptRequestTest {
         TranscriptRequest transcriptRequest = null;
         DocumentInfo documentInfo = null;
         try {
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/missing_documentinfo_element.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/missing_documentinfo_element.xml"));
             JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
             Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
             SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -720,7 +726,7 @@ public class TranscriptRequestTest {
         TranscriptRequest transcriptRequest = null;
         DocumentInfo documentInfo = null;
         try {
-            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_2/xmlTranscript_request_bad_documentinfo.xml"));
+            transcriptRequest = (TranscriptRequest) u.unmarshal(getClass().getClassLoader().getResource("org/pesc/sdk/message/transcriptrequest/v1_4/xmlTranscript_request_bad_documentinfo.xml"));
             JAXBContext documentInfoContext = JAXBContext.newInstance("org.pesc.sdk.message.documentinfo.v1_0.impl");
             Unmarshaller documentInfoUnmarshaller = documentInfoContext.createUnmarshaller();
             SchemaFactory documentinfochemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -745,12 +751,26 @@ public class TranscriptRequestTest {
 
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void testInvalidRequest() {
+
+        try {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("org/pesc/sdk/message/transcriptrequest/v1_4/invalid_transcript_request.xml");
+            ValidationUtils.validateDocument(inputStream, XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
+        } catch (SAXException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        } catch (OperationNotSupportedException e) {
+            logger.error("Failed test OperationNotSupportedException is not expected.", e);
+        }
+
+
+    }
 
     @Test
     public void testRequestLetterOfRecommendation() throws Exception {
         String[] files = new String[2];
-        files[0] = "org/pesc/sdk/message/transcriptrequest/v1_2/letterOfRecommendationCounselor_request.xml";
-        files[1] = "org/pesc/sdk/message/transcriptrequest/v1_2/letterOfRecommendationTeacher_request.xml";
+        files[0] = "org/pesc/sdk/message/transcriptrequest/v1_4/letterOfRecommendationCounselor_request.xml";
+        files[1] = "org/pesc/sdk/message/transcriptrequest/v1_4/letterOfRecommendationTeacher_request.xml";
         for(String file: files){
             JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
             Unmarshaller u = jc.createUnmarshaller();

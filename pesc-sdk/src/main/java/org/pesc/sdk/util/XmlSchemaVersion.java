@@ -8,6 +8,7 @@ public enum XmlSchemaVersion {
     V1_5_0("v1.5.0"),
     V1_6_0("v1.6.0"),
     V1_2_0("v1.2.0"),
+    V1_3_0("v1.3.0"),
     V1_4_0("v1.4.0");
 
     private final String versionText;

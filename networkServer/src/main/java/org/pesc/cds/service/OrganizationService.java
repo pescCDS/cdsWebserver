@@ -1,5 +1,6 @@
 package org.pesc.cds.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -13,11 +14,15 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.config.CacheConfig;
+import org.pesc.cds.domain.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.List;
 
 /**
  * Created by sallen on 8/12/16.
@@ -33,6 +38,10 @@ public class OrganizationService {
 
     @Value("${api.organization}")
     private String organizationApiPath;
+
+    @Value("${api.endpoints}")
+    private String endpointsApiPath;
+
 
     @Cacheable(ORGANIZATION)
     public JSONObject getOrganization(Integer organizationId){
@@ -87,5 +96,79 @@ public class OrganizationService {
         }
         return institution;
     }
+
+    public String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department) {
+
+        CloseableHttpClient client = HttpClients.custom().build();
+        String endpointURI = null;
+        try {
+            StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
+            uri.append("?organizationId=").append(orgID).append("&enabled=true").append("&mode=LIVE") ;
+            if (StringUtils.isNotBlank(documentFormat))
+                uri.append("&documentFormat=").append(documentFormat);
+
+            if (StringUtils.isNotBlank(documentType))
+                uri.append("&documentType=").append(URLEncoder.encode(documentType, "UTF-8"));
+
+            if (StringUtils.isNotBlank(department))
+                uri.append("&department=").append(department);
+
+
+            HttpGet get = new HttpGet(uri.toString());
+            get.setHeader(HttpHeaders.ACCEPT, "application/json");
+            CloseableHttpResponse response = client.execute(get);
+            try {
+
+                HttpEntity resEntity = response.getEntity();
+                if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
+                    JSONArray endpoints = new JSONArray(EntityUtils.toString(resEntity));
+                    if (endpoints.length() > 0) {
+
+                        if (endpoints.length() != 1) {
+                            throw new RuntimeException("More than one endpoint was found that fits the given criteria.");
+                        }
+                        endpointURI = endpoints.getJSONObject(0).getString("address");
+                        log.debug(endpoints.toString(3));
+                    }
+                }
+                EntityUtils.consume(resEntity);
+            }
+            finally {
+                response.close();
+            }
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                client.close();
+            }
+            catch (IOException e) {
+
+            }
+        }
+        return endpointURI;
+    }
+
+    public String getEndpointURIForSchool(String destinationSchoolCode, String destinationSchoolCodeType, String documentFormat, String documentType, String department, Transaction tx, List<String> destinationOrganizationNames) {
+
+        int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
+        tx.setRecipientId(orgID);
+        return getEndpointForOrg(orgID, documentFormat, documentType, department);
+    }
+
+    public int getOrganizationId(String destinationSchoolCode, String destinationSchoolCodeType, List<String> destinationOrganizationNames) {
+        log.debug("Getting endpoint for org");
+        int orgID = 0;
+        JSONObject organization = getOrganization(destinationSchoolCode, destinationSchoolCodeType);
+        if(organization!=null){
+            orgID = organization.getInt("id");
+            destinationOrganizationNames.add(organization.getString("name"));
+        }
+        return orgID;
+    }
+
+
 
 }

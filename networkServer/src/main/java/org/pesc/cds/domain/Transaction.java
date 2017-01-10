@@ -58,7 +58,7 @@ public class Transaction {
 	
 	@Column(name="acknowledged_at")
 	private Timestamp acknowledgedAt;
-	
+
 	@Column(name="error", columnDefinition = "text")
 	private String error;
 
@@ -71,7 +71,7 @@ public class Transaction {
 	
 	@Column(name="acknowledged")
 	private Boolean acknowledged = false;
-	
+
 	public Transaction() {}
 
 	public Integer getId() {
@@ -233,4 +233,5 @@ public class Transaction {
 	public void setAckFilePath(String ackFilePath) {
 		this.ackFilePath = ackFilePath;
 	}
+
 }

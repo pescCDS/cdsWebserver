@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="James Whetstone" context="dev, ci, prod">
+        <comment>Changing "Transript" to "College Transcript" and adding "Highschool Transcript" document type</comment>
+
+
+        <update tableName="document_types">
+            <column name="name" value="College Transcript"/>
+            <column name="description" value="College level transcript. "/>
+            <where>id = 1</where>
+        </update>
+
+        <insert tableName="document_types">
+            <column name="name" value="High School Transcript"/>
+            <column name="description" value="High school level transcript."/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>
