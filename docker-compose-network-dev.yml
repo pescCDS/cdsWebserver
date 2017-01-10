@@ -5,13 +5,13 @@ directoryserver_db_image:
     container_name: directory-db
 networkserver_db_image:
       build: ./networkServer/target/docker/database
-      expose:
-       - "3306"
+      ports:
+          - "5432:5432"
       container_name: network-db
 dev_network_db_image:
       build: ./networkServer/target/docker/database
-      expose:
-       - "3306"
+      ports:
+          - "5432:5432"
       container_name: dev-network-db
 directoryserver_app_image:
     build: ./directoryServer/target/docker
