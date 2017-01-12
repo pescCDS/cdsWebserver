@@ -19,8 +19,7 @@ network-server:
     io.rancher.scheduler.affinity:host_label: service-name=network-server
     io.rancher.container.pull_image: always
   ports:
-   - 8081:9000
-   - 443:9443
+   - 80:9000
   environment:
    - SPRING_PROFILES_ACTIVE=${profile}
    - DB_SERVER=${NETWORK_DB_HOST}
