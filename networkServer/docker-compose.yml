@@ -1,17 +1,15 @@
-db_image:
+network-db:
   build: ./target/docker/database
-  expose:
-   - "3306"
-  container_name: network-db
-app_image:
-  build: ./target/docker
-  volumes:
-     - ./target:/opt/edexchange
+  ports:
+   - "5432:5432"
+
+network-server:
+  image: edex/network-server
   ports:
    - "9000:9000"
    - "9449:9443"
-  links:
-   - db_image
+  extra_hosts:
+   - network-db:172.17.0.1
   environment:
    - SPRING_PROFILES_ACTIVE=qa
-  container_name: network-app
+   - DB_SERVER=network-db

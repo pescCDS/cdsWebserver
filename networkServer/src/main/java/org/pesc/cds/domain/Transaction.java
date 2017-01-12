@@ -25,8 +25,8 @@ import java.sql.Timestamp;
 @Table(name="transactions")
 public class Transaction {
 	@Id
-	@GeneratedValue
-	@Column(name="id")
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
 	@Column(name="recipient_id")

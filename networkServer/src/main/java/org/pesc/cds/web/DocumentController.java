@@ -570,10 +570,9 @@ public class DocumentController {
 
             } catch (Exception e) {
 
+                log.error(e);
                 tx.setError(e.getMessage());
                 transactionService.update(tx);
-
-                log.error(e);
 
                 throw new IllegalArgumentException(e);
 

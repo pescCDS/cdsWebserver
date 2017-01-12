@@ -1,0 +1,5 @@
+network-server:
+  scale: 1
+directory-server:
+  scale: 2
+

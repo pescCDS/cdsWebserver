@@ -1,45 +1,27 @@
-directoryserver_db_image:
-  build: ./directoryServer/target/docker/database
-  expose:
-   - 3306
-  container_name: directory-db
-
-networkserver_db_image:
-    build: ./directoryServer/target/docker/database
-    expose:
-     - 3306
-    container_name: network-db
-
-directoryserver_app_image:
+directory-server:
   image: ccctechcenter/cccnext-directory-server:${IMAGE_TAG}
-  volumes:
-     - ./directoryServer/target:/opt/edexchange
+  labels:
+    io.rancher.scheduler.affinity:host_label: service-name=directory-server
+    io.rancher.container.pull_image: always
   ports:
    - 8080:8080
    - 8443:8443
   environment:
    - SPRING_PROFILES_ACTIVE=${profile}
-   - DB_SERVER=directory-db
+   - DB_SERVER=${DIRECTORY_DB_HOST}
    - MAIL_SMTP_HOST=${MAIL_SMTP_HOST}
    - MAIL_SMTP_USERNAME=${MAIL_SMTP_USERNAME}
    - MAIL_SMTP_PASSWORD=${MAIL_SMTP_PASSWORD}
-  links:
-   - directoryserver_db_image
-  container_name: directory-app
 
-networkserver_app_image:
+network-server:
   image: ccctechcenter/cccnext-network-server:${IMAGE_TAG}
-  volumes:
-     - ./networkServer/target:/opt/edexchange
+  labels:
+    io.rancher.scheduler.affinity:host_label: service-name=network-server
+    io.rancher.container.pull_image: always
   ports:
-   - 8081:9000
-   - 9443:9443
+   - 80:9000
   environment:
    - SPRING_PROFILES_ACTIVE=${profile}
-   - DB_SERVER=network-db
-   - DIRECTORY_SERVER=directory-app
+   - DB_SERVER=${NETWORK_DB_HOST}
+   - DIRECTORY_SERVER=${DIRECTORY_HOST}
    - DIRECTORY_SERVER_PORT=8080
-  links:
-   - networkserver_db_image
-   - directoryserver_app_image
-  container_name: network-app
