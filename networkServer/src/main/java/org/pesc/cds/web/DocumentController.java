@@ -721,8 +721,6 @@ public class DocumentController {
                         DocumentUtils.validate(documentType, multipartFile.getInputStream());
                     }
 
-
-
                 } catch (IOException ioex) {
                     tx.setMessage(ioex.getMessage());
                     tx.setError(ioex.getMessage());

@@ -290,6 +290,15 @@ public class FileProcessorService {
                 else if (DocumentType.TRANSCRIPT_REQUEST.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())){
                     ack = handleTranscriptRequest(transaction,ackDocID);
                 }
+                else if (DocumentType.TRANSCRIPT_ACKNOWLEDGEMENT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
+
+                    org.pesc.sdk.message.transcriptacknowledgement.v1_3.Acknowledgment transcriptAck =
+                            transcriptAcknowledgementService.getTranscriptAcknowledgement(transaction.getFilePath());
+
+                    CollegeTranscript collegeTranscript = getCollegeTranscript(transcriptAck.getTransmissionData().getRequestTrackingID());
+
+                    transcriptAcknowledgementService.verifyTranscript(transcriptAck, collegeTranscript);
+                }
             }
 
 
@@ -315,6 +324,7 @@ public class FileProcessorService {
         catch (Exception e){
             transaction.setAcknowledged(false);
             transaction.setError(e.getLocalizedMessage());
+            //transaction.setStatus(TransactionStatus.FAILURE);
             transactionService.update(transaction);
             log.error(e);
         }
