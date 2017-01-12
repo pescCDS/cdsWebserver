@@ -1,21 +1,19 @@
-db_image:
+directory-db:
   build: ./target/docker/database
-  expose:
-   - "3306"
+  ports:
+   - "5432:5432"
   container_name: directory-db
-app_image:
-  build: ./target/docker
-  volumes:
-     - ./target:/opt/edexchange
+
+directory-server:
+  image: edex/directory-server
   ports:
    - "8080:8080"
    - "8000:8000"
-  links:
-   - db_image
+  extra_hosts:
+   - directory-db:172.17.0.1
   environment:
-   - SPRING_PROFILES_ACTIVE=dev
+   - SPRING_PROFILES_ACTIVE=qa
    - DB_SERVER=directory-db
    - MAIL_SMTP_HOST=${MAIL_SMTP_HOST}
    - MAIL_SMTP_USERNAME=${MAIL_SMTP_USERNAME}
    - MAIL_SMTP_PASSWORD=${MAIL_SMTP_PASSWORD}
-  container_name: directory-app
