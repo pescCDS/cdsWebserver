@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2017. California Community Colleges Technology Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 (function () {
 
     var app = angular.module('directoryServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate', 'ngSanitize'])
@@ -1002,7 +1018,6 @@
         self.getInstitutionsForServiceProvider = getInstitutionsForServiceProvider;
         self.totalServicedSchools = 0;
         self.servicedSchoolsOffset = 1;
-        self.pageSize = 30;
         self.showCertificateForm = false;
         self.showNetworkCertificateForm = false;
         self.setCertificate = setCertificate;
@@ -1379,7 +1394,7 @@
         function getInstitutionsForServiceProvider() {
 
             if (organizationService.isServiceProvider(self.org)) {
-                organizationService.getInstitutionsForServiceProvider(self.org,  self.pageSize, (self.servicedSchoolsOffset-1)* self.pageSize).then(function (response) {
+                organizationService.getInstitutionsForServiceProvider(self.org,  self.limit, (self.servicedSchoolsOffset-1)* self.limit).then(function (response) {
                     self.institutions = response.data;
                     self.totalServicedSchools = response.headers('X-Total-Count');
                 });
@@ -1618,13 +1633,12 @@
         self.totalRecords = 0;
         self.limit = 5;
         self.offset = 1;
-        self.pageSize = 10;
 
         activate();
 
         function activate() {
 
-           getOrganizations();
+           findOrganizations();
 
         }
 
@@ -1708,7 +1722,7 @@
                 self.isServiceProvider,
                 self.isInstitution,
                 self.limit,
-                (self.offset-1)*self.pageSize).then(function (response) {
+                (self.offset-1)*self.limit).then(function (response) {
                     self.totalRecords = response.headers('X-Total-Count');
                     self.organizations = response.data;
                 });

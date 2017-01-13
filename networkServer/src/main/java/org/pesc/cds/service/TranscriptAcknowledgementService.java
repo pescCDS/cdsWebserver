@@ -1,8 +1,27 @@
+/*
+ * Copyright (c) 2017. California Community Colleges Technology Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.pesc.cds.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pesc.cds.exception.TranscriptException;
 import org.pesc.sdk.core.coremain.v1_14.DocumentTypeCodeType;
+import org.pesc.sdk.core.coremain.v1_14.GPAType;
+import org.pesc.sdk.core.coremain.v1_14.NameType;
 import org.pesc.sdk.core.coremain.v1_14.TransmissionTypeType;
 import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
 import org.pesc.sdk.message.transcriptacknowledgement.v1_3.Acknowledgment;
@@ -16,9 +35,12 @@ import org.xml.sax.SAXException;
 import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
+import java.io.File;
 import java.io.StringWriter;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by James Whetstone on 1/5/17.
@@ -31,6 +53,156 @@ public class TranscriptAcknowledgementService {
     private static final org.pesc.sdk.message.transcriptacknowledgement.v1_3.ObjectFactory transcriptAcknoweledgementFactory = new org.pesc.sdk.message.transcriptacknowledgement.v1_3.ObjectFactory();
     private static final org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
 
+    public Acknowledgment getTranscriptAcknowledgement(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
+
+        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.transcriptacknowledgement.v1_3.impl");
+        Schema schema = ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_3_0);
+        u.setSchema(schema);
+        return (Acknowledgment) u.unmarshal(new File(filePath));
+    }
+
+    private boolean verifyName(NameType ackName, NameType studentName) {
+
+        boolean match = true;
+
+        if (studentName.getNameCode() != null) {
+            match &= studentName.getNameCode().equals( ackName.getNameCode());
+        }
+        if (studentName.getNamePrefix() != null) {
+            match &= studentName.getNamePrefix().equals( ackName.getNamePrefix());
+        }
+        if (studentName.getFirstName() != null) {
+            match &= studentName.getFirstName().equals( ackName.getFirstName());
+        }
+        if (studentName.getLastName() != null) {
+            match &= studentName.getLastName().equals( ackName.getLastName());
+        }
+        if (studentName.getMiddleNames() != null) {
+            match &= ( studentName.getMiddleNames().size() == ackName.getMiddleNames().size() );
+
+            for(int i=0; i < studentName.getMiddleNames().size(); i++) {
+                match &= studentName.getMiddleNames().get(i).equals(ackName.getMiddleNames().get(i));
+            }
+        }
+        if (studentName.getNameTitle() != null) {
+            match &= studentName.getNameTitle().equals( ackName.getNameTitle());
+        }
+        if (studentName.getNameSuffix() != null) {
+            match &= studentName.getNameSuffix().equals( ackName.getNameSuffix());
+        }
+
+        return match;
+    }
+
+    private boolean verifyGPA(GPAType ackGpa, GPAType transcriptGPA) {
+
+        boolean match = true;
+
+        if (transcriptGPA.getCreditHoursAttempted() != null) {
+            match &= transcriptGPA.getCreditHoursAttempted().equals(ackGpa.getCreditHoursAttempted());
+        }
+        if (transcriptGPA.getCreditHoursEarned() != null) {
+            match &= transcriptGPA.getCreditHoursEarned().equals(ackGpa.getCreditHoursEarned());
+        }
+        if (transcriptGPA.getCreditHoursforGPA() != null) {
+            match &= transcriptGPA.getCreditHoursforGPA().equals(ackGpa.getCreditHoursforGPA());
+        }
+        if (transcriptGPA.getCreditHoursRequired() != null) {
+            match &= transcriptGPA.getCreditHoursRequired().equals(ackGpa.getCreditHoursRequired());
+        }
+        if (transcriptGPA.getCreditUnit() != null) {
+            match &= transcriptGPA.getCreditUnit().equals(ackGpa.getCreditUnit());
+        }
+        if (transcriptGPA.getGPARangeMaximum() != null) {
+            match &= transcriptGPA.getGPARangeMaximum().equals(ackGpa.getGPARangeMaximum());
+        }
+        if (transcriptGPA.getGPARangeMinimum() != null) {
+            match &= transcriptGPA.getGPARangeMinimum().equals(ackGpa.getGPARangeMinimum());
+        }
+        if (transcriptGPA.getGradePointAverage() != null){
+            match &= transcriptGPA.getGradePointAverage().equals(ackGpa.getGradePointAverage());
+        }
+        if (transcriptGPA.getTotalQualityPoints() != null) {
+            match &= transcriptGPA.getTotalQualityPoints().equals(ackGpa.getTotalQualityPoints());
+        }
+        return match;
+
+    }
+
+
+    public void verifyTranscript(Acknowledgment ack, CollegeTranscript collegeTranscript) throws TranscriptException {
+
+        AcknowledgmentPersonType ackPerson = ack.getPerson();
+        PersonType studentPerson = collegeTranscript.getStudent().getPerson();
+
+        StringBuilder errorBuffer = new StringBuilder();
+
+        boolean matched = true;
+
+        try {
+            if (verifyName(ackPerson.getName(), studentPerson.getName()) == false) {
+                matched = false;
+                errorBuffer.append("The student name on the transcript does not match the student name in the transcript acknowledgement.\n");
+            }
+
+
+
+
+            if (verifyGPA(ack.getAcademicSummary().getGPA(), findFirstAcademicSummary(collegeTranscript).getGPA()) == false) {
+                matched = false;
+                errorBuffer.append("The GPA on the transcript does not match the GPA in the transcript acknoweledgement.\n");
+            }
+
+            Integer totalCourses = 0;
+            Integer totalAcademicAwards = 0;
+            getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
+
+            if (ack.getAcademicAwardTotal() != totalAcademicAwards) {
+                matched = false;
+                errorBuffer.append("The total number of academic awards on the transcript do not match the total awards on the transcript acknowledgement.\n");
+            }
+
+            if (ack.getCourseTotal() != totalCourses) {
+                matched = false;
+                errorBuffer.append("The total number of courses on the transcript do not match the total number of courses on the transcript acknowledgement.\n");
+            }
+        }
+        catch (Exception e) {
+            log.error("Failed to verify PESC college transcript with PESC transcript acknowledgement.", e);
+            matched = false;
+            errorBuffer.append(e.getMessage());
+        }
+        finally {
+            if (matched == false) {
+                throw new TranscriptException(errorBuffer.toString());
+            }
+        }
+    }
+
+    private void getCourseAndAwardTotals(CollegeTranscript collegeTranscript, Integer totalCourses, Integer totalAcademicAwards) {
+        totalCourses = 0;
+        totalAcademicAwards = 0;
+        for(AcademicRecordType ar : collegeTranscript.getStudent().getAcademicRecords()) {
+            totalCourses += ar.getCourses().size();
+            totalAcademicAwards += ar.getAcademicAwards().size();
+
+            for(AcademicSessionType session: ar.getAcademicSessions()) {
+                totalCourses += session.getCourses().size();
+                totalAcademicAwards += session.getAcademicAwards().size();
+            }
+        }
+    }
+
+    private AcademicSummaryFType findFirstAcademicSummary(CollegeTranscript collegeTranscript) {
+
+        for(AcademicRecordType ar: collegeTranscript.getStudent().getAcademicRecords()) {
+            if (!ar.getAcademicSummaries().isEmpty()){
+                return ar.getAcademicSummaries().get(0);
+            }
+        }
+
+        return null;
+    }
 
     public Acknowledgment buildBaseTranscriptAcknowledgement(SourceDestinationType source,
                                                                         SourceDestinationType destination,
@@ -55,22 +227,13 @@ public class TranscriptAcknowledgementService {
         AcknowledgmentPersonType person = academicRecordObjectFactory.createAcknowledgmentPersonType();
         person.setName(collegeTranscript.getStudent().getPerson().getName());
 
-        if (!collegeTranscript.getStudent().getAcademicRecords().isEmpty() &&
-            !collegeTranscript.getStudent().getAcademicRecords().get(0).getAcademicSummaries().isEmpty()) {
-                ack.setAcademicSummary(collegeTranscript.getStudent().getAcademicRecords().get(0).getAcademicSummaries().get(0));
-        }
 
-        int totalCourses = 0;
-        int totalAcademicAwards = 0;
-        for(AcademicRecordType ar : collegeTranscript.getStudent().getAcademicRecords()) {
-            totalCourses += ar.getCourses().size();
-            totalAcademicAwards += ar.getAcademicAwards().size();
+        ack.setAcademicSummary(findFirstAcademicSummary(collegeTranscript));
 
-            for(AcademicSessionType session: ar.getAcademicSessions()) {
-                totalCourses += session.getCourses().size();
-                totalAcademicAwards += session.getAcademicAwards().size();
-            }
-        }
+        Integer totalCourses = 0;
+        Integer totalAcademicAwards = 0;
+        getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
+
         ack.setCourseTotal(totalCourses);
         ack.setAcademicAwardTotal(totalAcademicAwards);
         ack.setPerson(person);
