@@ -107,15 +107,13 @@ node(buildNode) {
         error "build and publish image failed"
     }
     slackSend channel: channel, color: 'good', message: "#${env.BUILD_NUMBER}-${env.BRANCH_NAME} - Build and Publish Succeeded \nJob: ${env.BUILD_URL}"
-} 
 
-stage "deploy"
+    stage "deploy"
 
-if(environment == "qa") {
-    node(buildNode){
+    if(environment == "qa") {
         try {
-			ceDeploy.runDeploy("ed-exchange", "network-server", environment, IMAGE_TAG, props."edex.network.url", props."edex.network.port", props."edex.network.protocol", props."edex.network.health", props."rancher.key", props."rancher.pass", channel)
-			ceDeploy.slackNotify(channel, "good", "Success", "network", environment ?: "(environment not set)",  props ? props."edex.network.url" + props."edex.network.health" : "(endpoint not set)", IMAGE_TAG)
+            ceDeploy.runDeploy("ed-exchange", "network-server", environment, IMAGE_TAG, props."edex.network.url", props."edex.network.port", props."edex.network.protocol", props."edex.network.health", props."rancher.key", props."rancher.pass", channel)
+            ceDeploy.slackNotify(channel, "good", "Success", "network", environment ?: "(environment not set)",  props ? props."edex.network.url" + props."edex.network.health" : "(endpoint not set)", IMAGE_TAG)
         } catch (Exception | AssertionError e) {
             echo "ERROR: " + e.toString()
             slackSend channel: channel, color: 'danger', message: "#${env.BUILD_NUMBER}-${env.BRANCH_NAME} - Open Network Deploy Failed in QA Env: " + props."edex.network.url" + "\nJob: ${env.BUILD_URL}"
@@ -123,8 +121,8 @@ if(environment == "qa") {
         }
 
         try {
-			ceDeploy.runDeploy("ed-exchange", "directory-server", environment, IMAGE_TAG, props."edex.directory.url", props."edex.directory.port", props."edex.directory.protocol", props."edex.directory.health", props."rancher.key", props."rancher.pass", channel)
-			ceDeploy.slackNotify(channel, "good", "Success", "directory", environment ?: "(environment not set)",  props ? props."edex.directory.url" + props."edex.directory.health" : "(endpoint not set)", IMAGE_TAG)
+            ceDeploy.runDeploy("ed-exchange", "directory-server", environment, IMAGE_TAG, props."edex.directory.url", props."edex.directory.port", props."edex.directory.protocol", props."edex.directory.health", props."rancher.key", props."rancher.pass", channel)
+            ceDeploy.slackNotify(channel, "good", "Success", "directory", environment ?: "(environment not set)",  props ? props."edex.directory.url" + props."edex.directory.health" : "(endpoint not set)", IMAGE_TAG)
         } catch (Exception | AssertionError e) {
             echo "ERROR: " + e.toString()
             slackSend channel: channel, color: 'danger', message: "#${env.BUILD_NUMBER}-${env.BRANCH_NAME} - Open Directory Deploy Failed in QA Env: " + props."edex.directory.url" + "\nJob: ${env.BUILD_URL}"
