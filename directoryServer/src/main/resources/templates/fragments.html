@@ -1349,7 +1349,7 @@
                     ng-model="orgCtrl.servicedSchoolsOffset"
                     max-size="5"
                     class="pagination-sm"
-                    items-per-page="orgCtrl.pageSize"
+                    items-per-page="orgCtrl.limit"
                     boundary-link-numbers="true"
                     rotate="false" ng-change="orgCtrl.getInstitutionsForServiceProvider()"></uib-pagination>
 
@@ -1917,7 +1917,7 @@
                 ng-model="orgCtrl.offset"
                 max-size="5"
                 class="pagination-sm"
-                items-per-page="orgCtrl.pageSize"
+                items-per-page="orgCtrl.limit"
                 boundary-link-numbers="true"
                 rotate="false" ng-change="orgCtrl.findOrganizations()"></uib-pagination>
 

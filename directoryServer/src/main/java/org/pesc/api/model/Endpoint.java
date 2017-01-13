@@ -34,7 +34,7 @@ public class Endpoint {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = OrganizationDTO.class, cascade = CascadeType.DETACH)

@@ -1018,7 +1018,6 @@
         self.getInstitutionsForServiceProvider = getInstitutionsForServiceProvider;
         self.totalServicedSchools = 0;
         self.servicedSchoolsOffset = 1;
-        self.pageSize = 30;
         self.showCertificateForm = false;
         self.showNetworkCertificateForm = false;
         self.setCertificate = setCertificate;
@@ -1395,7 +1394,7 @@
         function getInstitutionsForServiceProvider() {
 
             if (organizationService.isServiceProvider(self.org)) {
-                organizationService.getInstitutionsForServiceProvider(self.org,  self.pageSize, (self.servicedSchoolsOffset-1)* self.pageSize).then(function (response) {
+                organizationService.getInstitutionsForServiceProvider(self.org,  self.limit, (self.servicedSchoolsOffset-1)* self.limit).then(function (response) {
                     self.institutions = response.data;
                     self.totalServicedSchools = response.headers('X-Total-Count');
                 });
@@ -1634,13 +1633,12 @@
         self.totalRecords = 0;
         self.limit = 5;
         self.offset = 1;
-        self.pageSize = 10;
 
         activate();
 
         function activate() {
 
-           getOrganizations();
+           findOrganizations();
 
         }
 
@@ -1724,7 +1722,7 @@
                 self.isServiceProvider,
                 self.isInstitution,
                 self.limit,
-                (self.offset-1)*self.pageSize).then(function (response) {
+                (self.offset-1)*self.limit).then(function (response) {
                     self.totalRecords = response.headers('X-Total-Count');
                     self.organizations = response.data;
                 });
