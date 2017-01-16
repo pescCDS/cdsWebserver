@@ -162,7 +162,6 @@ public class TransactionService {
                     endDate
                     );
 
-            countQuery.orderBy(cb.desc(countRoot.get("occurredAt")));
             countQuery.where(predicates);
 
             return entityManager.createQuery(countQuery).getSingleResult();

@@ -1040,6 +1040,7 @@
         self.setOAuthSecret = setOAuthSecret;
         self.getOAuthSecret = getOAuthSecret;
         self.oauthSecretReplacement = '';
+        self.limit = 30;
 
         function getOAuthSecret() {
            organizationService.getOAuthSecret(self.org).then(function(response){

@@ -150,7 +150,7 @@ public class TransactionsController {
 		Transaction tx = null;
 
 		try {
-			transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
+			tx = transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
 		}
 		catch (Exception e){
 			log.error( String.format("Failed to retrieve transaction with id (%s)", acknowledgment.getTransmissionData().getRequestTrackingID()), e);
