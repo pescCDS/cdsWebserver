@@ -19,20 +19,24 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <property name="blob.type" value="bytea" dbms="postgresql"/>
+    <property name="blob.type" value="blob" dbms="h2,mysql"/>
+
     <changeSet id="1" author="James Whetstone" context="dev, ci, prod">
         <comment>This changeset is to create Outh tables</comment>
+
 
         <createTable tableName="oauth_access_token">
             <column name="token_id" type="varchar(256)">
                 <constraints nullable="true"/>
             </column>
-            <column name="token" type="blob"/>
+            <column name="token" type="${blob.type}"/>
             <column name="authentication_id" type="varchar(256)">
                 <constraints nullable="true"/>
             </column>
             <column name="user_name" type="varchar(256)"/>
             <column name="client_id" type="varchar(256)"/>
-            <column name="authentication" type="blob"/>
+            <column name="authentication" type="${blob.type}"/>
             <column name="refresh_token" type="varchar(256)"/>
         </createTable>
 
@@ -44,8 +48,8 @@
             <column name="token_id" type="varchar(256)">
                 <constraints nullable="true"/>
             </column>
-            <column name="token" type="blob"/>
-            <column name="authentication" type="blob"/>
+            <column name="token" type="${blob.type}"/>
+            <column name="authentication" type="${blob.type}"/>
         </createTable>
 
         <update tableName="organization">

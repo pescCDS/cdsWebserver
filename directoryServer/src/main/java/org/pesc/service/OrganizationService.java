@@ -149,6 +149,11 @@ public class OrganizationService {
     public Organization createInstitution(Organization organization, Set<SchoolCode> schoolCodes, Integer serviceProviderID) {
         organization.setEnabled(false);
         organization.setActive(true);
+
+        Date createdTime = Calendar.getInstance().getTime();
+        organization.setCreatedTime(createdTime);
+        organization.setModifiedTime(createdTime);
+
         organization.setOrganizationTypes(new HashSet<OrganizationType>());
         organization.getOrganizationTypes().add(this.getOrganizationTypes().get(1));
 
@@ -306,7 +311,7 @@ public class OrganizationService {
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     private void revokeOAuthTokens(Integer orgID) {
 
-        jdbcTemplate.update("delete from oauth_access_token where client_id = ?", orgID);
+        jdbcTemplate.update("delete from oauth_access_token where client_id = ?", String.valueOf(orgID));
     }
     /*
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
