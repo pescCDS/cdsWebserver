@@ -62,7 +62,7 @@ public class EdExClientDetailsService implements ClientDetailsService {
         clientDetails.setClientId(clientId);
         clientDetails.setScope(scopes);
         clientDetails.setAutoApproveScopes(scopes);
-        clientDetails.setAuthorizedGrantTypes(Arrays.asList("client_credentials", "refresh_token"));
+        clientDetails.setAuthorizedGrantTypes(Arrays.asList("authorization_code", "client_credentials", "refresh_token"));
         clientDetails.setAuthorities(AuthorityUtils.createAuthorityList("ROLE_SENDER"));
         clientDetails.setAccessTokenValiditySeconds(tokenValiditySeconds);
         clientDetails.setClientSecret(org.getOauthSecret());
