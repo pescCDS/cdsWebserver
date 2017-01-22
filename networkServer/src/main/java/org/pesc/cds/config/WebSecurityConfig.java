@@ -17,6 +17,7 @@
 package org.pesc.cds.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.boot.autoconfigure.web.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +36,7 @@ import java.util.Map;
  */
 
 @Configuration
-@EnableWebSecurity
+@EnableOAuth2Sso
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -44,23 +45,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/", "/home", "/api/**","/transactions", "/about", "/upload", "/documentation", "/js/**", "/fonts/**","/images/**", "/css/**", "favicon.ico").permitAll()
+                .antMatchers("/", "/home", "/transactions", "/about", "/upload", "/documentation", "/js/**", "/fonts/**", "/images/**", "/css/**", "favicon.ico").permitAll()
                 .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .loginPage("/login")
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll();
+                .and().logout().logoutSuccessUrl("/");
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .inMemoryAuthentication()
-                .withUser("admin").password("admin").roles("ADMIN");
-    }
 
     //Customize error messages returned when exceptions are thrown from REST controllers.
     @Bean

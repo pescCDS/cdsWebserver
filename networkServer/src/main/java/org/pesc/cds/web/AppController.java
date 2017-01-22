@@ -27,6 +27,7 @@ import org.pesc.cds.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -83,8 +84,8 @@ public class AppController {
                 //when Anonymous Authentication is enabled
                 !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
 
-            User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Collection<GrantedAuthority> authorities = auth.getAuthorities();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            //Collection<GrantedAuthority> authorities = auth.getAuthorities();
             isAuthenticated = true;
 
             //model.addAttribute("hasSupportRole", hasRole(authorities, "ROLE_SUPPORT"));
@@ -101,6 +102,8 @@ public class AppController {
 
 
         if (isAuthenticated) {
+
+            //Get user details from oauth token.
             org.pesc.cds.model.User activeUser = new org.pesc.cds.model.User();
             activeUser.setName("Admin");
 
