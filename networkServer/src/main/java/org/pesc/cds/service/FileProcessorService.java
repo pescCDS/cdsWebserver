@@ -532,7 +532,7 @@ public class FileProcessorService {
     }
 
 
-    @PreAuthorize("(hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ORG_ADMIN')")
     public List<String> getInboxDocumentList() {
         List<String> retList = new ArrayList<String>();
         File directory = new File(localServerInboxPath);
@@ -545,7 +545,7 @@ public class FileProcessorService {
         return retList;
     }
 
-    @PreAuthorize("(hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ORG_ADMIN')")
     public List<String> getOutboxDocumentList() {
         List<String> retList = new ArrayList<String>();
         File directory = new File(localServerOutboxPath);

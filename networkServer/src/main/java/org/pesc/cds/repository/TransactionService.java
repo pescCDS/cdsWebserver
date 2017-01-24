@@ -65,7 +65,7 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Transactional(readOnly=true)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize(" hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_NETWORK_SERVER') ")
     public Iterable<Transaction> findAll(){
         return this.transactionRepository.findAll();
     }
@@ -81,19 +81,19 @@ public class TransactionService {
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize(" hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_NETWORK_SERVER') ")
     public void delete(Transaction transaction)  {
         this.transactionRepository.delete(transaction);
     }
 
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize(" hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_NETWORK_SERVER') ")
     public void delete(Integer id)  {
         this.transactionRepository.delete(id);
     }
     
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize(" hasRole('ROLE_ORG_ADMIN') || hasRole('ROLE_NETWORK_SERVER') ")
     public Transaction findById(Integer id)  {
 
         return this.transactionRepository.findOne(id);
@@ -180,7 +180,7 @@ public class TransactionService {
      *
      * @return
      */
-    @PreAuthorize("(hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ORG_ADMIN')")
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
     public PagedData<Transaction> search(
             Integer senderId,

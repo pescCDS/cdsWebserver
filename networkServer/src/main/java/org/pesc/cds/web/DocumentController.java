@@ -61,6 +61,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -605,6 +606,7 @@ public class DocumentController {
      * @param ackURL        This is the url to the network server that we will send the response back to
      */
     @RequestMapping(value = "/inbox", method = RequestMethod.POST)
+    @Secured("ROLE_NETWORK_SERVER")
     public void receiveFile(
             @RequestParam(value = "recipient_id", required = false) Integer recipientId,
             @RequestParam(value = "sender_id", required = false) Integer senderId,

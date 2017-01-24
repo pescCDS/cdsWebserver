@@ -27,8 +27,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.oauth2.provider.token.*;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -57,6 +56,12 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
         }
         return clientHttpRequestFactory;
     }
+    /*
+    @Bean
+    public AccessTokenConverter accessTokenConverter() {
+        return new DefaultAccessTokenConverter();
+    }
+    */
 
     @Bean
     public ResourceServerTokenServices tokenServices() {
@@ -65,6 +70,7 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
         remoteTokenServices.setClientId(clientId);
         remoteTokenServices.setClientSecret(secret);
         remoteTokenServices.setRestTemplate(new RestTemplate(getClientHttpRequestFactory()));
+        //remoteTokenServices.setAccessTokenConverter(accessTokenConverter());
         return remoteTokenServices;
     }
     @Override
@@ -77,11 +83,11 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
         http
                 .requestMatchers()
                     .antMatchers(HttpMethod.POST, "/api/v1/transactions/acknowledgement")
-                    .antMatchers(HttpMethod.GET, "/me")
+                    //.antMatchers(HttpMethod.GET, "/me")
                     .antMatchers(HttpMethod.POST, "/api/v1/documents/inbox").and()
                 .authorizeRequests()
                     .antMatchers(HttpMethod.POST, "/api/v1/transactions/acknowledgement").authenticated()
-                    .antMatchers(HttpMethod.GET, "/me").authenticated()
+                    //.antMatchers(HttpMethod.GET, "/me").authenticated()
                     .antMatchers(HttpMethod.POST, "/api/v1/documents/inbox").authenticated();
     }
 }

@@ -89,7 +89,7 @@ public class AppController {
             isAuthenticated = true;
 
             //model.addAttribute("hasSupportRole", hasRole(authorities, "ROLE_SUPPORT"));
-            //model.addAttribute("hasAdminRole", hasRole(authorities, "ROLE_ADMIN"));
+            //model.addAttribute("hasAdminRole", hasRole(authorities, "ROLE_ORG_ADMIN"));
 
             // model.addAttribute("roles", roleRepo.findAll() );
             org.pesc.cds.model.User activeUser = new org.pesc.cds.model.User();
