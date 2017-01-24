@@ -96,7 +96,6 @@ public class AppController {
             // model.addAttribute("roles", roleRepo.findAll() );
             org.pesc.cds.model.User activeUser = new org.pesc.cds.model.User();
             activeUser.setName(authentication.getName());
-
             model.addAttribute("activeUser", activeUser);
 
         }
