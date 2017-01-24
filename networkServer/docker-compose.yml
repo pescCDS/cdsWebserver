@@ -11,5 +11,5 @@ network-server:
   extra_hosts:
    - network-db:172.17.0.1
   environment:
-   - SPRING_PROFILES_ACTIVE=qa
+   - SPRING_PROFILES_ACTIVE=dev
    - DB_SERVER=network-db

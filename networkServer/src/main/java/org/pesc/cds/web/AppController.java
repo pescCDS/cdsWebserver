@@ -92,6 +92,11 @@ public class AppController {
             //model.addAttribute("hasAdminRole", hasRole(authorities, "ROLE_ADMIN"));
 
             // model.addAttribute("roles", roleRepo.findAll() );
+            org.pesc.cds.model.User activeUser = new org.pesc.cds.model.User();
+            activeUser.setName(authentication.getName());
+
+            model.addAttribute("activeUser", activeUser);
+
         }
         else {
             model.addAttribute("hasSupportRole", false);
@@ -103,11 +108,7 @@ public class AppController {
 
         if (isAuthenticated) {
 
-            //Get user details from oauth token.
-            org.pesc.cds.model.User activeUser = new org.pesc.cds.model.User();
-            activeUser.setName("Admin");
 
-            model.addAttribute("activeUser", activeUser);
         }
         return isAuthenticated;
 

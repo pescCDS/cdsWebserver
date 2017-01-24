@@ -93,7 +93,7 @@ public class OAuthClientConfig {
         resource.setClientId(clientId);
         resource.setClientSecret(secret);
         resource.setGrantType("client_credentials");
-        resource.setScope(Arrays.asList("read", "write"));
+        resource.setScope(Arrays.asList("write_inbox", "read_inbox", "write_transactions", "read_transactions"));
         return resource;
     }
 }

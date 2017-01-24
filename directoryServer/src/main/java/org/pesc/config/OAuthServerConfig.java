@@ -16,6 +16,7 @@
 
 package org.pesc.config;
 
+import org.pesc.oauth.CustomTokenEnhancer;
 import org.pesc.oauth.EdExClientDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +31,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
@@ -71,11 +75,20 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
         return new EdExClientDetailsService();
     }
 
+    @Bean
+    public AuthorizationServerTokenServices tokenServices() {
+        final DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+        defaultTokenServices.setTokenEnhancer(tokenEnhancer());
+        defaultTokenServices.setTokenStore(tokenStore());
+        return defaultTokenServices;
+    }
+
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-    throws Exception {
+            throws Exception {
 
         endpoints
+                .tokenEnhancer(tokenEnhancer())
                 .tokenStore(tokenStore())
                 //Approval handler not needed.  Approval is handled via enabling or disabling an organization.
                 .authenticationManager(authenticationManager);
@@ -93,5 +106,11 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
         security.passwordEncoder(passwordEncoder);
         security.checkTokenAccess("isAuthenticated()");    //change to permitAll() for public access.
     }
+
+    @Bean
+    public TokenEnhancer tokenEnhancer() {
+        return new CustomTokenEnhancer();
+    }
+
 
 }

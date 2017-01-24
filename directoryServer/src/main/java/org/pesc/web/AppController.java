@@ -18,7 +18,6 @@ package org.pesc.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.model.Message;
 import org.pesc.api.model.MessageTopic;
@@ -36,7 +35,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.context.WebContext;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -205,7 +203,7 @@ public class AppController {
 
         content = mailService.createContent(ctx, "mail/registration-admin", regForm.getOrganization(), regForm.getUser());
 
-        mailService.sendEmailToSysAdmins(MessageTopic.REGISTRATION.getFriendlyName(),content);
+        mailService.sendEmailToSysAdmins(MessageTopic.REGISTRATION.getFriendlyName(), content);
 
         Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,1, null );
 
@@ -246,7 +244,6 @@ public class AppController {
 
         return "home";
     }
-
 
     @RequestMapping({"/organizations"})
     public String getOrganizationsTemplate(Model model) {
