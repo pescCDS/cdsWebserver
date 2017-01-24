@@ -55,9 +55,11 @@ public class AppController {
     @Value("${networkServer.id}")
     private String localServerId;
 
-
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private TransactionService transactionService;
 
 
     private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
@@ -114,9 +116,12 @@ public class AppController {
 
     }
 
-
-    @Autowired
-    private TransactionService transactionService;
+    /*
+    @RequestMapping("/unauthenticated")
+    public String unauthenticated() {
+        return "redirect:/?error=true";
+    }
+    */
 
 
     private void setContentType(HttpServletResponse response, String fileFormat) {

@@ -16,6 +16,8 @@
 
 package org.pesc.config;
 
+import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
+import org.springframework.boot.autoconfigure.web.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +30,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.context.request.RequestAttributes;
+import org.xml.sax.SAXParseException;
+
+import java.util.Map;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 2/17/16.
@@ -105,6 +111,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService()).passwordEncoder(passwordEncoder());
 
     }
+
+    @Bean
+    public ErrorAttributes errorAttributes() {
+        return new DefaultErrorAttributes() {
+            @Override
+            public Map<String, Object> getErrorAttributes(RequestAttributes requestAttributes, boolean includeStackTrace) {
+                Map<String, Object> errorAttributes = super.getErrorAttributes(requestAttributes, includeStackTrace);
+                Throwable error = getError(requestAttributes);
+
+                if (error instanceof IllegalArgumentException) {
+                    errorAttributes.put("status", 400);
+                }
+                return errorAttributes;
+            }
+
+        };
+    }
+
 
 
 

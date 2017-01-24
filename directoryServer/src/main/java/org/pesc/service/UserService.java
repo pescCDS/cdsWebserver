@@ -151,7 +151,7 @@ public class UserService {
 
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    @PostAuthorize("( (returnObject.organizationId == principal.organizationId OR principal.id == returnObject.id) OR hasRole('ROLE_ORG_ADMIN'))")
+    @PostAuthorize("( (returnObject.organizationId == principal.organizationId OR principal.id == returnObject.id) OR (hasRole('ROLE_ORG_ADMIN') AND (returnObject.organizationId == principal.organizationId) ) )")
     public DirectoryUser findById(Integer id)  {
         return this.userRepository.findOne(id);
     }
@@ -290,6 +290,7 @@ public class UserService {
      * @return
      */
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    @PreAuthorize("(#organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public List<DirectoryUser> search(
             Integer userId,
             Integer organizationId,

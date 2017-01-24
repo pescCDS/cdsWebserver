@@ -87,11 +87,13 @@ public class UserResource {
     public List<DirectoryUser> getUser(@PathParam("id") @ApiParam("The unique identifier for the user.") Integer id) {
         ArrayList<DirectoryUser> results = new ArrayList<DirectoryUser>();
 
+
         DirectoryUser user = userService.findById(id);
 
         if (user != null) {
             results.add(user);
         }
+
 
         return results;
     }
@@ -124,8 +126,7 @@ public class UserResource {
 
         try {
             userService.updatePassword(id, password);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new ApiException(e, Response.Status.BAD_REQUEST, "/users/" + id + "/password");
         }
 

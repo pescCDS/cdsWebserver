@@ -16,6 +16,7 @@
 
 package org.pesc.cds.config;
 
+import org.pesc.cds.oauth.EdExUserAuthenticationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +40,7 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
 
     @Value("${authentication.oauth.secret}") String secret;
     @Value("${networkServer.id}") String clientId;
+    @Value("${networkServer.name}") String orgName;
     @Value("${directory.server.base.url}") String directoryServerBaseURL;
 
     @Autowired(required = false)
@@ -56,12 +58,14 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
         }
         return clientHttpRequestFactory;
     }
-    /*
+
     @Bean
     public AccessTokenConverter accessTokenConverter() {
-        return new DefaultAccessTokenConverter();
+        DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+        accessTokenConverter.setUserTokenConverter(new EdExUserAuthenticationConverter(Integer.valueOf(clientId), orgName));
+        return accessTokenConverter;
     }
-    */
+
 
     @Bean
     public ResourceServerTokenServices tokenServices() {
@@ -70,7 +74,7 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
         remoteTokenServices.setClientId(clientId);
         remoteTokenServices.setClientSecret(secret);
         remoteTokenServices.setRestTemplate(new RestTemplate(getClientHttpRequestFactory()));
-        //remoteTokenServices.setAccessTokenConverter(accessTokenConverter());
+        remoteTokenServices.setAccessTokenConverter(accessTokenConverter());
         return remoteTokenServices;
     }
     @Override
