@@ -22,6 +22,7 @@ import org.pesc.api.model.OAuthClientDetails;
 import org.pesc.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -52,7 +53,21 @@ public class EdExClientDetailsService implements ClientDetailsService {
         OAuthClientDetails org = organizationService.getOAuthClientDetails(Integer.valueOf(clientId));
 
         if (org == null || org.getEnabled() == false || StringUtils.isEmpty(org.getOauthSecret()) ) {
-            return null;
+
+            String error = null;
+
+            if (org == null) {
+
+                error = String.format("No organization found with directory id %s", clientId) ;
+            }
+            else if (org.getEnabled() == false) {
+                error = String.format("An organization was found with directory id %s, but the organization is disabled.", clientId);
+            }
+            else if (StringUtils.isEmpty(org.getOauthSecret())) {
+                error = String.format("OAuth is not enabled for the organization %d", clientId);
+            }
+
+            throw new IllegalArgumentException(error);
         }
 
         BaseClientDetails clientDetails = new BaseClientDetails();
