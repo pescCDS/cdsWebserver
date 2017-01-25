@@ -362,7 +362,7 @@ public class OrganizationService {
 
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    @PreAuthorize("( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
+    @PreAuthorize("isAuthenticated() AND ( (#orgID == principal.organizationId AND hasRole('ROLE_ORG_ADMIN')) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public String getOAuthSecret(Integer orgID) {
 
         String oauthSecret = jdbcTemplate.queryForObject("select oauth_secret from organization where id= ?", new Object[]{orgID}, String.class);
@@ -612,6 +612,16 @@ public class OrganizationService {
             entityManager.close();
         }
 
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> getInstitutionsByServiceProviderId(Integer serviceProviderId) {
+
+        String sql = "select institution_id as id from institutions_service_providers where service_provider_id = ?";
+
+        List<Integer> rows = jdbcTemplate.queryForList(sql, Integer.class, serviceProviderId);
+
+        return rows;
     }
 
     @Transactional(readOnly = true)

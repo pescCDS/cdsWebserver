@@ -17,6 +17,8 @@
 package org.pesc.cds.oauth;
 
 import org.pesc.cds.model.AuthUser;
+import org.pesc.cds.service.OrganizationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,9 +26,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,12 +38,15 @@ import java.util.Map;
  */
 public class EdExUserAuthenticationConverter implements UserAuthenticationConverter {
 
+    private OrganizationService organizationService;
+
     private Integer orgID;
     private String orgName;
 
-    public EdExUserAuthenticationConverter(Integer orgID, String orgName) {
+    public EdExUserAuthenticationConverter(Integer orgID, String orgName, OrganizationService organizationService) {
         this.orgID = orgID;
         this.orgName = orgName;
+        this.organizationService = organizationService;
     }
 
     @Override
@@ -54,12 +61,16 @@ public class EdExUserAuthenticationConverter implements UserAuthenticationConver
 
     }
 
+
     @Override
     public Authentication extractAuthentication(Map<String, ?> map) {
 
-        Integer organizationId = (Integer)map.get("organization_id");
-        if (organizationId.intValue() == orgID.intValue()) {
-            if (map.containsKey(USERNAME)) {
+
+        if (map.containsKey(USERNAME)) {
+            Integer organizationId = (Integer)map.get("organization_id");
+            List<Integer> servicedOrganizations = organizationService.getInstitutionsForServiceProvider();
+
+            if (organizationId.intValue() == orgID.intValue() || servicedOrganizations.contains(organizationId)) {
                 Collection<? extends GrantedAuthority> authorities = getAuthorities(map);
                 AuthUser authUser = new AuthUser((String)map.get(USERNAME),
                         "", true,true,true,true, authorities);
@@ -76,7 +87,7 @@ public class EdExUserAuthenticationConverter implements UserAuthenticationConver
             }
         }
 
-        throw new BadCredentialsException(String.format("User is not a member of %s.",orgName));
+        throw new BadCredentialsException(String.format("User is not a member of %s nor of any institution serviced by %s.",orgName, orgName));
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Map<String, ?> map) {

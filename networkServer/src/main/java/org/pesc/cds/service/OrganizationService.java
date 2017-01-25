@@ -31,13 +31,18 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.config.CacheConfig;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.IdList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,6 +62,9 @@ public class OrganizationService {
 
     @Value("${api.endpoints}")
     private String endpointsApiPath;
+
+    @Value("${networkServer.id}")
+    private String orgID;
 
 
     @Cacheable(ORGANIZATION)
@@ -172,6 +180,15 @@ public class OrganizationService {
         int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
         tx.setRecipientId(orgID);
         return getEndpointForOrg(orgID, documentFormat, documentType, department);
+    }
+
+    public List<Integer> getInstitutionsForServiceProvider(){
+        StringBuilder uri = new StringBuilder(directoryServer + "/services/rest/v1/institutions/id-list?service_provider_id=" + orgID);
+        RestTemplate template = new RestTemplate();
+
+        IdList idListEntity = template.getForObject(uri.toString(), IdList.class);
+
+        return idListEntity.idList;
     }
 
     public int getOrganizationId(String destinationSchoolCode, String destinationSchoolCodeType, List<String> destinationOrganizationNames) {

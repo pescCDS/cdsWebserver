@@ -21,7 +21,22 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-	<h1 th:text="${errorCode}">500</h1>
-    <p th:text="${errorMessage}">java.lang.NullPointerException</p>
+  <p>
+    <div>
+      <b>Time: </b><span th:text="${timestamp}"></span>
+    </div>
+    <div>
+      <span>Status: </span><span th:text="${status}"></span>
+    </div>
+    <div>
+      <span>Error: </span><span th:text="${error}"></span>
+    </div>
+    <div>
+      <span>Message: </span><span th:text="${message}"></span>
+    </div>
+    <div>
+      <span>Path: </span><span th:text="${path}"></span>
+    </div>
+  </p>
 </body>
 </html>

@@ -17,6 +17,7 @@
 package org.pesc.cds.config;
 
 import org.pesc.cds.oauth.EdExUserAuthenticationConverter;
+import org.pesc.cds.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +45,10 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
     @Value("${directory.server.base.url}") String directoryServerBaseURL;
 
     @Autowired(required = false)
-    ClientHttpRequestFactory clientHttpRequestFactory;
+    private ClientHttpRequestFactory clientHttpRequestFactory;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     /*
      * ClientHttpRequestFactory is autowired and checked in case somewhere in
@@ -62,7 +66,7 @@ public class OAuthServerConfig extends ResourceServerConfigurerAdapter {
     @Bean
     public AccessTokenConverter accessTokenConverter() {
         DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
-        accessTokenConverter.setUserTokenConverter(new EdExUserAuthenticationConverter(Integer.valueOf(clientId), orgName));
+        accessTokenConverter.setUserTokenConverter(new EdExUserAuthenticationConverter(Integer.valueOf(clientId), orgName, organizationService));
         return accessTokenConverter;
     }
 

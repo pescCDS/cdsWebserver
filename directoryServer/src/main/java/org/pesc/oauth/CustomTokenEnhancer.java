@@ -17,6 +17,8 @@
 package org.pesc.oauth;
 
 import org.pesc.api.model.AuthUser;
+import org.pesc.service.OrganizationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -32,6 +34,8 @@ import java.util.Map;
  */
 public class CustomTokenEnhancer implements TokenEnhancer {
 
+    @Autowired
+    private OrganizationService organizationService;
 
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
@@ -47,6 +51,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
             additionalInfo.put("user_id", user.getId());
             additionalInfo.put("authorities", AuthorityUtils.authorityListToSet(user.getAuthorities()));
             additionalInfo.put("organization_id", user.getOrganizationId());
+            additionalInfo.put("serviced_organizations", organizationService.getInstitutionsByServiceProviderId(user.getOrganizationId()) );
             //((DefaultOAuth2AccessToken) accessToken).setScope(new HashSet(Arrays.asList("read_inbox", "read_transactions", "write_outbox", "read_outbox"));
 
         }

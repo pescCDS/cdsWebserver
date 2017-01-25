@@ -253,14 +253,15 @@ public class OrganizationsResource {
 
     @Path("/{id}/oauth-secret")
     @GET
-    @Produces({MediaType.TEXT_HTML})
+    //@Produces({MediaType.TEXT_HTML})
+    @Produces({MediaType.APPLICATION_XML})
     @ApiOperation("Add or update the oauth secret for the organization.")
     public String getOAuthSecret(@PathParam("id") @ApiParam("The identifier for the organization.") Integer id) {
         try {
             return organizationService.getOAuthSecret(id);
         }
         catch (Exception e) {
-            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/oauth-secret");
+            throw new IllegalArgumentException("/organizations/" + id.toString() + "/oauth-secret", e);
         }
     }
 

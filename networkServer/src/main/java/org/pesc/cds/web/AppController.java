@@ -62,7 +62,7 @@ public class AppController {
     private TransactionService transactionService;
 
 
-    private boolean hasRole(Collection<GrantedAuthority> authorities, String role) {
+    private boolean hasRole(Collection<? extends GrantedAuthority> authorities, String role) {
         boolean hasRole = false;
         for (GrantedAuthority authority : authorities) {
             hasRole = authority.getAuthority().equals(role);
@@ -87,11 +87,11 @@ public class AppController {
                 !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            //Collection<GrantedAuthority> authorities = auth.getAuthorities();
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             isAuthenticated = true;
 
-            //model.addAttribute("hasSupportRole", hasRole(authorities, "ROLE_SUPPORT"));
-            //model.addAttribute("hasAdminRole", hasRole(authorities, "ROLE_ORG_ADMIN"));
+            model.addAttribute("hasSupportRole", hasRole(authorities, "ROLE_SUPPORT"));
+            model.addAttribute("hasAdminRole", hasRole(authorities, "ROLE_ORG_ADMIN"));
 
             // model.addAttribute("roles", roleRepo.findAll() );
             org.pesc.cds.model.User activeUser = new org.pesc.cds.model.User();
@@ -107,10 +107,6 @@ public class AppController {
         model.addAttribute("isAuthenticated", isAuthenticated);
 
 
-        if (isAuthenticated) {
-
-
-        }
         return isAuthenticated;
 
     }
@@ -252,5 +248,7 @@ public class AppController {
 
         return "fragments :: about";
     }
+
+
 
 }

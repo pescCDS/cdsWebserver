@@ -32,7 +32,6 @@ import org.pesc.service.PagedData;
 import org.pesc.web.AppController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -224,7 +223,7 @@ public class InstitutionResource {
     @GET
     @ApiOperation("Return the institutions that are serviced by this service provider.")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<OrganizationDTO> getServiceProvidersForInstitution(
+    public List<OrganizationDTO> getInstitutionsForServiceProvider(
             @QueryParam("service_provider_id") @ApiParam(value="The directory identifier for the service provider.", required = true) Integer id,
             @QueryParam("limit") @DefaultValue("5") Integer limit,
             @QueryParam("offset") @DefaultValue("0") Integer offset) {
@@ -241,6 +240,21 @@ public class InstitutionResource {
         organizationService.getInstitutionsByServiceProviderId(id, pagedData);
         servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()));
         return pagedData.getData();
+    }
+
+    @GET
+    @ApiOperation("Return the institutions that are serviced by this service provider as a list of directory/member IDs.")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Path("/id-list")
+    public IdList getInstitutionIDListForServiceProvider(
+            @QueryParam("service_provider_id") @ApiParam(value="The directory identifier for the service provider.", required = true) Integer id) {
+
+        if (id == null) {
+            throw new IllegalArgumentException("The service provider's id must be provided.");
+        }
+        IdList listModel = new IdList();
+        listModel.idList = organizationService.getInstitutionsByServiceProviderId(id);
+        return listModel;
     }
 
 }
