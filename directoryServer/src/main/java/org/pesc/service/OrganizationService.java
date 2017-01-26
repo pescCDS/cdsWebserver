@@ -129,6 +129,9 @@ public class OrganizationService {
     public Organization create(Organization organization) {
         organization.setEnabled(true);
         organization.setActive(true);
+        Date createdTime = Calendar.getInstance().getTime();
+        organization.setCreatedTime(createdTime);
+        organization.setModifiedTime(createdTime);
         return organizationRepository.save(organization);
     }
 
