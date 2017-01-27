@@ -21,7 +21,7 @@ def profile
 def IMAGE_TAG
 
 /**
- * An automated build + deploy occurs for QA and PILOT environments, based on the following branch name patterns
+ * An automated build + deploy occurs for CI, QA, and PILOT environments, based on the following branch name patterns
  **/
 
 stage "build"
@@ -31,20 +31,20 @@ node(buildNode) {
 		checkout scm
         currentBuild.displayName = "#${env.BUILD_NUMBER}-${env.BRANCH_NAME}"
 
-        //FIXME: pull into library function
-        if (env.BRANCH_NAME =~ /feature.*/) {
+        if (env.BRANCH_NAME =~ /feature/) {
                 IMAGE_TAG = "${env.BUILD_NUMBER}"
-                environment = "qa"
+                environment = "ci"
         }
             
         if(env.BRANCH_NAME == "develop"){
                 IMAGE_TAG = "latest"
                 environment = "qa"
         }
-        if(env.BRANCH_NAME =~ /release/ || env.BRANCH_NAME =="master"){
+        if(env.BRANCH_NAME =~ /release/ || env.BRANCH_NAME == "master"){
             IMAGE_TAG = sh(returnStdout: true, script: "git ls-remote --tags | awk -F'/' '/[0-9].[0-9].[0-9].*/ { print \$3}' | sort --version-sort -r| head -n1").trim()
             environment = "pilot"
         }
+        //FUTURE: add prod environment for pushes to master
 
         profile = environment
         env.profile = profile 
@@ -110,23 +110,21 @@ node(buildNode) {
 
     stage "deploy"
 
-    if(environment == "qa" || environment == "pilot") {
-        try {
-            ceDeploy.runDeploy("ed-exchange", "network-server", environment, IMAGE_TAG, props."edex.network.url", props."edex.network.port", props."edex.network.protocol", props."edex.network.health", props."rancher.key", props."rancher.pass", channel)
-            ceDeploy.slackNotify(channel, "good", "Success", "network", environment ?: "(environment not set)",  props ? props."edex.network.url" + props."edex.network.health" : "(endpoint not set)", IMAGE_TAG)
-        } catch (Exception | AssertionError e) {
-            echo "ERROR: " + e.toString()
-            slackSend channel: channel, color: 'danger', message: "#${env.BUILD_NUMBER}-${env.BRANCH_NAME} - Open Network Deploy Failed in " + environment.toUpperCase() + " Env: " + props."edex.network.url" + "\nJob: ${env.BUILD_URL}"
-            error "deploy failed"
-        }
+    try {
+        ceDeploy.runDeploy("ed-exchange", "network-server", environment, IMAGE_TAG, props."edex.network.url", props."edex.network.port", props."edex.network.protocol", props."edex.network.health", props."rancher.key", props."rancher.pass", channel)
+        ceDeploy.slackNotify(channel, "good", "Success", "network", environment ?: "(environment not set)",  props ? props."edex.network.url" + props."edex.network.health" : "(endpoint not set)", IMAGE_TAG)
+    } catch (Exception | AssertionError e) {
+        echo "ERROR: " + e.toString()
+        slackSend channel: channel, color: 'danger', message: "#${env.BUILD_NUMBER}-${env.BRANCH_NAME} - Open Network Deploy Failed in " + environment.toUpperCase() + " Env: " + props."edex.network.url" + "\nJob: ${env.BUILD_URL}"
+        error "deploy failed"
+    }
 
-        try {
-            ceDeploy.runDeploy("ed-exchange", "directory-server", environment, IMAGE_TAG, props."edex.directory.url", props."edex.directory.port", props."edex.directory.protocol", props."edex.directory.health", props."rancher.key", props."rancher.pass", channel)
-            ceDeploy.slackNotify(channel, "good", "Success", "directory", environment ?: "(environment not set)",  props ? props."edex.directory.url" + props."edex.directory.health" : "(endpoint not set)", IMAGE_TAG)
-        } catch (Exception | AssertionError e) {
-            echo "ERROR: " + e.toString()
-            slackSend channel: channel, color: 'danger', message: "#${env.BUILD_NUMBER}-${env.BRANCH_NAME} - Open Directory Deploy Failed in " + environment.toUpperCase() + " Env: " + props."edex.directory.url" + "\nJob: ${env.BUILD_URL}"
-            error "deploy failed"
-        }
+    try {
+        ceDeploy.runDeploy("ed-exchange", "directory-server", environment, IMAGE_TAG, props."edex.directory.url", props."edex.directory.port", props."edex.directory.protocol", props."edex.directory.health", props."rancher.key", props."rancher.pass", channel)
+        ceDeploy.slackNotify(channel, "good", "Success", "directory", environment ?: "(environment not set)",  props ? props."edex.directory.url" + props."edex.directory.health" : "(endpoint not set)", IMAGE_TAG)
+    } catch (Exception | AssertionError e) {
+        echo "ERROR: " + e.toString()
+        slackSend channel: channel, color: 'danger', message: "#${env.BUILD_NUMBER}-${env.BRANCH_NAME} - Open Directory Deploy Failed in " + environment.toUpperCase() + " Env: " + props."edex.directory.url" + "\nJob: ${env.BUILD_URL}"
+        error "deploy failed"
     }
 }
