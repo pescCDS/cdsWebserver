@@ -35,9 +35,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/6/16.
@@ -132,7 +130,9 @@ public class ContactService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#contact.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public Contact create(Contact contact)  {
-
+        Date createdTime = Calendar.getInstance().getTime();
+        contact.setCreatedTime(createdTime);
+        contact.setModifiedTime(createdTime);
         return this.contactsRepository.save(contact);
     }
 

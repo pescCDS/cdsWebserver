@@ -85,9 +85,12 @@ public class EdExUserAuthenticationConverter implements UserAuthenticationConver
                 return new UsernamePasswordAuthenticationToken(authUser, "N/A", authorities);
 
             }
+            throw new BadCredentialsException(String.format("User is not a member of %s nor of any institution serviced by %s.",orgName, orgName));
         }
 
-        throw new BadCredentialsException(String.format("User is not a member of %s nor of any institution serviced by %s.",orgName, orgName));
+        return null;
+
+
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Map<String, ?> map) {
