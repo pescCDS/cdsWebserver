@@ -1,0 +1,32 @@
+directory-server:
+  image: ccctechcenter/cccnext-directory-server:${IMAGE_TAG}
+  labels:
+    io.rancher.scheduler.affinity:host_label: service-name=directory-server
+    io.rancher.container.pull_image: always
+  ports:
+   - "80:8080"
+  environment:
+   - SPRING_PROFILES_ACTIVE=${profile}
+   - DB_SERVER=${DIRECTORY_DB_HOST}
+   - DB_USERNAME=${DIRECTORY_DB_USERNAME}
+   - DB_PASSWORD=${DIRECTORY_DB_PASSWORD}
+   - MAIL_SMTP_HOST=${MAIL_SMTP_HOST}
+   - MAIL_SMTP_USERNAME=${MAIL_SMTP_USERNAME}
+   - MAIL_SMTP_PASSWORD=${MAIL_SMTP_PASSWORD}
+  restart: unless-stopped
+
+network-server:
+  image: ccctechcenter/cccnext-network-server:${IMAGE_TAG}
+  labels:
+    io.rancher.scheduler.affinity:host_label: service-name=network-server
+    io.rancher.container.pull_image: always
+  ports:
+   - "80:9000"
+  environment:
+   - SPRING_PROFILES_ACTIVE=${profile}
+   - DB_SERVER=${NETWORK_DB_HOST}
+   - DB_USERNAME=${NETWORK_DB_USERNAME}
+   - DB_PASSWORD=${NETWORK_DB_PASSWORD}
+   - DIRECTORY_SERVER=${DIRECTORY_HOST}
+   - DIRECTORY_SERVER_PORT=${DIRECTORY_PORT}
+  restart: unless-stopped
