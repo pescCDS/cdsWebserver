@@ -58,7 +58,7 @@
 
                 <button class="btn btn-default" type="submit">Sign In</button>
 
-                <div style="padding-top: 15px">
+                <div th:if="${ssoEnabled}" style="padding-top: 15px">
                     Alternatively, you may <a href="login/edex">sign in using the EdExchange Directory.</a>
                 </div>
 

@@ -17,6 +17,7 @@
 package org.pesc.cds.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.boot.autoconfigure.web.ErrorAttributes;
@@ -49,6 +50,10 @@ import java.util.Map;
 @EnableOAuth2Client
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Value("${edex.sso.enabled}")
+    private boolean ssoEnabled;
+
     @Autowired
     OAuth2ClientContext oauth2ClientContext;
 
@@ -59,15 +64,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/", "/home", "/transactions", "/about", "/upload", "/documentation", "/js/**", "/fonts/**", "/images/**", "/css/**", "favicon.ico").permitAll()
+                .antMatchers("/", "/home", "/about", "/documentation", "/js/**", "/fonts/**", "/images/**", "/css/**", "favicon.ico").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")
                 .permitAll()
                 .and()
-                .addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class)
                 .logout().logoutSuccessUrl("/");
+
+                if (ssoEnabled == true) {
+                    http.addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class);
+                }
+
     }
 
     @Autowired

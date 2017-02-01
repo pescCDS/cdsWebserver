@@ -22,6 +22,7 @@ package org.pesc.cds.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,8 +38,13 @@ public class LoginController {
     private static final Log log = LogFactory.getLog(LoginController.class);
     private final String templateView = "login";
 
+    @Value("${edex.sso.enabled}")
+    private boolean ssoEnabled;
+
     @RequestMapping("/login")
-    public String login() {
+    public String login(Model model) {
+        model.addAttribute("ssoEnabled", ssoEnabled);
+
         return templateView;
     }
 
