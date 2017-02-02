@@ -18,14 +18,12 @@ package org.pesc.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pesc.api.model.Contact;
-import org.pesc.api.model.DirectoryUser;
-import org.pesc.api.model.Organization;
-import org.pesc.api.model.Role;
+import org.pesc.api.model.*;
 import org.pesc.api.repository.ContactsRepository;
 import org.pesc.api.repository.OrganizationRepository;
 import org.pesc.api.repository.RolesRepository;
 import org.pesc.api.repository.UserRepository;
+import org.pesc.utils.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -71,6 +70,9 @@ public class RegistrationService {
         contact.setAddress(organization.getStreet() + " " + organization.getCity() + " " + organization.getState() + " " + organization.getZip());
         contact.setTitle(user.getTitle());
         contact.setOrganizationId(user.getOrganizationId());
+        contact.setContactType(ContactType.ADMIN);
+        contact.setCreatedTime(TimeUtils.getCurrentUTCTime());
+        contact.setModifiedTime(contact.getCreatedTime());
         contactsRepository.save(contact);
     }
 
@@ -87,6 +89,8 @@ public class RegistrationService {
             throw new IllegalArgumentException("Organization type of 'System' is not allowed for registration.");
         }
         organization.setEnabled(false);  //The info requires validation/approval before becoming active
+        organization.setCreatedTime(TimeUtils.getCurrentUTCTime());
+        organization.setModifiedTime(organization.getCreatedTime());
 
         organization =organizationRepository.save(organization);
 

@@ -65,6 +65,10 @@ public class Contact implements Serializable {
     @Column(name = "phone_2")
     private String phone2;
 
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private ContactType contactType;
+
     public Integer getId() {
         return id;
     }
@@ -143,5 +147,13 @@ public class Contact implements Serializable {
 
     public void setPhone2(String phone2) {
         this.phone2 = phone2;
+    }
+
+    public ContactType getContactType() {
+        return contactType;
+    }
+
+    public void setContactType(ContactType contactType) {
+        this.contactType = contactType;
     }
 }

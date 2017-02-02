@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.pesc.api.model.Contact;
 import org.pesc.api.model.DirectoryUser;
 import org.pesc.api.repository.ContactsRepository;
+import org.pesc.utils.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +37,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/6/16.
@@ -130,7 +132,7 @@ public class ContactService {
     @Transactional(readOnly=false,propagation = Propagation.REQUIRED)
     @PreAuthorize("(#contact.organizationId == principal.organizationId AND  hasRole('ROLE_ORG_ADMIN') ) OR hasRole('ROLE_SYSTEM_ADMIN')")
     public Contact create(Contact contact)  {
-        Date createdTime = Calendar.getInstance().getTime();
+        Date createdTime = TimeUtils.getCurrentUTCTime();
         contact.setCreatedTime(createdTime);
         contact.setModifiedTime(createdTime);
         return this.contactsRepository.save(contact);

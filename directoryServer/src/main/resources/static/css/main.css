@@ -298,3 +298,9 @@ ol.alpha>li:before {
         padding-bottom: 50px;
     }
 }
+
+
+form.ng-submitted .ng-invalid
+{
+    border:1px solid #f00;
+}

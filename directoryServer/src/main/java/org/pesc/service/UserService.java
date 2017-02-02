@@ -151,7 +151,7 @@ public class UserService {
 
 
     @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
-    @PostAuthorize("( (returnObject.organizationId == principal.organizationId OR principal.id == returnObject.id) OR (hasRole('ROLE_ORG_ADMIN') AND (returnObject.organizationId == principal.organizationId) ) )")
+    @PostAuthorize("( (returnObject.organizationId == principal.organizationId OR principal.id == returnObject.id) OR (hasRole('ROLE_ORG_ADMIN') AND (returnObject.organizationId == principal.organizationId) ) OR hasRole('ROLE_SYSTEM_ADMIN') )")
     public DirectoryUser findById(Integer id)  {
         return this.userRepository.findOne(id);
     }

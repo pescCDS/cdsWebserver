@@ -547,6 +547,12 @@
                 return;
             }
 
+            if (self.org.organizationTypes.length == 0) {
+                toasterService.error("Please indicate whether your organization is an Institution, Service Provider, or both.");
+                return;
+            }
+
+
             organizationService.register(bag).then(function (data) {
                     toasterService.success("Thank you for registering.  An email will be sent to " + self.user.email + " when your organization becomes activated.");
                     $location.path('/registration-thank-you')

@@ -1719,7 +1719,7 @@
                 <fieldset class="form-group">
                     <label>State</label>
 
-                    <select class="form-control" ng-model="regCtrl.org.state">
+                    <select class="form-control" ng-model="regCtrl.org.state" required="required">
                         <option value="AL">Alabama</option>
                         <option value="AK">Alaska</option>
                         <option value="AZ">Arizona</option>
@@ -1790,7 +1790,7 @@
 
                      <div ng-repeat="type in regCtrl.organizationTypes">
                                 <div class="well" ng-show="type.id != 1">
-                                    <input
+                                    <input required="required"
                                         type="checkbox"
                                         ng-checked="regCtrl.hasOrgType(type)"
                                         name="orgTypes"
@@ -1816,25 +1816,25 @@
                 <fieldset class="form-group">
                     <label>Title</label>
 
-                    <input class="form-control" type="text" placeholder="Title" ng-model="regCtrl.user.title" > </input>
+                    <input class="form-control" type="text" placeholder="Title" ng-model="regCtrl.user.title" required="required"> </input>
 
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Phone</label>
-                    <input class="form-control" type="tel" placeholder="Phone" ng-model="regCtrl.user.phone" > </input>
+                    <input class="form-control" type="tel" placeholder="Phone" ng-model="regCtrl.user.phone" required="required"> </input>
 
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Email</label>
-                    <input class="form-control" type="email" placeholder="Email" ng-model="regCtrl.user.email"  > </input>
+                    <input class="form-control" type="email" placeholder="Email" ng-model="regCtrl.user.email"  required="required"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Username</label>
-                    <input class="form-control" type="text" placeholder="Username" ng-model="regCtrl.user.username"  > </input>
+                    <input class="form-control" type="text" placeholder="Username" ng-model="regCtrl.user.username" required="required" > </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Password</label>
-                    <input class="form-control" type="password" placeholder="Password" ng-model="regCtrl.user.password"  > </input>
+                    <input class="form-control" type="password" placeholder="Password" ng-model="regCtrl.user.password"  required="required"> </input>
                 </fieldset>
             </div>
         </div>
