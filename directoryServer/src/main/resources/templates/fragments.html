@@ -546,24 +546,24 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">
-                    <a href="http://www.pesc.org/interior.php?page_id=217">EDExchange by the Common Data Services (CDS) Task Force</a>
+                    <a href="http://www.pesc.org/interior.php?page_id=217">EdExchange by the Common Data Services (CDS) Task Force</a>
                 </h1>
             </div>
             <div class="col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4><i class="fa fa-fw fa-check"></i>What is EDExchange?</h4>
+                        <h4><i class="fa fa-fw fa-check"></i>What is EdExchange?</h4>
                     </div>
                     <div class="panel-body">
                         <p>
-                            EDExchange is a way for your college to exchange transcripts in a secure, standardized way with any other college in the EDExchange network.
+                            EdExchange is a way for your college to exchange transcripts in a secure, standardized way with any other college in the EdExchange network.
                         </p>
                         <p></p>
                         <p>
-                            Before EDExchange, there was no consistent way for colleges to request and exchange documents with each other. Service provider exchange networks operated in isolation from one another and any available legacy exchange platforms were built on old standards without delivery confirmation.
+                            Before EdExchange, there was no consistent way for colleges to request and exchange documents with each other. Service provider exchange networks operated in isolation from one another and any available legacy exchange platforms were built on old standards without delivery confirmation.
                         </p>
 
-                        <p>See who's using EDExchange now.  <a class="btn btn-lg btn-default btn-block" href="#directory">Directory</a></p>
+                        <p>See who's using EdExchange now.  <a class="btn btn-lg btn-default btn-block" href="#directory">Directory</a></p>
 
                     </div>
                 </div>
@@ -587,7 +587,7 @@
                         <h4><i class="fa fa-fw fa-compass"></i> Easy to Use</h4>
                     </div>
                     <div class="panel-body">
-                        <p>After your developer staff implements your EdExchange interface, sending a transcript to a college in the EDExchange network is as easy as entering the receiving school information, uploading the transcript, and clicking Send.</p>
+                        <p>After your developer staff implements your EdExchange interface, sending a transcript to a college in the EdExchange network is as easy as entering the receiving school information, uploading the transcript, and clicking Send.</p>
                         <p></p>
                         <p>What you <u>won’t</u> have to do? Wonder whether or not the transcript was received or worry about file format or data security.</p>
 						<p>Learn more. <a class="btn btn-lg btn-default btn-block" href="documentation#faq">FAQ</a></p>
@@ -607,7 +607,7 @@
                         <b>1. Register</b>
                     </div>
                     <div class="panel-body">
-                        Only members of the EDExchange network can send and receive documents over the network. To become
+                        Only members of the EdExchange network can send and receive documents over the network. To become
                         a member, fill out the <a href="home#/registration-form">registration form</a> choosing "Institution" or "Service Provider".
 
                         <p>After completing your registration form you can: login, configure your organization's details, set up users, and get your developer started testing and customizing the code for sending and/or receiving documents. Once PESC reviews and approves your organization you can begin sending and receiving documents on the EdExchange network.</p>
@@ -621,10 +621,10 @@
                         <b>2. Configure & Develop</b>
                     </div>
                     <div class="panel-body">
-                        <p>EDExchange member organizations can be configured to send documents, receive documents, or both. In either case, a developer at your organization can use the <a href="/documentation#network-server">free reference implementation</a> of the Network Server in the <a href="https://github.com/owenwe/cdsWebserver/tree/master">open source project</a> (includes a reference directory server for testing) to get you started. If you choose to only send documents, you will  <a href="/documentation#certificate">publish an SSL signing certificate</a> to the Directory Server and use an EDExchange service provider to receive documents on your behalf.</p>
+                        <p>EdExchange member organizations can be configured to send documents, receive documents, or both. In either case, a developer at your organization can use the <a href="/documentation#network-server">free reference implementation</a> of the Network Server in the <a href="https://github.com/owenwe/cdsWebserver/tree/master">open source project</a> (includes a reference directory server for testing) to get you started. If you choose to only send documents, you will  <a href="/documentation#certificate">publish an SSL signing certificate</a> to the Directory Server and use an EdExchange service provider to receive documents on your behalf.</p>
                         <p><span style="font-weight: bolder;"></p>
 
-                        <p><span style="font-weight: bolder;">To receive documents</span>, your organization must deploy an EDExchange Network Server on the internet using a domain name of your choice and secure it using a valid SSL certificate. On the Directory Server, you will publish the network SSL certificate and the <a href="/documentation#endpoints">endpoint</a> (the URL used to receive documents). HTTPS is required for URLs that are used to receive documents.</p>
+                        <p><span style="font-weight: bolder;">To receive documents</span>, your organization must deploy an EdExchange Network Server on the internet using a domain name of your choice and secure it using a valid SSL certificate. On the Directory Server, you will publish the network SSL certificate and the <a href="/documentation#endpoints">endpoint</a> (the URL used to receive documents). HTTPS is required for URLs that are used to receive documents.</p>
 
                     </div>
                 </div>
@@ -637,7 +637,7 @@
                     <div class="panel-body">
 
                         <p>The code for sending a document is implemented in the free <a href="/documentation#network-server">reference implementation</a> of the Network Server in the <a href="https://github.com/owenwe/cdsWebserver/tree/master">open source project</a>. Your developer will use this code to set your organization up for sending documents.</p>
-                            <p>First, the sender obtains the published URL for the receiver, based on attributes of the document and the intended recipient, from the EDExchange directory server.</p>
+                            <p>First, the sender obtains the published URL for the receiver, based on attributes of the document and the intended recipient, from the EdExchange directory server.</p>
                             <p>Next, the sender must <a href="/documentation#sign-document">generate a digital signature</a> for the document.</p>
                             <p>Next, create a transaction about the document for reporting purposes.</p>
                             <p><a href="/documentation#send-document">Send the document</a> and digital signature to the receiving URL along with the directory ID of the sender and the recipient, and optionally with a transaction ID and acknowledgment URL.</p>
@@ -657,7 +657,7 @@
                     <div class="panel-body">
                         <p>The code for receiving a document is implemented in the free <a href="/documentation#network-server">reference implementation</a> of the Network Server in the <a href="https://github.com/owenwe/cdsWebserver/tree/master">open source project</a>. Your developer will use this code to set your organization up for receiving documents.</p>
                             <p>When a document and it's digital signature are received by the the receiver's hosted Network Server over the published <a href="/documentation#endpoints">endpoint</a>, the Network Server creates a transaction about the document for reporting purposes.</p>
-                            <p>The Network Server then <a href="/documentation#verify-signature">verifies the document's digital signature</a> by obtaining the sender's published SSL certificate from the EDExchange Directory Server.</p>
+                            <p>The Network Server then <a href="/documentation#verify-signature">verifies the document's digital signature</a> by obtaining the sender's published SSL certificate from the EdExchange Directory Server.</p>
                             <p>Once the document's signature is verified, the Network Server delivers the document to the recipient and sends an acknowledgement back to the sender, with the sender's transaction ID, to indicate that the document has been delivered.</p>
 
                     </div>
@@ -669,10 +669,10 @@
         <!-- Features Section -->
         <div class="row">
             <div class="col-lg-12">
-                <h2 class="page-header">EDExchange Features</h2>
+                <h2 class="page-header">EdExchange Features</h2>
             </div>
             <div class="col-md-6">
-                <p>EDExchange project features:</p>
+                <p>EdExchange project features:</p>
                 <ul class="list-unstyled">
                     <li>
                         <strong>Open Source</strong>
@@ -681,7 +681,7 @@
                     <li>Network Server</li>
                     <li>Exchange any type of document with member organizations.</li>
                 </ul>
-                <p>Both SOAP web services and REST can be used to access the EDExchange API.</p>
+                <p>Both SOAP web services and REST can be used to access the EdExchange API.</p>
             </div>
         </div>
         <!-- /.row -->
@@ -691,7 +691,7 @@
         <footer>
             <div class="row">
                 <div class="col-lg-12">
-                    <p>EDExchange by the Common Data Services (CDS) Task Force</p>
+                    <p>EdExchange by the Common Data Services (CDS) Task Force</p>
                 </div>
             </div>
         </footer>
@@ -1633,31 +1633,31 @@
     <div>Dear <span th:text="${user.name}"></span>,</div>
 
     <p>
-        Thank you for registering  <span th:text="${organization.name}"></span> with EDExchange.  Your application is
-        currently being reviewed.  When the review process is complete, your organization will be added to the EDExchange
+        Thank you for registering  <span th:text="${organization.name}"></span> with EdExchange.  Your application is
+        currently being reviewed.  When the review process is complete, your organization will be added to the EdExchange
         directory.
     </p>
 
     <p>
         A user account has been created for you with the username and password that you provided in registration form.
         You may login <a href="http://www.edexchange.net/login">here.</a> While your application is being reviewed, all
-        EDExchange features are available, but your organization will not be included in the directory until the application
+        EdExchange features are available, but your organization will not be included in the directory until the application
         is approved.
     </p>
 
     <p>
         When the status of your application changes, you will receive another email. Messages can also be viewed in the
-        EDExchange application by selecting "Messages" from the menu.
+        EdExchange application by selecting "Messages" from the menu.
     </p>
 
     <p>
-        Thank you from the EDExchange team.
+        Thank you from the EdExchange team.
     </p>
 </div>
 
 <div th:fragment="registration-admin-email">
     <p>
-        An application for EDExchange membership has been received for <a th:href="@{'#organization/' + ${organization.id}}"><span th:text="${organization.name}"></span></a>
+        An application for EdExchange membership has been received for <a th:href="@{'#organization/' + ${organization.id}}"><span th:text="${organization.name}"></span></a>
         You are required to review the application and organization information and enable the organization to accept
         the application.  If additional actions are required by the applicant, you may send the application a message
         <a ng-href="#message-form">here</a>.
@@ -1671,9 +1671,9 @@
 <div th:fragment="registration-thank-you">
     <h1>Thank you!</h1>
     <p>
-        Thank you for registering with EDExchange.  Your application is
+        Thank you for registering with EdExchange.  Your application is
         currently being reviewed. While your application is being reviewed, all
-        EDExchange features are available, but your organization will not be included in the directory until the application
+        EdExchange features are available, but your organization will not be included in the directory until the application
         is approved.
     </p>
 
@@ -1684,11 +1684,11 @@
 
     <p>
         When the status of your application changes, you will receive another email. Messages can also be viewed in the
-        EDExchange application by selecting "Messages" from the menu.
+        EdExchange application by selecting "Messages" from the menu.
     </p>
 
     <p>
-        Thank you from the EDExchange team.
+        Thank you from the EdExchange team.
     </p>
 </div>
 

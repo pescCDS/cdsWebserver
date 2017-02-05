@@ -1,7 +1,7 @@
 directoryserver_db_image:
     build: ./directoryServer/target/docker/database
     expose:
-     - "3306"
+     - "5432"
     container_name: directory-db
 networkserver_db_image:
       build: ./networkServer/target/docker/database
