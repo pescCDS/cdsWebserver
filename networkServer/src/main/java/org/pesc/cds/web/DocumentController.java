@@ -372,7 +372,7 @@ public class DocumentController {
                 String ext = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
                 String trFileName = uuid.toString() + "_document." + ext;
                 File outboxFile = new File(outboxDirectory, trFileName);
-                multipartFile.transferTo(outboxFile);
+
                 File requestFile = null;
                 tx.setSenderId(recordHolderDirectoryID);
                 tx.setSignerId(Integer.valueOf(localServerId));
@@ -387,6 +387,7 @@ public class DocumentController {
 
                 tx = transactionService.create(tx);
 
+                multipartFile.transferTo(outboxFile);
 
                 log.debug(String.format(
                         "saved Transaction: {%n  recipientId: %s,%n  senderId: %s,%n  fileFormat: %s%n}",

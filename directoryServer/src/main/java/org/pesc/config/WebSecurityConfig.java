@@ -66,6 +66,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/organizations",
                         "/endpoints",
                         "/organization-details",
+                        "/onboarding-guide",
                         "/swagger-ui/**",
                         "/documentation",
                         "/docs",

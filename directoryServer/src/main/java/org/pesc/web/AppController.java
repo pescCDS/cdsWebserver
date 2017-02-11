@@ -136,6 +136,16 @@ public class AppController {
         return "documentation";
     }
 
+    @RequestMapping({"/onboarding-guide"})
+    public String getOnboardingGuide(Model model) {
+        buildUserModel(model);
+
+        model.addAttribute("github", githubURL);
+        model.addAttribute("apiURL", "https://" + restAPIHost);
+
+        return "onboarding-guide";
+    }
+
     @RequestMapping({"/endpoint-selector"})
     public String getEndpointSelectorFragment(Model model) {
         buildUserModel(model);
