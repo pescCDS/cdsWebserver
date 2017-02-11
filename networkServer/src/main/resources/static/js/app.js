@@ -38,9 +38,11 @@
         .service('toasterService', toasterService)
         .service('fileUpload', fileUpload)
         .service('settingsService', settingsService)
+        .service('transcriptRequestService', transcriptRequestService)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
         .controller("UploadController", UploadController)
+        .controller("TranscriptRequestController", TranscriptRequestController)
         .config(config)
         .run(['transactionService', function(transactionService) {
             transactionService.initialize();
@@ -59,6 +61,11 @@
                 templateUrl: "upload",
                 controller: "UploadController",
                 controllerAs: "uploadCtrl"
+            })
+            .when("/transcript-request-form", {
+                templateUrl: "transcript-request-form",
+                controller: "TranscriptRequestController",
+                controllerAs: "trCtrl"
             })
             .when("/home", {
                 templateUrl: "about"
@@ -478,6 +485,31 @@
     }
 
 
+    transcriptRequestService.$inject = ['$http', '$q'];
+
+    function transcriptRequestService($http, $q) {
+
+
+        var service = {
+            create: create
+        };
+
+        return service;
+
+        function create(obj) {
+            var deferred = $q.defer();
+
+            $http.post('/api/v1/transcript-requests', obj).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+    }
+
+
 
     transactionService.$inject = [ '$http', '$q', '$cacheFactory', 'toasterService'];
 
@@ -553,6 +585,98 @@
             }
         };
     };
+
+    TranscriptRequestController.$inject = ['transcriptRequestService', 'toasterService'];
+    function TranscriptRequestController(transcriptRequestService, toasterService) {
+
+
+        function Source(schoolCode, schoolCodeType, studentCurrentlyEnrolled, editing) {
+            this.schoolCode = schoolCode;
+            this.schoolCodeType = schoolCodeType;
+            this.studentCurrentlyEnrolled = studentCurrentlyEnrolled;
+            if (editing == true) {
+                this.editing = true;
+            }
+        }
+
+        function Destination(schoolCode, schoolCodeType, editing) {
+            this.schoolCode = schoolCode;
+            this.schoolCodeType = schoolCodeType;
+
+            if (editing == true) {
+                this.editing = true;
+            }
+
+        }
+
+        var self = this;
+        self.request = {
+            sourceInstitutions : [],
+            destinationInstitutions : [],
+            studentRelease : false,
+            studentReleasedMethod : '',
+            studentBirthDate : '',
+            studentFirstName : '',
+            studentMiddleName : '',
+            studentLastName : '',
+            studentEmail : '',
+            studentPartialSsn : ''
+        };
+        self.submitTranscriptRequest = submitTranscriptRequest;
+        self.createSource = createSource;
+        self.createDestination = createDestination;
+        self.edit  = edit;
+        self.save = save;
+        self.remove = remove;
+        self.showForm = showForm;
+
+        function showForm(obj) {
+            return obj.hasOwnProperty('editing') && obj.editing == true;
+        }
+
+        function remove(institution) {
+            var index = self.request.destinationInstitutions.indexOf(institution);
+            if (index > -1) {
+                self.request.destinationInstitutions.splice(index, 1);
+                return;
+            }
+
+            index = self.request.sourceInstitutions.indexOf(institution);
+            if (index > -1) {
+                self.request.sourceInstitutions.splice(index, 1);
+                return;
+            }
+
+        }
+
+        function edit(institution) {
+            institution.editing = true;
+        }
+
+        function save(institution){
+            delete institution.editing;
+        }
+
+        function createSource() {
+            self.request.sourceInstitutions.unshift(new Source('','',false, true));
+        }
+        function createDestination() {
+            self.request.destinationInstitutions.unshift(new Destination('','', true));
+        }
+
+        function submitTranscriptRequest() {
+            console.log(self.request);
+            transcriptRequestService.create(self.request).then(function(response){
+                if (response.status == 200) {
+                    toasterService.success("Your transcript request has been successfully delivered to the recipient with directory id " + response.data[0].recipientId);
+                }
+                else {
+                    toasterService.ajaxInfo(response.data);
+                }
+            });
+        }
+
+    }
 
 
     function toNumber() {

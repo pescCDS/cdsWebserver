@@ -30,7 +30,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -98,8 +97,7 @@ public class AppController {
             activeUser.setName(authentication.getName());
             model.addAttribute("activeUser", activeUser);
 
-        }
-        else {
+        } else {
             model.addAttribute("hasSupportRole", false);
             model.addAttribute("hasAdminRole", false);
         }
@@ -122,20 +120,15 @@ public class AppController {
     private void setContentType(HttpServletResponse response, String fileFormat) {
         if (fileFormat.equalsIgnoreCase("pdf")) {
             response.setContentType("application/pdf");
-        }
-        else if (fileFormat.equalsIgnoreCase("text")) {
+        } else if (fileFormat.equalsIgnoreCase("text")) {
             response.setContentType("text/plain");
-        }
-        else if (fileFormat.equalsIgnoreCase("xml")) {
+        } else if (fileFormat.equalsIgnoreCase("xml")) {
             response.setContentType("text/xml");
-        }
-        else if (fileFormat.equalsIgnoreCase("pescxml")) {
+        } else if (fileFormat.equalsIgnoreCase("pescxml")) {
             response.setContentType("text/xml");
-        }
-        else if (fileFormat.equalsIgnoreCase("image")) {
+        } else if (fileFormat.equalsIgnoreCase("image")) {
             response.setContentType("image/png"); //TODO: how to get actual MIME type ???
-        }
-        else if (fileFormat.equalsIgnoreCase("edi")) {
+        } else if (fileFormat.equalsIgnoreCase("edi")) {
             response.setContentType("application/edi-x12"); //TODO: could be application/edifact ???
         }
 
@@ -158,8 +151,8 @@ public class AppController {
                 throw new RuntimeException("Invalid transaction id.");
             }
 
-            String filePath = BooleanUtils.isTrue(showRequest)?transaction.getRequestFilePath():transaction.getFilePath();
-            String fileFormat = BooleanUtils.isTrue(showRequest)?"xml":transaction.getFileFormat();
+            String filePath = BooleanUtils.isTrue(showRequest) ? transaction.getRequestFilePath() : transaction.getFilePath();
+            String fileFormat = BooleanUtils.isTrue(showRequest) ? "xml" : transaction.getFileFormat();
 
             InputStream is = new FileInputStream(new File(filePath));
 
@@ -184,7 +177,7 @@ public class AppController {
                 throw new RuntimeException("Invalid transaction id.");
             }
 
-            String filePath =transaction.getAckFilePath();
+            String filePath = transaction.getAckFilePath();
             String fileFormat = "xml";
 
             InputStream is = new FileInputStream(new File(filePath));
@@ -235,7 +228,15 @@ public class AppController {
         return "fragments :: upload";
     }
 
-    @RequestMapping({ "/", "/home" })
+    @RequestMapping("/transcript-request-form")
+    public String getTranscriptRequestForm(Model model) {
+
+        buildCommonModel(model);
+
+        return "fragments :: transcript-request-form";
+    }
+
+    @RequestMapping({"/", "/home"})
     public String viewHome(Model model) {
 
         buildCommonModel(model);
@@ -248,7 +249,6 @@ public class AppController {
 
         return "fragments :: about";
     }
-
 
 
 }

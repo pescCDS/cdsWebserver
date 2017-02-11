@@ -374,6 +374,180 @@
     </form>
 </div>
 
+<div th:fragment="tr-institution">
+    <div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div style="text-align: right;">
+                    <button ng-show="trCtrl.showForm(institution) == false" type="button" ng-click="trCtrl.edit(institution)" class="btn btn-default btn-sm">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="trCtrl.showForm(institution) == true" type="button" ng-click="trCtrl.save(institution)" class="btn btn-default btn-sm">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" class="btn btn-default btn-sm" ng-click="trCtrl.remove(institution)">
+                        <span class="glyphicon glyphicon-remove-circle" ng-click="trCtrl.delete(institution)"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div ng-show="trCtrl.showForm(institution) == true">
+                <div class="col-sm-6">
+                    <b>School code</b>
+                    <input name="schoolCode" class="form-control" type="text" ng-model="institution.schoolCode" placeholder="School Code" required="required"> </input>
+                </div>
+                <div class="col-sm-6">
+                    <b>Code type</b>
+                    <select name="schoolCodeType" class="form-control" required="required" ng-model="institution.schoolCodeType">
+                        <option value=""></option>
+                        <option value="ACT">ACT</option>
+                        <option value="ATP">ATP</option>
+                        <option value="FICE">FICE</option>
+                        <option value="IPEDS">IPEDS</option>
+                        <option value="OPEID">OPEID</option>
+                    </select>
+                </div>
+            </div>
+
+            <div ng-show="trCtrl.showForm(institution) == false">
+                <div class="col-sm-6">
+                    <div><b>School code</b></div>
+                    <div class="col-sm-6">{{institution.schoolCode}}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div><b>Code type</b></div>
+                    <div class="col-sm-6">{{institution.schoolCodeType}}</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div th:fragment="transcript-request-form">
+
+    <form name="transcriptRequestForm" ng-submit="transcriptRequestForm.$valid && trCtrl.submitTranscriptRequest()" novalidate="novalidate" style="margin-bottom: 100px;">
+
+
+        <div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div>
+                        <div style="float:right;">
+                            <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="trCtrl.createSource()"></span>
+                        </div>
+
+                        <div class="ed-title">Record Holding Institution(s)</div>
+
+                    </div>
+                    <div ng-repeat="institution in trCtrl.request.sourceInstitutions">
+                        <div class="well" style="position: relative; padding: 15px;">
+                            <div th:include="::tr-institution"></div>
+                        <span  class="checkbox-inline" style="margin: 10px 0 10px 0;"> <input
+                                type="checkbox"
+                                ng-model="institution.studentCurrentlyEnrolled" checked="false"> <strong>Currently Enrolled</strong></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div>
+                        <div style="float:right;">
+                            <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="trCtrl.createDestination()"></span>
+                        </div>
+                        <div class="ed-title">Requesting Institution(s)</div>
+                    </div>
+
+                    <div ng-repeat="institution in trCtrl.request.destinationInstitutions">
+                        <div class="well" style="position: relative; padding: 15px;">
+                            <div th:include="::tr-institution"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-sm-12">
+                    <div class="ed-title">Student Information</div>
+
+                    <div class="form-group">
+
+                        <span  class="checkbox-inline"> <input
+                                type="checkbox"
+                                ng-model="trCtrl.request.studentRelease" checked="false"> <strong>Student Release Authorized Indicator</strong></span>
+                        </span>
+
+                    </div>
+
+                    <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentReleasedMethod.$invalid && (!transcriptRequestForm.studentReleasedMethod.$pristine || transcriptRequestForm.$submitted) }">
+                        <div><strong>Student Release Authorized Method</strong></div>
+                        <select name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="trCtrl.request.studentReleasedMethod" required="required">
+                            <option value=""></option>
+                            <option value="SIGNATURE">SIGNATURE</option>
+                            <option value="ELECTRONIC_SIGNATURE">ELECTRONIC_SIGNATURE</option>
+                            <option value="LEGITIMATE_EDUCATIONAL_INTEREST">LEGITIMATE_EDUCATIONAL_INTEREST</option>
+                            <option value="OTHER">OTHER</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentBirthDate.$invalid && (!transcriptRequestForm.studentBirthDate.$pristine || transcriptRequestForm.$submitted) }">
+                        <div><strong>Student Date of Birth</strong></div>
+                        <input name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentBirthDate" placeholder="format: 01/01/1995" required="required"> </input>
+                    </div>
+
+                    <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentFirstName.$invalid && (!transcriptRequestForm.studentFirstName.$pristine || transcriptRequestForm.$submitted) }">
+                        <div><strong>Student First Name</strong></div>
+                        <input name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentFirstName"> </input>
+                    </div>
+
+                    <div class="form-group">
+                        <div><strong>Student Middle Name</strong></div>
+                        <input class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentMiddleName"> </input>
+                    </div>
+
+                    <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentLastName.$invalid && (!transcriptRequestForm.studentLastName.$pristine || transcriptRequestForm.$submitted) }">
+                        <div><strong>Student Last Name</strong></div>
+                        <input name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentLastName"> </input>
+                    </div>
+
+                    <div class="form-group">
+                        <div><strong>Student Email</strong></div>
+                        <input class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentEmail"> </input>
+                    </div>
+
+                    <div class="form-group">
+                        <div><strong>Student Last 4 SSN</strong></div>
+                        <input class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentPartialSsn"> </input>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-send"></span> Submit
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
 <div th:fragment="about">
     <div>
 

@@ -65,7 +65,10 @@
                         <a class="item" href="#transaction-report">Transactions</a>
                     </li>
                     <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/myorg')}">
-                        <a class="item" href="#upload">Send</a>
+                        <a class="item" href="#upload">Send Transcript</a>
+                    </li>
+                    <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/transcript-request-form')}">
+                        <a class="item" href="#transcript-request-form">Request Transcript</a>
                     </li>
 
                 </ul>
