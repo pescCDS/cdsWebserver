@@ -35,6 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -198,7 +199,7 @@ public class DirectoryApplicationTests {
 		try {
 			EndpointResource.validateEndpointURL(endpointURL, certificateName);
 
-		} catch (URISyntaxException e) {
+		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 

@@ -127,7 +127,7 @@ public class EndpointResource {
             validateEndpointURL(endpoint.getAddress(), organizationService.getNetworkDomainName(endpoint.getOrganization().getId()));
 
         }
-        catch (URISyntaxException e) {
+        catch (MalformedURLException e) {
             throw new ApiException(e, Response.Status.BAD_REQUEST, "Invalid URL");
         }
 
@@ -146,7 +146,7 @@ public class EndpointResource {
             validateEndpointURL(endpoint.getAddress(), organizationService.getNetworkDomainName(endpoint.getOrganization().getId()));
 
         }
-        catch (URISyntaxException e) {
+        catch (MalformedURLException e) {
             throw new ApiException(e, Response.Status.BAD_REQUEST, "Invalid URL");
         }
 
@@ -179,23 +179,23 @@ public class EndpointResource {
         return false;
     }
 
-    public static String validateEndpointURL(String url, String networkHostName) throws URISyntaxException {
-        URI uri = new URI(url);
-        if (!"https".equalsIgnoreCase(uri.getScheme())) {
+    public static String validateEndpointURL(String url, String networkHostName) throws MalformedURLException {
+        URL _url = new URL(url);
+        if (!"https".equalsIgnoreCase(_url.getProtocol())) {
             throw new ApiException(
-                    new IllegalArgumentException(String.format("HTTPS is required for endpoint URLs.", uri.getHost(), networkHostName)),
+                    new IllegalArgumentException(String.format("HTTPS is required for endpoint URLs.", _url.getHost(), networkHostName)),
                     Response.Status.BAD_REQUEST, "/endpoints");
         }
         //If the hostname's don't match, or if if the hostname is not contained in the certificate's comman name (wildcard might be used).
-        if (!uri.getHost().equalsIgnoreCase(networkHostName) && !wildcardCheck(networkHostName, uri.getHost())) {
+        if (!_url.getHost().equalsIgnoreCase(networkHostName) && !wildcardCheck(networkHostName, _url.getHost())) {
 
 
             throw new ApiException(
                     new IllegalArgumentException(
-                            String.format("The endpoint hostname %s does not match the network certificate hostname %s.  Have you uploaded your network certificate?", uri.getHost(), networkHostName != null ? networkHostName : "")),
+                            String.format("The endpoint hostname %s does not match the network certificate hostname %s.  Have you uploaded your network certificate?", _url.getHost(), networkHostName != null ? networkHostName : "")),
                     Response.Status.BAD_REQUEST, "/endpoints");
         }
-        return uri.getHost();
+        return _url.getHost();
 
     }
 

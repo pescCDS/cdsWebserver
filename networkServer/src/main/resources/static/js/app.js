@@ -676,7 +676,30 @@
             });
         }
 
+        //TODO: remove test data!!!
+
+        var source = new Source('001233','FICE', true, false);
+
+        var dest = new Destination('001150', 'FICE', false);
+
+        self.request.sourceInstitutions.push(source);
+        self.request.destinationInstitutions.push(dest);
+
+        self.request.studentBirthDate = '01/01/1995';
+        self.request.studentFirstName = 'James';
+        self.request.studentLastName = 'Whetstone';
+        self.request.studentMiddleName = 'Hobart';
+        self.request.studentEmail = 'james.whetstone.x@gmail.com';
+        self.request.studentPartialSsn = '2100';
+        self.request.studentRelease = true;
+        self.request.studentReleasedMethod = 'SIGNATURE';
+
+
     }
+
+
+
+
 
 
     function toNumber() {

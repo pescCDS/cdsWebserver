@@ -261,8 +261,8 @@ public class TranscriptRequestController {
         Preconditions.checkArgument(transcriptRequestDTO.getDestinationInstitutions().size() == 1) ;
         Preconditions.checkArgument(transcriptRequestDTO.getSourceInstitutions().size() == 1);
 
-        String fileFormat = "PESCXML";
-        String documentType = "Transcript Request";
+        String fileFormat = DocumentFormat.PESCXML.getFormatName();
+        String documentType = DocumentType.TRANSCRIPT_REQUEST.getDocumentName();
         String department = "Administration";
 
         List<Transaction> transactions = new ArrayList<Transaction>();
