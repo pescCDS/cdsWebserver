@@ -1620,7 +1620,7 @@
                     <div>
                         <strong>Name: </strong>
                     <span>
-                            <input type="text" placeholder="Name" required="required" ng-model="orgCtrl.institution.name" width="100%"> </input>
+                            <input type="text" placeholder="Name" required="required" ng-model="orgCtrl.institution.name" style="width: 300px;"> </input>
                     </span>
 
                     </div>
@@ -1628,7 +1628,7 @@
                     <div>
                         <strong>Website: </strong>
                     <span>
-                        <input type="url" placeholder="http://" required="required" ng-model="orgCtrl.institution.website" width="100%"> </input>
+                        <input type="url" placeholder="http://" required="required" ng-model="orgCtrl.institution.website" style="width: 300px;"> </input>
                     </span>
                     </div>
                     <div>
@@ -1735,7 +1735,7 @@
                                      </select>
                                  </div>
                                  <div class="col-md-4">
-                                     <input class="form-control" type="text" ng-model="schoolCode.code"/>
+                                     <input class="form-control" type="text" ng-model="schoolCode.code" required="required"/>
                                  </div>
                                  <div class="col-md-4">
                                      <button type="button" class="btn btn-default" ng-click="orgCtrl.saveSchoolCodeForInstitution(schoolCode)">

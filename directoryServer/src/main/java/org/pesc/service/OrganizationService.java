@@ -199,7 +199,15 @@ public class OrganizationService {
         for (SchoolCode schoolCode : schoolCodes) {
 
             schoolCode.setOrganizationId(savedOrg.getId());
-            organization.getSchoolCodes().add(schoolCodesService.nonSecuredCreate(schoolCode));
+
+            try {
+                organization.getSchoolCodes().add(schoolCodesService.nonSecuredCreate(schoolCode));
+            }
+            catch (RuntimeException ex) {
+
+                throw new IllegalArgumentException(String.format("A school code of type %s and value %s already exists and cannot be duplicated.  Run a search for an institution with the given code and code type.", schoolCode.getCodeType(), schoolCode.getCode()));
+            }
+
         }
 
         return savedOrg;

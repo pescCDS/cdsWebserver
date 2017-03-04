@@ -1060,14 +1060,29 @@
                 toasterService.error("You must provide at least one school code for the institution.");
                 return;
             }
-            organizationService.saveOrg(self.institution);
+
+            organizationService.createInstitution(self.institution).then(function (data) {
+                toasterService.info("Successfully created an institution with id " + data.id);
+                organizationService.createRelation(self.org.id, data.id).then(function(response){
+
+                    if (response.status == 200) {
+                        toasterService.info("Successfully added " + data.name + " as a serviced institution.");
+                        self.org.institutions.push(data);
+                    }
+                    else {
+                        toasterService.error("Failed to add " + data.name + " as a serviceable institution.");
+                    }
+                });
+
+            });
+
         }
 
         function createInstitution() {
             self.showInstitutionForm = true;
             self.institution = {
                 name: '',
-                organizationTypes: ['Institution'],
+                organizationTypes: [$window.organizationTypes[1]],
                 street: '',
                 city: '',
                 state: '',
@@ -2066,6 +2081,7 @@
             deleteOrg: deleteOrg,
             updateOrg: updateOrg,
             createOrg: createOrg,
+            createInstitution: createInstitution,
             find: find,
             getActiveOrg: getActiveOrg,
             setActiveOrg: setActiveOrg,
@@ -2088,7 +2104,8 @@
             getNetworkCertificate: getNetworkCertificate,
             updateNetworkCertificate: updateNetworkCertificate,
             updateOAuthSecret: udpateOAuthSecret,
-            getOAuthSecret: getOAuthSecret
+            getOAuthSecret: getOAuthSecret,
+            createRelation: createRelation
         };
 
         return service;
@@ -2330,6 +2347,33 @@
 
             return deferred.promise;
         }
+
+        function createInstitution(org) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/institutions/', org).success(function (data) {
+                angular.extend(org, data);
+                deferred.resolve(org);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while updating an institution.");
+            });
+
+            return deferred.promise;
+        }
+
+        function createRelation(serviceProviderID, institutionID) {
+
+            var deferred = $q.defer();
+
+            $http.post('/services/rest/v1/institutions/relation', { 'serviceProviderID' : serviceProviderID, 'institutionID' : institutionID }).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
 
         function register(formObject) {
 
