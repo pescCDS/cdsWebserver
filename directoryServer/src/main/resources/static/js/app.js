@@ -1047,6 +1047,37 @@
         self.getOAuthSecret = getOAuthSecret;
         self.oauthSecretReplacement = '';
         self.limit = 30;
+        self.showInstitutionForm = false;
+        self.institution;
+        self.saveInstitution = saveInstitution;
+        self.createInstitution = createInstitution;
+        self.addSchoolCodeToInstitution = addSchoolCodeToInstitution;
+        self.saveSchoolCodeForInstitution = saveSchoolCodeForInstitution;
+
+
+        function saveInstitution() {
+            if (self.institution.schoolCodes.length == 0) {
+                toasterService.error("You must provide at least one school code for the institution.");
+                return;
+            }
+            organizationService.saveOrg(self.institution);
+        }
+
+        function createInstitution() {
+            self.showInstitutionForm = true;
+            self.institution = {
+                name: '',
+                organizationTypes: ['Institution'],
+                street: '',
+                city: '',
+                state: '',
+                zip: '',
+                schoolCodes: [],
+                telephone: '',
+                website: 'http://'
+            };
+
+        }
 
         function getOAuthSecret() {
            organizationService.getOAuthSecret(self.org).then(function(response){
@@ -1417,16 +1448,16 @@
             return schoolCode.hasOwnProperty('editing');
         }
 
-        function removeSchoolCodeFromModel(schoolCode) {
-            var index = self.org.schoolCodes.indexOf(schoolCode);
+        function removeSchoolCodeFromModel(schoolCode, org) {
+            var index = org.schoolCodes.indexOf(schoolCode);
             if (index > -1) {
-                self.org.schoolCodes.splice(index, 1);
+                org.schoolCodes.splice(index, 1);
             }
         }
 
-        function removeSchoolCode(schoolCode) {
+        function removeSchoolCode(schoolCode, org) {
             if (schoolCode.hasOwnProperty("id")) {
-                removeSchoolCodeFromModel(schoolCode);
+                removeSchoolCodeFromModel(schoolCode, org);
                 schoolCodesService.removeSchoolCode(schoolCode).then(function (data) {
                     delete schoolCode.editing;
                     console.log("Successfully remove school code.");
@@ -1434,28 +1465,56 @@
 
             }
             else {
-                removeSchoolCodeFromModel(schoolCode);
+                removeSchoolCodeFromModel(schoolCode, org);
             }
+        }
+
+        function isValidSchoolCode(schoolCode) {
+            if (schoolCode.code == '' || schoolCode.codeType == '') {
+                toasterService.info("Invalid school code.  Please select a code and type and provide the code.");
+                return false;
+            }
+
+            return true;
+        }
+
+        function isDuplicateSchoolCode(schoolCodes, schoolCode) {
+            for (var i = 0; i < schoolCodes.length; i++) {
+                if (schoolCodes[i] === schoolCode) {
+                    continue;
+                }
+                if (schoolCodes[i].codeType === schoolCode.codeType) {
+                    toasterService.info("An " + schoolCode.codeType + " is already defined for this school. " +
+                        " Please edit the existing " + schoolCode.codeType + " code or choose an unused code type.");
+                    return true;
+                }
+            }
+
+            return false
+        }
+        function saveSchoolCodeForInstitution(schoolCode) {
+            if (!isValidSchoolCode(schoolCode)) {
+                return;
+            }
+
+            //Also make sure a duplicate code isn't being used.
+            if (isDuplicateSchoolCode(self.institution.schoolCodes, schoolCode)) {
+                return;
+            }
+
+            delete schoolCode.editing;
         }
 
         function saveSchoolCode(schoolCode) {
 
             //Validate code parameters
-            if (schoolCode.code == '' || schoolCode.codeType == '') {
-                toasterService.info("Invalid school code.  Please select a code and type and provide the code.");
+            if (!isValidSchoolCode(schoolCode)) {
                 return;
             }
 
             //Also make sure a duplicate code isn't being used.
-            for (var i = 0; i < self.org.schoolCodes.length; i++) {
-                if (self.org.schoolCodes[i] === schoolCode) {
-                    continue;
-                }
-                if (self.org.schoolCodes[i].codeType === schoolCode.codeType) {
-                    toasterService.info("An " + schoolCode.codeType + " is already defined for this school. " +
-                        " Please edit the existing " + schoolCode.codeType + " code or choose an unused code type.");
-                    return;
-                }
+            if (isDuplicateSchoolCode(self.org.schoolCodes, schoolCode)) {
+                return;
             }
 
             delete schoolCode.editing;
@@ -1476,6 +1535,17 @@
             }
 
             self.org.schoolCodes.unshift(schoolCode);
+        }
+
+
+        function addSchoolCodeToInstitution() {
+            var schoolCode = {
+                code: '',
+                codeType: '',
+                editing: true
+            }
+
+            self.institution.schoolCodes.unshift(schoolCode);
         }
 
         function createEndpoint() {

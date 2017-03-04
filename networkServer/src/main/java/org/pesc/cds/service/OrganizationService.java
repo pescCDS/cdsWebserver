@@ -31,6 +31,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.config.CacheConfig;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.EndpointMode;
 import org.pesc.cds.model.IdList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,13 +122,13 @@ public class OrganizationService {
         return institution;
     }
 
-    public String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department) {
+    public String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department, EndpointMode mode) {
 
         CloseableHttpClient client = HttpClients.custom().build();
         String endpointURI = null;
         try {
             StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
-            uri.append("?organizationId=").append(orgID).append("&enabled=true").append("&mode=LIVE") ;
+            uri.append("?organizationId=").append(orgID).append("&enabled=true").append("&mode=").append(mode.getMode()) ;
             if (StringUtils.isNotBlank(documentFormat))
                 uri.append("&documentFormat=").append(documentFormat);
 
@@ -179,7 +180,7 @@ public class OrganizationService {
 
         int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
         tx.setRecipientId(orgID);
-        return getEndpointForOrg(orgID, documentFormat, documentType, department);
+        return getEndpointForOrg(orgID, documentFormat, documentType, department, EndpointMode.LIVE);
     }
 
     public List<Integer> getInstitutionsForServiceProvider(){

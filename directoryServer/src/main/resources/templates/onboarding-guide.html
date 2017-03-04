@@ -57,6 +57,10 @@
             <div class="sub-step"><a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents</a></div>
             <div class="sub-step"><a href="#upload-network-certificate">Step 5c: Upload the Network Server SSL Certificate</a></div>
             <div class="sub-step"><a href="#upload-signing-certificate">Step 5d: Upload the Signing Certificate</a></div>
+            <div class="sub-step"><a href="#create-oauth-secret">Step 5e: Set the OAuth Secret</a></div>
+            <div class="sub-step"><a href="#create-college-transcript-endpoint">Step 5f: Define an Endpoint for Handling PESC College Transcripts.</a></div>
+            <div><a href="#start-network-server">Step 6: Start the EdExchange Network Server</a></div>
+
 
         </div>
         <div class="col-sm-9" id="main-window">
@@ -64,8 +68,10 @@
             <h2 id="about-this-guide">About this Guide</h2>
             <p>
                 This guide provides detailed, step-by-step instructions on how to deploy the reference implementation
-                of the network server to send and receive documents using EdExchange.  Upon completion of this guide, your organization will have become an active member of the EdExchange network and have
-                successfully sent and received a test document with Butte College.
+                of the network server to send and receive documents using EdExchange.  Upon completion of this guide, your organization
+                will have become an active member of the EdExchange network and have
+                successfully requested and received a PESC college transcript with Butte College based on test data and
+                test student "John Doe".
             </p>
 
             <h2 id="join">Step 1: Join the EdExchange Network</h2>
@@ -89,7 +95,7 @@
 
             <h3 id="aws-console">Step 2a: Sign In to the AWS console</h3>
             <p>
-                Log into the AWS console located at <a href="https://aws.amazon.com/console/">https://aws.amazon.com/console/</a>.  If this link no
+                Log into the AWS console located at <a target="_blank" href="https://aws.amazon.com/console/">https://aws.amazon.com/console/</a>.  If this link no
                 longer works, do a Google search on "Amazon Web Services console" and use the search results to find the
                 AWS console. Select the "Sign In To the Console" button and login.  If you don't have an Amazon account that
                 is appropriate for hosting the EdExchange network server, you'll need to create an Amazon account.
@@ -124,7 +130,7 @@
                     Select an instance type that makes sense for the amount of network traffic you
                     expect to have.  Initially, you many choose to use the free tier just to establish your
                     presence on the EdExchange network.  Later, you can change the instance type to something more
-                    appropriate without impacting the server's operations.
+                    appropriate.
 
                 </li>
             </ol>
@@ -182,7 +188,8 @@
             </p>
             <img src="assets/images/elastic-ip.png" />
             <p>Note the IP address and close the dialog.  Next, select the IP address you just created from the list of Elastic
-                IP Addresses and from the Actions dropdown, select "Associate address".</p>
+                IP Addresses and from the Actions dropdown, select "Associate address".  Using the dialog, associate the IP address
+            with your newly created server instance using the server name you noted earlier in the process. E.g. i-0fe3dc9b47b98fb63</p>
 
             <img src="assets/images/associate-address.png" />
 
@@ -603,7 +610,7 @@ or use your favorite IDE to develop and run
             <ol>
                 <li>Sign in to the AWS Management Console and open the Amazon EC2 console at <a class="ulink" href="https://console.aws.amazon.com/ec2/" target="_blank">https://console.aws.amazon.com/ec2/</a>.</li>
                 <li>In the regions list in the upper right corner of the console, choose the region that you launched the instance in.</li>
-                <li>In the navigation pane, choose <span>Instances</span>.</li>
+                <li>In the navigation pane, choose <span>Running Instances</span>.</li>
                 <li>In the table, choose the instance that you created for EdExchange.</li>
                 <li>In the bottom pane, on the <span>Description</span> tab, select/click the link for the security group next to <span>Security groups</span>.  The security group configuration options will be in the bottom pane.</li>
                 <li>Select the <span>Inbound</span> tab and then <span>Edit</span> and then <span>Add Rule</span> from the popup dialog.</li>
@@ -656,8 +663,8 @@ IMPORTANT NOTES:
         </pre>
             </p>
             <div class="ed-title">Create a Keystore Usable by the EdExchange Network Server</div>
-            <p>Invoke the command below and when prompted, input a password.  Note the password you use for future use.  When command completes, a new file <span>keystore.p12</span> will
-            exist in the current directory.</p>
+            <p>Invoke the commands below and when prompted, input a password.  Note the password you use for future use.  When the command completes, a new file <span>keystore.p12</span> will
+            exist in the current directory.  Note that in the example command below, you'll need to replace "www.example.com" with your actual domain name.</p>
             <p>
                 <div><kbd>$ cd ~</kbd></div>
                 <div><kbd>$  sudo openssl pkcs12 -export -in /etc/letsencrypt/live/www.example.com/fullchain.pem -inkey /etc/letsencrypt/live/www.example.com/privkey.pem -out keystore.p12</kbd></div>
@@ -670,7 +677,7 @@ IMPORTANT NOTES:
             </p>
             <p>
                 <div><kbd>$ sudo sed -i 's/#keyUsage/keyUsage/g' /etc/ssl/openssl.cnf</kbd></div>
-                <div><kbd>$ openssl req -x509 -newkey rsa:2048 -keyout signing_key.pem -out signing_certificate.pem -days 3650 -extensions mysection -config my.cnf</kbd></div>
+                <div><kbd>$ openssl req -x509 -newkey rsa:2048 -keyout signing_key.pem -out signing_certificate.pem -days 3650 -extensions v3_req</kbd></div>
                 <div><kbd>$ openssl pkcs12 -export -in signing_certificate.pem -inkey signing_key.pem -out temp.p12 -name EdExchange</kbd></div>
                 <div><kbd>$ keytool -importkeystore -destkeystore keystore.jks -srckeystore temp.p12 -srcstoretype pkcs12 -alias EdExchange</kbd></div>
             </p>
@@ -681,7 +688,7 @@ IMPORTANT NOTES:
             uses the certificate to verify that endpoint URLs are hosted by the server specified in the SSL certificate.  So in the step, you will be uploading your PEM encoded network certificate to the
             directory server.</p>
             <ol>
-                <li>From the /home/ubuntu directory of your AWS server instnace, extract the PEM encoded certificate from the keystore created earlier:
+                <li>From the /home/ubuntu directory of your AWS server instance, extract the PEM encoded certificate from the keystore created earlier:
                     <p>
                         <kbd>$ openssl pkcs12 -in keystore.p12 -clcerts -nokeys -out network_certificate.pem</kbd>
                     </p>
@@ -731,7 +738,7 @@ uOsK1KC+somcZPjBg3T9Nnf6esa6AXAb5GfjXujHim+SM3TaAwEr/JNMW2wc9J7M
             </ol>
 
 
-            <h2 id="upload-signing-certificate">Step 5c: Upload the Signing Certificate</h2>
+            <h2 id="upload-signing-certificate">Step 5d: Upload the Signing Certificate</h2>
             <p>One of the requirements to receive documents throught the EdExchange network, is that the EdExchange directory server must have the SSL certificate used to verify the digital signature of a received document.
                 When a network server receives a document from a member, the signing certificate is retrieved from the directory server and the digital sigature is verified using the public key portion of the certificate.
                 </p>
@@ -776,8 +783,60 @@ UefzAZM0VN/hj/4DZUwELgqNxDHlSeKKEOyc
                 </li>
             </ol>
 
+            <h2 id="create-oauth-secret">Step 5e: Set the OAuth Secret</h2>
+            <p>OAuth 2.0 is used by the reference implementation of the network server to authenticate and authorize HTTP
+            requests related to document upload and acknowledgements.  This section describes how to configure OAuth 2.0</p>
+            <ol>
+                <li>Open a web browser on your computer and login to the directory server at https:/edex-directory-open-pilot.ccctechcenter.org and select "My Organization" from the menu.</li>
+                <li>In the section titled "OAUTH", select/click the pencil icon.</li>
+                <li>In the "Secret" field, enter a passphrase.  Note the passphrase and keep it secure.  You will need to
+                    provide this passphrase to your network server as one of the configuration parameters when start the network server on your AWS instance.</li>
+
+             </ol>
+
+            <h2 id="create-college-transcript-endpoint">Step 5f: Define an Endpoint for Handling PESC College Transcripts.</h2>
+            <p>By default, the reference implementation of the network server accepts documents at /api/v1/documents/inbox. If your server name
+                is www.example.com, then your fully qualified endpoint URL would be https://www.example.com/api/v1/documents/inbox.  To make
+                this endpoint discoverable by entities that wish to send you a document, you must add the URL  to your list of endpoints on the directory server. This
+                section describes how to add the necesssary endpoint to the directory server so you can receive a PESC college transcripts.
+            </p>
+            <ol>
+                <li>Open a web browser on your computer and login to the directory server at https:/edex-directory-open-pilot.ccctechcenter.org and select "My Organization" from the menu.</li>
+                <li>In the section titled "Endpoints", select/click the "plus" icon. This should present a web form for inputing information about the endpoint.</li>
+                <li>Fill in the entire web form:
+                    <ol>
+                        <li>The URL: the server/domain name must match the domain name contained in the network certificate you uploaded earlier in the process.  This
+                        will be automatically populated. if your domain name is "www.example.com", then the URL should be "https://www.example.com/api/v1/documents/inbox".</li>
+                        <li>A description of the endpoint. E.g.  "PESC College Transcripts" </li>
+                        <li>Document Format:  choose "PESCCML" from the list.</li>
+                        <li>Document Types: choose "College Transcript" from the list.</li>
+                        <li>Departments: choose "Administration" from the list.</li>
+                        <li>Mode: choose "LIVE" from the list.</li>
+                    </ol>
+
+                </li>
+            </ol>
 
         </div>
+
+        <h2 id="start-network-server">Step 6: Start the EdExchange Network Server</h2>
+        <p>This section describes how to start the network server hosted on your AWS ubuntu instance.</p>
+
+        <ol>
+            <li><a href="#connect-to-server">Login to your AWS server instance.</a></li>
+            <li>Verify that you have the following files in the /home/ubuntu (the current users's home directory) directory after you're logged in to the AWS server:
+                <ul>
+                    <li>
+                        <b>keystore.p12</b> You should have created the keystore in <a href="#create-network-certificate">Step 5a: Create an SSL Certificate for the Network Server</a>
+                    </li>
+                    <li>
+                         <b>keystore.jks</b> You should have created the keystore in <a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents.</a>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+        <p>You should have the following files in the home directory of the ubuntu user (/home/ubuntu). </p>
+
 
     </div>
 

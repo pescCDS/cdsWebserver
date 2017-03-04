@@ -19,6 +19,7 @@ package org.pesc.cds.web;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +68,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping(value="api/v1/transcript-requests")
+@Api(tags = "Transcript Requests", description = "Manage transcript requests.")
 public class TranscriptRequestController {
 
     private static final Log log = LogFactory.getLog(TranscriptRequestController.class);
@@ -204,12 +206,15 @@ public class TranscriptRequestController {
                 .studentBirthDate(trStudentDOB)
                 .studentFirstName(trStudentFirstName)
                 .studentLastName(trStudentLastName)
-                .studentMiddleNames(Arrays.asList(trStudentMiddleName))
                 .studentEmail(trStudentEmail)
                 .studentPartialSsn(trStudentPartialSsn)
                 .studentSchoolCodes(currentlyAttendedSchoolCodes)
                 .studentSchoolName(edexOrganization.optString("name", ""))
                 .studentCurrentlyEnrolled(schoolDTO.isStudentCurrentlyEnrolled());
+
+        if (StringUtils.isNotEmpty(trStudentMiddleName)) {
+            builder.studentMiddleNames(Arrays.asList(trStudentMiddleName));
+        }
 
         return builder;
     }
@@ -430,6 +435,11 @@ public class TranscriptRequestController {
 
             ResponseEntity<String> response = restTemplate.exchange
                     (endpointURI, HttpMethod.POST, new org.springframework.http.HttpEntity<Object>(map, headers), String.class);
+
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new IllegalArgumentException("Failed to send document.  Reason: " + response.getStatusCode().getReasonPhrase());
+            }
 
             log.info(response.getStatusCode().getReasonPhrase());
 

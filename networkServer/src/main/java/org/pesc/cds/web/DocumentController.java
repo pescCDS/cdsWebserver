@@ -19,6 +19,10 @@ package org.pesc.cds.web;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -33,7 +37,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.pesc.cds.config.SwaggerConfig;
 import org.pesc.cds.domain.Transaction;
+import org.pesc.cds.model.EndpointMode;
 import org.pesc.cds.model.SchoolCodeType;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.model.TranscriptRequestBuilder;
@@ -62,6 +68,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -87,6 +94,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping(value = "api/v1/documents")
+@Api(tags = "Documents", description = "Manage Documents.")
 public class DocumentController {
 
     private static final Log log = LogFactory.getLog(DocumentController.class);
@@ -175,7 +183,7 @@ public class DocumentController {
 
         tran = transactionService.create(tran);
 
-        String endpointURI = organizationService.getEndpointForOrg(tran.getRecipientId(), tran.getFileFormat(), tran.getDocumentType(), tran.getDepartment());
+        String endpointURI = organizationService.getEndpointForOrg(tran.getRecipientId(), tran.getFileFormat(), tran.getDocumentType(), tran.getDepartment(), EndpointMode.LIVE);
 
         if (endpointURI == null) {
             String error = ErrorUtils.getNoEndpointFoundMessage(tran.getRecipientId(), tran.getFileFormat(), tran.getDocumentType(), tran.getDepartment());
@@ -283,7 +291,7 @@ public class DocumentController {
 
         int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
         tx.setRecipientId(orgID);
-        return organizationService.getEndpointForOrg(orgID, documentFormat, documentType, department);
+        return organizationService.getEndpointForOrg(orgID, documentFormat, documentType, department, EndpointMode.LIVE);
     }
 
     private int getOrganizationId(String destinationSchoolCode, String destinationSchoolCodeType, List<String> destinationOrganizationNames) {
@@ -607,7 +615,12 @@ public class DocumentController {
      * @param ackURL        This is the url to the network server that we will send the response back to
      */
     @RequestMapping(value = "/inbox", method = RequestMethod.POST)
-    @Secured("ROLE_NETWORK_SERVER")
+
+    @PreAuthorize("hasRole('ROLE_NETWORK_SERVER') OR hasRole('ROLE_SUPERUSER')")
+    @ApiOperation(value = "Upload a document.",
+    authorizations = {
+            @Authorization(value = "oauth", scopes = {@AuthorizationScope( scope = "read_inbox,write_inbox", description = "OAuth 2.0")})
+    })
     public void receiveFile(
             @RequestParam(value = "recipient_id", required = false) Integer recipientId,
             @RequestParam(value = "sender_id", required = false) Integer senderId,
@@ -739,7 +752,6 @@ public class DocumentController {
 
 
         fileProcessorService.deliverFile(tx);
-
 
 
     }

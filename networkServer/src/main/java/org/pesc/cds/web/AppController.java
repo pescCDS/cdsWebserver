@@ -51,14 +51,21 @@ public class AppController {
     @Value("${directory.server.base.url}")
     private String directoryServer;
 
-    @Value("${networkServer.id}")
     private String localServerId;
 
-    @Autowired
+    private JSONObject organization;
+
     private OrganizationService organizationService;
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    public AppController( @Value("${networkServer.id}") String edExID, OrganizationService organizationService) {
+        this.organizationService = organizationService;
+        localServerId = edExID;
+        organization = organizationService.getOrganization(Integer.valueOf(localServerId));
+    }
 
 
     private boolean hasRole(Collection<? extends GrantedAuthority> authorities, String role) {
@@ -115,6 +122,18 @@ public class AppController {
         return "redirect:/?error=true";
     }
     */
+
+
+    @RequestMapping({"/documentation"})
+    public String getDocumentation(Model model) {
+        buildCommonModel(model);
+
+        model.addAttribute("organizationName", organization.getString("name"));
+        model.addAttribute("organizationId", organization.getInt("id"));
+
+        return "documentation";
+    }
+
 
 
     private void setContentType(HttpServletResponse response, String fileFormat) {
@@ -222,7 +241,16 @@ public class AppController {
         buildCommonModel(model);
         //If Institution, use OrgId.  Otherwise need to ask and look up Source Institution Info.
         //OrgId known, Source Institution (if applicable) not known.
-        JSONObject organization = organizationService.getOrganization(Integer.valueOf(localServerId));
+
+        if (organization == null) {
+            organization = organizationService.getOrganization(Integer.valueOf(localServerId));
+        }
+
+        if (organization == null) {
+            throw new IllegalStateException("Failed to retrieve organization info from directory for network server ID " + localServerId );
+
+        }
+
         boolean institution = organizationService.isInstitution(organization);
         model.addAttribute("institution", institution);
         return "fragments :: upload";

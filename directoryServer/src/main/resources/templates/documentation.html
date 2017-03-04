@@ -631,9 +631,11 @@
                 public key in the certificate. The default configuration properties are as follows:
 
                         <pre>
-                            networkServer.keystore=/keystore.jks
-                            networkServer.keystore.password=password
-                            networkServer.keystore.signing_key_alias=test
+
+                        networkServer.keystore=/keystore.jks
+                        networkServer.keystore.password=password
+                        networkServer.keystore.signing_key_alias=test
+
                         </pre>
 
                 This means that the reference network server code has be pre-configured to use the private key identifed
@@ -1389,7 +1391,7 @@
 
         <div class="ed-title">Option 2: Development Script</div>
         <p>This option is intended for development. It creates a docker image for the database, and allows the developer
-            to run the network server locally, but using the database image to host the Mysql database. </p>
+            to run the network server locally, but using the database image to host the PostgreSQL database. </p>
 
         <ol>
             <li>From the cdsWebserver/networkServer directory, invoke the dev-setup.sh script from the command line.
@@ -1397,10 +1399,12 @@
                 <p>When the script completes, you should see output similar to the following:</p>
 
                 <pre>
-                    OK - network-db is running. IP: 172.17.0.2, StartedAt: 2016-06-21T20:03:07.627885776Z
-                    You can start the network server app using the following command:
-                    java -Dspring.profiles.active=dev -Ddb.server=172.17.0.2 -jar ./target/network-server.jar
-                    or use your favorite IDE to develop and run.
+
+        OK - network-db is running. IP: 172.17.0.2, StartedAt: 2016-06-21T20:03:07.627885776Z
+        You can start the network server app using the following command:
+        java -Dspring.profiles.active=dev -Ddb.server=172.17.0.2 -jar ./target/network-server.jar
+        or use your favorite IDE to develop and run.
+
                 </pre>
 
                 <p>After the network server is started, you can navigate to http://localhost:9000 with a browser.</p>
@@ -1409,7 +1413,7 @@
 
         <div class="ed-title">Option 3: Manual Provisioning</div>
         <p>
-            You can optionally provision servers manually. You will need a Postgres (default) or MySQL database server and a server to run the
+            You can optionally provision servers manually. You will need a Postgres (default) or PostgreSQL database server and a server to run the
             network server application. You may use the dev-setup.sh script as a reference for provisioning your
             servers and running the EdExchange network application.
         </p>

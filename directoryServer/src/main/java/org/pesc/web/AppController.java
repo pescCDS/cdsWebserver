@@ -119,6 +119,14 @@ public class AppController {
         return "fragments :: organization";
     }
 
+    @RequestMapping({"/institution"})
+    public String getInstitutionFragment(Model model) {
+        buildUserModel(model);
+
+        return "fragments :: institution";
+    }
+
+
     @RequestMapping({"/messages"})
     public String getMessagesFragment(Model model) {
         buildUserModel(model);

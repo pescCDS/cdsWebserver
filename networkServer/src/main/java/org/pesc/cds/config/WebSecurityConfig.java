@@ -108,10 +108,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    public void configureGlobal(AuthenticationManagerBuilder auth,
+                                @Value("${networkServer.admin.username}") String username,
+                                @Value("${networkServer.admin.password}") String password) throws Exception {
         auth
                 .inMemoryAuthentication()
-                .withUser("admin").password("admin").roles("ORG_ADMIN");
+                .withUser(username).password(password).roles("ORG_ADMIN", "SUPERUSER");
     }
 
 

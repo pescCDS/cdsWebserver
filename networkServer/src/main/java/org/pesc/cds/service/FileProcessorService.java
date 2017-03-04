@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.DocumentFormat;
 import org.pesc.cds.model.DocumentType;
+import org.pesc.cds.model.EndpointMode;
 import org.pesc.cds.model.TransactionStatus;
 import org.pesc.cds.repository.StringUtils;
 import org.pesc.cds.repository.TransactionService;
@@ -161,7 +162,7 @@ public class FileProcessorService {
         tx.setSignerId(senderID);
         tx.setFileFormat(DocumentFormat.PESCXML.getFormatName());
         tx.setDocumentType(DocumentType.TRANSCRIPT_ACKNOWLEDGEMENT.getDocumentName());
-        tx.setDepartment("Administration");
+        //tx.setDepartment("");
         tx.setAckURL(localServerWebServiceURL);
         tx.setOperation("SEND");
         tx.setOccurredAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
@@ -191,7 +192,7 @@ public class FileProcessorService {
             tx.setFileSize(Long.valueOf(xml.getBytes().length));
 
             String endpointURI = organizationService.getEndpointForOrg(
-                    tx.getRecipientId(), tx.getFileFormat(), tx.getDocumentType(), tx.getDepartment());
+                    tx.getRecipientId(), tx.getFileFormat(), tx.getDocumentType(), tx.getDepartment(), EndpointMode.LIVE);
 
 
             if (endpointURI == null) {

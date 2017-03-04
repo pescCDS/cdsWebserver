@@ -59,7 +59,7 @@
             <div class="collapse navbar-collapse" uib-collapse="navCollapsed">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a th:href="${directoryServer} + '/documentation'">Docs</a>
+                        <a href="/documentation">Docs</a>
                     </li>
                     <li th:if="${isAuthenticated}" ng-class="{ active: nav.isActive('/settings')}">
                         <a class="item" href="#transaction-report">Transactions</a>

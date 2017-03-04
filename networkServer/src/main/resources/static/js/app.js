@@ -218,7 +218,7 @@
         self.studentMiddleName = '';
         self.studentLastName = '';
         self.studentEmail = '';
-        self.studentPartialSsn = '';
+        self.studentPartialSSN = '';
         self.studentCurrentlyEnrolled = false;
         //Transcript Request
 
@@ -241,7 +241,7 @@
                 self.studentMiddleName,
                 self.studentLastName,
                 self.studentEmail,
-                self.studentPartialSsn,
+                self.studentPartialSSN,
                 self.studentCurrentlyEnrolled);
         }
 
@@ -371,7 +371,7 @@
 
         function uploadFileToUrl(file, fileFormat, documentType, department, sourceSchoolCode, sourceSchoolCodeType, destinationSchoolCode, destinationSchoolCodeType, studentRelease,
                                  studentReleasedMethod, studentBirthDate, studentFirstName, studentMiddleName, studentLastName,
-                                 studentEmail, studentPartialSsn, studentCurrentlyEnrolled){
+                                 studentEmail, studentPartialSSN, studentCurrentlyEnrolled){
             var fd = new FormData();
             fd.append('file', file);
             fd.append('file_format', fileFormat );
@@ -388,7 +388,7 @@
             fd.append('student_middle_name', studentMiddleName);
             fd.append('student_last_name', studentLastName);
             fd.append('student_email', studentEmail);
-            fd.append('student_partial_ssn', studentPartialSsn);
+            fd.append('student_partial_ssn', studentPartialSSN);
             fd.append('student_currently_enrolled', studentCurrentlyEnrolled);
 
             $http.post('/api/v1/documents/outbox', fd, {
@@ -620,7 +620,7 @@
             studentMiddleName : '',
             studentLastName : '',
             studentEmail : '',
-            studentPartialSsn : ''
+            studentPartialSSN : ''
         };
         self.submitTranscriptRequest = submitTranscriptRequest;
         self.createSource = createSource;
@@ -678,7 +678,7 @@
 
         //TODO: remove test data!!!
 
-        var source = new Source('001233','FICE', true, false);
+        var source = new Source('008073','FICE', true, false);
 
         var dest = new Destination('001150', 'FICE', false);
 
@@ -686,11 +686,11 @@
         self.request.destinationInstitutions.push(dest);
 
         self.request.studentBirthDate = '01/01/1995';
-        self.request.studentFirstName = 'James';
-        self.request.studentLastName = 'Whetstone';
-        self.request.studentMiddleName = 'Hobart';
-        self.request.studentEmail = 'james.whetstone.x@gmail.com';
-        self.request.studentPartialSsn = '2100';
+        self.request.studentFirstName = 'John';
+        self.request.studentLastName = 'Doe';
+        self.request.studentMiddleName = '';
+        self.request.studentEmail = 'john.doe@gmail.com';
+        self.request.studentPartialSSN = '0000';
         self.request.studentRelease = true;
         self.request.studentReleasedMethod = 'SIGNATURE';
 

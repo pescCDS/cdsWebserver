@@ -16,6 +16,7 @@
 
 package org.pesc.cds.web;
 
+import io.swagger.annotations.Api;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.PagedData;
@@ -51,6 +52,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value="api/v1/transactions")
+@Api(tags = "Transactions", description = "Manage transactions.")
 public class TransactionsController {
 	
 	private static final Log log = LogFactory.getLog(TransactionsController.class);
@@ -177,6 +179,9 @@ public class TransactionsController {
 					StringBuilder buf = new StringBuilder();
 					for(SyntaxErrorType error: acknowledgment.getAcknowledgmentData().getSyntaxErrors()){
 						buf.append(String.format("%s %s Column Number: %d Line Number: %d%n", error.getErrorMessage(), error.getSeverityCode().value(), error.getLocator().getColumnNumber(), error.getLocator().getLineNumber()));
+					}
+					for(String error : acknowledgment.getAcknowledgmentData().getNoteMessages()) {
+						buf.append(String.format("%s%n", error));
 					}
 					tx.setError(buf.toString());
 			}

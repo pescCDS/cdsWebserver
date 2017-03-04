@@ -46,17 +46,16 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
         if (principal instanceof AuthUser) {
 
-            AuthUser user = (AuthUser)principal;
+            AuthUser user = (AuthUser) principal;
 
             additionalInfo.put("user_id", user.getId());
             additionalInfo.put("authorities", AuthorityUtils.authorityListToSet(user.getAuthorities()));
             additionalInfo.put("organization_id", user.getOrganizationId());
-            additionalInfo.put("serviced_organizations", organizationService.getInstitutionsByServiceProviderId(user.getOrganizationId()) );
+            additionalInfo.put("serviced_organizations", organizationService.getInstitutionsByServiceProviderId(user.getOrganizationId()));
             //((DefaultOAuth2AccessToken) accessToken).setScope(new HashSet(Arrays.asList("read_inbox", "read_transactions", "write_outbox", "read_outbox"));
 
-        }
-        else {
-            additionalInfo.put("authorities", new String[]{ "ROLE_NETWORK_SERVER" });
+        } else {
+            additionalInfo.put("authorities", new String[]{"ROLE_NETWORK_SERVER"});
             additionalInfo.put("organization_id", principal);
 
         }

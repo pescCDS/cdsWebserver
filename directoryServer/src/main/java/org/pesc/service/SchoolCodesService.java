@@ -175,6 +175,11 @@ public class SchoolCodesService {
                 throw new IllegalArgumentException(String.format("Bad CDS code %s. CDS codes must be exactly 14 digits.", code));
             }
         }
+        else if (codeType.equalsIgnoreCase("EDEX")) {
+            if (!org.apache.commons.lang3.StringUtils.isNumeric(code)){
+                throw new IllegalArgumentException(String.format("Bad EDEX code %s. EDEX codes must be numeric.", code));
+            }
+        }
         else {
             throw new IllegalArgumentException(String.format("%s is not a school code supported by EDExchange.", codeType));
         }
