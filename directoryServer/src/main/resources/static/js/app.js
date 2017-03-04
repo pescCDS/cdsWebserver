@@ -1070,7 +1070,7 @@
                         self.org.institutions.push(data);
                     }
                     else {
-                        toasterService.error("Failed to add " + data.name + " as a serviceable institution.");
+                        toasterService.error("Failed to add " + data.name + " as a serviceable institution.  Contact PESC to associate this institution.");
                     }
                 });
 
