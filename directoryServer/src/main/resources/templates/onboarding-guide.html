@@ -46,7 +46,7 @@
             <div class="sub-step"><a href="#start-server">Step 2d: Start the Server</a></div>
             <div class="sub-step"><a href="#assign-static-ip">Step 2e: Assign a Static IP Address</a></div>
             <div><a href="#provision-server">Step 3: Provision the Server</a></div>
-            <div class="sub-step"><a href="#connect-to-server">Step 3a: Connect to the Server</a></div>
+            <div class="sub-step"><a href="#connect-to-server">Step 3a: Connect to the AWS Server</a></div>
             <div class="sub-step"><a href="#get-software">Step 3b: Get the Network Server Software</a></div>
             <div class="sub-step"><a href="#build-software">Step 3c: Build the Network Server Software</a></div>
             <div class="sub-step"><a href="#create-database">Step 3d: Create the Database</a></div>
@@ -200,7 +200,7 @@
                 implementation of the network server.  This step includes downloading the software to the AWS server
                 instance and building the network server.
             </p>
-            <h2 id="connect-to-server">Step 3a: Connect to the Server</h2>
+            <h2 id="connect-to-server">Step 3a: Connect to the AWS Server</h2>
             <p>
                 At this point in the process, you should have a running AWS server instance.  This section describes
                 how to remotely connect to the running server so that you can download and build the EdExchange Network
@@ -817,25 +817,91 @@ UefzAZM0VN/hj/4DZUwELgqNxDHlSeKKEOyc
                 </li>
             </ol>
 
+            <h2 id="start-network-server">Step 6: Start the EdExchange Network Server</h2>
+            <p>This section describes how to start the network server hosted on your AWS ubuntu instance.</p>
+
+            <ol>
+                <li><a href="#connect-to-server">Connect to your AWS server instance.</a></li>
+                <li>Verify that you have the following files in the /home/ubuntu (the current users's home directory) directory after you're logged in to the AWS server:
+                    <ul style="margin-left: 60px;">
+                        <li>
+                            <b>keystore.p12</b> You should have created the keystore in <a href="#create-network-certificate">Step 5a: Create an SSL Certificate for the Network Server</a>
+                        </li>
+                        <li>
+                            <b>keystore.jks</b> You should have created the keystore in <a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents.</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>Verify that you have a directory "cdsWebserver" in the /home/ubuntu (the current user's home directory) directory.  This is the GIT repository and location of the
+                network server software that was built in <a href="#get-software">Step 3b: Get the Network Server Software</a></li>
+                <li>Verify that ./cdsWebserver/networkServer/target/network-server.jar exists.  This is the compiled network server software that you should have build in
+                    <a href="#build-software">Step 3c: Build the Network Server Software</a></li>
+                <li>Create a shell script to start the network server:
+                    <ol>
+                        <li><kbd>nano start-network-server.sh</kbd></li>
+                        <li>Copy and paste the following code into the editor, after providing the properites:
+                            <pre>
+                                <code>
+#!/bin/bash
+
+docker start network-db
+
+/home/ubuntu/cdsWebserver/networkServer/target/network-server.jar \
+--spring.profiles.active=pilot \
+--logging.file="/home/ubuntu/network-server.log" \
+--db.server=172.17.0.2 \
+--networkServer.hostname= \
+--networkServer.id=5 \
+--networkServer.name= \
+--networkServer.keystore=/home/ubuntu/keystore.jks \
+--networkServer.keystore.password= \
+--networkServer.keystore.signing_key_alias=EdExchange \
+--networkServer.file.path=/home/ubuntu/documents \
+--networkServer.admin.username= \
+--networkServer.admin.password= \
+--server.ssl.key-store=/home/ubuntu/keystore.p12 \
+--server.ssl.key-store-password=
+                                </code>
+
+                            </pre>
+                        </li>
+                        <li>Close the editor and save the changes. (Ctrl-X) then type 'Y' when prompted.</li>
+                        <li><kbd>chmod +x start-network-server.sh</kbd></li>
+                        <li><kbd>sudo chown ubuntu:ubuntu keystore.p12</kbd></li>
+                        <li><kbd>mkdir documents</kbd> This is where documents will be saved.</li>
+                        <li><kbd>sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 9000</kbd></li>
+                        <li><kbd>sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 9443</kbd></li>
+                        <li><kbd>sudo apt-get install iptables-persistent</kbd> Respond with "Y" to question prompts.  This step makes it so the iptables are persisted across reboots.</li>
+
+                        <li><kbd>sudo nano /etc/systemd/system/edexchange.service</kbd></li>
+                        <li>Copy and paste the following into the editor.
+                        <pre>
+                            <code>
+[Unit]
+Description = Start the EdExchange network server
+After = network.target
+[Service]
+ExecStart = /home/ubuntu/start-network-server.sh
+[Install]
+WantedBy = multi-user.target
+                            </code>
+                        </pre>
+                        </li>
+                        <li>Close the editor and save the changes. (Ctrl-X) then type 'Y' when prompted.</li>
+                        <li><kbd>sudo chmod 644 /etc/systemd/system/edexchange.service</kbd></li>
+                        <li><kbd>sudo  systemctl enable connection.service</kbd></li>
+                        <li><kbd>sudo service edexchange start</kbd></li>
+
+                    </ol>
+                </li>
+            </ol>
+            <p>The network server should now be running.  You may test it by opening a browser and navigating to your domain name. E.g. https://www.example.com, where you shoud be presented
+            with the default home page.  If for some reason, the home page does not load, you should take a look at the server log, located at /home/ubuntu/network-server.log for any errors
+            that may have occurred.</p>
+
+
         </div>
 
-        <h2 id="start-network-server">Step 6: Start the EdExchange Network Server</h2>
-        <p>This section describes how to start the network server hosted on your AWS ubuntu instance.</p>
-
-        <ol>
-            <li><a href="#connect-to-server">Login to your AWS server instance.</a></li>
-            <li>Verify that you have the following files in the /home/ubuntu (the current users's home directory) directory after you're logged in to the AWS server:
-                <ul>
-                    <li>
-                        <b>keystore.p12</b> You should have created the keystore in <a href="#create-network-certificate">Step 5a: Create an SSL Certificate for the Network Server</a>
-                    </li>
-                    <li>
-                         <b>keystore.jks</b> You should have created the keystore in <a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents.</a>
-                    </li>
-                </ul>
-            </li>
-        </ol>
-        <p>You should have the following files in the home directory of the ubuntu user (/home/ubuntu). </p>
 
 
     </div>
