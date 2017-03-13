@@ -620,7 +620,9 @@
             studentMiddleName : '',
             studentLastName : '',
             studentEmail : '',
-            studentPartialSSN : ''
+            studentPartialSSN : '',
+            fileFormat: 'PESCXML',
+            mode: 'LIVE'
         };
         self.submitTranscriptRequest = submitTranscriptRequest;
         self.createSource = createSource;
@@ -676,30 +678,7 @@
             });
         }
 
-        //TODO: remove test data!!!
-
-        var source = new Source('008073','FICE', true, false);
-
-        var dest = new Destination('001150', 'FICE', false);
-
-        self.request.sourceInstitutions.push(source);
-        self.request.destinationInstitutions.push(dest);
-
-        self.request.studentBirthDate = '01/01/1995';
-        self.request.studentFirstName = 'John';
-        self.request.studentLastName = 'Doe';
-        self.request.studentMiddleName = '';
-        self.request.studentEmail = 'john.doe@gmail.com';
-        self.request.studentPartialSSN = '0000';
-        self.request.studentRelease = true;
-        self.request.studentReleasedMethod = 'SIGNATURE';
-
-
     }
-
-
-
-
 
 
     function toNumber() {

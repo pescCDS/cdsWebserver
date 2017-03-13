@@ -176,11 +176,11 @@ public class OrganizationService {
         return endpointURI;
     }
 
-    public String getEndpointURIForSchool(String destinationSchoolCode, String destinationSchoolCodeType, String documentFormat, String documentType, String department, Transaction tx, List<String> destinationOrganizationNames) {
+    public String getEndpointURIForSchool(String destinationSchoolCode, String destinationSchoolCodeType, String documentFormat, String documentType, String department, Transaction tx, List<String> destinationOrganizationNames, EndpointMode mode) {
 
         int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
         tx.setRecipientId(orgID);
-        return getEndpointForOrg(orgID, documentFormat, documentType, department, EndpointMode.LIVE);
+        return getEndpointForOrg(orgID, documentFormat, documentType, department, mode);
     }
 
     public List<Integer> getInstitutionsForServiceProvider(){

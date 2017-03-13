@@ -394,7 +394,6 @@
 
         </div>
 
-
         <div class="row">
 
             <div ng-show="trCtrl.showForm(institution) == true">
@@ -411,6 +410,7 @@
                         <option value="FICE">FICE</option>
                         <option value="IPEDS">IPEDS</option>
                         <option value="OPEID">OPEID</option>
+                        <option value="EDEXCHANGE">EDEXCHANGE</option>
                     </select>
                 </div>
             </div>
@@ -478,6 +478,22 @@
             </div>
 
             <div class="row">
+                <div class="col-sm-12">
+                    <div class="ed-title">Transcript Rendition Information</div>
+
+                    <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.fileFormat.$invalid && (!transcriptRequestForm.fileFormat.$pristine || transcriptRequestForm.$submitted) }">
+                        <div><strong>File Format</strong></div>
+                        <select name="fileFormat" class="form-control" style="width: 160px;" ng-model="trCtrl.request.fileFormat" required="required">
+                            <option value="JSON">JSON</option>
+                            <option value="PESCXML">PESCXML</option>
+                            <option value="PDF">PDF</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row">
 
                 <div class="col-sm-12">
                     <div class="ed-title">Student Information</div>
@@ -536,7 +552,20 @@
 
             </div>
 
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ed-title">Endpoint Information</div>
 
+                    <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.mode.$invalid && (!transcriptRequestForm.mode.$pristine || transcriptRequestForm.$submitted) }">
+                        <div><strong>Mode</strong></div>
+                        <select name="mode" class="form-control" style="width: 160px;" ng-model="trCtrl.request.mode" required="required">
+                            <option value="TEST">TEST</option>
+                            <option value="LIVE">LIVE</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
 
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary">

@@ -35,6 +35,8 @@ public class TranscriptRequestDTO {
     private String studentMiddleName;
     private String studentEmail;
     private String studentPartialSSN;
+    private String fileFormat;
+    private EndpointMode mode;
 
     public List<RecordHolderDTO> getSourceInstitutions() {
         return sourceInstitutions;
@@ -114,5 +116,21 @@ public class TranscriptRequestDTO {
 
     public void setStudentPartialSSN(String studentPartialSSN) {
         this.studentPartialSSN = studentPartialSSN;
+    }
+
+    public String getFileFormat() {
+        return fileFormat;
+    }
+
+    public void setFileFormat(String fileFormat) {
+        this.fileFormat = fileFormat;
+    }
+
+    public EndpointMode getMode() {
+        return mode;
+    }
+
+    public void setMode(EndpointMode mode) {
+        this.mode = mode;
     }
 }

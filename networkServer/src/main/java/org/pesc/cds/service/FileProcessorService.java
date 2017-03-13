@@ -150,6 +150,7 @@ public class FileProcessorService {
      */
     private Acknowledgment handleTranscriptRequest(Transaction transaction, String ackDocID) {
 
+
         return null;
     }
 

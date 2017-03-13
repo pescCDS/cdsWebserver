@@ -65,18 +65,15 @@ public class SwaggerConfig {
     }
 
     private OAuth oAuth() {
-        AuthorizationScope authorizationScope = new AuthorizationScope("read_inbox", "Read Inbox");
-       // AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-       // authorizationScopes[0] = authorizationScope;
-
         GrantType grantType = new ClientCredentialsGrant(tokenURL);
 
-        return new OAuth("oauth", newArrayList(authorizationScope), newArrayList(grantType));
+        return new OAuth("oauth", newArrayList(new AuthorizationScope("read_inbox", "Read the contents of the document inbox."), new AuthorizationScope("send_document", "Send a document to the inbox.")), newArrayList(grantType));
     }
 
     private BasicAuth basicAuth() {
         return new BasicAuth("basic");
     }
+
 
     private SecurityContext securityContext() {
         return SecurityContext.builder().securityReferences(defaultAuth()).forPaths(PathSelectors.regex("/anyPath.*"))
@@ -93,8 +90,8 @@ public class SwaggerConfig {
 
     @Bean
     SecurityConfiguration security() {
-        return new SecurityConfiguration("3", "Testing123&4000", "test-app-realm", "test-app",
-                "apiKey", ApiKeyVehicle.HEADER, "api_key", "," /*
+        return new SecurityConfiguration("3", "Testing123&4000", "EdExchange", "network-server",
+                "apiKey", ApiKeyVehicle.HEADER, "Authorization", "," /*
                                                                 * scope
                                                                 * separator
                                                                 */);

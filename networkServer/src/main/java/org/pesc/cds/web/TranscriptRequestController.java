@@ -254,6 +254,10 @@ public class TranscriptRequestController {
         //get the EDExchange organization object from the directory server...
         Preconditions.checkArgument(StringUtils.isNotBlank(schoolDTO.getSchoolCode()), "School Code is required");
         Preconditions.checkArgument(StringUtils.isNotBlank(schoolDTO.getSchoolCodeType()), "School Code Type is required");
+
+        if (schoolDTO.getSchoolCodeType().equals(SchoolCodeType.EDEXCHANGE.name())) {
+            return organizationService.getOrganization(Integer.valueOf(schoolDTO.getSchoolCode()));
+        }
         return organizationService.getOrganization(schoolDTO.getSchoolCode(), schoolDTO.getSchoolCodeType());
 
     }
@@ -285,7 +289,7 @@ public class TranscriptRequestController {
 
         //Get the endpoint for the record holder.  This is where the transcript request will be sent.
         String endpointURI = organizationService.getEndpointURIForSchool(recordHolderInstitution.getSchoolCode(), recordHolderInstitution.getSchoolCodeType(), fileFormat,
-                    documentType, department, tx, transcriptRequestRecordHolderNames);
+                    documentType, department, tx, transcriptRequestRecordHolderNames, transcriptRequestDTO.getMode());
 
 
         if (endpointURI == null) {
@@ -338,7 +342,7 @@ public class TranscriptRequestController {
                 .documentInfoMarshaller(documentInfoMarshaller)
                 .documentID(trDocumentID)
                 .documentTypeCode(trDocumentTypeCode)
-                .documentFormat("JSON")
+                .documentFormat(transcriptRequestDTO.getFileFormat())
                 .transmissionType(trTransmissionType)
                 .requestTrackingID(trRequestTrackingID)
                 .parchmentDocumentTypeCode(trDocumentType)
