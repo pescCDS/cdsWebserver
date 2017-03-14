@@ -38,11 +38,13 @@
         .service('toasterService', toasterService)
         .service('fileUpload', fileUpload)
         .service('settingsService', settingsService)
+        .service('actuatorService', actuatorService)
         .service('transcriptRequestService', transcriptRequestService)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
         .controller("UploadController", UploadController)
         .controller("TranscriptRequestController", TranscriptRequestController)
+        .controller("ActuatorController", ActuatorController)
         .config(config)
         .run(['transactionService', function(transactionService) {
             transactionService.initialize();
@@ -67,6 +69,11 @@
                 controller: "TranscriptRequestController",
                 controllerAs: "trCtrl"
             })
+            .when("/actuator-view", {
+                templateUrl: "actuator-view",
+                controller: "ActuatorController",
+                controllerAs: "actCtrl"
+            })
             .when("/home", {
                 templateUrl: "about"
             })
@@ -75,6 +82,31 @@
                 redirectTo: "home"
             });
     }
+
+    ActuatorController.$inject = ['actuatorService', 'toasterService'];
+    function ActuatorController(actuatorService, toasterService) {
+        var self = this;
+
+        self.getActuatorPage = getActuatorPage;
+        self.serverInfo = null;
+
+        function getActuatorPage() {
+            actuatorService.getEndpoints().then(function(response){
+                if (response.status == 200) {
+
+                    self.serverInfo = response.data;
+                }
+                else {
+                    toasterService.error("Failed to retrieve Actuator data.");
+                }
+            });
+        }
+
+        getActuatorPage();
+
+
+    }
+
 
     TransactionController.$inject = ['transactionService', 'toasterService', '$scope'];
     function TransactionController(transactionService, toasterService, $scope) {
@@ -401,6 +433,29 @@
             .error(function(data){
                 toasterService.ajaxInfo(data);
             });
+        }
+
+    }
+
+    actuatorService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService', '$window'];
+
+    function actuatorService($http, $q, $cacheFactory, toasterService, $window) {
+        var service = {
+            getEndpoints: getEndpoints
+        } ;
+
+        return service;
+
+        function getEndpoints() {
+            var deferred = $q.defer();
+
+            $http.get('/actuator').then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
         }
 
     }

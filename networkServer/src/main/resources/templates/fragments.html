@@ -431,6 +431,16 @@
 
 </div>
 
+<div th:fragment="actuator-view">
+    <h1>Server Info</h1>
+
+    <div ng-repeat="(key, value) in actCtrl.serverInfo._links">
+        <span> {{key}} </span> <span><a ng-href="{{ value.href }}">{{value.href}}</a> </span>
+    </div>
+
+
+</div>
+
 <div th:fragment="transcript-request-form">
 
     <form name="transcriptRequestForm" ng-submit="transcriptRequestForm.$valid && trCtrl.submitTranscriptRequest()" novalidate="novalidate" style="margin-bottom: 100px;">

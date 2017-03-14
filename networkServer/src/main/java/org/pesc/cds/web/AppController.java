@@ -264,6 +264,14 @@ public class AppController {
         return "fragments :: transcript-request-form";
     }
 
+    @RequestMapping("/actuator-view")
+    public String getActuatorView(Model model) {
+
+        buildCommonModel(model);
+
+        return "fragments :: actuator-view";
+    }
+
     @RequestMapping({"/", "/home"})
     public String viewHome(Model model) {
 
