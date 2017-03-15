@@ -1771,14 +1771,25 @@
 <div th:fragment="actuator-view">
     <h1>Server Info</h1>
 
-    <div ng-repeat="endpoint in actCtrl.serverInfo.links" class="well">
+    <div ng-repeat="endpoint in actCtrl.serverInfo.links">
         <h4><a ng-click="actCtrl.getEndpoint(endpoint.rel)">{{endpoint.rel}}</a></h4>
-        <div ng-show="actCtrl.view[endpoint.rel] == true" >
-            <div ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[endpoint.rel]">
-                <div><b>{{endpointKey}}</b> : <span>{{endpointValue}}</span></div>
-            </div>
 
-        </div>
+        <table ng-show="actCtrl.view[endpoint.rel] == true" class="table table-sm table-striped" >
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[endpoint.rel]">
+                <td>{{endpointKey}}</td>
+                <td>{{endpointValue}}</td>
+            </tr>
+            </tbody>
+
+
+        </table>
     </div>
 
 
