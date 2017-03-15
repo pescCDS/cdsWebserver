@@ -88,13 +88,38 @@
         var self = this;
 
         self.getActuatorPage = getActuatorPage;
+        self.getEndpoint = getEndpoint;
         self.serverInfo = null;
+        self.view = {};
+
+
+        function getEndpoint(endpointName) {
+            self.view[endpointName] = !self.view[endpointName];
+            if (self.view[endpointName] == true) {
+                actuatorService.getEndpoint(endpointName).then(function(response){
+                    if (response.status == 200) {
+
+                        self.serverInfo[endpointName] = response.data;
+
+                        console.log(response.data);
+                    }
+                    else {
+                        toasterService.error("Failed to retrieve " + endpointName +  " data.");
+
+                    }
+                });
+            }
+
+        }
 
         function getActuatorPage() {
             actuatorService.getEndpoints().then(function(response){
                 if (response.status == 200) {
 
+                    delete response.data._links['self'];
+
                     self.serverInfo = response.data;
+
                 }
                 else {
                     toasterService.error("Failed to retrieve Actuator data.");
@@ -441,10 +466,23 @@
 
     function actuatorService($http, $q, $cacheFactory, toasterService, $window) {
         var service = {
-            getEndpoints: getEndpoints
+            getEndpoints: getEndpoints,
+            getEndpoint: getEndpoint
         } ;
 
         return service;
+
+        function getEndpoint(name){
+            var deferred = $q.defer();
+
+            $http.get('/' + name).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
 
         function getEndpoints() {
             var deferred = $q.defer();

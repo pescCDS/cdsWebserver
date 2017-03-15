@@ -435,7 +435,8 @@
     <h1>Server Info</h1>
 
     <div ng-repeat="(key, value) in actCtrl.serverInfo._links">
-        <span> {{key}} </span> <span><a ng-href="{{ value.href }}">{{value.href}}</a> </span>
+        <span> {{key}} </span> <span><a ng-click="actCtrl.getEndpoint(key)">{{value.href}}</a> </span>
+        <div ng-show="actCtrl.view[key] == true"><h1>{{key}}</h1></div>
     </div>
 
 
