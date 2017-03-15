@@ -1161,11 +1161,13 @@
 
                     if (response.status == 200) {
                         toasterService.info("Successfully added " + data.name + " as a serviced institution.");
-                        self.org.institutions.push(data);
+                        self.institutions.push(data);
+                        self.showInstitutionForm = false;
                     }
                     else {
                         toasterService.error("Failed to add " + data.name + " as a serviceable institution.  Contact PESC to associate this institution.");
                     }
+
                 });
 
             });
