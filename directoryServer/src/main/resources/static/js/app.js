@@ -31,6 +31,7 @@
         .service('messageService', messageService)
         .service('fileUpload', fileUpload)
         .service('contactService', contactService)
+        .service('actuatorService', actuatorService)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
@@ -42,6 +43,7 @@
         .controller("EndpointController", EndpointController)
         .controller("EndpointSelectorController", EndpointSelectorController)
         .controller("RegistrationController", RegistrationController)
+        .controller("ActuatorController", ActuatorController)
         .config(config)
         .run(['organizationService', function (organizationService) {
             organizationService.initialize();
@@ -147,6 +149,11 @@
             })
             .when("/home", {
                 templateUrl: "about"
+            })
+            .when("/actuator-view", {
+                templateUrl: "actuator-view",
+                controller: "ActuatorController",
+                controllerAs: "actCtrl"
             })
             .otherwise({
                 redirectTo: "home"
@@ -979,6 +986,92 @@
 
         }
     }
+
+    ActuatorController.$inject = ['actuatorService', 'toasterService'];
+    function ActuatorController(actuatorService, toasterService) {
+        var self = this;
+
+        self.getActuatorPage = getActuatorPage;
+        self.getEndpoint = getEndpoint;
+        self.serverInfo = null;
+        self.view = {};
+
+
+        function getEndpoint(endpointName) {
+            self.view[endpointName] = !self.view[endpointName];
+            if (self.view[endpointName] == true) {
+                actuatorService.getEndpoint(endpointName).then(function(response){
+                    if (response.status == 200) {
+
+                        self.serverInfo[endpointName] = response.data;
+
+                        console.log(response.data);
+                    }
+                    else {
+                        toasterService.error("Failed to retrieve " + endpointName +  " data.");
+
+                    }
+                });
+            }
+
+        }
+
+        function getActuatorPage() {
+            actuatorService.getEndpoints().then(function(response){
+                if (response.status == 200) {
+
+                    response.data.links.splice(0, 1);
+                    self.serverInfo = response.data;
+
+                }
+                else {
+                    toasterService.error("Failed to retrieve Actuator data.");
+                }
+            });
+        }
+
+        getActuatorPage();
+
+
+    }
+
+    actuatorService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService', '$window'];
+
+    function actuatorService($http, $q, $cacheFactory, toasterService, $window) {
+        var service = {
+            getEndpoints: getEndpoints,
+            getEndpoint: getEndpoint
+        } ;
+
+        return service;
+
+        function getEndpoint(name){
+            var deferred = $q.defer();
+
+            $http.get('/' + name).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+        function getEndpoints() {
+            var deferred = $q.defer();
+
+            $http.get('/actuator').then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+    }
+
+
 
     OrgController.$inject = ['$routeParams', 'organizationService', 'org', 'userService', 'endpointService', 'schoolCodesService', 'toasterService', '$window', '$uibModal', '$log', 'contactService'];
 

@@ -154,6 +154,14 @@ public class AppController {
         return "onboarding-guide";
     }
 
+    @RequestMapping("/actuator-view")
+    public String getActuatorView(Model model) {
+
+        buildUserModel(model);
+
+        return "fragments :: actuator-view";
+    }
+
     @RequestMapping({"/endpoint-selector"})
     public String getEndpointSelectorFragment(Model model) {
         buildUserModel(model);
