@@ -434,9 +434,14 @@
 <div th:fragment="actuator-view">
     <h1>Server Info</h1>
 
-    <div ng-repeat="(key, value) in actCtrl.serverInfo._links">
-        <span> {{key}} </span> <span><a ng-click="actCtrl.getEndpoint(key)">{{value.href}}</a> </span>
-        <div ng-show="actCtrl.view[key] == true"><h1>{{key}}</h1></div>
+    <div ng-repeat="(key, value) in actCtrl.serverInfo._links" class="well">
+        <h4><a ng-click="actCtrl.getEndpoint(key)">{{key}}</a></h4>
+        <div ng-show="actCtrl.view[key] == true" >
+            <div ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[key]">
+                <div><b>{{endpointKey}}</b> : <span>{{endpointValue}}</span></div>
+            </div>
+
+        </div>
     </div>
 
 
