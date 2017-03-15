@@ -22,6 +22,7 @@
         .filter('trueFalse', trueFalse)
         .directive('toNumber', toNumber)
         .directive('fileModel', fileModel)
+        .directive('emptyToNull', emptyToNull)
         .service('toasterService', toasterService)
         .service('organizationService', organizationService)
         .service('userService', userService)
@@ -1808,6 +1809,7 @@
         self.schoolCodeType = '';
         self.schoolCode = '';
         self.orgName = '';
+        self.directoryID = null,
         self.resetSearch = resetSearch;
         self.isEnabled = true;
         self.isInstitution = true;
@@ -1853,6 +1855,7 @@
             self.orgName = '';
             self.schoolCode = '';
             self.schoolCodeType = '';
+            self.directoryID = null;
         }
 
 
@@ -1900,7 +1903,9 @@
 
 
         function findOrganizations() {
-            organizationService.search(self.orgName,
+            organizationService.search(
+                self.directoryID,
+                self.orgName,
                 self.schoolCode,
                 self.schoolCodeType,
                 self.isEnabled,
@@ -2542,12 +2547,13 @@
         }
 
 
-        function search(name, organizationCode, organizationCodeType, enabled, isServiceProvider,isInstitution, limit, offset) {
+        function search(directoryId, name, organizationCode, organizationCodeType, enabled, isServiceProvider,isInstitution, limit, offset) {
 
             var deferred = $q.defer();
 
             $http.get('/services/rest/v1/organizations', {
                 'params': {
+                    'id' : directoryId,
                     'name': name,
                     'organizationCode': organizationCode,
                     'organizationCodeType': organizationCodeType,
@@ -3135,6 +3141,22 @@
     function isValidPassword(password) {
         return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$_! %*#?&])[A-Za-z\d$@$_! %*#?&]{15,}$/.test(password);
     }
+
+    function emptyToNull() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, elem, attrs, ctrl) {
+                ctrl.$parsers.push(function(viewValue) {
+                    if(viewValue === "") {
+                        return null;
+                    }
+                    return viewValue;
+                });
+            }
+        };
+    }
+
     function friendlyRoleName() {
         return function (input) {
 
