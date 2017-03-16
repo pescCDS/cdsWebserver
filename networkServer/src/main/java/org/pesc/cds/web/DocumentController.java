@@ -273,9 +273,9 @@ public class DocumentController {
                 response.close();
             }
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            log.error(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e);
         } finally {
             try {
                 client.close();
@@ -668,8 +668,9 @@ public class DocumentController {
         }
 
         File inboxDirectory = new File(localServerInboxPath);
-        inboxDirectory.mkdirs();
-
+        if (!inboxDirectory.exists() && !inboxDirectory.mkdirs()) {
+            throw new RuntimeException("Failed to create directory " + inboxDirectory.getAbsolutePath());
+        }
 
         try {
 

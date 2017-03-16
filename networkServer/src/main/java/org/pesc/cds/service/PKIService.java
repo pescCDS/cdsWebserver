@@ -17,6 +17,8 @@
 package org.pesc.cds.service;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,9 @@ import java.util.Enumeration;
  */
 @Service
 public class PKIService {
+
+    private static final Log log = LogFactory.getLog(PKIService.class);
+
 
     @Value("${networkServer.keystore}")
     private String keystoreFile;
@@ -82,13 +87,13 @@ public class PKIService {
             return new KeyPair(cert.getPublicKey(), privateKeyEntry.getPrivateKey() );
 
         } catch (UnrecoverableKeyException e) {
-            e.printStackTrace();
+            log.error(e);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error(e);
         } catch (KeyStoreException e) {
-            e.printStackTrace();
+            log.error(e);
         } catch (UnrecoverableEntryException e) {
-            e.printStackTrace();
+            log.error(e);
         }
 
         return null;
@@ -108,7 +113,7 @@ public class PKIService {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e);
         }
 
         return null;
@@ -133,13 +138,14 @@ public class PKIService {
             return dsa.sign();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            
+             log.error(e);
         }
         finally {
             try {
                 bufin.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e);
             }
         }
 
@@ -166,18 +172,18 @@ public class PKIService {
             return sig.verify(signature);
 
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error(e);
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+             log.error(e);
         } catch (SignatureException e) {
-            e.printStackTrace();
+             log.error(e);
         } catch (IOException e) {
-            e.printStackTrace();
+             log.error(e);
         } finally {
             try {
                 bufin.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                 log.error(e);
             }
         }
 
