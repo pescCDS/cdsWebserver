@@ -348,11 +348,25 @@ public class FileProcessorService {
         org.setMutuallyDefined(String.valueOf(transaction.getSenderId()));
         destination.setOrganization(org);
 
-        Acknowledgment ack = buildAcceptedAcknowledgement(source,
-                destination,
-                String.valueOf(transaction.getSenderTransactionId()),
-                String.valueOf(transaction.getSenderTransactionId()),
-                ackDocID);
+        Acknowledgment ack = null;
+
+        if (StringUtils.isEmpty(transaction.getError())) {
+            ack = buildAcceptedAcknowledgement(source,
+                    destination,
+                    String.valueOf(transaction.getSenderTransactionId()),
+                    String.valueOf(transaction.getSenderTransactionId()),
+                    ackDocID);
+        }
+        else {
+
+            ack = buildRejectedAcknowledgement(source,
+                    destination,
+                    String.valueOf(transaction.getSenderTransactionId()),
+                    String.valueOf(transaction.getSenderTransactionId()),
+                    ackDocID,
+                    transaction.getError());
+        }
+
 
         return ack;
 
@@ -417,6 +431,16 @@ public class FileProcessorService {
                                                        String requestTrackingID, String documentID, String ackDocID) {
         Acknowledgment ack = buildBaseAcknowledgement(source, destination, requestTrackingID, documentID, AcknowledgmentCodeType.ACCEPTED, ackDocID);
         return ack;
+    }
+    public Acknowledgment buildRejectedAcknowledgement(SourceDestinationType source, SourceDestinationType destination,
+                                                       String requestTrackingID, String documentID, String ackDocID,  String noteMessage) {
+
+        Acknowledgment ack = buildBaseAcknowledgement(source, destination, requestTrackingID, documentID,AcknowledgmentCodeType.REJECTED,ackDocID);
+
+
+        ack.getAcknowledgmentData().getNoteMessages().addAll(StringUtils.splitEqually(noteMessage, 80));
+        return ack;
+
     }
 
     public Acknowledgment buildRejectedAcknowledgement(SourceDestinationType source, SourceDestinationType destination,

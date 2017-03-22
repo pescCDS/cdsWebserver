@@ -16,6 +16,9 @@
 
 package org.pesc.cds.repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 4/12/16.
  */
@@ -23,5 +26,16 @@ public class StringUtils {
 
     public static boolean isEmpty(String target) {
         return target == null || target.trim().length()==0;
+    }
+
+    public static List<String> splitEqually(String text, int size) {
+        // Give the list the right capacity to start with. You could use an array
+        // instead if you wanted.
+        List<String> ret = new ArrayList<String>((text.length() + size - 1) / size);
+
+        for (int start = 0; start < text.length(); start += size) {
+            ret.add(text.substring(start, Math.min(text.length(), start + size)));
+        }
+        return ret;
     }
 }

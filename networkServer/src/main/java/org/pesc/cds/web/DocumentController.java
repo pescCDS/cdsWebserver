@@ -699,7 +699,7 @@ public class DocumentController {
 
 
             if (false == pkiService.verifySignature(multipartFile.getInputStream(), signatureFile.getBytes(), senderPublicKey)) {
-                throw new WebApplicationException("Invalid digital signature found.  File discarded.");
+                throw new IllegalArgumentException("Invalid digital signature found.  File discarded.");
             }
 
 
@@ -743,7 +743,7 @@ public class DocumentController {
                 }
             }
         } catch (Exception ex) {
-            log.error(ex);
+            log.error("Failed to process inbound document.", ex);
             tx.setMessage(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
             tx.setError(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
             tx.setStatus(TransactionStatus.FAILURE);
