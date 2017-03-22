@@ -71,6 +71,8 @@ node(buildNode) {
         env.MAIL_SMTP_USERNAME = props."edex.mail.server.username" 
         env.MAIL_SMTP_PASSWORD = props."edex.mail.server.password" 
 
+        env.environment = environment
+
         ceBuild.setupEnv() //add mvn and java tool
         ceBuild.mvnBuild(buildCommand)
         
