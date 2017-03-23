@@ -82,10 +82,13 @@ node(buildNode) {
             error "Tests failed. Not updating image"
         }
 
+        gitsha = ceBuild.getGitsha() // may be used to validate /info endpoints
+        echo "DEBUG: gitsha: $gitsha"
+
         stage "publish"
         sh 'docker images'
-        sh "docker tag edex/directory-server ccctechcenter/cccnext-directory-server:${IMAGE_TAG}"
-        sh "docker tag edex/network-server ccctechcenter/cccnext-network-server:${IMAGE_TAG}"
+        sh "docker tag edex/directory-server:${gitsha} ccctechcenter/cccnext-directory-server:${IMAGE_TAG}"
+        sh "docker tag edex/network-server:${gitsha} ccctechcenter/cccnext-network-server:${IMAGE_TAG}"
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ccctech-dockerhub-public-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
             try { 
