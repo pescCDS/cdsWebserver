@@ -287,11 +287,26 @@ public class DocumentController {
     }
 
 
-    private String getEndpointURIForSchool(String destinationSchoolCode, String destinationSchoolCodeType, String documentFormat, String documentType, String department, Transaction tx, List<String> destinationOrganizationNames) {
+    private String getEndpointURIForSchool(String destinationSchoolCode,
+                                           String destinationSchoolCodeType,
+                                           String documentFormat,
+                                           String documentType,
+                                           String department,
+                                           Transaction tx,
+                                           List<String> destinationOrganizationNames,
+                                           EndpointMode mode) {
 
-        int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
+
+        Integer orgID = null;
+
+        if (SchoolCodeType.EDEXCHANGE.toString().equalsIgnoreCase(destinationSchoolCodeType)) {
+            orgID = Integer.valueOf(destinationSchoolCode);
+        }
+        else {
+            orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
+        }
         tx.setRecipientId(orgID);
-        return organizationService.getEndpointForOrg(orgID, documentFormat, documentType, department, EndpointMode.LIVE);
+        return organizationService.getEndpointForOrg(orgID, documentFormat, documentType, department, mode);
     }
 
     private int getOrganizationId(String destinationSchoolCode, String destinationSchoolCodeType, List<String> destinationOrganizationNames) {
@@ -355,18 +370,31 @@ public class DocumentController {
             int recordHolderDirectoryID = Integer.valueOf(localServerId);
 
             if (!StringUtils.isEmpty(sourceSchoolCode) && !StringUtils.isEmpty(sourceSchoolCodeType)) {
-                JSONObject recordHolder = organizationService.getOrganization(sourceSchoolCode, sourceSchoolCodeType);
 
-                if (recordHolder == null) {
-                    throw new IllegalArgumentException(String.format("No organization exists with %s code %s.", sourceSchoolCodeType, sourceSchoolCode));
+                if (SchoolCodeType.EDEXCHANGE.toString().equalsIgnoreCase(sourceSchoolCodeType)) {
+                    recordHolderDirectoryID = Integer.valueOf(sourceSchoolCode);
                 }
+                else {
+                    JSONObject recordHolder = null;
 
-                recordHolderDirectoryID = recordHolder.getInt("id");
+                    recordHolder = organizationService.getOrganization(sourceSchoolCode, sourceSchoolCodeType);
+                    if (recordHolder == null) {
+                        throw new IllegalArgumentException(String.format("No organization exists with %s code %s.", sourceSchoolCodeType, sourceSchoolCode));
+                    }
+                    recordHolderDirectoryID = recordHolder.getInt("id");
+                }
             }
 
 
             List<String> trDestinationOrganizationNames = Lists.newArrayList();//Provided by Source Institution
-            String endpointURI = getEndpointURIForSchool(destinationSchoolCode, destinationSchoolCodeType, fileFormat, documentType, department, tx, trDestinationOrganizationNames);
+            String endpointURI = getEndpointURIForSchool(destinationSchoolCode,
+                    destinationSchoolCodeType,
+                    fileFormat,
+                    documentType,
+                    department,
+                    tx,
+                    trDestinationOrganizationNames,
+                    EndpointMode.LIVE);
 
             if (endpointURI == null) {
                 String error = ErrorUtils.getNoEndpointFoundMessage(tx.getRecipientId(), fileFormat, documentType, department);

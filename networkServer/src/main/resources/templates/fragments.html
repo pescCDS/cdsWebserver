@@ -227,7 +227,7 @@
                         <input name="sourceSchoolCode" class="form-control" type="text" th:required="${institution}==false" ng-model="uploadCtrl.sourceSchoolCode" placeholder="Code" style="width: 110px;"> </input>
                     </div>
                     <div class="form-group" ng-class="{ 'has-error' : uploadForm.sourceSchoolCodeType.$invalid && (!uploadForm.sourceSchoolCodeType.$pristine || uploadForm.$submitted) }">
-                        <select name="sourceSchoolCodeType" class="form-control" style="width: 110px;" th:required="${institution}==false"
+                        <select name="sourceSchoolCodeType" class="form-control" style="width: 160px;" th:required="${institution}==false"
                                 ng-model="uploadCtrl.sourceSchoolCodeType">
                             <option value="">Code Type</option>
                             <option value="ACT">ACT</option>
@@ -236,6 +236,7 @@
                             <option value="IPEDS">IPEDS</option>
                             <option value="OPEID">OPEID</option>
                             <option value="CEEB">CEEB</option>
+                            <option value="EDEXCHANGE">EDEXCHANGE</option>
                         </select>
 
                     </div>
@@ -248,7 +249,7 @@
                         <input name="destinationSchoolCode" class="form-control" type="text" required="required" ng-model="uploadCtrl.destinationSchoolCode" placeholder="Code" style="width: 110px;"> </input>
                     </div>
                     <div class="form-group" ng-class="{ 'has-error' : uploadForm.destinationSchoolCodeType.$invalid && (!uploadForm.destinationSchoolCodeType.$pristine || uploadForm.$submitted) }">
-                        <select name="destinationSchoolCodeType" class="form-control" style="width: 110px;" required="required"
+                        <select name="destinationSchoolCodeType" class="form-control" style="width: 160px;" required="required"
                                 ng-model="uploadCtrl.destinationSchoolCodeType">
                             <option value="">Code Type</option>
                             <option value="ACT">ACT</option>
@@ -257,6 +258,7 @@
                             <option value="IPEDS">IPEDS</option>
                             <option value="OPEID">OPEID</option>
                             <option value="CEEB">CEEB</option>
+                            <option value="EDEXCHANGE">EDEXCHANGE</option>
                         </select>
 
                     </div>

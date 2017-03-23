@@ -16,6 +16,7 @@
 
 package org.pesc.cds.config;
 
+import org.pesc.cds.model.AuthUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -28,6 +29,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
@@ -109,11 +114,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth,
-                                @Value("${networkServer.admin.username}") String username,
-                                @Value("${networkServer.admin.password}") String password) throws Exception {
-        auth
-                .inMemoryAuthentication()
-                .withUser(username).password(password).roles("ORG_ADMIN", "SUPERUSER");
+                                @Value("${networkServer.id}") final Integer directoryId,
+                                @Value("${networkServer.admin.username}") final String adminUsername,
+                                @Value("${networkServer.admin.password}") final String adminPassword) throws Exception {
+        auth.userDetailsService(new UserDetailsService() {
+            @Override
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                AuthUser admin = null;
+                if (username.equals(adminUsername)) {
+                    admin = new AuthUser(adminUsername, adminPassword, true, true, true, true, AuthorityUtils.createAuthorityList("ROLE_ORG_ADMIN", "ROLE_SUPERUSER"));
+                    admin.setId(1);
+                    admin.setOrganizationId(directoryId);
+                    return admin;
+                }
+                return admin;
+            }
+        });
     }
 
 
