@@ -257,6 +257,10 @@
 
 				<configuration>
 					<imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <imageTags>
+                        <imageTag>latest</imageTag>
+                        <imageTag>${git.commit.id.abbrev}</imageTag>
+                    </imageTags>
 					<dockerDirectory>${basedir}/src/main/docker</dockerDirectory>
 					<resources>
 						<resource>
