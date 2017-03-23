@@ -41,7 +41,8 @@ node(buildNode) {
                 environment = "qa"
         }
         if(env.BRANCH_NAME =~ /release/ || env.BRANCH_NAME == "master"){
-            IMAGE_TAG = sh(returnStdout: true, script: "git ls-remote --tags | awk -F'/' '/[0-9].[0-9].[0-9].*/ { print \$3}' | sort --version-sort -r| head -n1").trim()
+            IMAGE_TAG = sh(returnStdout: true, script: "git ls-remote -q --refs --tags | awk -F'/' '{ print \$3 }' | grep '^[0-9].[0-9].[0-9]*$' | sort --version-sort -r| head -n1").trim()
+            if(IMAGE_TAG == '') { error "Was not able to parse a valid version tag from the remote repository" }
             environment = "pilot"
         }
         //FUTURE: add prod environment for pushes to master
