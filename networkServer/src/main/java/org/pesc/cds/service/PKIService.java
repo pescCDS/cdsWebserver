@@ -87,13 +87,13 @@ public class PKIService {
             return new KeyPair(cert.getPublicKey(), privateKeyEntry.getPrivateKey() );
 
         } catch (UnrecoverableKeyException e) {
-            log.error(e);
+            log.error("Failed to obtain private key from local keystore.", e);
         } catch (NoSuchAlgorithmException e) {
-            log.error(e);
+            log.error("Failed to obtain private key from local keystore.",e);
         } catch (KeyStoreException e) {
             log.error(e);
         } catch (UnrecoverableEntryException e) {
-            log.error(e);
+            log.error("Failed to obtain private key from local keystore.",e);
         }
 
         return null;
@@ -113,7 +113,7 @@ public class PKIService {
 
 
         } catch (Exception e) {
-            log.error(e);
+            log.error("Failed to obtain signing keys from local keystore.", e);
         }
 
         return null;
@@ -139,7 +139,7 @@ public class PKIService {
 
         } catch (Exception e) {
             
-             log.error(e);
+             log.error("Failed to create digital signature", e);
         }
         finally {
             try {
@@ -172,18 +172,18 @@ public class PKIService {
             return sig.verify(signature);
 
         } catch (NoSuchAlgorithmException e) {
-            log.error(e);
+           log.error("Failed to verify signature.", e);
         } catch (InvalidKeyException e) {
-             log.error(e);
+            log.error("Failed to verify signature.", e);
         } catch (SignatureException e) {
-             log.error(e);
+            log.error("Failed to verify signature.", e);
         } catch (IOException e) {
-             log.error(e);
+            log.error("Failed to verify signature.", e);
         } finally {
             try {
                 bufin.close();
             } catch (IOException e) {
-                 log.error(e);
+                log.error(e);
             }
         }
 
