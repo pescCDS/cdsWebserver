@@ -22,17 +22,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Enumeration;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 6/1/16.
@@ -71,13 +66,6 @@ public class PKIService {
 
         try {
 
-            Enumeration enumeration = keystore.aliases();
-            while (enumeration.hasMoreElements()) {
-                String name = (String)enumeration.nextElement();
-                System.out.println("alias name: " + name);
-
-            }
-
             KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keystore.getEntry(alias, new KeyStore.PasswordProtection(password));
 
             Certificate[] cc = privateKeyEntry.getCertificateChain();
@@ -103,8 +91,13 @@ public class PKIService {
     public KeyPair getSigningKeys() {
         InputStream is = null;
         try {
-            is = getClass().getResourceAsStream(keystoreFile);
 
+            File f = new java.io.File(keystoreFile);
+            if (f.isFile()) {
+                is = new FileInputStream(f);
+            } else {
+                is = getClass().getResourceAsStream(keystoreFile);
+            }
 
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
             keystore.load(is, null);

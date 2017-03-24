@@ -33,6 +33,7 @@ import org.pesc.cds.config.CacheConfig;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.EndpointMode;
 import org.pesc.cds.model.IdList;
+import org.pesc.cds.model.SchoolCodeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -178,7 +179,15 @@ public class OrganizationService {
 
     public String getEndpointURIForSchool(String destinationSchoolCode, String destinationSchoolCodeType, String documentFormat, String documentType, String department, Transaction tx, List<String> destinationOrganizationNames, EndpointMode mode) {
 
-        int orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
+
+        Integer orgID = null;
+
+        if (SchoolCodeType.EDEXCHANGE.toString().equalsIgnoreCase(destinationSchoolCodeType)) {
+            orgID = Integer.valueOf(destinationSchoolCode);
+        }
+        else {
+            orgID = getOrganizationId(destinationSchoolCode, destinationSchoolCodeType, destinationOrganizationNames);
+        }
         tx.setRecipientId(orgID);
         return getEndpointForOrg(orgID, documentFormat, documentType, department, mode);
     }
