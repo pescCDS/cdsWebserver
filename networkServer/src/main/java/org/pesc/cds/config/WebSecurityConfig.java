@@ -127,7 +127,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     admin.setOrganizationId(directoryId);
                     return admin;
                 }
-                return admin;
+
+                if (admin == null) {
+                    throw new UsernameNotFoundException("No user found with username " + username);
+                }
+                return null;
             }
         });
     }
