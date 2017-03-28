@@ -59,6 +59,12 @@ public class UsageDataController {
 
     }
 
+    @RequestMapping(value = "/usage-request-parameters")
+    public List<Map<String, Object>> getRequestParameters(@RequestParam(name = "api-request-id") Integer apiRequestId) {
+        return apiRequestService.getRequestParameters(apiRequestId);
+    }
+
+
     @RequestMapping(value = "/usage-dashboard-data")
     public Map<String, List<Map<String,Object>>> getUsageDashboardData() {
 

@@ -1796,7 +1796,33 @@
 <div th:fragment="usage-record">
     <div class="row">
         <div class="col-sm-3">{{usageRecord.resource}}</div>
-        <div class="col-sm-3">{{usageRecord.url}}</div>
+        <div class="col-sm-3">
+            <div style="position:relative;">
+                <a ng-click="usageCtrl.toggleParameters(usageRecord)">{{usageRecord.url}}</a>
+                <div ng-show="usageRecord.showParameters == true" class="popup-table">
+                    <button type="button" class="close" aria-label="Close" ng-click="usageCtrl.toggleParameters(usageRecord)" style="padding-right: 5px;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="parameter in usageRecord.parameters">
+                            <td>{{parameter.name}}</td>
+                            <td>{{parameter.value}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
         <div class="col-sm-3">{{usageRecord.occurredAt | date:'MM/dd/yyyy h:mm a'}}</div>
         <div class="col-sm-3">{{usageRecord.resultCount}}</div>
      </div>

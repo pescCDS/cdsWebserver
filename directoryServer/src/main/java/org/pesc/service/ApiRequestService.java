@@ -101,6 +101,16 @@ public class ApiRequestService {
     }
 
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
+    public List<Map<String, Object>>  getRequestParameters(Integer apiRequestID){
+
+        String sql = "select parameter_name as name, parameter_value as value from api_request_parameters where api_request_id = ?";
+
+        return jdbcTemplate.queryForList(sql, apiRequestID);
+
+    }
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public ApiRequest createAndSave(Map<String, String[]> parameters, String uri, Integer resultCount) {
 

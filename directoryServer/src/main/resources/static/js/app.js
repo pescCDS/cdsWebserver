@@ -1095,6 +1095,25 @@
         self.organizationCount = {};
         self.refreshData = refreshData;
         self.getUsageData = getUsageData;
+        self.toggleParameters = toggleParameters;
+
+
+        function toggleParameters(apiRequestRecord) {
+
+            apiRequestRecord.showParameters = !apiRequestRecord.showParameters;
+
+            if (!apiRequestRecord.hasOwnProperty("parameters")) {
+                usageService.getRequestParameters(apiRequestRecord.id).then(function(response){
+                    if (response.status == 200) {
+                        apiRequestRecord.parameters = response.data;
+                    }
+                    else {
+                        toasterService.ajaxInfo(response.data);
+                    }
+                });
+            }
+
+        }
 
 
         function refreshData() {
@@ -1140,7 +1159,8 @@
             getUsageData: getUsageData,
             getDashboardData: getDashboardData,
             getEndpointParameterCount: getEndpointParameterCount,
-            getEndpointParameterCounts: getEndpointParameterCounts
+            getEndpointParameterCounts: getEndpointParameterCounts,
+            getRequestParameters: getParametersByRecordId,
         } ;
 
         return service;
@@ -1168,6 +1188,21 @@
 
             $http.get('/usage-dashboard-data',  {
                 cache: false
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+        function getParametersByRecordId(recordId){
+            var deferred = $q.defer();
+
+            $http.get('/usage-request-parameters',  {
+                'params' : {'api-request-id' : recordId },
+                cache: true
             }).then(function (response) {
                 deferred.resolve(response);
             }, function (data) {

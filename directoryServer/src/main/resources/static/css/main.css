@@ -315,3 +315,17 @@ form.ng-submitted .ng-invalid
     background-color: lightgray;
     padding: 20px;
 }
+
+.popup-table {
+    position: absolute;
+    top: 0;
+    left: 100px;
+    width: 300px;
+    background-color: #FAFAFA;
+    z-index: 1000;
+    border: 1px solid #efefef;
+}
+.popup-table td, th{
+    padding: 3px;
+}
+
