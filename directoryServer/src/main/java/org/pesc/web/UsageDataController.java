@@ -22,12 +22,15 @@ import org.pesc.service.PagedData;
 import org.pesc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by james on 1/22/17.
@@ -60,5 +63,27 @@ public class UsageDataController {
         return apiRequestService.getDashboardData();
 
     }
+
+    @RequestMapping(value = "/usage-endpoint-parameter-data")
+    public List<Map<String, Object>>  getEndpointParameterData(@RequestParam(name = "parameter-name") String parameterName) {
+        return apiRequestService.getEndpointParameterCount(parameterName);
+
+    }
+
+    @RequestMapping(value = "/usage-endpoint-data")
+    public  Map<String, List<Map<String,Object>>>   getEndpointParametersData() {
+
+        Map<String, List<Map<String,Object>>> resultMap = new HashMap<String, List<Map<String,Object>>>();
+
+        resultMap.put("documentTypeCount", apiRequestService.getEndpointParameterCount("documentType"));
+        resultMap.put("documentFormatCount", apiRequestService.getEndpointParameterCount("documentFormat"));
+        resultMap.put("departmentCount", apiRequestService.getEndpointParameterCount("department"));
+        resultMap.put("organizationCount", apiRequestService.getEndpointParameterCount("organizationId"));
+
+        return resultMap;
+
+
+    }
+
 
 }

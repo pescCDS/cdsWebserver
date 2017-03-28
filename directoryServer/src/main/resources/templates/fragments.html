@@ -1792,6 +1792,7 @@
     </div>
 </div>
 
+
 <div th:fragment="usage-record">
     <div class="row">
         <div class="col-sm-3">{{usageRecord.resource}}</div>
@@ -1801,9 +1802,10 @@
      </div>
 </div>
 
-<div th:fragment="api-usage">
-    <h1>API Usage</h1>
+<div th:fragment="api-usage" style="margin-bottom:50px;">
+    <h1 style="margin-bottom: 20px;">API Usage</h1>
 
+    
     <div class="row">
         <div class="col-sm-3">
             <div style="display: inline-block">
@@ -1842,7 +1844,81 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ed-title">Document Type Distribution</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.documentTypeCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div class="ed-title">Document Format Distribution</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.documentFormatCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ed-title">Department Distribution</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.departmentCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div class="ed-title">Organization Distribution for Endpoint Queries</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.organizationCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
+
+    <div class="ed-title">API Requests</div>
     <uib-pagination
             total-items="usageCtrl.totalRecords"
             ng-model="usageCtrl.offset"
@@ -1863,7 +1939,6 @@
     <div ng-repeat="usageRecord in usageCtrl.records">
         <div th:include="::usage-record"></div>
     </div>
-
 </div>
 
 <div th:fragment="organization">

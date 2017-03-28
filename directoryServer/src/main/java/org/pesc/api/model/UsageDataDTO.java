@@ -22,10 +22,19 @@ import java.util.Date;
  * Created by james on 3/27/17.
  */
 public class UsageDataDTO {
+    private Integer id;
     private String resource;
     private String url;
     private Integer resultCount;
     private Date occurredAt;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getResource() {
         return resource;

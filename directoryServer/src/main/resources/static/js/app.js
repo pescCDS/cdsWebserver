@@ -1086,18 +1086,28 @@
         var self = this;
         self.totalRecords = 0;
         self.offset = 1;
-        self.limit = 30;
+        self.limit = 15;
         self.records = [];
         self.dashboardData = {};
+        self.documentTypeCount = {};
+        self.documentFormatCount = {};
+        self.departmentCount = {};
+        self.organizationCount = {};
 
-        usageService.getDashboardData().then(function(response){
+
+        usageService.getEndpointParameterCounts().then(function(response){
             if (response.status == 200) {
-                self.dashboardData = response.data;
+                self.documentTypeCount = response.data['documentTypeCount'];
+                self.documentFormatCount =  response.data['documentFormatCount'];
+                self.departmentCount =  response.data['departmentCount'];
+                self.organizationCount =  response.data['organizationCount'];
             }
             else {
                 toasterService.ajaxInfo(response.data);
             }
         });
+
+
 
         self.getUsageData = getUsageData;
 
@@ -1128,7 +1138,9 @@
     function usageService($http, $q, $cacheFactory, toasterService, $window) {
         var service = {
             getUsageData: getUsageData,
-            getDashboardData: getDashboardData
+            getDashboardData: getDashboardData,
+            getEndpointParameterCount: getEndpointParameterCount,
+            getEndpointParameterCounts: getEndpointParameterCounts
         } ;
 
         return service;
@@ -1151,10 +1163,41 @@
             return deferred.promise;
         }
 
-        function getDashboardData(limit, offset){
+        function getDashboardData(){
             var deferred = $q.defer();
 
             $http.get('/usage-dashboard-data',  {
+                cache: false
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+
+        function getEndpointParameterCount(parameterName){
+            var deferred = $q.defer();
+
+            $http.get('/usage-endpoint-data',  {
+                'params': {'parameter-name': parameterName},
+                cache: false
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+
+        function getEndpointParameterCounts(){
+            var deferred = $q.defer();
+
+            $http.get('/usage-endpoint-data',  {
                 cache: false
             }).then(function (response) {
                 deferred.resolve(response);

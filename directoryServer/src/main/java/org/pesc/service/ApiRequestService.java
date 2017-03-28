@@ -30,10 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by james on 3/26/17.
@@ -59,13 +56,14 @@ public class ApiRequestService {
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
     public PagedData<UsageDataDTO> getUsageRecords(PagedData<UsageDataDTO> pagedData){
 
-        String sql = "select resource, url, result_count, occurred_at from api_request LIMIT ? OFFSET ?";
+        String sql = "select id, resource, url, result_count, occurred_at from api_request order by occurred_at desc LIMIT ? OFFSET ?";
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, pagedData.getLimit(), pagedData.getOffset());
 
         ArrayList<UsageDataDTO> usageDataList = new ArrayList<UsageDataDTO>();
 
         for (Map row : rows) {
             UsageDataDTO usageData = new UsageDataDTO();
+            usageData.setId((Integer)row.get("id"));
             usageData.setResource((String) row.get("resource"));
             usageData.setUrl((String) row.get("url"));
             usageData.setResultCount((Integer) row.get("result_count"));
@@ -99,6 +97,17 @@ public class ApiRequestService {
             }
         });
         return usageDashboardData;
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
+    public List<Map<String, Object>>  getEndpointParameterCount(String parameterName){
+
+        String sql = "select lower(arp.parameter_value) as Name, count(arp.parameter_value) from api_request_parameters arp join api_request ar on ar.id = arp.api_request_id where ar.resource = 'endpoints' and arp.parameter_name = ? group by lower(arp.parameter_value)";
+
+        List<Map<String, Object>> parameterMap = jdbcTemplate.queryForList(sql, parameterName);
+
+        return parameterMap;
     }
 
 
