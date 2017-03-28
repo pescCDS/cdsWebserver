@@ -1803,15 +1803,20 @@
 </div>
 
 <div th:fragment="api-usage" style="margin-bottom:50px;">
-    <h1 style="margin-bottom: 20px;">API Usage</h1>
 
+    <h1 style="display: inline-block;">API Usage</h1>
+    <button class="btn btn-default" ng-click="usageCtrl.refreshData()" style="vertical-align: text-bottom; margin-left: 10px;">
+        <i class="glyphicon glyphicon-refresh"></i> Refresh
+    </button>
+           
+        
     
-    <div class="row">
+    <div class="row" style="margin-top: 20px;">
         <div class="col-sm-3">
             <div style="display: inline-block">
                 <div class="dashboard-data">
                     Total Endpoint Queries
-                    <div>{{usageCtrl.dashboardData.totalEndpointQueries}}</div>
+                    <div>{{usageCtrl.dashboardData.totalendpointqueries}}</div>
                 </div>
             </div>
         </div>
@@ -1819,7 +1824,7 @@
             <div style="display: inline-block">
                 <div class="dashboard-data">
                     Empty Result Endpoint Queries
-                    <div>{{usageCtrl.dashboardData.emptyResultEndpointQueries}}</div>
+                    <div>{{usageCtrl.dashboardData.emptyresultendpointqueries}}</div>
                 </div>
             </div>
         </div>
@@ -1828,7 +1833,7 @@
                 <div class="dashboard-data">
                     Total Public Key Queries
                     <div>
-                        {{usageCtrl.dashboardData.totalPublicKeyQueries}}
+                        {{usageCtrl.dashboardData.totalpublickeyqueries}}
                     </div>
 
                 </div>
@@ -1838,7 +1843,7 @@
             <div style="display: inline-block">
                 <div class="dashboard-data">
                     Empty Result Public Key Queries
-                    <div>{{usageCtrl.dashboardData.emptyResultPublicKeyQueries}}</div>
+                    <div>{{usageCtrl.dashboardData.emptyresultpublickeyqueries}}</div>
                 </div>
             </div>
         </div>

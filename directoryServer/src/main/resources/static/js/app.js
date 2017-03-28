@@ -1093,32 +1093,26 @@
         self.documentFormatCount = {};
         self.departmentCount = {};
         self.organizationCount = {};
-
-
-        usageService.getDashboardData().then(function(response){
-            if (response.status == 200) {
-                self.dashboardData = response.data;
-            }
-            else {
-                toasterService.ajaxInfo(response.data);
-            }
-        });
-
-        usageService.getEndpointParameterCounts().then(function(response){
-            if (response.status == 200) {
-                self.documentTypeCount = response.data['documentTypeCount'];
-                self.documentFormatCount =  response.data['documentFormatCount'];
-                self.departmentCount =  response.data['departmentCount'];
-                self.organizationCount =  response.data['organizationCount'];
-            }
-            else {
-                toasterService.ajaxInfo(response.data);
-            }
-        });
-
-
-
+        self.refreshData = refreshData;
         self.getUsageData = getUsageData;
+
+
+        function refreshData() {
+            usageService.getDashboardData().then(function(response){
+                if (response.status == 200) {
+                    self.dashboardData = response.data['queryCount'][0];
+                    self.documentTypeCount = response.data['documentTypeCount'];
+                    self.documentFormatCount =  response.data['documentFormatCount'];
+                    self.departmentCount =  response.data['departmentCount'];
+                    self.organizationCount =  response.data['organizationCount'];
+                }
+                else {
+                    toasterService.ajaxInfo(response.data);
+                }
+            });
+
+            getUsageData();
+        }
 
         function getUsageData() {
 
@@ -1136,10 +1130,7 @@
 
         }
 
-        getUsageData();
-
-
-
+        refreshData();
     }
 
     usageService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService', '$window'];

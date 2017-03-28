@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +60,20 @@ public class UsageDataController {
     }
 
     @RequestMapping(value = "/usage-dashboard-data")
-    public UsageDashboardDTO getUsageDashboardData() {
-        return apiRequestService.getDashboardData();
+    public Map<String, List<Map<String,Object>>> getUsageDashboardData() {
+
+        Map<String, List<Map<String,Object>>> resultMap = new HashMap<String, List<Map<String,Object>>>();
+
+        resultMap.put("documentTypeCount", apiRequestService.getEndpointParameterCount("documentType"));
+        resultMap.put("documentFormatCount", apiRequestService.getEndpointParameterCount("documentFormat"));
+        resultMap.put("departmentCount", apiRequestService.getEndpointParameterCount("department"));
+        resultMap.put("organizationCount", apiRequestService.getEndpointParameterCount("organizationId"));
+
+        List<Map<String, Object>> dashboardMapList = new ArrayList<Map<String, Object>>();
+        dashboardMapList.add(apiRequestService.getDashboardData());
+        resultMap.put("queryCount", dashboardMapList);
+
+        return resultMap;
 
     }
 
@@ -79,6 +92,7 @@ public class UsageDataController {
         resultMap.put("documentFormatCount", apiRequestService.getEndpointParameterCount("documentFormat"));
         resultMap.put("departmentCount", apiRequestService.getEndpointParameterCount("department"));
         resultMap.put("organizationCount", apiRequestService.getEndpointParameterCount("organizationId"));
+
 
         return resultMap;
 

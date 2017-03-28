@@ -78,25 +78,15 @@ public class ApiRequestService {
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     @PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') ")
-    public UsageDashboardDTO getDashboardData(){
+    public Map<String, Object> getDashboardData(){
+
 
         String sql = "select (select count(*) from api_request where result_count = 0 and resource = 'endpoints') as emptyResultEndpointQueries, \n" +
                 "(select count(*) from api_request where result_count = 0 and url like '%public-key') as emptyResultPublicKeyQueries,\n" +
                 "(select count(*) from api_request where url like '%public-key') as totalPublicKeyQueries,\n" +
                 "(select count(*) from api_request where resource = 'endpoints') as totalEndpointQueries;";
 
-        UsageDashboardDTO usageDashboardData = jdbcTemplate.queryForObject(sql, new RowMapper<UsageDashboardDTO>() {
-            @Override
-            public UsageDashboardDTO mapRow(ResultSet rs, int i) throws SQLException {
-                UsageDashboardDTO dashboardData = new UsageDashboardDTO();
-                dashboardData.setEmptyResultEndpointQueries(rs.getInt("emptyResultEndpointQueries"));
-                dashboardData.setEmptyResultPublicKeyQueries(rs.getInt("emptyResultPublicKeyQueries"));
-                dashboardData.setTotalEndpointQueries(rs.getInt("totalEndpointQueries"));
-                dashboardData.setTotalPublicKeyQueries(rs.getInt("totalPublicKeyQueries"));
-                return dashboardData;
-            }
-        });
-        return usageDashboardData;
+        return jdbcTemplate.queryForMap(sql);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
