@@ -1770,7 +1770,6 @@
 
 <div th:fragment="actuator-view">
     <h1>Server Info</h1>
-
     <div ng-repeat="endpoint in actCtrl.serverInfo.links">
         <h4><a ng-click="actCtrl.getEndpoint(endpoint.rel)">{{endpoint.rel}}</a></h4>
 
@@ -1791,7 +1790,79 @@
 
         </table>
     </div>
+</div>
 
+<div th:fragment="usage-record">
+    <div class="row">
+        <div class="col-sm-3">{{usageRecord.resource}}</div>
+        <div class="col-sm-3">{{usageRecord.url}}</div>
+        <div class="col-sm-3">{{usageRecord.occurredAt | date:'MM/dd/yyyy HH:mm'}}</div>
+        <div class="col-sm-3">{{usageRecord.resultCount}}</div>
+     </div>
+</div>
+
+<div th:fragment="api-usage">
+    <h1>API Usage</h1>
+
+    <div class="row">
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Total Endpoint Queries
+                    <div>{{usageCtrl.dashboardData.totalEndpointQueries}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Empty Result Endpoint Queries
+                    <div>{{usageCtrl.dashboardData.emptyResultEndpointQueries}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Total Public Key Queries
+                    <div>
+                        {{usageCtrl.dashboardData.totalPublicKeyQueries}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Empty Result Public Key Queries
+                    <div>{{usageCtrl.dashboardData.emptyResultPublicKeyQueries}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <uib-pagination
+            total-items="usageCtrl.totalRecords"
+            ng-model="usageCtrl.offset"
+            max-size="5"
+            class="pagination-sm"
+            items-per-page="usageCtrl.limit"
+            boundary-link-numbers="true"
+            rotate="false" ng-change="usageCtrl.getUsageData()"></uib-pagination>
+
+
+    <div class="row">
+        <b class="col-sm-3">Resource</b>
+        <b class="col-sm-3">URL</b>
+        <b class="col-sm-3">Occurred At</b>
+        <b class="col-sm-3">Result Count</b>
+    </div>
+
+    <div ng-repeat="usageRecord in usageCtrl.records">
+        <div th:include="::usage-record"></div>
+    </div>
 
 </div>
 

@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ResponseHeader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.exception.ApiException;
 import org.pesc.api.model.CertificateInfo;
@@ -42,7 +43,9 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/22/16.
@@ -58,6 +61,12 @@ public class OrganizationsResource {
 
     public static final String NETWORK_CERTFICATE_CHANGED_MESSAGE = "<div>The network certificate for <a href='%s'>%d</a> changed and requires approval.</div>";
     public static final String SIGNING_CERTIFICATION_CHANGED_MESSAGE = "<div>The signing certificate for <a href='%s'>%d</a> changed and requires approval.</div>";
+
+    @Context
+    private MessageContext context;
+
+    @Autowired
+    private ApiRequestService apiRequestService;
 
 
     @Value("${api.base.uri}")
@@ -379,17 +388,23 @@ public class OrganizationsResource {
 
         try {
 
-            return organizationService.getPEMPublicKey(id);
+            Map<String,String[]> parameterMap = new HashMap<String,String[]>();
+            parameterMap.put("organizationId", new String[]{String.valueOf(id)});
+
+            String pemKey = organizationService.getPEMPublicKey(id);
+
+            apiRequestService.createAndSave(parameterMap, context.getHttpServletRequest().getRequestURI(), StringUtils.isEmpty(pemKey) ? 0 : 1);
+
+            return pemKey;
 
         } catch (CertificateException e) {
             log.error("Failed to retrieve public key.", e);
-            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/network-certificate");
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/public-key");
         }
         catch (Exception e) {
             log.error("Failed to retrieve public key.", e);
+            throw new ApiException(e, Response.Status.BAD_REQUEST, "/organizations/" + id.toString() + "/public-key");
         }
-
-        return null;
     }
 
     public static void checkParameter(Object param, String parameterName, String path) {

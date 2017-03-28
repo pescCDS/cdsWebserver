@@ -21,25 +21,31 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.pesc.api.exception.ApiException;
+import org.pesc.api.model.ApiRequest;
+import org.pesc.api.model.ApiRequestParameter;
 import org.pesc.api.model.Endpoint;
+import org.pesc.service.ApiRequestService;
 import org.pesc.service.EndpointService;
 import org.pesc.service.OrganizationService;
+import org.pesc.utils.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 3/22/16.
@@ -51,9 +57,16 @@ import java.util.List;
 public class EndpointResource {
 
     private static final Log log = LogFactory.getLog(EndpointResource.class);
+    private static final String PATH = "/endpoints";
 
     @Value("${api.base.uri}")
     private String baseURI;
+
+    @Context
+    private MessageContext context;
+
+    @Autowired
+    private ApiRequestService apiRequestService;
 
 
     //Security is enforced using method level annotations on the service.
@@ -86,9 +99,10 @@ public class EndpointResource {
 
     ) {
 
-        validateParameters(organizationIdList, baseURI + "/endpoints");
 
-        return endpointService.search(
+        validateParameters(organizationIdList, baseURI + PATH);
+
+        List<Endpoint> endpoints = endpointService.search(
                 documentFormat,
                 documentType,
                 departmentName,
@@ -97,6 +111,10 @@ public class EndpointResource {
                 organizationIdList,
                 mode,
                 enabled);
+
+        apiRequestService.createAndSave(context.getHttpServletRequest().getParameterMap(), context.getHttpServletRequest().getRequestURI(), endpoints.size());
+
+        return endpoints;
     }
 
     @GET
@@ -184,7 +202,7 @@ public class EndpointResource {
         if (!"https".equalsIgnoreCase(_url.getProtocol())) {
             throw new ApiException(
                     new IllegalArgumentException(String.format("HTTPS is required for endpoint URLs.", _url.getHost(), networkHostName)),
-                    Response.Status.BAD_REQUEST, "/endpoints");
+                    Response.Status.BAD_REQUEST, PATH);
         }
         //If the hostname's don't match, or if if the hostname is not contained in the certificate's comman name (wildcard might be used).
         if (!_url.getHost().equalsIgnoreCase(networkHostName) && !wildcardCheck(networkHostName, _url.getHost())) {
@@ -193,7 +211,7 @@ public class EndpointResource {
             throw new ApiException(
                     new IllegalArgumentException(
                             String.format("The endpoint hostname %s does not match the network certificate hostname %s.  Have you uploaded your network certificate?", _url.getHost(), networkHostName != null ? networkHostName : "")),
-                    Response.Status.BAD_REQUEST, "/endpoints");
+                    Response.Status.BAD_REQUEST, PATH);
         }
         return _url.getHost();
 

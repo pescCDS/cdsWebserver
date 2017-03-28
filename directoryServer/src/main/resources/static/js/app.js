@@ -33,6 +33,7 @@
         .service('fileUpload', fileUpload)
         .service('contactService', contactService)
         .service('actuatorService', actuatorService)
+        .service('usageService', usageService)
         .controller('DirectoryController', DirectoryController)
         .controller("NavController", NavController)
         .controller("SettingsController", SettingsController)
@@ -45,6 +46,7 @@
         .controller("EndpointSelectorController", EndpointSelectorController)
         .controller("RegistrationController", RegistrationController)
         .controller("ActuatorController", ActuatorController)
+        .controller("UsageController", UsageController)
         .config(config)
         .run(['organizationService', function (organizationService) {
             organizationService.initialize();
@@ -155,6 +157,11 @@
                 templateUrl: "actuator-view",
                 controller: "ActuatorController",
                 controllerAs: "actCtrl"
+            })
+            .when("/api-usage", {
+                templateUrl: "api-usage",
+                controller: "UsageController",
+                controllerAs: "usageCtrl"
             })
             .otherwise({
                 redirectTo: "home"
@@ -1071,6 +1078,95 @@
         }
 
     }
+
+
+
+    UsageController.$inject = ['usageService', 'toasterService'];
+    function UsageController(usageService, toasterService) {
+        var self = this;
+        self.totalRecords = 0;
+        self.offset = 1;
+        self.limit = 30;
+        self.records = [];
+        self.dashboardData = {};
+
+        usageService.getDashboardData().then(function(response){
+            if (response.status == 200) {
+                self.dashboardData = response.data;
+            }
+            else {
+                toasterService.ajaxInfo(response.data);
+            }
+        });
+
+        self.getUsageData = getUsageData;
+
+        function getUsageData() {
+
+            usageService.getUsageData(self.limit, (self.offset-1)*self.limit).then(function(response){
+
+                    if (response.status == 200) {
+                        self.totalRecords = response.headers('X-Total-Count');
+                        self.records = response.data;
+                    }
+                    else {
+                        toasterService.ajaxInfo(response.data);
+                    }
+
+                });
+
+        }
+
+        getUsageData();
+
+
+
+    }
+
+    usageService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService', '$window'];
+
+    function usageService($http, $q, $cacheFactory, toasterService, $window) {
+        var service = {
+            getUsageData: getUsageData,
+            getDashboardData: getDashboardData
+        } ;
+
+        return service;
+
+        function getUsageData(limit, offset){
+            var deferred = $q.defer();
+
+            $http.get('/usage-data',  {
+                'params': {
+                    'limit': limit,
+                    'offset' : offset
+                },
+                cache: true
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+        function getDashboardData(limit, offset){
+            var deferred = $q.defer();
+
+            $http.get('/usage-dashboard-data',  {
+                cache: false
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+    }
+
+
 
 
 

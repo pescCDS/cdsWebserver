@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="James Whetstone" context="dev, ci, prod">
+        <comment>Creating tables to help track member usage.</comment>
+
+        <createTable tableName="api_request" remarks="Used to track API usage.">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="resource" type="varchar(128)" remarks="The resource name.">
+                <constraints nullable="false" />
+            </column>
+            <column name="url" type="varchar(128)" remarks="The URL for this API request.">
+                <constraints nullable="false" />
+            </column>
+            <column name="occurred_at" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="The time at which the API request was made.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="result_count" type="INT" remarks="Indicates if a result was returned. 0 indicates no results were returned.">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+
+        <createTable tableName="api_request_parameters" remarks="Used to track request parameter usage.">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="parameter_name" type="varchar(128)" remarks="The name of the parameter.">
+                <constraints nullable="false" />
+            </column>
+            <column name="parameter_value" type="varchar(128)" remarks="The value of the parameter.">
+                <constraints nullable="false" />
+            </column>
+            <column name="api_request_id" type="INT" remarks="foreign key to the api request table">
+                <constraints nullable="false"
+                             foreignKeyName="fk_api_request"
+                             references="api_request(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

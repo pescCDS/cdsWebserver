@@ -67,6 +67,9 @@
                 <li th:if="${hasSystemAdminRole}" ng-class="{ active: nav.isActive('/actuator-view')}">
                     <a class="item" href="#actuator-view">Server Info</a>
                 </li>
+                <li th:if="${hasSystemAdminRole}" ng-class="{ active: nav.isActive('/api-usage')}">
+                    <a class="item" href="#api-usage">API Usage</a>
+                </li>
                 <li th:if="${isAuthenticated}" ng-class="{ active: nav.isActive('/settings')}">
                     <a class="item" href="#settings">Settings</a>
                 </li>

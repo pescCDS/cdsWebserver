@@ -304,3 +304,13 @@ form.ng-submitted .ng-invalid
 {
     border:1px solid #f00;
 }
+
+.dashboard-data {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 18px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 20px;
+}

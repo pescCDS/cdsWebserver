@@ -156,13 +156,13 @@ public class EndpointService {
                 predicates.add(cb.equal(endpoint.get("id"), endpointId));
             }
             if (documentFormat != null) {
-                predicates.add(cb.equal(endpoint.get("documentFormat").get("name"), documentFormat));
+                predicates.add(cb.equal(cb.lower(endpoint.get("documentFormat").get("name")), documentFormat.toLowerCase()));
             }
             if (documentType != null) {
-                predicates.add(cb.equal(endpoint.get("documentType").get("name"), documentType));
+                predicates.add(cb.equal(cb.lower(endpoint.get("documentType").get("name")), documentType.toLowerCase()));
             }
             if (departmentName != null) {
-                predicates.add(cb.equal(endpoint.get("department").get("name"), departmentName));
+                predicates.add(cb.equal(cb.lower(endpoint.get("department").get("name")), departmentName.toLowerCase()));
             }
             if (mode != null) {
                 predicates.add(cb.equal(endpoint.get("mode"), mode.toUpperCase()));

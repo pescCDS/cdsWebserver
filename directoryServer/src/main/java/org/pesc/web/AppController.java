@@ -162,6 +162,15 @@ public class AppController {
         return "fragments :: actuator-view";
     }
 
+    @RequestMapping("/api-usage")
+    public String getApiUsage(Model model) {
+
+        buildUserModel(model);
+
+        return "fragments :: api-usage";
+    }
+
+
     @RequestMapping({"/endpoint-selector"})
     public String getEndpointSelectorFragment(Model model) {
         buildUserModel(model);
