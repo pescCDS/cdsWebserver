@@ -1095,6 +1095,15 @@
         self.organizationCount = {};
 
 
+        usageService.getDashboardData().then(function(response){
+            if (response.status == 200) {
+                self.dashboardData = response.data;
+            }
+            else {
+                toasterService.ajaxInfo(response.data);
+            }
+        });
+
         usageService.getEndpointParameterCounts().then(function(response){
             if (response.status == 200) {
                 self.documentTypeCount = response.data['documentTypeCount'];
