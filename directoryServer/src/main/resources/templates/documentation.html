@@ -100,6 +100,9 @@
         <div>
             <a href="#multiple-endpoints">Multiple Providers for an Institution</a>
         </div>
+        <div>
+            <a href="#docker-osx">Docker on OSX</a>
+        </div>
 
         <div>
             <a href="#faq">Frequently Ask Questions (FAQ)</a>
@@ -2096,6 +2099,44 @@
         endpoints will be returned to the API caller. In this case, it is up to the caller to select which endpoint in
         which to send the document. </p>
 
+    <div class="ed-title" id="docker-osx">Docker on OSX</div>
+    <p>
+        The best way to install docker for OSX is to use native docker, as opposed to Docker Machine.  Native docker
+        will make development and use of docker with EdExchange work without modifications.
+    </p>
+    <p>Get native docker by downloading it from <a target="_blank" href="https://www.docker.com">https://www.docker.com</a> and following
+    the instructions.  After you've successfully installed docker, there is one more step involved in configuration, so that
+        the docker daemon integrates with Maven during the build process...
+    </p>
+    <p>
+        <ol>
+            <li>
+                Open a terminal.
+            </li>
+            <li>
+                <kbd>cd ~</kbd>
+            </li>
+            <li>
+                Using your favorite text editor, add the following line to your .bash_profile script:
+                <div style="margin-left: 40px">
+                    <samp>
+                        export DOCKER_HOST=unix:///var/run/docker.sock
+                    </samp>
+                </div>
+
+
+            </li>
+            <li>
+                Source the script: <kbd>source .bash_profile</kbd>
+            </li>
+            <li>
+                Restart docker.
+            </li>
+            <li>
+                Rebuild EdExchange <kbd>mvn clean install</kbd> from your source repository directory.
+            </li>
+        </ol>
+    </p>
 
     <h2 id="upload-serviceable-institutions-csv">Upload Serviceable Institutions CSV</h2>
 
