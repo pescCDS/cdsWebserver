@@ -837,12 +837,13 @@ UefzAZM0VN/hj/4DZUwELgqNxDHlSeKKEOyc
                 network server software that was built in <a href="#get-software">Step 3b: Get the Network Server Software</a></li>
                 <li>Verify that ./cdsWebserver/networkServer/target/network-server.jar exists.  This is the compiled network server software that you should have build in
                     <a href="#build-software">Step 3c: Build the Network Server Software</a></li>
-                <li>Create a shell script to start the network server:
+                <li>Create a shell script to start the network server (you can optionally update the appropriate application.properties profile in the source code and rebuild your application):
                     <ol>
                         <li><kbd>nano start-network-server.sh</kbd></li>
                         <li>Copy and paste the following code into the editor, after providing the properites, providing missing values for the following properties:
 
                             <ul style="margin-left:20px;">
+                                <li><b>networkServer.id</b> : <span>This is your organization's EdExchange directory ID. Obtain it from the directory server.</span></li>
                                 <li><b>networkServer.name</b> : <span>This is your organization's name. It should be the same as what's on the directory server.</span></li>
                                 <li><b>networkServer.keystore.password</b> : This is the password you used in <a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents</a></li>
                                 <li><b>networkServer.admin.username</b> : This is the username of the super user account that is used to sign into the network server.  Make sure to select a unpredictable username.</li>
@@ -861,7 +862,7 @@ docker start network-db
 --logging.file="/home/ubuntu/network-server.log" \
 --db.server=172.17.0.2 \
 --networkServer.hostname= \
---networkServer.id=5 \
+--networkServer.id= \
 --networkServer.name= \
 --networkServer.keystore=/home/ubuntu/keystore.jks \
 --networkServer.keystore.password= \
