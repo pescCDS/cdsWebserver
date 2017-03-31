@@ -366,37 +366,29 @@ public class TranscriptRequestController {
                 transcriptRequestMarshaller.marshal(transcriptRequest, new StreamResult(requestFile));
             }
         }
-        catch (IOException e) {
-            log.error("Failed to save transcript request document.");
+        catch (Exception e) {
+            log.error("Failed to save transcript request document.", e);
 
             tx.setError(e.getLocalizedMessage());
+            tx.setStatus(TransactionStatus.FAILURE);
         }
 
         tx.setFileSize(requestFile.length());
-
-
-        //End transcript request construction
-
-
-        log.debug(String.format(
-                "saved Transaction: {%n  recipientId: %s,%n  senderId: %s,%n  fileFormat: %s%n}",
-                tx.getRecipientId(),
-                tx.getSenderId(),
-                tx.getFileFormat()
-        ));
 
         transactionService.update(tx);
 
         transactions.add(tx);
 
         try {
-            sendDocument(requestFile, endpointURI, tx, fileFormat,documentType, department);
+            if (StringUtils.isEmpty(tx.getError())) {
+                sendDocument(requestFile, endpointURI, tx, fileFormat,documentType, department);
+            }
         } catch (Exception e) {
 
             tx.setError(e.getMessage());
             transactionService.update(tx);
 
-            log.error(e);
+            log.error("Failed to send transcript request.", e);
 
             throw new IllegalArgumentException(e.getMessage());
         }
