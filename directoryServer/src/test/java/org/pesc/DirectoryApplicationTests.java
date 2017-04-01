@@ -17,6 +17,7 @@
 package org.pesc;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Test;
@@ -25,8 +26,8 @@ import org.pesc.api.EndpointResource;
 import org.pesc.api.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,8 +36,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
+
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -56,9 +57,9 @@ public class DirectoryApplicationTests {
 
 	//Test RestTemplate to invoke the APIs.
 	private RestTemplate restTemplate = new RestTemplate();
-	private RestTemplate secureRestTemplate = new TestRestTemplate("sallen", "admin");
-	private RestTemplate butteCollegeRestTemplate = new TestRestTemplate("jwhetstone", "admin");
-	private RestTemplate superUserRestTemplate = new TestRestTemplate("admin", "admin");
+	private TestRestTemplate secureRestTemplate = new TestRestTemplate("sallen", "admin");
+	private TestRestTemplate butteCollegeRestTemplate = new TestRestTemplate("jwhetstone", "admin");
+	private TestRestTemplate superUserRestTemplate = new TestRestTemplate("admin", "admin");
 
 	private String getBaseDirectoryServerURL() {
 		return  "http://localhost:" + port;
@@ -91,7 +92,7 @@ public class DirectoryApplicationTests {
 	 * server.
 	 */
 	@Test
-	public void updateOrganization() {
+	public void updateOrganization() throws JSONException {
 
 		HttpEntity<String> entity = new HttpEntity<String>("parameters", Utils.createHttpHeaders());
 
@@ -127,7 +128,7 @@ public class DirectoryApplicationTests {
 	 * of serviceable institutions.
 	 */
 	@Test
-	public void createInstitutionAndLinkToServiceProvider() {
+	public void createInstitutionAndLinkToServiceProvider() throws JSONException {
 		JSONObject institution = new JSONObject();
 		institution.put("name", "Sacramento City College");
 		institution.put("website", "http://www.scc.losrios.edu/");

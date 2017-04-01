@@ -57,6 +57,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/static/**",
+                        "/js/**",
+                        "/css/**",
                         "/fonts/**",
                         "/assets/**",
                         "/registration-form",
@@ -74,6 +76,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/docs",
                         "/home.html",
                         "/exception",
+                        "/info",
                         "/").permitAll()
                 .anyRequest().authenticated()
                 .and()

@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,6 +54,7 @@ import java.util.Map;
 
 @Configuration
 @EnableOAuth2Client
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -69,7 +71,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/", "/home", "/about", "/documentation", "/js/**", "/fonts/**", "/images/**", "/css/**", "favicon.ico").permitAll()
+                .antMatchers("/", "/info", "/home", "/about", "/documentation", "/js/**", "/fonts/**", "/images/**", "/css/**", "favicon.ico").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
