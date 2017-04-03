@@ -91,6 +91,9 @@ node(buildNode) {
         sh "docker tag edex/directory-server:${gitsha} ccctechcenter/cccnext-directory-server:${IMAGE_TAG}"
         sh "docker tag edex/network-server:${gitsha} ccctechcenter/cccnext-network-server:${IMAGE_TAG}"
 
+        archive "networkServer/target/network-server.jar"
+        archive "directoryServer/target/directory-server.jar"
+
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ccctech-dockerhub-public-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
             try { 
                 retry (5) {
