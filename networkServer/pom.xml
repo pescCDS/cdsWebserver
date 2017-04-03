@@ -234,7 +234,7 @@
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
 				<configuration>
-
+					<generateGitPropertiesFile>false</generateGitPropertiesFile>
 					<dotGitDirectory>../.git</dotGitDirectory>
 
 				</configuration>
