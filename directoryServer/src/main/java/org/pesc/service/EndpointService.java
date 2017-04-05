@@ -123,10 +123,9 @@ public class EndpointService {
             String mode,
             String enabled
     ) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         try {
-
-            EntityManager entityManager = entityManagerFactory.createEntityManager();
 
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
@@ -179,6 +178,9 @@ public class EndpointService {
 
         } catch(Exception ex) {
             log.error("Failed to execute endpoint search query.", ex);
+        }
+        finally {
+            entityManager.close();
         }
         return new ArrayList<Endpoint>();
     }
