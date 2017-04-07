@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>An Error Occurred</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -36,7 +36,7 @@
 
 <div th:fragment="user">
 
-    <form name="userForm" ng-submit="userForm.$valid && usersCtrl.save(user)" novalidate="novalidate" class="glow">
+    <form name="userForm" ng-submit="userForm.$valid && usersCtrl.save(user)" novalidate="novalidate" class="glow" aria-label="Create user form.">
         <div class="sub-nav">
             <div class="inner-margin7">
                 <div ng-show="!usersCtrl.showForm(user)">
@@ -154,7 +154,7 @@
     <div class="well">
 
         <form name="contactForm" ng-submit="contactForm.$valid && orgCtrl.saveContact(contact)" novalidate="novalidate"
-              class="glow">
+              class="glow" aria-label="Create contact form.">
             <div class="sub-nav">
                 <div class="inner-margin7">
                     <div ng-show="!orgCtrl.showContactForm(contact)">
@@ -249,7 +249,7 @@
 
 <div th:fragment="user-details">
     <form name="userForm" ng-submit="userForm.$valid && userCtrl.save()" novalidate="novalidate" class="glow">
-        <div class="sub-nav">
+        <div class="sub-nav" aria-label="Update user form.">
             <div class="inner-margin7">
                 <div ng-show="!userCtrl.showForm()">
 
@@ -400,7 +400,7 @@
                         <li class="list-group-item">
                             <form name="deliveryMethodForm"
                                   ng-submit="deliveryMethodForm.$valid && settingsCtrl.save('delivery-methods', obj)"
-                                  novalidate="novalidate" class="glow">
+                                  novalidate="novalidate" class="glow" aria-label="Delivery method form.">
                                 <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
                                     <button type="button" class="btn btn-default"
                                             ng-click="settingsCtrl.deleteObject('delivery-methods', obj)">
@@ -449,7 +449,7 @@
                         <li class="list-group-item">
                             <form name="documentFormatForm"
                                   ng-submit="documentFormatForm.$valid && settingsCtrl.save('document-formats', obj)"
-                                  novalidate="novalidate" class="glow">
+                                  novalidate="novalidate" class="glow" aria-label="Document format form.">
                                 <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
                                     <button type="button" class="btn btn-default"
                                             ng-click="settingsCtrl.deleteObject('document-formats', obj)">
@@ -499,7 +499,7 @@
                         <li class="list-group-item">
                             <form name="departmentForm"
                                   ng-submit="departmentForm.$valid && settingsCtrl.save('document-types', obj)"
-                                  novalidate="novalidate" class="glow">
+                                  novalidate="novalidate" class="glow" aria-label="Department form.">
                                 <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
                                     <button type="button" class="btn btn-default"
                                             ng-click="settingsCtrl.deleteObject('document-types', obj)">
@@ -550,7 +550,7 @@
                         <li class="list-group-item">
                             <form name="departmentForm"
                                   ng-submit="departmentForm.$valid && settingsCtrl.save('departments', obj)"
-                                  novalidate="novalidate" class="glow">
+                                  novalidate="novalidate" class="glow" aria-label="Department form.">
                                 <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
                                     <button type="button" class="btn btn-default"
                                             ng-click="settingsCtrl.deleteObject('departments', obj)">
@@ -815,7 +815,7 @@
     <div class="well" ng-controller="EndpointController as endpointCtrl">
 
         <form name="endpointForm" ng-submit="endpointForm.$valid && endpointCtrl.save(endpoint)" novalidate="novalidate"
-              class="glow">
+              class="glow" aria-label="Endpoint form.">
 
             <div ng-show="orgCtrl.isEditableByUser() && orgCtrl.hostedBy(endpoint)" style="float: right;">
                 <div class="btn-group">
@@ -1116,8 +1116,8 @@
 
 <div th:fragment="organization-details">
     <div>
-        <form name="orgForm" ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow">
-            <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
+        <form name="orgForm" ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow" aria-label="Update or create organization form.">
+            <div ng-show="orgCtrl.isEditableByUser()" style="float: right;" aria-label="Update organization form.">
                 <div class="btn-group">
                     <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default"
                             ng-show="orgCtrl.org.enabled == false"
@@ -1341,7 +1341,7 @@
 
     <div ng-show="orgCtrl.isEditableByUser()" id="oauthForm">
         <form name="oauthSecretForm" ng-submit="oauthSecretForm.$valid && orgCtrl.setOAuthSecret()"
-              novalidate="novalidate">
+              novalidate="novalidate" aria-label="Update OAuth secret form.">
             <div style="float:right;">
 
 
@@ -1362,7 +1362,7 @@
                 <div class="form-group">
                     <label style="width: 70px;">Secret: </label><input type="text"
                                                                        ng-model="orgCtrl.oauthSecretReplacement"
-                                                                       placeholder="OAuth Secret"> </input>
+                                                                       placeholder="OAuth Secret" aria-label="OAuth secret"> </input>
                 </div>
 
             </div>
@@ -1372,9 +1372,9 @@
             <div class="form-inline">
                 <div class="form-group">
                     <label style="width: 70px;">Secret: </label>
-                    <input ng-show="orgCtrl.oauthSecret.length > 0" readonly type="password" value="***************"/>
+                    <input ng-show="orgCtrl.oauthSecret.length > 0" readonly type="password" value="***************" aria-label="OAuth secret"/>
                     <input ng-show="orgCtrl.oauthSecret.length == 0" readonly type="password"
-                           placeholder="No OAuth Secret"/>
+                           placeholder="No OAuth Secret" aria-label="Oauth secret"/>
                 </div>
             </div>
         </div>
@@ -1383,7 +1383,7 @@
 
     <div>
         <form name="certificateForm" ng-submit="certificateForm.$valid && orgCtrl.setCertificate()"
-              novalidate="novalidate">
+              novalidate="novalidate" aria-label="Upload signing certificate form.">
             <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
 
 
@@ -1442,7 +1442,7 @@
 
     <div ng-show="orgCtrl.isServiceProvider()==true ">
         <form name="networkCertificateForm" ng-submit="networkCertificateForm.$valid && orgCtrl.setNetworkCertificate()"
-              novalidate="novalidate">
+              novalidate="novalidate" aria-label="Upload SSL certificate form.">
             <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
 
 
@@ -1592,7 +1592,7 @@
             <div class="form-inline">
                 <div class="form-group">
                     <input class="form-control" type="text" ng-model="usersCtrl.searchInput"
-                           placeholder="Name"> </input>
+                           placeholder="Name" aria-label="Organization name"> </input>
                     <button class="btn btn-default" ng-click="usersCtrl.find()">
                         <i class="glyphicon glyphicon-search"></i> Search
                     </button>
@@ -1618,7 +1618,7 @@
 <div th:fragment="institution">
     <div class="well">
         <form name="institutionForm" ng-submit="institutionForm.$valid && orgCtrl.saveInstitution()" novalidate="novalidate" class="glow" style="position: relative;">
-            <div class="sub-nav">
+            <div class="sub-nav" aria-label="Create institution form.">
                 <div class="inner-margin7">
 
                     <div>
@@ -1978,14 +1978,14 @@
 
 <div th:fragment="organization">
     <form name="orgForm" ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate" class="glow"
-          style="position: relative;">
+          style="position: relative;" aria-label="Create organization form.">
         <div class="sub-nav">
             <div class="inner-margin7">
                 <h1 ng-show="!orgCtrl.showOrgForm(org)"><a ng-href="#organization/{{org.id}}">{{org.name}}</a></h1>
 
                 <div ng-show="orgCtrl.showOrgForm(org)">
                     <h1>
-                        <input type="text" placeholder="Name" required="required" ng-model="org.name"> </input>
+                        <input type="text" placeholder="Name" required="required" ng-model="org.name" aria-label="Name"> </input>
                     </h1>
                 </div>
 
@@ -1994,7 +1994,7 @@
                 </div>
 
                 <div ng-show="orgCtrl.showOrgForm(org)">
-                    <input type="url" placeholder="http://" required="required" ng-model="org.website"> </input>
+                    <input type="url" placeholder="http://" required="required" ng-model="org.website" aria-label="Website URL"> </input>
                 </div>
                 <div><strong>Address: </strong>
                                             <span ng-show="!orgCtrl.showOrgForm(org)">
@@ -2006,12 +2006,12 @@
                                             <span ng-show="orgCtrl.showOrgForm(org)">
 
                                                 <span><input type="text" placeholder="Street" required="required"
-                                                             ng-model="org.street"> </input> </span>
+                                                             ng-model="org.street" aria-label="Street"> </input> </span>
                                                 <span><input type="text" placeholder="City" required="required"
-                                                             ng-model="org.city"> </input> </span>
+                                                             ng-model="org.city" aria-label="City"> </input> </span>
                                                 <span>
 
-                                                <select ng-model="org.state">
+                                                <select ng-model="org.state" aria-label="State">
                                                     <option value="AL">Alabama</option>
                                                     <option value="AK">Alaska</option>
                                                     <option value="AZ">Arizona</option>
@@ -2068,7 +2068,7 @@
                                                 </span>
                                                 <span><input type="text" placeholder="Zip Code" required="required"
                                                              ng-model="org.zip"
-                                                             style="max-width: 80px;"> </input></span>
+                                                             style="max-width: 80px;" aria-label="Zip code"> </input></span>
 
                                             </span>
                 </div>
@@ -2250,7 +2250,7 @@
 </div>
 
 <div th:fragment="registration-form">
-    <form name="regForm" ng-submit="regForm.$valid && regCtrl.register()" novalidate="novalidate">
+    <form name="regForm" ng-submit="regForm.$valid && regCtrl.register()" novalidate="novalidate" aria-label="Registration form.">
         <div class="row">
 
             <div class="col-sm-4">
@@ -2258,29 +2258,29 @@
                 <fieldset class="form-group">
                     <label>Organization Name</label>
                     <input type="text" class="form-control" placeholder="Name" required="required"
-                           ng-model="regCtrl.org.name"> </input>
+                           ng-model="regCtrl.org.name" aria-label="Organization name"> </input>
                 </fieldset>
 
                 <fieldset class="form-group">
                     <label>Website URL</label>
                     <input class="form-control" type="url" placeholder="http://" required="required"
-                           ng-model="regCtrl.org.website"> </input>
+                           ng-model="regCtrl.org.website" aria-label="Website URL"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Street</label>
                     <input class="form-control" type="text" placeholder="Street" required="required"
-                           ng-model="regCtrl.org.street"> </input>
+                           ng-model="regCtrl.org.street" aria-label="State"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>City</label>
 
                     <input class="form-control" type="text" placeholder="City" required="required"
-                           ng-model="regCtrl.org.city"> </input>
+                           ng-model="regCtrl.org.city" aria-label="City"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>State</label>
 
-                    <select class="form-control" ng-model="regCtrl.org.state" required="required">
+                    <select class="form-control" ng-model="regCtrl.org.state" required="required" aria-label="State">
                         <option value="AL">Alabama</option>
                         <option value="AK">Alaska</option>
                         <option value="AZ">Arizona</option>
@@ -2338,16 +2338,16 @@
                 <fieldset class="form-group">
                     <label>Zip Code</label>
                     <input class="form-control" type="text" placeholder="Zip Code" required="required"
-                           ng-model="regCtrl.org.zip" style="max-width: 100px;"> </input>
+                           ng-model="regCtrl.org.zip" style="max-width: 100px;" aria-label="Zip Code"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Phone</label>
                     <input type="tel" class="form-control" placeholder="Telephone" required="required"
-                           ng-model="regCtrl.org.telephone" style="width:150px;">
+                           ng-model="regCtrl.org.telephone" style="width:150px;" aria-label="Phone number">
 
                 </fieldset>
 
-                <fieldset class="form-group">
+                <fieldset class="form-group" id="org-types">
                     <label>Type</label>
 
 
@@ -2357,7 +2357,7 @@
                                    type="checkbox"
                                    ng-checked="regCtrl.hasOrgType(type)"
                                    name="orgTypes"
-                                   ng-click="regCtrl.updateOrgType($event, type)"/>
+                                   ng-click="regCtrl.updateOrgType($event, type)" aria-label="Organization type" aria-labelledby="org-types"/>
                             <b>{{type.name}}</b>
 
                             <p>{{type.description}}</p>
@@ -2376,35 +2376,35 @@
                 <fieldset class="form-group">
                     <label>Contact Name</label>
                     <input class="form-control" type="text" placeholder="Name" required="required"
-                           ng-model="regCtrl.user.name"> </input>
+                           ng-model="regCtrl.user.name" aria-label="Contact name"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Title</label>
 
                     <input class="form-control" type="text" placeholder="Title" ng-model="regCtrl.user.title"
-                           required="required"> </input>
+                           required="required" aria-label="Contact title"> </input>
 
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Phone</label>
                     <input class="form-control" type="tel" placeholder="Phone" ng-model="regCtrl.user.phone"
-                           required="required"> </input>
+                           required="required" aria-label="Phone number"> </input>
 
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Email</label>
                     <input class="form-control" type="email" placeholder="Email" ng-model="regCtrl.user.email"
-                           required="required"> </input>
+                           required="required" aria-label="Email address"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Username</label>
                     <input class="form-control" type="text" placeholder="Username" ng-model="regCtrl.user.username"
-                           required="required"> </input>
+                           required="required" aria-label="Username"> </input>
                 </fieldset>
                 <fieldset class="form-group">
                     <label>Password</label>
                     <input class="form-control" type="password" placeholder="Password" ng-model="regCtrl.user.password"
-                           required="required"> </input>
+                           required="required" aria-label="password"> </input>
                 </fieldset>
             </div>
         </div>
@@ -2446,21 +2446,21 @@
             <div class="form-inline">
                 <div class="form-group">
                     <input class="form-control" style="width: 60px;" type="text" ng-model="orgCtrl.directoryID"
-                           placeholder="ID" empty-to-null> </input>
+                           placeholder="ID" empty-to-null aria-label="EdExchange directory ID"> </input>
                 </div>
 
                 <div class="form-group">
                     <input class="form-control" type="text" ng-model="orgCtrl.orgName"
-                           placeholder="Organization Name"> </input>
+                           placeholder="Organization Name" aria-label="Organization name."> </input>
                 </div>
 
                 <div class="form-group" style="border: dotted 1px #eeeeee;">
                     <input class="form-control" type="text" ng-model="orgCtrl.schoolCode" placeholder="Code"
-                           style="width: 100px;"> </input>
+                           style="width: 100px;" aria-label="School code."> </input>
 
 
                     <select class="form-control" style="width: 110px;" required="required"
-                            ng-model="orgCtrl.schoolCodeType">
+                            ng-model="orgCtrl.schoolCodeType" aria-label="School code type.">
                         <option value="">Code Type</option>
                         <option value="ACT">ACT</option>
                         <option value="ATP">ATP</option>

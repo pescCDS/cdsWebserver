@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>EdExchange Onboarding Guide for Service Providers</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -187,12 +187,12 @@
                 "Elastic IPs" menu item and then select "Allocate new address" and then "Allocate".  You should be presented with
                 a dialog that shows the IP address, similar to the one here:
             </p>
-            <img src="assets/images/elastic-ip.png" />
+            <img src="assets/images/elastic-ip.png" alt="Elastic IP dialog box." />
             <p>Note the IP address and close the dialog.  Next, select the IP address you just created from the list of Elastic
                 IP Addresses and from the Actions dropdown, select "Associate address".  Using the dialog, associate the IP address
             with your newly created server instance using the server name you noted earlier in the process. E.g. i-0fe3dc9b47b98fb63</p>
 
-            <img src="assets/images/associate-address.png" />
+            <img src="assets/images/associate-address.png" alt="Assocate IP address."/>
 
 
             <h1 id="provision-server">Step 3: Provision the Server</h1>
@@ -575,9 +575,9 @@ or use your favorite IDE to develop and run
                         <dd>
                             Accept the default value of <span>300</span>.
                         </dd>
-                        <div>
+                        <dt>
                             <b><span>Value</span></b>
-                        </div>
+                        </dt>
                         <dd>
                             Type the IP address that you got in <a href="#find-ip-address">Get the IP address for the Amazon EC2 instance</a>.
                         </dd>
@@ -643,7 +643,7 @@ or use your favorite IDE to develop and run
             <p>
                 Upon completion, you should be presented with a popup dialog similar to the one below:
                 <div>
-                    <img src="assets/images/letsencrypt-success.png" />
+                    <img src="assets/images/letsencrypt-success.png" alt="Successful letsencrypt dialog."/>
                 </div>
 
                 Select <span>OK</span>.
@@ -927,66 +927,66 @@ WantedBy = multi-user.target
                 <li>Sign into your network server using the admin username and password you configured in <a href="#start-network-server">Step 6: Start the EdExchange Network Server</a></li>
                 <li>Select "Request Transcript" from the top level menu.</li>
                 <li>Fill in all of the form fields as follows:</li>
-                    <div class="well">
-                        <div>
-                            <b>Record Holding Institution(s)</b> :
+            </ol>
+
+            <div class="well">
+                <div>
+                    <b>Record Holding Institution(s)</b> :
                             <span>Select/click the plus symbol icon next to the field name.
                                 In the web form that is presented, enter 008073 in the code field and select
                                 the FICE code type from the list.   This is the FICE code that identifies Butte College
                                 which is the institution to which the transcript request is being sent.
                             </span>
-                        </div>
-                        <div>
-                            <b>Requesting Institution(s)</b> :
+                </div>
+                <div>
+                    <b>Requesting Institution(s)</b> :
                              <span>Select/click the plus symbol icon next to the field name.
                                 In the web form that is presented, select the code type from the
                                 list and then the code that identifies an institution. TODO: add ability
                                  to use "MutuallDefined" and the directory ID of the service provider.
                             </span>
-                        </div>
-                        <div>
-                            <b>File format</b> : <span>PESCXML</span>
-                        </div>
-                        <div>
-                            <b>Student Release Authorized Indicator</b> : <span>Put a check in the checkbox.</span>
-                        </div>
-                        <div>
-                            <b>Student Release Authorized Method</b> :
+                </div>
+                <div>
+                    <b>File format</b> : <span>PESCXML</span>
+                </div>
+                <div>
+                    <b>Student Release Authorized Indicator</b> : <span>Put a check in the checkbox.</span>
+                </div>
+                <div>
+                    <b>Student Release Authorized Method</b> :
                             <span>Select SIGNATURE from the list, but in this test
                                   case, any method could be selected.
                             </span>
-                        </div>
+                </div>
 
-                        <div>
-                            <b>Student Date of Birth</b> : <span>Enter the birth date of the student as '01/01/1995'.</span>
-                        </div>
+                <div>
+                    <b>Student Date of Birth</b> : <span>Enter the birth date of the student as '01/01/1995'.</span>
+                </div>
 
-                        <div>
-                            <b>Student First Name</b> : <span>Enter 'John'.</span>
-                        </div>
+                <div>
+                    <b>Student First Name</b> : <span>Enter 'John'.</span>
+                </div>
 
-                        <div>
-                            <b>Student Middle Name</b> : <span>Leave the middle name blank.</span>
-                        </div>
+                <div>
+                    <b>Student Middle Name</b> : <span>Leave the middle name blank.</span>
+                </div>
 
-                        <div>
-                            <b>Student Last Name</b> : <span>Enter 'Doe'.</span>
-                        </div>
+                <div>
+                    <b>Student Last Name</b> : <span>Enter 'Doe'.</span>
+                </div>
 
-                        <div>
-                            <b>Student Email</b> : <span>Enter 'john.doe@edexchange.org'.</span>
-                        </div>
+                <div>
+                    <b>Student Email</b> : <span>Enter 'john.doe@edexchange.org'.</span>
+                </div>
 
-                        <div>
-                            <b>Student Last 4 SSN</b> : <span>Enter '0000'</span>
-                        </div>
+                <div>
+                    <b>Student Last 4 SSN</b> : <span>Enter '0000'</span>
+                </div>
 
-                        <div>
-                            <b>Mode</b> : <span>TEST</span>
-                        </div>
-                    </div>
-
-            </ol>
+                <div>
+                    <b>Mode</b> : <span>TEST</span>
+                </div>
+            </div>
 
 
 

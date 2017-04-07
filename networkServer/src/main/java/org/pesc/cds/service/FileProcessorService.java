@@ -136,6 +136,9 @@ public class FileProcessorService {
             catch (HttpClientErrorException e) {
                 log.error("Failed to send PESC functional acknowledgement: ." + e.getResponseBodyAsString(), e);
             }
+            catch (Exception e) {
+                log.error("Failed to send PESC functional acknowledgement.", e);
+            }
 
         }
     }
