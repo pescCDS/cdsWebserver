@@ -32,6 +32,7 @@
                 return  (val.match(/\.0*$/) ? val.substr(0, val.indexOf('.')) : val) +  ' ' + units[number];
             }
         })
+        .filter('trueFalse', trueFalse)
         .directive('toNumber', toNumber)
         .directive('fileModel', fileModel)
         .service('transactionService', transactionService)
@@ -77,7 +78,9 @@
             .when("/home", {
                 templateUrl: "about"
             })
-
+            .when("/me", {
+                templateUrl: "user-account"
+            })
             .otherwise({
                 redirectTo: "home"
             });
@@ -821,6 +824,16 @@
             }
 
             return friendlyName;
+        };
+    }
+
+
+    function trueFalse(){
+        return function(text, length, end) {
+            if (text) {
+                return 'Y';
+            }
+            return 'N';
         };
     }
 

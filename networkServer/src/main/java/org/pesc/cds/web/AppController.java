@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.Collection;
 
 @Controller
@@ -285,6 +286,13 @@ public class AppController {
 
         return "fragments :: about";
     }
+
+    @RequestMapping("/user-account")
+    public String userAccount(Model model, Principal principal) {
+        model.addAttribute("name", principal.getName());
+        return "fragments :: user-account";
+    }
+
 
 
 }

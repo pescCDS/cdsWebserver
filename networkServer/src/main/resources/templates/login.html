@@ -35,6 +35,7 @@
 
 <div class="container" style="width: 40%; margin: 5em auto;">
 
+    <h1>Sign In</h1>
 
     <div th:if="${param.error}" class="alert alert-danger">
         Invalid username and password.
@@ -43,17 +44,17 @@
         You have been logged out.
     </div>
 
-    <form th:action="@{login}" method="post">
+    <form th:action="@{login}" method="post" aria-label="Login form">
         <div class="panel panel-default">
             <div class="panel-body" style="padding: 2em;">
                 <div class="form-group">
 
                     <input class="form-control" type="text" name="username" placeholder="Username" autofocus="true"
-                           autocomplete="off"/>
+                           autocomplete="off" aria-label="Username"/>
                 </div>
 
                 <div class="form-group">
-                    <input class="form-control" type="password" name="password" placeholder="Password"/>
+                    <input class="form-control" type="password" name="password" placeholder="Password" aria-label="Password"/>
                 </div>
 
                 <button class="btn btn-default" type="submit">Sign In</button>

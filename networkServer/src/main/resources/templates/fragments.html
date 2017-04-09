@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>An Error Occurred</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -36,11 +36,11 @@
                                 <input type="text" class="form-control" placeholder="MM/DD/YYYY"
                                        uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.startDate"
                                        is-open="transactionCtrl.startDatePopup.opened" datepicker-options="dateOptions"
-                                       close-text="Close"/>
+                                       close-text="Close" aria-label="From date"/>
                               <span class="input-group-btn">
                                 <button type="button" class="btn btn-default"
                                         ng-click="transactionCtrl.openStartDatePopup()"><i
-                                        class="glyphicon glyphicon-calendar"></i></button>
+                                        class="glyphicon glyphicon-calendar"></i> From</button>
                               </span>
                             </p>
                         </div>
@@ -50,10 +50,10 @@
                                 <input type="text" class="form-control" placeholder="MM/DD/YYYY"
                                        uib-datepicker-popup="MM/dd/yyyy" ng-model="transactionCtrl.endDate"
                                        is-open="transactionCtrl.endDatePopup.opened" datepicker-options="dateOptions"
-                                       close-text="Close"/>
+                                       close-text="Close" aria-label="To date"/>
                             <span class="input-group-btn">
                                <button type="button" class="btn btn-default" ng-click="transactionCtrl.openEndDatePopup()">
-                                   <i class="glyphicon glyphicon-calendar"></i></button>
+                                   <i class="glyphicon glyphicon-calendar"></i> To</button>
                             </span>
                             </p>
                         </div>
@@ -110,7 +110,7 @@
                         <b>Fetch Size</b>
 
                         <div>
-                            <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.limit" min="1" max="100">
+                            <input style="width: 80px;" type="number" name="input" ng-model="transactionCtrl.limit" min="1" max="100" aria-label="Fetch size">
                         </div>
                     </div>
                 </div>
@@ -142,62 +142,95 @@
 
     </div>
 
-    <div style="margin-top: 20px;">
-        <table st-table="transactionCtrl.transactions" class="table table-striped">
+    <div style="margin-top: 20px;" class="table-responsive">
+        <table class="table table-striped">
             <thead>
             <tr>
-                <th>ID</th>
-                <th>Recipient</th>
-                <th>Sender</th>
+                <th data-toggle="tooltip" title="Transaction ID">ID</th>
+                <th>Route</th>
                 <th>Operation</th>
-                <th>Format</th>
-                <th>Type</th>
-                <th>Dept.</th>
-                <th>Size</th>
-                <th>Document</th>
-                <th>Transcript Request</th>
-                <th>Acknowledgment</th>
+                <th>Document Info</th>
                 <th>Occurred At</th>
-                <th>Acknowledged At</th>
-                <th>Error</th>
-                <th>Acknowledgement sent</th>
                 <th>Delivery Status</th>
-                <th>Delivery Message</th>
-                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="tran in transactionCtrl.transactions">
-                <td>{{tran.id}}</td>
-                <td><a ng-href="{{transactionCtrl.getOrgURL(tran.recipientId)}}">{{tran.recipientId}}</a></td>
-                <td><a ng-href="{{transactionCtrl.getOrgURL(tran.senderId)}}">{{tran.senderId}}</a></td>
-                <td>{{tran.operation}}</td>
-                <td>{{tran.fileFormat}}</td>
-                <td>{{tran.documentType}}</td>
-                <td>{{tran.department}}</td>
-                <td>{{tran.fileSize | bytes}}</td>
                 <td>
-                    <a ng-href="files?tran_id={{tran.id}}">{{tran.filePath}}</a>
+                    {{tran.id}}
+                </td>
+                <td>
+                    <div style="width:110px; margin: 2px;">
+                        <button class="btn btn-default btn-sm" ng-click="transactionCtrl.getOrg(tran.senderId)" uib-popover-template="'org-view.html'" popover-trigger="focus">Source:  {{tran.senderId}}</button>
+                    </div>
+                    <div style="width:110px; margin: 2px;">
+                        <button  class="btn btn-default btn-sm" ng-click="transactionCtrl.getOrg(tran.recipientId)" uib-popover-template="'org-view.html'" popover-trigger="focus">Destination: {{tran.recipientId}}</button>
+
+                    </div>
 
                 </td>
                 <td>
-                    <a ng-href="files?tran_id={{tran.id}}&show_request=true">{{tran.requestFilePath}}</a>
+                    <div>{{tran.operation}}</div>
+                    <div ng-show="tran.ackFilePath != null">
+                        <a ng-href="files/acknowledgement?tran_id={{tran.id}}">
+                            <div style="width: 110px;">
+                                Ack <span ng-show="tran.operation == 'SEND'">received: </span><span ng-show="tran.operation == 'RECEIVE'">sent: </span><span>{{tran.acknowledged |  trueFalse}}</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div ng-show="tran.ackFilePath == null">
+                        <div style="width: 110px;">
+                            Ack <span ng-show="tran.operation == 'SEND'">received: </span><span ng-show="tran.operation == 'RECEIVE'">sent: </span><span>{{tran.acknowledged |  trueFalse}}</span>
+                        </div>
+                    </div>
+                    <div ng-show="tran.acknowledgedAt != null">Ack time: {{tran.acknowledgedAt | date:'medium'}}</div>
 
-                </td>
-                <td>
-                    <a ng-href="files/acknowledgement?tran_id={{tran.id}}">{{tran.ackFilePath}}</a>
-
-                </td>
-                <td>{{tran.occurredAt | date:'medium'}}</td>
-                <td>{{tran.acknowledgedAt | date:'medium'}}</td>
-                <td>{{tran.error}}</td>
-                <td>{{tran.acknowledged}}</td>
-                <td>{{tran.status}}</td>
-                <td>{{tran.message}}</td>
-                <td>
                     <button ng-show="tran.operation == 'SEND'" type="button" ng-click="transactionCtrl.resend(tran)" class="btn btn-primary btn-sm">
                         <span class="glyphicon glyphicon-send"></span> Resend
                     </button>
+
+                </td>
+                <td>
+                    <div>
+                        <a ng-href="files?tran_id={{tran.id}}">{{tran.documentType}}</a>
+                    </div>
+                    <div>
+                        <small>Format:  {{tran.fileFormat}}</small>
+                    </div>
+                    <div>
+                        <small>Size: {{tran.fileSize | bytes}}</small>
+                    </div>
+                    <div ng-show="tran.department != null">
+                        <small>Department: {{tran.department}}</small>
+                    </div>
+                    <div ng-show="tran.requestFilePath != null">
+                        <a ng-href="files?tran_id={{tran.id}}&show_request=true">Transcript Request</a>
+                    </div>
+                </td>
+                <td>{{tran.occurredAt | date:'medium'}}</td>
+                <td>
+                    <div>{{tran.status}}</div>
+                    <div ng-show="tran.error != null" style="position: relative;">
+                        <a ng-click="tran.showError = !tran.showError">Error Message</a>
+                        <div ng-show="tran.showError == true" class="popup-message">
+                            <button type="button" class="close" aria-label="Close" ng-click="tran.showError = false" style="padding-right: 5px;">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+
+                            {{tran.error}}
+                        </div>
+                    </div>
+                    <div ng-show="tran.message != null" style="position: relative;">
+                        <a ng-click="tran.showInfo = !tran.showInfo">Info Message</a>
+                        <div ng-show="tran.showInfo == true" class="popup-message">
+                            <button type="button" class="close" aria-label="Close" ng-click="tran.showInfo = false" style="padding-right: 5px;">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+
+                            {{tran.message}}
+                        </div>
+                    </div>
+
                 </td>
             </tr>
             </tbody>
@@ -205,6 +238,13 @@
     </div>
 
 
+</div>
+
+
+<div th:fragment="user-account">
+    <div>
+        <span>Name: </span><span th:text="${name}"></span>
+    </div>
 </div>
 
 <div th:fragment="upload-status">
@@ -224,10 +264,10 @@
                 <strong>Source School Code</strong>
                 <div class="form-inline">
                     <div class="form-group" ng-class="{ 'has-error' : uploadForm.sourceSchoolCode.$invalid && (!uploadForm.sourceSchoolCode.$pristine || uploadForm.$submitted) }">
-                        <input name="sourceSchoolCode" class="form-control" type="text" th:required="${institution}==false" ng-model="uploadCtrl.sourceSchoolCode" placeholder="Code" style="width: 110px;"> </input>
+                        <input aria-label="Source school code" name="sourceSchoolCode" class="form-control" type="text" th:required="${institution}==false" ng-model="uploadCtrl.sourceSchoolCode" placeholder="Code" style="width: 110px;"> </input>
                     </div>
                     <div class="form-group" ng-class="{ 'has-error' : uploadForm.sourceSchoolCodeType.$invalid && (!uploadForm.sourceSchoolCodeType.$pristine || uploadForm.$submitted) }">
-                        <select name="sourceSchoolCodeType" class="form-control" style="width: 160px;" th:required="${institution}==false"
+                        <select aria-label="Source school code type" name="sourceSchoolCodeType" class="form-control" style="width: 160px;" th:required="${institution}==false"
                                 ng-model="uploadCtrl.sourceSchoolCodeType">
                             <option value="">Code Type</option>
                             <option value="ACT">ACT</option>
@@ -246,10 +286,10 @@
                 <strong>Destination School Code</strong>
                 <div class="form-inline">
                     <div class="form-group" ng-class="{ 'has-error' : uploadForm.destinationSchoolCode.$invalid && (!uploadForm.destinationSchoolCode.$pristine || uploadForm.$submitted) }">
-                        <input name="destinationSchoolCode" class="form-control" type="text" required="required" ng-model="uploadCtrl.destinationSchoolCode" placeholder="Code" style="width: 110px;"> </input>
+                        <input aria-label="Desination school code" name="destinationSchoolCode" class="form-control" type="text" required="required" ng-model="uploadCtrl.destinationSchoolCode" placeholder="Code" style="width: 110px;"> </input>
                     </div>
                     <div class="form-group" ng-class="{ 'has-error' : uploadForm.destinationSchoolCodeType.$invalid && (!uploadForm.destinationSchoolCodeType.$pristine || uploadForm.$submitted) }">
-                        <select name="destinationSchoolCodeType" class="form-control" style="width: 160px;" required="required"
+                        <select aria-label="Desination school code type" name="destinationSchoolCodeType" class="form-control" style="width: 160px;" required="required"
                                 ng-model="uploadCtrl.destinationSchoolCodeType">
                             <option value="">Code Type</option>
                             <option value="ACT">ACT</option>
@@ -267,7 +307,7 @@
 
             <div class="form-group" ng-class="{ 'has-error' : uploadForm.documentFormat.$invalid && (!uploadForm.documentFormat.$pristine || uploadForm.$submitted) }">
                 <strong>Document Format</strong>
-                <select name="documentFormat" class="form-control" style="width: 160px;" required="required"
+                <select aria-label="Document format" name="documentFormat" class="form-control" style="width: 160px;" required="required"
                         ng-model="uploadCtrl.documentFormat"
                         ng-options="documentFormat.name for documentFormat in uploadCtrl.documentFormats track by documentFormat.id">
 
@@ -280,7 +320,7 @@
 
             <div class="form-group" ng-class="{ 'has-error' : uploadForm.documentType.$invalid && (!uploadForm.documentType.$pristine || uploadForm.$submitted) }">
                 <strong>Document Type</strong>
-                <select name="documentType" class="form-control" style="width: 160px;" required="required"
+                <select aria-label="Document type" name="documentType" class="form-control" style="width: 160px;" required="required"
                         ng-model="uploadCtrl.documentType"
                         ng-options="documentType.name for documentType in uploadCtrl.documentTypes track by documentType.id">
 
@@ -293,7 +333,7 @@
 
             <div class="form-group" ng-class="{ 'has-error' : uploadForm.department.$invalid && (!uploadForm.department.$pristine || uploadForm.$submitted) }">
                 <strong>Department</strong>
-                <select name="department" class="form-control" style="width: 160px;" required="required"
+                <select aria-label="Department name"  name="department" class="form-control" style="width: 160px;" required="required"
                         ng-model="uploadCtrl.department"
                         ng-options="department.name for department in uploadCtrl.departments track by department.id">
 
@@ -307,7 +347,7 @@
             <div class="form-group">
                 <div><strong>Transcript File</strong></div>
                 <div class="btn btn-default btn-file">
-                    Browse <input type="file" file-model="uploadCtrl.fileToUpload"/>
+                    Browse <input aria-label="File to upload" type="file" file-model="uploadCtrl.fileToUpload"/>
                 </div>
 
                 <span>{{uploadCtrl.fileToUpload.name}}</span>
@@ -316,12 +356,12 @@
             <div class="form-group" ng-show="uploadCtrl.documentFormat.name!='PESCXML'">
                 <div class="form-group">
                     <div><strong>Student Release Authorized Indicator</strong></div>
-                    <input type="checkbox" ng-model="uploadCtrl.studentRelease" checked="false"/>
+                    <input aria-label="Student release indicator"  type="checkbox" ng-model="uploadCtrl.studentRelease" checked="false"/>
                 </div>
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentReleasedMethod.$invalid && (!uploadForm.studentReleasedMethod.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student Release Authorized Method</strong></div>
-                    <select name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="uploadCtrl.studentReleasedMethod" ng-required="uploadCtrl.documentFormat.name!='PESCXML'">
+                    <select aria-label="Student release method" name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="uploadCtrl.studentReleasedMethod" ng-required="uploadCtrl.documentFormat.name!='PESCXML'">
                         <option value=""></option>
                         <option value="SIGNATURE">SIGNATURE</option>
                         <option value="ELECTRONIC_SIGNATURE">ELECTRONIC_SIGNATURE</option>
@@ -332,37 +372,37 @@
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentBirthDate.$invalid && (!uploadForm.studentBirthDate.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student Date of Birth</strong></div>
-                    <input name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentBirthDate" placeholder="format: 01/01/1995" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
+                    <input aria-label="Student birth date" name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentBirthDate" placeholder="format: 01/01/1995" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
                 </div>
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentFirstName.$invalid && (!uploadForm.studentFirstName.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student First Name</strong></div>
-                    <input name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentFirstName" ng-required="uploadCtrl.documentFormat.name!='PESCXML' "> </input>
+                    <input aria-label="Student first name" name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentFirstName" ng-required="uploadCtrl.documentFormat.name!='PESCXML' "> </input>
                 </div>
 
                 <div class="form-group">
                     <div><strong>Student Middle Name</strong></div>
-                    <input class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentMiddleName"> </input>
+                    <input aria-label="Student middle name" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentMiddleName"> </input>
                 </div>
 
                 <div class="form-group" ng-class="{ 'has-error' : uploadForm.studentLastName.$invalid && (!uploadForm.studentLastName.$pristine || uploadForm.$submitted) }">
                     <div><strong>Student Last Name</strong></div>
-                    <input name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentLastName" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
+                    <input aria-label="Student last name" name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentLastName" ng-required="uploadCtrl.documentFormat.name!='PESCXML'"> </input>
                 </div>
 
                 <div class="form-group">
                     <div><strong>Student Email</strong></div>
-                    <input class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentEmail"> </input>
+                    <input aria-label="Student email" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentEmail"> </input>
                 </div>
 
                 <div class="form-group">
                     <div><strong>Student Last 4 SSN</strong></div>
-                    <input class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentPartialSSN"> </input>
+                    <input aria-label="Student partial SSN" class="form-control" style="width: 160px;" type="text" ng-model="uploadCtrl.studentPartialSSN"> </input>
                 </div>
 
                 <div class="form-group">
                     <div><strong>Student Current Enrollment Indicator</strong></div>
-                    <input type="checkbox" ng-model="uploadCtrl.studentCurrentlyEnrolled" checked="false"/>
+                    <input aria-label="Student currently enrolled indicator" type="checkbox" ng-model="uploadCtrl.studentCurrentlyEnrolled" checked="false"/>
                 </div>
             </div>
 <!--Transcript Request-->
@@ -401,11 +441,11 @@
             <div ng-show="trCtrl.showForm(institution) == true">
                 <div class="col-sm-6">
                     <b>School code</b>
-                    <input name="schoolCode" class="form-control" type="text" ng-model="institution.schoolCode" placeholder="School Code" required="required"> </input>
+                    <input aria-label="School code" name="schoolCode" class="form-control" type="text" ng-model="institution.schoolCode" placeholder="School Code" required="required"> </input>
                 </div>
                 <div class="col-sm-6">
                     <b>Code type</b>
-                    <select name="schoolCodeType" class="form-control" required="required" ng-model="institution.schoolCodeType">
+                    <select aria-label="School code type" name="schoolCodeType" class="form-control" required="required" ng-model="institution.schoolCodeType">
                         <option value=""></option>
                         <option value="ACT">ACT</option>
                         <option value="ATP">ATP</option>
@@ -511,7 +551,7 @@
 
                     <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.fileFormat.$invalid && (!transcriptRequestForm.fileFormat.$pristine || transcriptRequestForm.$submitted) }">
                         <div><strong>File Format</strong></div>
-                        <select name="fileFormat" class="form-control" style="width: 160px;" ng-model="trCtrl.request.fileFormat" required="required">
+                        <select aria-label="File format" name="fileFormat" class="form-control" style="width: 160px;" ng-model="trCtrl.request.fileFormat" required="required">
                             <option value="JSON">JSON</option>
                             <option value="PESCXML">PESCXML</option>
                             <option value="PDF">PDF</option>
@@ -529,6 +569,7 @@
                     <div class="form-group">
 
                         <span  class="checkbox-inline"> <input
+                                aria-label="Student release indicator"
                                 type="checkbox"
                                 ng-model="trCtrl.request.studentRelease" checked="false"> <strong>Student Release Authorized Indicator</strong></span>
                         </span>
@@ -537,7 +578,7 @@
 
                     <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentReleasedMethod.$invalid && (!transcriptRequestForm.studentReleasedMethod.$pristine || transcriptRequestForm.$submitted) }">
                         <div><strong>Student Release Authorized Method</strong></div>
-                        <select name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="trCtrl.request.studentReleasedMethod" required="required">
+                        <select aria-label="Student release method" name="studentReleasedMethod" class="form-control" style="width: 160px;" ng-model="trCtrl.request.studentReleasedMethod" required="required">
                             <option value=""></option>
                             <option value="SIGNATURE">SIGNATURE</option>
                             <option value="ELECTRONIC_SIGNATURE">ELECTRONIC_SIGNATURE</option>
@@ -548,32 +589,32 @@
 
                     <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentBirthDate.$invalid && (!transcriptRequestForm.studentBirthDate.$pristine || transcriptRequestForm.$submitted) }">
                         <div><strong>Student Date of Birth</strong></div>
-                        <input name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentBirthDate" placeholder="format: 01/01/1995" required="required"> </input>
+                        <input aria-label="Student birth date" name="studentBirthDate" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentBirthDate" placeholder="format: 01/01/1995" required="required"> </input>
                     </div>
 
                     <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentFirstName.$invalid && (!transcriptRequestForm.studentFirstName.$pristine || transcriptRequestForm.$submitted) }">
                         <div><strong>Student First Name</strong></div>
-                        <input name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentFirstName"> </input>
+                        <input aria-label="Student first name" name="studentFirstName" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentFirstName"> </input>
                     </div>
 
                     <div class="form-group">
                         <div><strong>Student Middle Name</strong></div>
-                        <input class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentMiddleName"> </input>
+                        <input aria-label="Student middle name" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentMiddleName"> </input>
                     </div>
 
                     <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.studentLastName.$invalid && (!transcriptRequestForm.studentLastName.$pristine || transcriptRequestForm.$submitted) }">
                         <div><strong>Student Last Name</strong></div>
-                        <input name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentLastName"> </input>
+                        <input aria-label="Student last name" name="studentLastName" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentLastName"> </input>
                     </div>
 
                     <div class="form-group">
                         <div><strong>Student Email</strong></div>
-                        <input class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentEmail"> </input>
+                        <input aria-label="Student email address" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentEmail"> </input>
                     </div>
 
                     <div class="form-group">
                         <div><strong>Student Last 4 SSN</strong></div>
-                        <input class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentPartialSSN"> </input>
+                        <input aria-label="Student partial SSN" class="form-control" style="width: 160px;" type="text" ng-model="trCtrl.request.studentPartialSSN"> </input>
                     </div>
 
                 </div>
@@ -586,7 +627,7 @@
 
                     <div class="form-group" ng-class="{ 'has-error' : transcriptRequestForm.mode.$invalid && (!transcriptRequestForm.mode.$pristine || transcriptRequestForm.$submitted) }">
                         <div><strong>Mode</strong></div>
-                        <select name="mode" class="form-control" style="width: 160px;" ng-model="trCtrl.request.mode" required="required">
+                        <select aria-label="Endpoint mode" name="mode" class="form-control" style="width: 160px;" ng-model="trCtrl.request.mode" required="required">
                             <option value="TEST">TEST</option>
                             <option value="LIVE">LIVE</option>
                         </select>

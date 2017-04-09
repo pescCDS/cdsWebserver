@@ -17,7 +17,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
-      ng-app="networkServer">
+      ng-app="networkServer" lang="en">
 <head>
     <title>Education Exchange - a standards based system for exchanging documents.</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -91,7 +91,7 @@
                         <ul uib-dropdown-menu>
                             <li>
                                 <div style="width: 60%;margin: auto; padding: 5px;">
-                                    <a class="btn btn-primary" th:href="@{'me'}">Account</a>
+                                    <a class="btn btn-primary" href="#me">Account</a>
                                 </div>
                             </li>
 
@@ -137,6 +137,12 @@
     var directoryServer = /*[[${directoryServer}]]*/ null;
 
     /*]]>*/
+</script>
+
+<script type="text/ng-template" id="org-view.html">
+    <div>
+        {{transactionCtrl.org.name}}
+    </div>
 </script>
 
 
