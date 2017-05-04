@@ -40,13 +40,17 @@ import javax.xml.validation.Schema;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * Created by James Whetstone on 1/5/17.
  */
 @Service
 public class TranscriptAcknowledgementService {
+
+    public static class AckTotals {
+        public Integer totalCourses;
+        public Integer totalAcademicAwards;
+    }
 
     private static final Log log = LogFactory.getLog(TranscriptAcknowledgementService.class);
 
@@ -145,9 +149,6 @@ public class TranscriptAcknowledgementService {
                 errorBuffer.append("The student name on the transcript does not match the student name in the transcript acknowledgement.\n");
             }
 
-
-
-
             if (verifyGPA(ack.getAcademicSummary().getGPA(), findFirstAcademicSummary(collegeTranscript).getGPA()) == false) {
                 matched = false;
                 errorBuffer.append("The GPA on the transcript does not match the GPA in the transcript acknoweledgement.\n");
@@ -155,14 +156,14 @@ public class TranscriptAcknowledgementService {
 
             Integer totalCourses = 0;
             Integer totalAcademicAwards = 0;
-            getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
+            AckTotals ackTotals = getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
 
-            if (ack.getAcademicAwardTotal() != totalAcademicAwards) {
+            if (ack.getAcademicAwardTotal() != ackTotals.totalAcademicAwards) {
                 matched = false;
                 errorBuffer.append("The total number of academic awards on the transcript do not match the total awards on the transcript acknowledgement.\n");
             }
 
-            if (ack.getCourseTotal() != totalCourses) {
+            if (ack.getCourseTotal() != ackTotals.totalCourses) {
                 matched = false;
                 errorBuffer.append("The total number of courses on the transcript do not match the total number of courses on the transcript acknowledgement.\n");
             }
@@ -179,18 +180,24 @@ public class TranscriptAcknowledgementService {
         }
     }
 
-    private void getCourseAndAwardTotals(CollegeTranscript collegeTranscript, Integer totalCourses, Integer totalAcademicAwards) {
-        totalCourses = 0;
-        totalAcademicAwards = 0;
+
+    private AckTotals getCourseAndAwardTotals(CollegeTranscript collegeTranscript, Integer totalCourses, Integer totalAcademicAwards) {
+
+        AckTotals ackTotals = new AckTotals();
+        ackTotals.totalAcademicAwards = totalAcademicAwards;
+        ackTotals.totalCourses = totalCourses;
+
         for(AcademicRecordType ar : collegeTranscript.getStudent().getAcademicRecords()) {
-            totalCourses += ar.getCourses().size();
-            totalAcademicAwards += ar.getAcademicAwards().size();
+            ackTotals.totalCourses += ar.getCourses().size();
+            ackTotals.totalAcademicAwards += ar.getAcademicAwards().size();
 
             for(AcademicSessionType session: ar.getAcademicSessions()) {
-                totalCourses += session.getCourses().size();
-                totalAcademicAwards += session.getAcademicAwards().size();
+                ackTotals.totalCourses += session.getCourses().size();
+                ackTotals.totalAcademicAwards += session.getAcademicAwards().size();
             }
         }
+
+        return ackTotals;
     }
 
     private AcademicSummaryFType findFirstAcademicSummary(CollegeTranscript collegeTranscript) {
@@ -232,10 +239,10 @@ public class TranscriptAcknowledgementService {
 
         Integer totalCourses = 0;
         Integer totalAcademicAwards = 0;
-        getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
+        AckTotals ackTotals = getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
 
-        ack.setCourseTotal(totalCourses);
-        ack.setAcademicAwardTotal(totalAcademicAwards);
+        ack.setCourseTotal(ackTotals.totalCourses);
+        ack.setAcademicAwardTotal(ackTotals.totalAcademicAwards);
         ack.setPerson(person);
 
         return ack;

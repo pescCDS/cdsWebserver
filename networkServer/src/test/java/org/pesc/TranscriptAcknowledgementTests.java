@@ -36,8 +36,10 @@ import org.xml.sax.SAXException;
 
 import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
+import java.io.ByteArrayOutputStream;
 
 /**
  * Created by james on 1/12/17.
@@ -70,6 +72,19 @@ public class TranscriptAcknowledgementTests {
                         collegeTranscript.getTransmissionData().getSource(), collegeTranscript, ackDocID, collegeTranscript.getTransmissionData().getRequestTrackingID());
 
         transcriptAcknowledgementService.verifyTranscript(ack, collegeTranscript);
+
+
+        //serialize it
+
+        Marshaller marshaller = ValidationUtils.createMarshaller("org.pesc.sdk.message.transcriptacknowledgement.v1_3.impl");
+        marshaller.setSchema(ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_3_0));
+
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        marshaller.marshal(ack, byteArrayOutputStream);
+
+
+        //logger.info(byteArrayOutputStream.toString());
 
 
     }
