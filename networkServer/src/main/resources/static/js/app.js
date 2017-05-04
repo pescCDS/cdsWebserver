@@ -40,6 +40,7 @@
         .service('fileUpload', fileUpload)
         .service('settingsService', settingsService)
         .service('actuatorService', actuatorService)
+        .service('organizationService', organizationService)
         .service('transcriptRequestService', transcriptRequestService)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
@@ -136,8 +137,8 @@
     }
 
 
-    TransactionController.$inject = ['transactionService', 'toasterService', '$scope'];
-    function TransactionController(transactionService, toasterService, $scope) {
+    TransactionController.$inject = ['organizationService','transactionService', 'toasterService', '$scope'];
+    function TransactionController(organizationService, transactionService, toasterService, $scope) {
         var self = this;
 
         self.transactions = [];
@@ -158,6 +159,9 @@
         self.offset = 1;
         self.limit = 10;
         self.reset = resetParameters;
+
+        self.getOrg = getOrg;
+        self.org;
 
 
         self.startDatePopup = {
@@ -183,6 +187,19 @@
 
             getTransactions();
 
+        }
+
+        function getOrg(orgID) {
+
+            organizationService.getById(orgID).then(function(response){
+
+                if (response.status == 200){
+                    self.org = response.data[0];
+                }
+                else {
+                    toasterService.ajaxInfo(response.data);
+                }
+            });
         }
 
         function resetParameters() {
@@ -775,6 +792,116 @@
         }
 
     }
+
+    organizationService.$inject = ['$http', '$q'];
+
+    function organizationService($http, $q) {
+
+
+        var service = {
+            getById: getById,
+            getByName: getByName,
+            search: search,
+            hasOrgType: hasOrgType,
+            isServiceProvider: isServiceProvider,
+            isInstitution: isInstitution
+        };
+
+        return service;
+
+        function indexOfType(org, typeName) {
+            for (var i = 0; i < org.organizationTypes.length; i++) {
+                if (org.organizationTypes[i].name == typeName){
+                    return i;
+                }
+
+            }
+            return -1;
+        }
+
+        function isServiceProvider(org) {
+            return indexOfType(org, 'Service Provider') != -1;
+        }
+
+        function isInstitution(org) {
+            return indexOfType(org, 'Institution') != -1;
+        }
+
+
+        function hasOrgType(org, orgType) {
+
+            var found = false;
+
+            for (var i = 0; i < org.organizationTypes.length; i++) {
+                if (org.organizationTypes[i].id == orgType.id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+
+
+
+        function getById(id) {
+
+            var deferred = $q.defer();
+
+            $http.get(directoryServer + '/services/rest/v1/organizations/' + id, {
+                cache: true
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+        function getByName(name) {
+
+            var deferred = $q.defer();
+
+            $http.get(directoryServer + '/services/rest/v1/organizations', {
+                'params': {'name': name},
+                cache: false
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+
+
+        function search(directoryId, name, organizationCode, organizationCodeType, enabled, isServiceProvider,isInstitution, limit, offset) {
+
+            var deferred = $q.defer();
+
+            $http.get(directoryServer + '/services/rest/v1/organizations', {
+                'params': {
+                    'id' : directoryId,
+                    'name': name,
+                    'organizationCode': organizationCode,
+                    'organizationCodeType': organizationCodeType,
+                    'enabled': enabled,
+                    'serviceprovider' : isServiceProvider,
+                    'institution': isInstitution,
+                    'limit': limit,
+                    'offset': offset
+                },
+                cache: true
+            }).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+    }
+
 
 
     function toNumber() {
