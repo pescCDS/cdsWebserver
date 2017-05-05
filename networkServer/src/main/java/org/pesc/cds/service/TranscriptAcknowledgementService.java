@@ -40,6 +40,7 @@ import javax.xml.validation.Schema;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by James Whetstone on 1/5/17.
@@ -149,14 +150,15 @@ public class TranscriptAcknowledgementService {
                 errorBuffer.append("The student name on the transcript does not match the student name in the transcript acknowledgement.\n");
             }
 
-            if (verifyGPA(ack.getAcademicSummary().getGPA(), findFirstAcademicSummary(collegeTranscript).getGPA()) == false) {
-                matched = false;
-                errorBuffer.append("The GPA on the transcript does not match the GPA in the transcript acknoweledgement.\n");
+            if (ack.getAcademicSummary() != null) {
+                if (verifyGPA(ack.getAcademicSummary().getGPA(), findFirstAcademicSummary(collegeTranscript).getGPA()) == false) {
+                    matched = false;
+                    errorBuffer.append("The GPA on the transcript does not match the GPA in the transcript acknoweledgement.\n");
+                }
             }
 
-            Integer totalCourses = 0;
-            Integer totalAcademicAwards = 0;
-            AckTotals ackTotals = getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
+
+            AckTotals ackTotals = getCourseAndAwardTotals(collegeTranscript);
 
             if (ack.getAcademicAwardTotal() != ackTotals.totalAcademicAwards) {
                 matched = false;
@@ -171,7 +173,7 @@ public class TranscriptAcknowledgementService {
         catch (Exception e) {
             log.error("Failed to verify PESC college transcript with PESC transcript acknowledgement.", e);
             matched = false;
-            errorBuffer.append(e.getMessage());
+            errorBuffer.append("Failed to verify PESC college transcript with PESC transcript acknowledgement: " + e.getClass().getCanonicalName());
         }
         finally {
             if (matched == false) {
@@ -181,11 +183,11 @@ public class TranscriptAcknowledgementService {
     }
 
 
-    private AckTotals getCourseAndAwardTotals(CollegeTranscript collegeTranscript, Integer totalCourses, Integer totalAcademicAwards) {
+    private AckTotals getCourseAndAwardTotals(CollegeTranscript collegeTranscript) {
 
         AckTotals ackTotals = new AckTotals();
-        ackTotals.totalAcademicAwards = totalAcademicAwards;
-        ackTotals.totalCourses = totalCourses;
+        ackTotals.totalAcademicAwards = 0;
+        ackTotals.totalCourses = 0;
 
         for(AcademicRecordType ar : collegeTranscript.getStudent().getAcademicRecords()) {
             ackTotals.totalCourses += ar.getCourses().size();
@@ -237,9 +239,7 @@ public class TranscriptAcknowledgementService {
 
         ack.setAcademicSummary(findFirstAcademicSummary(collegeTranscript));
 
-        Integer totalCourses = 0;
-        Integer totalAcademicAwards = 0;
-        AckTotals ackTotals = getCourseAndAwardTotals(collegeTranscript, totalCourses, totalAcademicAwards);
+        AckTotals ackTotals = getCourseAndAwardTotals(collegeTranscript);
 
         ack.setCourseTotal(ackTotals.totalCourses);
         ack.setAcademicAwardTotal(ackTotals.totalAcademicAwards);
