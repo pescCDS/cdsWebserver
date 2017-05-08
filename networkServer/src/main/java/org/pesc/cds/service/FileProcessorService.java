@@ -189,7 +189,7 @@ public class FileProcessorService {
 
             org.pesc.sdk.message.transcriptacknowledgement.v1_3.Acknowledgment acknowledgment =
                     transcriptAcknowledgementService.buildBaseTranscriptAcknowledgement(transcript.getTransmissionData().getDestination(),
-                            transcript.getTransmissionData().getSource(), transcript, String.valueOf(tx.getId()), transcript.getTransmissionData().getRequestTrackingID());
+                            transcript.getTransmissionData().getSource(), transcript, String.valueOf(tx.getId()), transcript.getTransmissionData().getDocumentID());
             String xml = transcriptAcknowledgementService.toXml(acknowledgment);
             stream2.write(xml.getBytes("UTF-8"));
             stream2.close();

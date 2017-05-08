@@ -69,7 +69,7 @@ public class TranscriptAcknowledgementTests {
 
         Acknowledgment ack =
                 transcriptAcknowledgementService.buildBaseTranscriptAcknowledgement(collegeTranscript.getTransmissionData().getDestination(),
-                        collegeTranscript.getTransmissionData().getSource(), collegeTranscript, ackDocID, collegeTranscript.getTransmissionData().getRequestTrackingID());
+                        collegeTranscript.getTransmissionData().getSource(), collegeTranscript, ackDocID, collegeTranscript.getTransmissionData().getDocumentID());
 
         transcriptAcknowledgementService.verifyTranscript(ack, collegeTranscript);
 
