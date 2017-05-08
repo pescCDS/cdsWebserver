@@ -140,9 +140,12 @@ public class TransactionsController {
 	@Secured("ROLE_NETWORK_SERVER")
 	public ResponseEntity<String> acknowledgement(@RequestBody AcknowledgmentImpl acknowledgment) throws IOException {
 
-        if (acknowledgment.getTransmissionData().getRequestTrackingID()  == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A request tracking ID (transaction ID) is required in the acknowledgement.");
+        if (acknowledgment.getAcknowledgmentData().getDocumentID()  == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A document ID (transaction ID) is required in the acknowledgement.");
         }
+
+		String documentID = acknowledgment.getAcknowledgmentData().getDocumentID();
+
 
         //TODO: if better performance is required, change the request body to string and marshal it manually.  This
         //should eliminate an extra unmarshal that occurs before this method is invoked.
@@ -155,10 +158,10 @@ public class TransactionsController {
 		Transaction tx = null;
 
 		try {
-			tx = transactionService.findById(Integer.valueOf(acknowledgment.getTransmissionData().getRequestTrackingID()));
+			tx = transactionService.findById(Integer.valueOf(documentID));
 		}
 		catch (Exception e){
-			log.error( String.format("Failed to retrieve transaction with id (%s)", acknowledgment.getTransmissionData().getRequestTrackingID()), e);
+			log.error( String.format("Failed to retrieve transaction with id (%s)", documentID), e);
 		}
 		if(tx!=null) {
 			tx.setAcknowledged(true);
@@ -218,11 +221,11 @@ public class TransactionsController {
             tran.setOccurredAt(occurredAt);
             tran.setAcknowledged(false);
             tran.setStatus(TransactionStatus.FAILURE);
-            tran.setError(String.format("A acknowledgement was received, but the request tracking id (%s) was not found.", acknowledgment.getTransmissionData().getRequestTrackingID()));
+            tran.setError(String.format("A acknowledgement was received, but the document ID (%s) was not found.", documentID));
 
             transactionService.create(tran);
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid request tracking ID found %s.", acknowledgment.getTransmissionData().getRequestTrackingID()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Invalid document ID found %s.", documentID));
 		}
 
 
