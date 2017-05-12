@@ -1,0 +1,44 @@
+
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div xmlns:th="http://www.thymeleaf.org">
+    <div>Dear <span th:text="${user.name}"></span>,</div>
+
+    <p>
+        Thank you for registering  <span th:text="${organization.name}"></span> with EDExchange.  Your application is
+        currently being reviewed.  When the review process is complete, your organization will be added to the EDExchange
+        directory.
+    </p>
+
+    <p>
+        A user account has been created for you with the username and password that you provided in registration form.
+        You may login <a th:href="${loginURL}">here.</a> While your application is being reviewed, all
+        EDExchange features are available, but your organization will not be included in the directory until the application
+        is approved.
+    </p>
+
+    <p>
+        When the status of your application changes, you will receive another email. Messages can also be viewed in the
+        EDExchange application by selecting "Messages" from the menu.
+    </p>
+
+    <p>
+        Thank you from the EDExchange team.
+    </p>
+</div>
+
+

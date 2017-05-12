@@ -1,0 +1,9 @@
+directory-server:
+  extends:
+    file: compose-base.yml
+    service: directory-server
+
+network-server:
+  extends:
+    file: compose-base.yml
+    service: network-server

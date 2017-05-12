@@ -1,5 +1,5 @@
 #!/bin/bash
-mvn -DskipTests package docker:build
+mvn clean install
 
 IMAGE=networkserver_db_image
 CONTAINER=network-db

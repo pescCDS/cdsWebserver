@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2017. California Community Colleges Technology Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 (function () {
 
     var app = angular.module('networkServer', ['ui.bootstrap', 'ngRoute', 'toaster', 'ngAnimate'])
@@ -9,21 +25,28 @@
                 if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
                 if (typeof precision === 'undefined') precision = 1;
 
-                var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
+                var units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB'],
                     number = Math.floor(Math.log(bytes) / Math.log(1024)),
                     val = (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision);
 
                 return  (val.match(/\.0*$/) ? val.substr(0, val.indexOf('.')) : val) +  ' ' + units[number];
             }
         })
+        .filter('trueFalse', trueFalse)
         .directive('toNumber', toNumber)
         .directive('fileModel', fileModel)
         .service('transactionService', transactionService)
-        .service('notificationService', notificationService)
+        .service('toasterService', toasterService)
         .service('fileUpload', fileUpload)
+        .service('settingsService', settingsService)
+        .service('actuatorService', actuatorService)
+        .service('organizationService', organizationService)
+        .service('transcriptRequestService', transcriptRequestService)
         .controller("NavController", NavController)
         .controller("TransactionController", TransactionController)
-        .controller("TransferController", TransferController)
+        .controller("UploadController", UploadController)
+        .controller("TranscriptRequestController", TranscriptRequestController)
+        .controller("ActuatorController", ActuatorController)
         .config(config)
         .run(['transactionService', function(transactionService) {
             transactionService.initialize();
@@ -36,39 +59,110 @@
             .when("/transaction-report", {
                 templateUrl: "transaction-report",
                 controller: "TransactionController",
-                controllerAs: 'transactionCtrl',
-                resolve: {
-                    transactions: ['transactionService', function (transactionService) {
-                        return transactionService.getTransactions(null,null,null,100);
-                    }]
-                }
+                controllerAs: 'transactionCtrl'
             })
-            .when("/transfers", {
-                templateUrl: "transfers",
-                controller: "TransferController",
-                controllerAs: "transferCtrl"
+            .when("/upload", {
+                templateUrl: "upload",
+                controller: "UploadController",
+                controllerAs: "uploadCtrl"
+            })
+            .when("/transcript-request-form", {
+                templateUrl: "transcript-request-form",
+                controller: "TranscriptRequestController",
+                controllerAs: "trCtrl"
+            })
+            .when("/actuator-view", {
+                templateUrl: "actuator-view",
+                controller: "ActuatorController",
+                controllerAs: "actCtrl"
             })
             .when("/home", {
                 templateUrl: "about"
             })
-
+            .when("/me", {
+                templateUrl: "user-account"
+            })
             .otherwise({
                 redirectTo: "home"
             });
     }
 
-    TransactionController.$inject = ['transactionService', 'transactions'];
-    function TransactionController(transactionService, transactions) {
+    ActuatorController.$inject = ['actuatorService', 'toasterService'];
+    function ActuatorController(actuatorService, toasterService) {
         var self = this;
 
-        self.transactions = transactions;
+        self.getActuatorPage = getActuatorPage;
+        self.getEndpoint = getEndpoint;
+        self.serverInfo = null;
+        self.view = {};
+
+
+        function getEndpoint(endpointName) {
+            self.view[endpointName] = !self.view[endpointName];
+            if (self.view[endpointName] == true) {
+                actuatorService.getEndpoint(endpointName).then(function(response){
+                    if (response.status == 200) {
+
+                        self.serverInfo[endpointName] = response.data;
+
+                        console.log(response.data);
+                    }
+                    else {
+                        toasterService.error("Failed to retrieve " + endpointName +  " data.");
+
+                    }
+                });
+            }
+
+        }
+
+        function getActuatorPage() {
+            actuatorService.getEndpoints().then(function(response){
+                if (response.status == 200) {
+
+                    delete response.data._links['self'];
+
+                    self.serverInfo = response.data;
+
+                }
+                else {
+                    toasterService.error("Failed to retrieve Actuator data.");
+                }
+            });
+        }
+
+        getActuatorPage();
+
+
+    }
+
+
+    TransactionController.$inject = ['organizationService','transactionService', 'toasterService', '$scope'];
+    function TransactionController(organizationService, transactionService, toasterService, $scope) {
+        var self = this;
+
+        self.transactions = [];
         self.status = '';
+        self.operation = 'Both';
+        self.error = null;
+        self.deliveryStatus = '';
+
         self.startDate = '';
         self.stopDate = '';
         self.openStartDatePopup = openStartDatePopup;
         self.openEndDatePopup = openEndDatePopup;
+        self.resend = resend;
 
-        self.fetchSize = 100;
+        self.getOrgURL = getOrgURL;
+
+        self.totalRecords = 0;
+        self.offset = 1;
+        self.limit = 10;
+        self.reset = resetParameters;
+
+        self.getOrg = getOrg;
+        self.org;
+
 
         self.startDatePopup = {
             opened: false
@@ -86,6 +180,52 @@
         };
 
         self.getTransactions = getTransactions;
+
+        activate();
+
+        function activate() {
+
+            getTransactions();
+
+        }
+
+        function getOrg(orgID) {
+
+            organizationService.getById(orgID).then(function(response){
+
+                if (response.status == 200){
+                    self.org = response.data[0];
+                }
+                else {
+                    toasterService.ajaxInfo(response.data);
+                }
+            });
+        }
+
+        function resetParameters() {
+            $scope.transactionFrom.$setPristine();
+
+            self.status = '';
+            self.operation = 'Both';
+            self.error = null;
+            self.deliveryStatus = '';
+
+            self.startDate = '';
+            self.stopDate = '';
+        }
+
+        function getOrgURL(orgID) {
+            return directoryServer + "/services/rest/v1/organizations/" + orgID;
+        }
+
+        function resend(tran) {
+            transactionService.resend(tran).then(function(data){
+                self.transactions.push(data);
+                toasterService.success("Successfully resent document.");
+            },function(error){
+                toasterService.error("Failed to resend document.");
+            })
+        }
 
 
         function today() {
@@ -108,35 +248,146 @@
 
 
         function getTransactions() {
-            transactionService.getTransactions(self.status,self.startDate,self.endDate,self.fetchSize).then(function(data){
-                self.transactions = data;
+            transactionService.getTransactions(
+                self.status,
+                self.operation,
+                self.startDate,
+                self.endDate,
+                self.deliveryStatus,
+                self.limit,
+                (self.offset-1) * self.limit).then(function(response){
+                    self.transactions = response.data;
+                    self.totalRecords = response.headers('X-Total-Count');
 
             });
         }
     }
 
 
-    TransferController.$inject = ['fileUpload'];
-    function TransferController(fileUpload) {
+    UploadController.$inject = ['fileUpload', 'settingsService'];
+    function UploadController(fileUpload, settingsService) {
         var self = this;
 
-        self.transfers = [];
-
-        self.transferFile = transferFile;
+        self.uploadFile = uploadFile;
         self.documentFormats = getSupportedDocumentFormatsForEndpoint();
         self.documentFormat = ''; //selected document format.
         self.recipientName = '';
         self.senderName = '';
         self.endpointURL = 'http://';
         self.fileToUpload = '';
+        self.sourceSchoolCode = '';
+        self.sourceSchoolCodeType = '';
+        self.destinationSchoolCode = '';
+        self.destinationSchoolCodeType = '';
+        self.deliveryMethods = [];
 
-        function transferFile() {
+        self.documentTypes = getSupportedDocumentTypes();
+
+        self.documentType = '';
+
+        self.departments = getSupportedDepartments();
+        self.department = '';
+        //Transcript Request
+        self.studentRelease = false;
+        self.studentReleasedMethod = '';
+        self.studentBirthDate = '';
+        self.studentFirstName = '';
+        self.studentMiddleName = '';
+        self.studentLastName = '';
+        self.studentEmail = '';
+        self.studentPartialSSN = '';
+        self.studentCurrentlyEnrolled = false;
+        //Transcript Request
+
+        initialize();
+
+        function uploadFile() {
             console.log("Transfer file.");
-            fileUpload.uploadFileToUrl(self.fileToUpload, self.endpointURL);
+            fileUpload.uploadFileToUrl(self.fileToUpload,
+                self.documentFormat.name,
+                self.documentType.name,
+                self.department.name,
+                self.sourceSchoolCode,
+                self.sourceSchoolCodeType,
+                self.destinationSchoolCode,
+                self.destinationSchoolCodeType,
+                self.studentRelease,
+                self.studentReleasedMethod,
+                self.studentBirthDate,
+                self.studentFirstName,
+                self.studentMiddleName,
+                self.studentLastName,
+                self.studentEmail,
+                self.studentPartialSSN,
+                self.studentCurrentlyEnrolled);
         }
 
+        function getDeliveryMethods() {
+            settingsService.getDeliveryMethods().then(function (data) {
+                self.deliveryMethods = data;
+            });
+        }
+
+        function getDocumentFormats() {
+            settingsService.getDocumentFormats().then(function (data) {
+                self.documentFormats = data;
+            });
+        }
+
+        function getDepartments() {
+            settingsService.getDepartments().then(function (data) {
+                self.departments = data;
+            });
+        }
+
+        function getDocumentTypes() {
+            settingsService.getDocumentTypes().then(function (data) {
+                self.documentTypes = data;
+            });
+        }
+
+
+
+
+        function initialize() {
+            getDocumentFormats();
+            getDocumentTypes();
+            getDepartments();
+            getDeliveryMethods();
+        }
+
+        function getSupportedDocumentTypes() {
+            return [
+                {
+                    "id": 1,
+                    "name": "College Transcript",
+                    "description": "College level transcript."
+                },
+                {
+                    "id": 2,
+                    "name": "Transcript Request",
+                    "description": "Academic transcript request."
+                }
+            ] ;
+
+        }
+
+        function getSupportedDepartments() {
+            return [
+                {
+                    "id": 1,
+                    "name": "English",
+                    "description": "The English department."
+                },
+                {
+                    "id": 2,
+                    "name": "Administration",
+                    "description": "Administration department"
+                }
+            ];
+        }
         function getSupportedDocumentFormatsForEndpoint() {
-            //TODO : ajax call to endpont to get supported doc formats.
+
             return [{ id: 1, name: 'XML', description: 'EXtensible Markup Language.'},
                 { id: 2, name: 'PDF', description: 'Adobe Portable Document Format.'},
                 { id: 3, name: 'PESCXML', description: 'PESC’s Core Component Naming convention is based on the Core Component naming convention described in the UNCEFACT Core Component Technical Specification. The UNCEFACT Core Component Technical Specification’s naming convention is based on the standards outlined ISO 11179 Part 5 – Naming and Identification Principles for Data Elements. The Core Component Technical Specification expands upon the ISO 11179 naming convention standards to include Core Component Types and Business Information Entities.'},
@@ -156,13 +407,14 @@
         };
     }
 
-    notificationService.$inject = [ 'toaster'] ;
+    toasterService.$inject = [ 'toaster'] ;
 
-    function notificationService(toaster) {
+    function toasterService(toaster) {
         var service = {
             success: success,
             error: error,
-            ajaxInfo: ajaxInfo
+            ajaxInfo: ajaxInfo,
+            renderHtml: renderHtml
         } ;
 
         return service;
@@ -178,47 +430,206 @@
         function error(text) {
             toaster.pop('error', "Error", text);
         }
+
+        function renderHtml(type, title, html) {
+            toaster.pop(type, title, html,null, 'trustedHtml');
+        }
     }
 
 
-    fileUpload.$inject = [ '$http', 'notificationService'] ;
+    fileUpload.$inject = [ '$http', 'toasterService'] ;
 
-    function fileUpload($http, notificationService) {
+    function fileUpload($http, toasterService) {
         var service = {
             uploadFileToUrl: uploadFileToUrl
         } ;
 
         return service;
 
-        function uploadFileToUrl(file, uploadUrl){
+        function uploadFileToUrl(file, fileFormat, documentType, department, sourceSchoolCode, sourceSchoolCodeType, destinationSchoolCode, destinationSchoolCodeType, studentRelease,
+                                 studentReleasedMethod, studentBirthDate, studentFirstName, studentMiddleName, studentLastName,
+                                 studentEmail, studentPartialSSN, studentCurrentlyEnrolled){
             var fd = new FormData();
             fd.append('file', file);
-            fd.append('recipientId', 1);
-            fd.append('networkServerId', 2);
-            fd.append('senderId', 3);
-            fd.append('fileFormat', 'PDF');
-            fd.append('webServiceUrl', uploadUrl);
+            fd.append('file_format', fileFormat );
+            fd.append('source_school_code', sourceSchoolCode);
+            fd.append('source_school_code_type', sourceSchoolCodeType);
+            fd.append('destination_school_code', destinationSchoolCode);
+            fd.append('destination_school_code_type', destinationSchoolCodeType);
+            fd.append('document_type', documentType);
+            fd.append('department', department);
+            fd.append('student_release', studentRelease);
+            fd.append('student_released_method', studentReleasedMethod);
+            fd.append('student_birth_date', studentBirthDate);
+            fd.append('student_first_name', studentFirstName);
+            fd.append('student_middle_name', studentMiddleName);
+            fd.append('student_last_name', studentLastName);
+            fd.append('student_email', studentEmail);
+            fd.append('student_partial_ssn', studentPartialSSN);
+            fd.append('student_currently_enrolled', studentCurrentlyEnrolled);
 
-            $http.post('/documents/outbox', fd, {
+            $http.post('/api/v1/documents/outbox', fd, {
                 transformRequest: angular.identity,
                 headers: {'Content-Type': undefined}
             })
             .success(function(data){
-                notificationService.success("Successfully uploaded file.");
+                toasterService.success('Successfully sent document.');
             })
             .error(function(data){
-                notificationService.error("Failed to upload file.");
+                toasterService.ajaxInfo(data);
             });
         }
 
     }
 
+    actuatorService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService', '$window'];
 
-    transactionService.$inject = [ '$http', '$q', '$cacheFactory', 'notificationService'];
+    function actuatorService($http, $q, $cacheFactory, toasterService, $window) {
+        var service = {
+            getEndpoints: getEndpoints,
+            getEndpoint: getEndpoint
+        } ;
 
-    function transactionService($http, $q, $cacheFactory, notificationService) {
+        return service;
+
+        function getEndpoint(name){
+            var deferred = $q.defer();
+
+            $http.get('/' + name).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+        function getEndpoints() {
+            var deferred = $q.defer();
+
+            $http.get('/actuator').then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+
+    }
+
+    settingsService.$inject = ['$http', '$q', '$cacheFactory', 'toasterService', '$window'];
+
+    function settingsService($http, $q, $cacheFactory, toasterService, $window) {
+
+
+        var service = {
+            getDeliveryMethods: getDeliveryMethods,
+            getDocumentFormats: getDocumentFormats,
+            getDocumentTypes: getDocumentTypes,
+            getDepartments: getDepartments
+        };
+
+        return service;
+
+        function getDeliveryMethods() {
+            var deferred = $q.defer();
+
+            $http.get($window.directoryServer + '/services/rest/v1/delivery-methods', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching delivery methods.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDocumentFormats() {
+            var deferred = $q.defer();
+
+            $http.get( $window.directoryServer + '/services/rest/v1/document-formats', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching document formats.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDepartments() {
+            var deferred = $q.defer();
+
+            $http.get($window.directoryServer + '/services/rest/v1/departments', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching department definitions.");
+            });
+
+            return deferred.promise;
+        }
+
+        function getDocumentTypes() {
+            var deferred = $q.defer();
+
+            $http.get($window.directoryServer + '/services/rest/v1/document-types', {
+                cache: true
+            }).success(function (data) {
+                deferred.resolve(data);
+            }).error(function (data) {
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while fetching document type definitions.");
+            });
+
+            return deferred.promise;
+        }
+
+
+
+
+    }
+
+
+    transcriptRequestService.$inject = ['$http', '$q'];
+
+    function transcriptRequestService($http, $q) {
+
+
+        var service = {
+            create: create
+        };
+
+        return service;
+
+        function create(obj) {
+            var deferred = $q.defer();
+
+            $http.post('/api/v1/transcript-requests', obj).then(function (response) {
+                deferred.resolve(response);
+            }, function (data) {
+                deferred.resolve(data);
+            });
+
+            return deferred.promise;
+        }
+    }
+
+
+
+    transactionService.$inject = [ '$http', '$q', '$cacheFactory', 'toasterService'];
+
+    function transactionService($http, $q, $cacheFactory, toasterService) {
         var service = {
             getTransactions: getTransactions,
+            resend: resend,
             initialize: initialize
         };
 
@@ -228,24 +639,42 @@
             console.log("TODO: transactionService initialize")
         }
 
-
-        function getTransactions(status, startDate, endDate, fetchSize) {
-
+        function resend(tran) {
             var deferred = $q.defer();
 
-            $http.get('/transactions', {
+            $http.get('/api/v1/documents/send', {
                 'params': {
-                    'fetchSize': fetchSize,
-                    'from': startDate,
-                    'to' : endDate,
-                    'status': status
+                    'transaction_id': tran.id
                 },
                 cache: false
             }).success(function (data) {
                 deferred.resolve(data);
             }).error(function(data){
-                notificationService.ajaxInfo(data);
-                deferred.reject("An error occured while fetching transactions.");
+                toasterService.ajaxInfo(data);
+                deferred.reject("An error occured while sending a document for transaction id " + tran.id);
+            });
+
+            return deferred.promise;
+        }
+
+
+        function getTransactions(status, operation, startDate, endDate, deliveryStatus, limit, offset) {
+
+            var deferred = $q.defer();
+
+            $http.get('/api/v1/transactions', {
+                'params': {
+                    'operation' : operation,
+                    'delivery-status': deliveryStatus,
+                    'offset' : offset,
+                    'limit' : limit,
+                    'from': startDate,
+                    'to' : endDate,
+                    'status': status
+                },
+                cache: false
+            }).then(function (response) {
+                deferred.resolve(response);
             });
 
             return deferred.promise;
@@ -269,6 +698,210 @@
             }
         };
     };
+
+    TranscriptRequestController.$inject = ['transcriptRequestService', 'toasterService'];
+    function TranscriptRequestController(transcriptRequestService, toasterService) {
+
+
+        function Source(schoolCode, schoolCodeType, studentCurrentlyEnrolled, editing) {
+            this.schoolCode = schoolCode;
+            this.schoolCodeType = schoolCodeType;
+            this.studentCurrentlyEnrolled = studentCurrentlyEnrolled;
+            if (editing == true) {
+                this.editing = true;
+            }
+        }
+
+        function Destination(schoolCode, schoolCodeType, editing) {
+            this.schoolCode = schoolCode;
+            this.schoolCodeType = schoolCodeType;
+
+            if (editing == true) {
+                this.editing = true;
+            }
+
+        }
+
+        var self = this;
+        self.request = {
+            sourceInstitutions : [],
+            destinationInstitutions : [],
+            studentRelease : false,
+            studentReleasedMethod : '',
+            studentBirthDate : '',
+            studentFirstName : '',
+            studentMiddleName : '',
+            studentLastName : '',
+            studentEmail : '',
+            studentPartialSSN : '',
+            fileFormat: 'PESCXML',
+            mode: 'LIVE'
+        };
+        self.submitTranscriptRequest = submitTranscriptRequest;
+        self.createSource = createSource;
+        self.createDestination = createDestination;
+        self.edit  = edit;
+        self.save = save;
+        self.remove = remove;
+        self.showForm = showForm;
+
+        function showForm(obj) {
+            return obj.hasOwnProperty('editing') && obj.editing == true;
+        }
+
+        function remove(institution) {
+            var index = self.request.destinationInstitutions.indexOf(institution);
+            if (index > -1) {
+                self.request.destinationInstitutions.splice(index, 1);
+                return;
+            }
+
+            index = self.request.sourceInstitutions.indexOf(institution);
+            if (index > -1) {
+                self.request.sourceInstitutions.splice(index, 1);
+                return;
+            }
+
+        }
+
+        function edit(institution) {
+            institution.editing = true;
+        }
+
+        function save(institution){
+            delete institution.editing;
+        }
+
+        function createSource() {
+            self.request.sourceInstitutions.unshift(new Source('','',false, true));
+        }
+        function createDestination() {
+            self.request.destinationInstitutions.unshift(new Destination('','', true));
+        }
+
+        function submitTranscriptRequest() {
+            console.log(self.request);
+            transcriptRequestService.create(self.request).then(function(response){
+                if (response.status == 200) {
+                    toasterService.success("Your transcript request has been successfully delivered to the recipient with directory id " + response.data[0].recipientId);
+                }
+                else {
+                    toasterService.ajaxInfo(response.data);
+                }
+            });
+        }
+
+    }
+
+    organizationService.$inject = ['$http', '$q'];
+
+    function organizationService($http, $q) {
+
+
+        var service = {
+            getById: getById,
+            getByName: getByName,
+            search: search,
+            hasOrgType: hasOrgType,
+            isServiceProvider: isServiceProvider,
+            isInstitution: isInstitution
+        };
+
+        return service;
+
+        function indexOfType(org, typeName) {
+            for (var i = 0; i < org.organizationTypes.length; i++) {
+                if (org.organizationTypes[i].name == typeName){
+                    return i;
+                }
+
+            }
+            return -1;
+        }
+
+        function isServiceProvider(org) {
+            return indexOfType(org, 'Service Provider') != -1;
+        }
+
+        function isInstitution(org) {
+            return indexOfType(org, 'Institution') != -1;
+        }
+
+
+        function hasOrgType(org, orgType) {
+
+            var found = false;
+
+            for (var i = 0; i < org.organizationTypes.length; i++) {
+                if (org.organizationTypes[i].id == orgType.id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+
+
+
+        function getById(id) {
+
+            var deferred = $q.defer();
+
+            $http.get(directoryServer + '/services/rest/v1/organizations/' + id, {
+                cache: true
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+        function getByName(name) {
+
+            var deferred = $q.defer();
+
+            $http.get(directoryServer + '/services/rest/v1/organizations', {
+                'params': {'name': name},
+                cache: false
+            }).then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+
+
+        function search(directoryId, name, organizationCode, organizationCodeType, enabled, isServiceProvider,isInstitution, limit, offset) {
+
+            var deferred = $q.defer();
+
+            $http.get(directoryServer + '/services/rest/v1/organizations', {
+                'params': {
+                    'id' : directoryId,
+                    'name': name,
+                    'organizationCode': organizationCode,
+                    'organizationCodeType': organizationCodeType,
+                    'enabled': enabled,
+                    'serviceprovider' : isServiceProvider,
+                    'institution': isInstitution,
+                    'limit': limit,
+                    'offset': offset
+                },
+                cache: true
+            }).then(function (response) {
+                deferred.resolve(response);
+            });
+
+            return deferred.promise;
+        }
+
+    }
+
 
 
     function toNumber() {
@@ -318,6 +951,16 @@
             }
 
             return friendlyName;
+        };
+    }
+
+
+    function trueFalse(){
+        return function(text, length, end) {
+            if (text) {
+                return 'Y';
+            }
+            return 'N';
         };
     }
 

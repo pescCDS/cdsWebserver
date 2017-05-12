@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mvn -DskipTests package docker:build
+mvn -DskipTests install
 
 docker-compose -f docker-compose-network-dev.yml up -d
 
@@ -27,6 +27,5 @@ echo "OK - dev-network-db is running. IP: $NETWORK, StartedAt: $STARTED"
 echo "You can start your development network server app using the following command: "
 echo "java -Dspring.profiles.active=dev -Ddb.server=$NETWORK -Ddirectory.server=$DIRECTORY_NETWORK -Ddirectory.port=8080 -jar ./networkServer/target/network-server.jar"
 echo "or use your favorite IDE to develop and run"
-echo "A reference network server is running at $NETWORK_SERVER_IP on port 8080"
 
 

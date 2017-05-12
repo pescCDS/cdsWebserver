@@ -1,17 +1,33 @@
 <!DOCTYPE html>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
-      ng-app="networkServer">
+      ng-app="networkServer" lang="en">
 <head>
     <title>Education Exchange - a standards based system for exchanging documents.</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
     <meta name="description" content="EdExchange is a system for exchanging academic records." />
-    <link rel="shortcut icon" type="image/png" href="edex-favicon-16.png" th:href="@{assets/images/edex-favicon-16.png}" sizes="16x16" />
-    <link rel="shortcut icon" type="image/png" href="edex-favicon-24.png" th:href="@{assets/images/edex-favicon-24.png}" sizes="24x24" />
-    <link rel="shortcut icon" type="image/png" href="edex-favicon-32.png" th:href="@{assets/images/edex-favicon-32.png}" sizes="32x32" />
-    <link rel="shortcut icon" type="image/png" href="edex-favicon-48.png" th:href="@{assets/images/edex-favicon-48.png}" sizes="48x48" />
-    <link rel="shortcut icon" type="image/png" href="edex-favicon-64.png" th:href="@{assets/images/edex-favicon-64.png}" sizes="64x64" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-16.png" th:href="@{images/edex-favicon-16.png}" sizes="16x16" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-24.png" th:href="@{images/edex-favicon-24.png}" sizes="24x24" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-32.png" th:href="@{images/edex-favicon-32.png}" sizes="32x32" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-48.png" th:href="@{images/edex-favicon-48.png}" sizes="48x48" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-64.png" th:href="@{images/edex-favicon-64.png}" sizes="64x64" />
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen" />
@@ -22,7 +38,7 @@
 <body>
 
 
-<toaster-container toaster-options="{'close-button': true}"></toaster-container>
+<toaster-container toaster-options="{'time-out': 5000, 'close-button':true}"></toaster-container>
 
 <div ng-controller="NavController as nav">
 
@@ -43,19 +59,25 @@
             <div class="collapse navbar-collapse" uib-collapse="navCollapsed">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a th:href="'http://' + ${directoryServer} + '/swagger-ui/index.html'">Docs</a>
+                        <a href="/documentation">Docs</a>
                     </li>
-                    <li th:if="${isAuthenticated}" ng-class="{ active: nav.isActive('/settings')}">
+                    <li th:if="${isAuthenticated}" ng-class="{ active: nav.isActive('/actuator-view')}">
+                        <a class="item" href="#actuator-view">Server Info</a>
+                    </li>
+                    <li th:if="${isAuthenticated}" ng-class="{ active: nav.isActive('/transaction-report')}">
                         <a class="item" href="#transaction-report">Transactions</a>
                     </li>
-                    <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/myorg')}">
-                        <a class="item" href="#transfers">Transfers</a>
+                    <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/upload')}">
+                        <a class="item" href="#upload">Send Transcript</a>
+                    </li>
+                    <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/transcript-request-form')}">
+                        <a class="item" href="#transcript-request-form">Request Transcript</a>
                     </li>
 
                 </ul>
                 <ul th:if="${isAuthenticated}==false" class="nav navbar-nav navbar-right">
                     <ul class="nav navbar-nav">
-                        <li><a href="admin">Sign In</a></li>
+                        <li><a href="login">Sign In</a></li>
                     </ul>
                 </ul>
                 <ul th:if="${isAuthenticated}==true" class="nav navbar-nav navbar-right">
@@ -69,7 +91,7 @@
                         <ul uib-dropdown-menu>
                             <li>
                                 <div style="width: 60%;margin: auto; padding: 5px;">
-                                    <a class="btn btn-primary" th:href="@{'#user/' + ${activeUser.id}}">Account</a>
+                                    <a class="btn btn-primary" href="#me">Account</a>
                                 </div>
                             </li>
 
@@ -102,7 +124,6 @@
 <script src="js/angular-animate.min.js"></script>
 <script src="js/toaster.min.js"></script>
 <script src="js/ui-bootstrap-tpls-1.2.5.min.js"></script>
-<script src="js/smart-table.min.js"></script>
 
 <script src="js/app.js"></script>
 
@@ -113,7 +134,15 @@
 
     var roles = /*[[${roles}]]*/ null;
 
+    var directoryServer = /*[[${directoryServer}]]*/ null;
+
     /*]]>*/
+</script>
+
+<script type="text/ng-template" id="org-view.html">
+    <div>
+        {{transactionCtrl.org.name}}
+    </div>
 </script>
 
 

@@ -1,29 +1,51 @@
+/*
+ * Copyright (c) 2017. California Community Colleges Technology Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.pesc.api.model;
 
 /**
- * Created by james on 2/23/16.
+ * Created by James Whetstone (jwhetstone@ccctechcenter.org) on 2/23/16.
  */
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 
 @XmlRootElement(name = "Organization")
 @Entity
 @Table(name = "organization")
+@JsonPropertyOrder({"name", "website", "street", "city", "state", "zip", "organizationTypes", "schoolCodes"})
+@ApiModel
 public class Organization implements Serializable {
 
     @Column(name = "name")
+    @ApiModelProperty(position = 1, required = true, value = "The free form name of the organization.")
     private String name;
 
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -55,39 +77,43 @@ public class Organization implements Serializable {
     @Column(name = "short_description")
     private String shortDescription;
 
-    @Column(name="type")
-    private int type;
+    @JoinTable(
+            name = "org_orgtype",
+            joinColumns =
+            @JoinColumn(name = "organization_id", referencedColumnName = "id"),
+            inverseJoinColumns =
+            @JoinColumn(name = "organization_type_id", referencedColumnName = "id")
+    )
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = OrganizationType.class, cascade = CascadeType.MERGE)
+    private Set<OrganizationType> organizationTypes;
 
-    @Column(name="enabled")
+    @ApiModelProperty(value = "Enabled", allowableValues = "true/false")
+    @Column(name = "enabled")
     private boolean enabled;
 
-    @Column(name="active")
+    @Column(name = "active")
     private boolean active;
 
-    @Column(name="ein")
-    private String ein;
 
-    @Column(name="organization_id")
-    private String organizationCode;
+    @OneToMany(fetch = FetchType.EAGER,
+            targetEntity = SchoolCode.class,
+            cascade = {CascadeType.REMOVE, CascadeType.ALL},
+            orphanRemoval = true)
+    @JoinColumn(name = "organization_id")
+    private Set<SchoolCode> schoolCodes;
 
-    @Column(name="organization_id_type")
-    private String organizationCodeType;
+    @OneToMany(fetch = FetchType.EAGER,
+            targetEntity = Contact.class,
+            cascade = {CascadeType.REMOVE, CascadeType.ALL},
+            orphanRemoval = true)
+    @JoinColumn(name = "organization_id")
+    private Set<Contact> contacts;
 
-    @Column(name="subcode")
-    private String subcode;
-
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = SchoolCode.class, cascade = CascadeType.MERGE)
-    @JoinColumn(name="organization_id")
-    private List<SchoolCode> schoolCodes;
-
-
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = Endpoint.class,  cascade = CascadeType.MERGE)
-    @JoinColumn(name="organization_id")
-    private List<Endpoint> endpoints;
 
     public String getName() {
         return this.name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -95,7 +121,6 @@ public class Organization implements Serializable {
     public Integer getId() {
         return id;
     }
-
 
     public Integer setId(Integer id) {
         return this.id = id;
@@ -173,12 +198,12 @@ public class Organization implements Serializable {
         this.shortDescription = shortDescription;
     }
 
-    public int getType() {
-        return type;
+    public Set<OrganizationType> getOrganizationTypes() {
+        return organizationTypes;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setOrganizationTypes(Set<OrganizationType> organizationTypes) {
+        this.organizationTypes = organizationTypes;
     }
 
     public boolean isEnabled() {
@@ -197,53 +222,22 @@ public class Organization implements Serializable {
         this.active = active;
     }
 
-    public String getEin() {
-        return ein;
-    }
 
-    public void setEin(String ein) {
-        this.ein = ein;
-    }
-
-    public String getOrganizationCodeType() {
-        return organizationCodeType;
-    }
-
-    public void setOrganizationCodeType(String organizationCodeType) {
-        this.organizationCodeType = organizationCodeType;
-    }
-
-    public String getOrganizationCode() {
-        return organizationCode;
-    }
-
-    public void setOrganizationCode(String organizationCode) {
-        this.organizationCode = organizationCode;
-    }
-
-    public String getSubcode() {
-        return subcode;
-    }
-
-    public void setSubcode(String subcode) {
-        this.subcode = subcode;
-    }
-
-    public List<SchoolCode> getSchoolCodes() {
+    public Set<SchoolCode> getSchoolCodes() {
         return schoolCodes;
     }
 
-    public void setSchoolCodes(List<SchoolCode> schoolCodes) {
+    public void setSchoolCodes(Set<SchoolCode> schoolCodes) {
         this.schoolCodes = schoolCodes;
     }
 
-    @XmlTransient
-    public List<Endpoint> getEndpoints() {
-        return endpoints;
+
+    public Set<Contact> getContacts() {
+        return contacts;
     }
 
-    public void setEndpoints(List<Endpoint> endpoints) {
-        this.endpoints = endpoints;
+    public void setContacts(Set<Contact> contacts) {
+        this.contacts = contacts;
     }
 
     @Override
@@ -255,6 +249,7 @@ public class Organization implements Serializable {
         Organization that = (Organization) obj;
         return id.equals(that.id);
     }
+
     @Override
     public int hashCode() {
         return id == null ? 0 : id.hashCode();

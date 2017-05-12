@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="James Whetstone" context="dev, ci, prod">
+        <comment>This changeSet is the initial creation of the required base tables for the Directory Server.</comment>
+
+        <createTable tableName="organization_type">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(18)" remarks="The name of the organization type">
+                <constraints nullable="false" />
+            </column>
+            <column name="description" type="varchar(512)"/>
+        </createTable>
+
+        <insert tableName="organization_type">
+            <column name="name" value="System"/>
+            <column name="description" value="The organization that manages the Directory server."/>
+        </insert>
+
+        <insert tableName="organization_type">
+            <column name="name" value="Institution"/>
+            <column name="description" value="An educational entity that can receive documents through a service provider and
+                           send digitally signed documents after providing a valid SSL certificate to EDExchange."/>
+        </insert>
+
+        <insert tableName="organization_type">
+            <column name="name" value="Service Provider"/>
+            <column name="description" value="An organization that sends and receives documents on behalf of itself and/or
+                                                other institutions.  Requires a network server implementation."/>
+        </insert>
+
+
+        <createTable tableName="organization">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="organization_id" type="varchar(35)" remarks="Unique Identifier that represents an organization,
+                                                                        for a given organization id type"/>
+            <column name="organization_id_type" type="varchar(10)" remarks="The code that qualifies the organization id"/>
+            <column name="name" type="varchar(60)" remarks="Fully Qualified name of the Organization">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subcode" type="varchar(50)" remarks="Further refinement of the delivery location. Ex, department\n(Math, Science)"/>
+            <column name="ein" type="varchar(10)" remarks="Employer Identification Number (EIN) is also known as a Federal Tax Identification
+                                                            Number, and is used to identify a business entity"/>
+            <column name="website" type="varchar(255)" remarks="Web Site address of organization"/>
+            <column name="short_description" type="varchar(1024)"/>
+            <column name="signing_certificate" type="varchar(4096)" remarks="The SSL certificate and public key used to verify documents
+                                                                                signed with the paired private key."/>
+            <column name="network_certificate" type="varchar(4096)" remarks="The SSL certificate used to configure HTTPS on the network server."/>
+            <column name="network_domain" type="varchar(256)" remarks="The domain name for the network server"/>
+            <column name="public_key" type="varchar(2048)" remarks="The PEM encoded public key extracted from the signing certificate,
+                                                                        used to verify digital signatures."/>
+            <column name="terms_of_use" type="text" remarks="Rules which one must agree to abide by in order to use a service. Terms of service can also be merely a disclaimer, especially regarding the use of websites."/>
+            <column name="privacy_policy" type="text" remarks="A statement that discloses some or all of the ways a party gathers, uses, discloses and manages a customer or client's data."/>
+            <column name="created_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Created Time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Last Updated Time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="telephone" type="varchar(32)"/>
+            <column name="active" type="boolean" remarks="Indicates whether the organization is active in the ed exchange program and actively supporting document exchange">
+                <constraints nullable="false" />
+            </column>
+            <column name="enabled" type="boolean" remarks="Indicates whether the organization has been reviewed and enabled by an administrator">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="street" type="varchar(100)"/>
+            <column name="city" type="varchar(50)">
+                <constraints nullable="false" />
+            </column>
+            <column name="state" type="varchar(20)">
+                <constraints nullable="false" />
+            </column>
+            <column name="zip" type="varchar(20)"/>
+        </createTable>
+
+
+        <createTable tableName="org_orgtype">
+            <column name="organization_id" type="INT">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_org_orgtype"/>
+            </column>
+            <column name="organization_type_id" type="INT">
+                <constraints nullable="false" references="organization_type (id)" foreignKeyName="fk_orgtype_org"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="organization_id, organization_type_id"
+                       constraintName="pk_org_id_org_type_id"
+                       tableName="org_orgtype"/>
+
+
+
+        <createTable tableName="credential">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="username" type="varchar(128)" remarks="The security principal name/eppn">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean" remarks="enabled/disabled status of the security principal">
+                <constraints nullable="false" />
+            </column>
+            <column name="public_key" type="varchar(1024)">
+                <constraints nullable="false" />
+            </column>
+            <column name="digital_signature" type="varchar(1024)">
+                <constraints nullable="false" />
+            </column>
+            <column name="authentication_type" type="varchar(56)" remarks="PASSWORD, PKI, ...">
+                <constraints nullable="false" />
+            </column>
+            <column name="organization_id" type="INT" remarks="foreign key to the organization table">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Created Time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Last Updated Time">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="credential"
+                                 constraintName="fk_credential_organization"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"/>
+
+        <createTable tableName="contact">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(50)" remarks="Admin, Technical, Billing, etc...">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_1" type="varchar(20)" remarks="Supports International">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_2" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street_address" type="varchar(256)" remarks="Full address of contact">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="INT" remarks="foreign key to the organization table">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Created Time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Last Updated Time">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="contact"
+                                 constraintName="fk_contact_organization"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"/>
+
+        <createTable tableName="document_format">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(18)" remarks="The name of the format">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Created Time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_time" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP" remarks="Last Updated Time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="inuse_count" type="TINYINT(2)" defaultValue="0" remarks="Used for tracking format support">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="delivery_methods">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(20)" remarks="The name of the delivery method">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(256)" remarks="A description of the delivery method">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <insert tableName="delivery_methods">
+            <column name="name" value="Web Service"/>
+            <column name="description" value="Deliver through a web service."/>
+        </insert>
+        <insert tableName="delivery_methods">
+            <column name="name" value="SFTP"/>
+            <column name="description" value="Deliver through a Secure File Transfer Protocol server."/>
+        </insert>
+        <insert tableName="delivery_methods">
+            <column name="name" value="USPS"/>
+            <column name="description" value="Deliver using the United States Postal Service."/>
+        </insert>
+
+
+        <createTable tableName="endpoint">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="organization_id" type="INT" remarks="foreign key to the organization table">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="varchar(256)"/>
+            <column name="instructions" type="varchar(1024)"/>
+            <column name="delivery_confirm" type="boolean"/>
+            <column name="error" type="boolean"/>
+            <column name="mode" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operational_status" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="endpoint"
+                                 constraintName="fk_endpoint_owner_organization"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"/>
+
+        <createTable tableName="document_types">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(20)" remarks="The name of the document types">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(256)" remarks="A description of the document types">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <insert tableName="document_types">
+            <column name="name" value="Transcript"/>
+            <column name="description" value="Academic transcript."/>
+        </insert>
+        <insert tableName="document_types">
+            <column name="name" value="Transcript Request"/>
+            <column name="description" value="Academic transcript request."/>
+        </insert>
+        <insert tableName="document_types">
+            <column name="name" value="Transcript Response"/>
+            <column name="description" value="Transcript response."/>
+        </insert>
+        <insert tableName="document_types">
+            <column name="name" value="Acknowledgement"/>
+            <column name="description" value="A logical receipt sent to the sending organization by the receiving organization that provides information about the document delivery."/>
+        </insert>
+
+        <createTable tableName="endpoint_document_types">
+            <column name="endpoint_id" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="document_types_id" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="endpoint_id, document_types_id"
+                       constraintName="pk_endpoint_id_docTypes_id"
+                       tableName="endpoint_document_types"/>
+
+        <addForeignKeyConstraint baseColumnNames="endpoint_id"
+                                 baseTableName="endpoint_document_types"
+                                 constraintName="fk_endpoint_document_types"
+                                 referencedColumnNames="id"
+                                 referencedTableName="endpoint"/>
+
+        <addForeignKeyConstraint baseColumnNames="document_types_id"
+                                 baseTableName="endpoint_document_types"
+                                 constraintName="fk_document_types_endpoint"
+                                 referencedColumnNames="id"
+                                 referencedTableName="document_types"/>
+
+        <createTable tableName="departments">
+            <column name="id" type="INT" autoIncrement="true" remarks="Primary Key">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(20)" remarks="The name of the department">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(256)" remarks="A description of the department">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <insert tableName="departments">
+            <column name="name" value="English"/>
+            <column name="description" value="The English department."/>
+        </insert>
+        <insert tableName="departments">
+            <column name="name" value="Administration"/>
+            <column name="description" value="Administration department"/>
+        </insert>
+
+        <createTable tableName="endpoint_departments">
+            <column name="endpoint_id" type="INT">
+                <constraints nullable="false" references="endpoint (id)" foreignKeyName="fk_endpoint_departments"/>
+            </column>
+            <column name="departments_id" type="INT">
+                <constraints nullable="false" references="departments (id)" foreignKeyName="fk_departments_endpoint"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="endpoint_id, departments_id"
+                       constraintName="pk_endpoint_id_departments_id"
+                       tableName="endpoint_departments"/>
+
+        <createTable tableName="endpoint_delivery_methods">
+            <column name="endpoint_id" type="INT">
+                <constraints nullable="false" references="endpoint (id)" foreignKeyName="fk_endpoint_delivery_methods"/>
+            </column>
+            <column name="delivery_methods_id" type="INT">
+                <constraints nullable="false" references="departments (id)" foreignKeyName="fk_delivery_methods_endpoint"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="endpoint_id, delivery_methods_id"
+                       constraintName="pk_endpoint_id_docMethod_id"
+                       tableName="endpoint_delivery_methods"/>
+
+
+        <createTable tableName="endpoint_document_format">
+            <column name="endpoint_id" type="INT">
+                <constraints nullable="false" references="endpoint (id)" foreignKeyName="fk_endpoint_document_format"/>
+            </column>
+            <column name="document_format_id" type="INT">
+                <constraints nullable="false" references="document_format (id)" foreignKeyName="fk_document_format_endpoint"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="endpoint_id, document_format_id"
+                       constraintName="pk_endpoint_id_document_format_id"
+                       tableName="endpoint_document_format"/>
+
+
+        <createTable tableName="endpoint_organization">
+            <column name="endpoint_id" type="INT">
+                <constraints nullable="false" references="endpoint (id)" foreignKeyName="fk_endpoint_organization"/>
+            </column>
+            <column name="organization_id" type="INT">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_organization_endpoint"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="endpoint_id, organization_id"
+                       constraintName="pk_endpoint_id_org_id"
+                       tableName="endpoint_organization"/>
+
+    </changeSet>
+
+</databaseChangeLog>
