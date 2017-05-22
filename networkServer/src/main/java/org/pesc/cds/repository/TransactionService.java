@@ -99,6 +99,12 @@ public class TransactionService {
         return this.transactionRepository.findOne(id);
     }
 
+    @Transactional(readOnly=true,propagation = Propagation.REQUIRED)
+    public Transaction unsecuredFindById(Integer id)  {
+        return this.transactionRepository.findOne(id);
+    }
+
+
     private Predicate[] createPredicates(CriteriaBuilder cb, Root<Transaction> transactionRoot,  Integer senderId,
                                         String status,
                                         String operation,
