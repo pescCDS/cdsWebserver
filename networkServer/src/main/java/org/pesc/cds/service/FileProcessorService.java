@@ -16,6 +16,7 @@
 
 package org.pesc.cds.service;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pesc.cds.domain.Transaction;
@@ -300,7 +301,13 @@ public class FileProcessorService {
                     org.pesc.sdk.message.transcriptacknowledgement.v1_3.Acknowledgment transcriptAck =
                             transcriptAcknowledgementService.getTranscriptAcknowledgement(transaction.getFilePath());
 
-                    CollegeTranscript collegeTranscript = getCollegeTranscript(transcriptAck.getTransmissionData().getRequestTrackingID());
+                    String requestTrackingID = transcriptAck.getTransmissionData().getRequestTrackingID();
+
+                    Preconditions.checkArgument(org.apache.commons.lang3.StringUtils.isNotBlank(requestTrackingID) && org.apache.commons.lang3.StringUtils.isNumeric(requestTrackingID), requestTrackingID+" invalid, must be a nonBlank Integer");
+                    Transaction transcriptTransaction = transactionService.findById(Integer.parseInt(requestTrackingID));
+                    Preconditions.checkNotNull(transcriptTransaction, "Cannot find transcript for ID:" + requestTrackingID);
+                    Preconditions.checkArgument(org.apache.commons.lang3.StringUtils.isNotBlank(transcriptTransaction.getFilePath()), "filePath is missing for transcriptTransaction for ID:"+requestTrackingID);
+                    CollegeTranscript collegeTranscript = getCollegeTranscript(transcriptTransaction.getFilePath());
 
                     transcriptAcknowledgementService.verifyTranscript(transcriptAck, collegeTranscript);
                 }
