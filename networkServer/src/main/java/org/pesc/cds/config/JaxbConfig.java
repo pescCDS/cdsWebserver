@@ -16,16 +16,50 @@
 
 package org.pesc.cds.config;
 
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 
 /**
  * Created by sallen on 7/27/16.
  */
 @Configuration
 public class JaxbConfig {
+
+    @Bean(name="transcriptJAXBContext")
+    public JAXBContext transcriptJAXBContext() throws JAXBException {
+        return JAXBContextFactory.createContext("org.pesc.sdk.message.collegetranscript.v1_6.impl", null, null);
+    }
+
+    @Bean(name="transcriptAcknowledgementJAXBContext")
+    public JAXBContext transcriptAcknowledgementJAXBContext() throws JAXBException {
+        return  JAXBContextFactory.createContext("org.pesc.sdk.message.transcriptacknowledgement.v1_3.impl", null, null);
+    }
+
+    @Bean(name="transcriptRequestJAXBContext")
+    public JAXBContext transcriptRequestJAXBContext() throws JAXBException {
+        return  JAXBContextFactory.createContext("org.pesc.sdk.message.transcriptrequest.v1_4.impl", null, null);
+    }
+
+    @Bean(name="docInfoJAXBContext")
+    public JAXBContext docInfoJAXBContext() throws JAXBException {
+        return  JAXBContextFactory.createContext("org.pesc.sdk.message.documentinfo.v1_0.impl", null, null);
+    }
+
+    @Bean(name="functionalAckJAXBContext")
+    public JAXBContext functionalAckJAXBContext() throws JAXBException {
+        return  JAXBContextFactory.createContext("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl", null, null);
+    }
+
+    @Bean(name="transcriptResponseJAXBContext")
+    public JAXBContext transcriptResponseJAXBContext() throws JAXBException {
+        return  JAXBContextFactory.createContext("org.pesc.sdk.message.transcriptresponse.v1_4.impl", null, null);
+    }
 
     @Bean(name="transcriptRequestMarshaller")
     public Jaxb2Marshaller transcriptRequestMarshaller(){

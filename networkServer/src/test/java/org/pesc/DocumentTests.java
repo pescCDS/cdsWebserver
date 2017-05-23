@@ -16,10 +16,13 @@
 
 package org.pesc;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.service.FileProcessorService;
+import org.pesc.cds.service.SerializationService;
+import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
 import org.pesc.sdk.message.functionalacknowledgement.v1_2.Acknowledgment;
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.message.transcriptresponse.v1_4.TranscriptResponse;
@@ -45,6 +48,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -61,6 +65,9 @@ public class DocumentTests {
     @Autowired
     FileProcessorService fileProcessorService;
 
+    @Autowired
+    private SerializationService serializationService;
+
     @Test
     public void testFunctionalAckCreation() throws JAXBException, SAXException, OperationNotSupportedException {
 
@@ -70,10 +77,10 @@ public class DocumentTests {
 
         Acknowledgment ack = fileProcessorService.createFunctionalAcknowledgement(transaction, "ack_1");
 
-        Marshaller marshaller = ValidationUtils.createMarshaller("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl");
+        Marshaller marshaller = serializationService.createFunctionalAckMarshaller();
+
         marshaller.setSchema(ValidationUtils.getSchema(XmlFileType.FUNCTIONAL_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_2_0));
 
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         marshaller.marshal(ack, byteArrayOutputStream);
 
@@ -86,10 +93,7 @@ public class DocumentTests {
     @Test
     public void testTranscriptResponseCreation() throws JAXBException, SAXException, OperationNotSupportedException {
 
-        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
-
-        Schema schema = ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
-        u.setSchema(schema);
+        Unmarshaller u = serializationService.createTranscriptRequestUnmarshaller(true, false);
 
         TranscriptRequest transcriptRequest = null;
         try {
@@ -119,10 +123,10 @@ public class DocumentTests {
                 transcriptRequest.getRequests().get(0).getRequestedStudent()
         );
 
-        Marshaller marshaller = ValidationUtils.createMarshaller("org.pesc.sdk.message.transcriptresponse.v1_4.impl");
+        Marshaller marshaller = serializationService.createTranscriptResponseMarshaller();
+
         marshaller.setSchema(ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_RESPONSE, XmlSchemaVersion.V1_4_0));
 
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         marshaller.marshal(response, byteArrayOutputStream);
 
@@ -130,6 +134,38 @@ public class DocumentTests {
 
 
     }
+
+
+    @Test
+    public void testJSONSerializationOfJAXBPESCCollegeTranscript() throws JAXBException, SAXException, OperationNotSupportedException {
+
+        Unmarshaller unmarshaller =  serializationService.createTranscriptUnmarshaller(false, false);
+
+        Object object = unmarshaller.unmarshal(getClass().getClassLoader().getResourceAsStream("college-transcript.xml"));
+
+        Marshaller marshaller = serializationService.createTranscriptMarshaller(true);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        marshaller.marshal(object, outputStream);
+
+        System.out.print(outputStream.toString());
+
+        InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+
+        unmarshaller =  serializationService.createTranscriptUnmarshaller(false, true);
+
+        object = unmarshaller.unmarshal(inputStream);
+
+        Assert.assertTrue("Failed to unmarshall JSON transcript from PESC College Transcript object.", object instanceof CollegeTranscript);
+
+        CollegeTranscript collegeTranscript = (CollegeTranscript)object;
+
+        Assert.assertTrue("Student's first name is incorrect.", collegeTranscript.getStudent().getPerson().getName().getFirstName().equals("John"));
+
+
+    }
+
 
 
 }

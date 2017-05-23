@@ -24,6 +24,7 @@ import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
 import org.pesc.sdk.util.ValidationUtils;
 import org.pesc.sdk.util.XmlFileType;
 import org.pesc.sdk.util.XmlSchemaVersion;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
@@ -41,13 +42,12 @@ import java.net.URL;
 public class TranscriptService {
     private static final Log log = LogFactory.getLog(TranscriptService.class);
 
+    @Autowired
+    private SerializationService serializationService;
 
-    public CollegeTranscript fromURL(URL url) throws JAXBException, SAXException, OperationNotSupportedException {
+    public CollegeTranscript fromURL(URL url, boolean isJSON) throws JAXBException, SAXException, OperationNotSupportedException {
 
-        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.collegetranscript.v1_6.impl");
-
-        Schema schema = ValidationUtils.getSchema(XmlFileType.COLLEGE_TRANSCRIPT, XmlSchemaVersion.V1_6_0);
-        u.setSchema(schema);
+        Unmarshaller u = serializationService.createTranscriptUnmarshaller(true, isJSON);
 
         CollegeTranscript collegeTranscript = null;
         try {
@@ -60,26 +60,33 @@ public class TranscriptService {
         return collegeTranscript;
     }
 
+    private String serialize(CollegeTranscript transcript, Marshaller marshaller) throws JAXBException {
+        StringWriter writer = new StringWriter();
+        marshaller.marshal(transcript, writer);
+        return writer.toString();
+    }
+
     public String toXml(CollegeTranscript transcript) {
         try {
-            JAXBContext jc = JAXBContext.newInstance("org.pesc.sdk.message.collegetranscript.v1_6.impl");
-            Marshaller marshaller = jc.createMarshaller();
 
-            Schema schema = ValidationUtils.getSchema(XmlFileType.COLLEGE_TRANSCRIPT, XmlSchemaVersion.V1_6_0);
+            Marshaller marshaller = serializationService.createTranscriptMarshaller(false);
 
-            marshaller.setSchema(schema);
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
-
-            StringWriter writer = new StringWriter();
-            marshaller.marshal(transcript, writer);
-
-            return writer.toString();
+            return serialize(transcript, marshaller);
 
         } catch (JAXBException e) {
             log.error(e);
-        } catch (SAXException e) {
-            log.error(e);
-        } catch (OperationNotSupportedException e) {
+        }
+
+        return null;
+    }
+
+    public String toJson(CollegeTranscript transcript) {
+        try {
+
+            Marshaller marshaller = serializationService.createTranscriptMarshaller(true);
+            return serialize(transcript, marshaller);
+
+        } catch (JAXBException e) {
             log.error(e);
         }
 

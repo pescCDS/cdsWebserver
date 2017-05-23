@@ -40,9 +40,6 @@ import org.pesc.sdk.message.functionalacknowledgement.v1_2.impl.AcknowledgmentIm
 import org.pesc.sdk.message.transcriptrequest.v1_4.TranscriptRequest;
 import org.pesc.sdk.message.transcriptresponse.v1_4.TranscriptResponse;
 import org.pesc.sdk.sector.academicrecord.v1_9.*;
-import org.pesc.sdk.util.ValidationUtils;
-import org.pesc.sdk.util.XmlFileType;
-import org.pesc.sdk.util.XmlSchemaVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,8 +60,10 @@ import org.xml.sax.SAXException;
 import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
@@ -103,6 +102,9 @@ public class FileProcessorService {
 
     @Autowired
     private PKIService pkiService;
+
+    @Autowired
+    private SerializationService serializationService;
 
     @Autowired
     @Qualifier("myRestTemplate")
@@ -282,9 +284,12 @@ public class FileProcessorService {
 
                 }
                 else if (DocumentType.COLLEGE_TRANSCRIPT.getDocumentName().equalsIgnoreCase(transaction.getDocumentType())) {
-                    if (DocumentFormat.PESCXML.getFormatName().equalsIgnoreCase(transaction.getFileFormat())){
+                    final String format = transaction.getFileFormat();
 
-                        CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getFilePath());
+                    if (DocumentFormat.PESCXML.getFormatName().equalsIgnoreCase(format) ||
+                            DocumentFormat.JSON.getFormatName().equalsIgnoreCase(format)){
+
+                        CollegeTranscript collegeTranscript = getCollegeTranscript(transaction.getFilePath(), format);
                         ack = buildAcceptedAcknowledgement(collegeTranscript, ackDocID) ;
 
                         sendTranscriptAcknowledgment(collegeTranscript, transaction.getSenderId(), transaction.getRecipientId());
@@ -308,7 +313,7 @@ public class FileProcessorService {
                     Transaction transcriptTransaction = transactionService.unsecuredFindById(Integer.parseInt(requestTrackingID));
                     Preconditions.checkNotNull(transcriptTransaction, "Cannot find transcript for ID:" + requestTrackingID);
                     Preconditions.checkArgument(org.apache.commons.lang3.StringUtils.isNotBlank(transcriptTransaction.getFilePath()), "filePath is missing for transcriptTransaction for ID:"+requestTrackingID);
-                    CollegeTranscript collegeTranscript = getCollegeTranscript(transcriptTransaction.getFilePath());
+                    CollegeTranscript collegeTranscript = getCollegeTranscript(transcriptTransaction.getFilePath(), transcriptTransaction.getFileFormat());
 
                     transcriptAcknowledgementService.verifyTranscript(transcriptAck, collegeTranscript);
                 }
@@ -320,7 +325,7 @@ public class FileProcessorService {
             if (ack == null) {
 
                 if (!StringUtils.isEmpty(transaction.getRequestFilePath()) ) {
-                    TranscriptRequest transcriptRequest = getTranscriptRequest(transaction.getRequestFilePath());
+                    TranscriptRequest transcriptRequest = getTranscriptRequest(transaction.getRequestFilePath(), transaction.getFileFormat());
 
                     ack = buildAcceptedAcknowledgement(transcriptRequest, ackDocID) ;
                 }
@@ -552,19 +557,16 @@ public class FileProcessorService {
 
 
 
-    private TranscriptRequest getTranscriptRequest(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
+    private TranscriptRequest getTranscriptRequest(String filePath, String fileFormat) throws JAXBException, SAXException, OperationNotSupportedException {
 
-        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.transcriptrequest.v1_4.impl");
-        Schema schema = ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_REQUEST, XmlSchemaVersion.V1_4_0);
-        u.setSchema(schema);
+        Unmarshaller u = serializationService.createTranscriptRequestUnmarshaller(true, fileFormat.equalsIgnoreCase("JSON"));
+
         return (TranscriptRequest) u.unmarshal(new File(filePath));
     }
 
-    private CollegeTranscript getCollegeTranscript(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
+    private CollegeTranscript getCollegeTranscript(String filePath, String fileFormat) throws JAXBException, SAXException, OperationNotSupportedException {
 
-        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.collegetranscript.v1_6.impl");
-        Schema schema = ValidationUtils.getSchema(XmlFileType.COLLEGE_TRANSCRIPT, XmlSchemaVersion.V1_6_0);
-        u.setSchema(schema);
+        Unmarshaller u = serializationService.createTranscriptUnmarshaller(false, fileFormat.equalsIgnoreCase("JSON"));
         return (CollegeTranscript) u.unmarshal(new File(filePath));
     }
 

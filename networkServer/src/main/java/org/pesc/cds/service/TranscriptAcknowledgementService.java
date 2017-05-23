@@ -29,6 +29,7 @@ import org.pesc.sdk.sector.academicrecord.v1_9.*;
 import org.pesc.sdk.util.ValidationUtils;
 import org.pesc.sdk.util.XmlFileType;
 import org.pesc.sdk.util.XmlSchemaVersion;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
@@ -53,6 +54,10 @@ public class TranscriptAcknowledgementService {
         public Integer totalAcademicAwards;
     }
 
+    @Autowired
+    private SerializationService serializationService;
+
+
     private static final Log log = LogFactory.getLog(TranscriptAcknowledgementService.class);
 
     private static final org.pesc.sdk.message.transcriptacknowledgement.v1_3.ObjectFactory transcriptAcknoweledgementFactory = new org.pesc.sdk.message.transcriptacknowledgement.v1_3.ObjectFactory();
@@ -60,9 +65,8 @@ public class TranscriptAcknowledgementService {
 
     public Acknowledgment getTranscriptAcknowledgement(String filePath) throws JAXBException, SAXException, OperationNotSupportedException {
 
-        Unmarshaller u = ValidationUtils.createUnmarshaller("org.pesc.sdk.message.transcriptacknowledgement.v1_3.impl");
-        Schema schema = ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_3_0);
-        u.setSchema(schema);
+        Unmarshaller u = serializationService.createTranscriptAckUnmarshaller(true);
+
         return (Acknowledgment) u.unmarshal(new File(filePath));
     }
 
@@ -251,11 +255,10 @@ public class TranscriptAcknowledgementService {
     public String toXml(Acknowledgment acknowledgment) {
         try {
 
-            Marshaller marshaller = ValidationUtils.createMarshaller("org.pesc.sdk.message.transcriptacknowledgement.v1_3.impl");
+            Marshaller marshaller = serializationService.createTranscriptAckMarshaller();
             Schema schema = ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_3_0);
 
             marshaller.setSchema(schema);
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
 
             StringWriter writer = new StringWriter();
             marshaller.marshal(acknowledgment, writer);

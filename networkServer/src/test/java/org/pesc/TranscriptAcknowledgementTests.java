@@ -18,6 +18,7 @@ package org.pesc;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pesc.cds.service.SerializationService;
 import org.pesc.cds.service.TranscriptAcknowledgementService;
 import org.pesc.cds.service.TranscriptService;
 import org.pesc.sdk.message.collegetranscript.v1_6.CollegeTranscript;
@@ -57,13 +58,16 @@ public class TranscriptAcknowledgementTests {
     @Autowired
     TranscriptService transcriptService;
 
+    @Autowired
+    private SerializationService serializationService;
+
     private static final String ackDocID = "1";
 
     @Test
     public void testVerification() throws JAXBException, SAXException, OperationNotSupportedException {
 
 
-        CollegeTranscript collegeTranscript = transcriptService.fromURL(getClass().getClassLoader().getResource("college-transcript.xml"));
+        CollegeTranscript collegeTranscript = transcriptService.fromURL(getClass().getClassLoader().getResource("college-transcript.xml"), false);
 
 
 
@@ -76,10 +80,7 @@ public class TranscriptAcknowledgementTests {
 
         //serialize it
 
-        Marshaller marshaller = ValidationUtils.createMarshaller("org.pesc.sdk.message.transcriptacknowledgement.v1_3.impl");
-        marshaller.setSchema(ValidationUtils.getSchema(XmlFileType.TRANSCRIPT_ACKNOWLEDGEMENT, XmlSchemaVersion.V1_3_0));
-
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        Marshaller marshaller = serializationService.createTranscriptAckMarshaller();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         marshaller.marshal(ack, byteArrayOutputStream);
 
