@@ -43,6 +43,7 @@ import org.pesc.sdk.sector.academicrecord.v1_9.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
@@ -59,6 +60,7 @@ import org.xml.sax.SAXException;
 
 import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -110,9 +112,16 @@ public class FileProcessorService {
     @Qualifier("myRestTemplate")
     private OAuth2RestOperations restTemplate;
 
+    private File ackDir;
+
     private static final org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory functionalacknowledgementObjectFactory = new org.pesc.sdk.message.functionalacknowledgement.v1_2.ObjectFactory();
     private static final org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory academicRecordObjectFactory = new org.pesc.sdk.sector.academicrecord.v1_9.ObjectFactory();
     private static final org.pesc.sdk.message.transcriptresponse.v1_4.ObjectFactory transcriptResponseObjectFactory = new org.pesc.sdk.message.transcriptresponse.v1_4.ObjectFactory();
+
+    public FileProcessorService(Environment env){
+        ackDir = new File(env.getProperty("networkServer.ack.path"));
+        ackDir.mkdirs();
+    }
 
     public void sendAck(String ackURL, Acknowledgment acknowledgment) {
 
@@ -336,15 +345,30 @@ public class FileProcessorService {
 
             }
 
+ 			transaction.setAcknowledgedAt(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            Marshaller marshaller = serializationService.createFunctionalAckMarshaller();
+            File ackFile = File.createTempFile("ack-", ".xml", ackDir);
+            FileOutputStream ackFileStream = new FileOutputStream(ackFile);
+            marshaller.marshal(ack, ackFileStream);
+            transaction.setAckFilePath(ackFile.getAbsolutePath());
             sendAck(transaction.getAckURL(), ack);
 
         }
         catch (Exception e){
             transaction.setAcknowledged(false);
-            transaction.setError(e.getLocalizedMessage());
-            //transaction.setStatus(TransactionStatus.FAILURE);
+             String errorMessage = null;
+            if (e.getLocalizedMessage() == null) {
+                errorMessage = e.getClass().getCanonicalName();
+            }
+            else {
+                errorMessage = e.getLocalizedMessage();
+            }
+            transaction.setError(errorMessage);
+            transaction.setStatus(TransactionStatus.FAILURE);
+            log.error("File processing failed.", e);
+        }
+        finally {
             transactionService.update(transaction);
-            log.error(e);
         }
 
 
@@ -498,7 +522,7 @@ public class FileProcessorService {
     public Acknowledgment buildAcceptedAcknowledgement(CollegeTranscript transcript, String ackDocID) {
 
         Acknowledgment ack = buildAcceptedAcknowledgement(transcript.getTransmissionData().getDestination(),
-                transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getRequestTrackingID(),
+                transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getDocumentID(),
                 transcript.getTransmissionData().getDocumentID(), ackDocID);
 
         return ack;
@@ -507,7 +531,7 @@ public class FileProcessorService {
     public Acknowledgment buildRejectedAcknowledgement(CollegeTranscript transcript, List<SyntaxErrorType> errors, String ackDocID) {
 
         Acknowledgment ack = buildRejectedAcknowledgement(transcript.getTransmissionData().getDestination(),
-                transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getRequestTrackingID(),
+                transcript.getTransmissionData().getSource(), transcript.getTransmissionData().getDocumentID(),
                 transcript.getTransmissionData().getDocumentID(), errors, ackDocID);
 
         return ack;
