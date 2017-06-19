@@ -638,7 +638,7 @@ public class OrganizationService {
     @Transactional(readOnly = true)
     public PagedData getInstitutionsByServiceProviderId(Integer serviceProviderId, PagedData<OrganizationDTO> pagedData) {
 
-        String sql = "select isp.institution_id as id, org.name as name " +
+        String sql = "select isp.institution_id as id, org.name as name, org.enabled as enabled " +
                 "from institutions_service_providers isp join organization org on isp.institution_id = org.id " +
                 "where isp.service_provider_id = ? LIMIT ? OFFSET ?";
 
