@@ -1,4 +1,4 @@
-FROM java:8
+FROM openjdk:8
 
 # add the virtual directory from the host
 RUN mkdir /opt/edexchange
