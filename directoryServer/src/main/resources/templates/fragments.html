@@ -605,7 +605,7 @@
             <div class="col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4><i class="fa fa-fw fa-check"></i>What is EdExchange?</h4>
+                        <b><i class="fa fa-fw fa-check"></i>What is EdExchange?</b>
                     </div>
                     <div class="panel-body">
                         <p>
@@ -622,8 +622,7 @@
                             delivery confirmation.
                         </p>
 
-                        <p>See who's using EdExchange now. <a class="btn btn-lg btn-default btn-block"
-                                                              href="#directory">Directory</a></p>
+                        <p><a href="#directory">See who's using EdExchange now. </a></p>
 
                     </div>
                 </div>
@@ -631,7 +630,7 @@
             <div class="col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4><i class="fa fa-fw fa-gift"></i> Free &amp; Open Source</h4>
+                        <b><i class="fa fa-fw fa-gift"></i> Free &amp; Open Source</b>
                     </div>
                     <div class="panel-body">
                         <p>The EdExchange software is open source so you can extend and configure it as needed. Using
@@ -640,8 +639,7 @@
                             reference network server app, create your own custom app, or integrate EdExchange with an
                             existing app at your institution.</p>
 
-                        <p>Learn more. <a class="btn btn-lg btn-default btn-block" href="documentation#network-server">Network
-                            Server</a></p>
+                        <p><a href="documentation#network-server">Learn more about the reference implementation of the network server.</a></p>
                     </div>
 
                 </div>
@@ -649,7 +647,7 @@
             <div class="col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4><i class="fa fa-fw fa-compass"></i> Easy to Use</h4>
+                        <b><i class="fa fa-fw fa-compass"></i> Easy to Use</b>
                     </div>
                     <div class="panel-body">
                         <p>After your developer staff implements your EdExchange interface, sending a transcript to a
@@ -658,10 +656,10 @@
 
                         <p></p>
 
-                        <p>What you <u>won’t</u> have to do? Wonder whether or not the transcript was received or worry
+                        <p>What you won’t have to do? Wonder whether or not the transcript was received or worry
                             about file format or data security.</p>
 
-                        <p>Learn more. <a class="btn btn-lg btn-default btn-block" href="documentation#faq">FAQ</a></p>
+                        <p><a href="documentation#faq">Read the frequently asked questions here.</a></p>
                     </div>
                 </div>
             </div>
@@ -835,10 +833,10 @@
             </div>
             <div ng-show="endpointCtrl.showForm(endpoint)">
                 <div style="width: 80%;">
-                    <h4>
+                    <b>
                         <input class="form-control" type="text" placeholder="Address" required="required"
                                ng-model="endpoint.address"> </input>
-                    </h4>
+                    </b>
 
                     <p class="help-block">multipart/form-data</p>
 
@@ -946,7 +944,7 @@
                 </div>
             </div>
             <div ng-show="!endpointCtrl.showForm(endpoint)">
-                <h4>{{endpoint.address}}</h4>
+                <b>{{endpoint.address}}</b>
 
                 <p class="help-block">multipart/form-data</p>
 
@@ -1034,7 +1032,7 @@
                 </div>
 
                 <div>
-                    <h4>{{endpoint.address}}</h4>
+                    <b>{{endpoint.address}}</b>
 
                     <p>{{endpoint.instructions}}</p>
 
@@ -1774,25 +1772,31 @@
 
 <div th:fragment="actuator-view">
     <h1>Server Info</h1>
-    <div ng-repeat="endpoint in actCtrl.serverInfo.links">
-        <h4><a ng-click="actCtrl.getEndpoint(endpoint.rel)">{{endpoint.rel}}</a></h4>
 
-        <table ng-show="actCtrl.view[endpoint.rel] == true" class="table table-sm table-striped" >
-            <thead>
+    <div ng-repeat="endpoint in actCtrl.serverInfo.links">
+        <div style="margin-bottom: 10px;"><button type="button" class="btn btn-default" ng-click="actCtrl.getEndpoint(endpoint.rel)">
+            <span ng-show="actCtrl.view[endpoint.rel]">Hide </span><span ng-show="actCtrl.view[endpoint.rel] != true">Show </span>{{endpoint.rel}}</button>
+        </div>
+
+        <div ng-show="actCtrl.view[endpoint.rel] == true">
+            <h2>{{endpoint.rel}}</h2>
+            <table class="table table-sm table-striped" >
+                <thead>
                 <tr>
                     <th>Name</th>
                     <th>Value</th>
                 </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[endpoint.rel]">
-                <td>{{endpointKey}}</td>
-                <td>{{endpointValue}}</td>
-            </tr>
-            </tbody>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[endpoint.rel]">
+                    <td>{{endpointKey}}</td>
+                    <td>{{endpointValue}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
 
-        </table>
     </div>
 </div>
 

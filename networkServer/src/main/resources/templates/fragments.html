@@ -477,25 +477,29 @@
     <h1>Server Info</h1>
 
     <div ng-repeat="(key, value) in actCtrl.serverInfo._links">
-    <h4><a ng-click="actCtrl.getEndpoint(key)">{{key}}</a></h4>
+        <div style="margin-bottom: 10px;"><button type="button" class="btn btn-default" ng-click="actCtrl.getEndpoint(key)">
+            <span ng-show="actCtrl.view[key]">Hide </span><span ng-show="actCtrl.view[key] != true">Show </span>{{key}}</button>
+        </div>
 
-        <table ng-show="actCtrl.view[key] == true" class="table table-sm table-striped" >
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[key]">
-                <td>{{endpointKey}}</td>
-                <td>{{endpointValue}}</td>
-            </tr>
-            </tbody>
-        </table>
+        <div ng-show="actCtrl.view[key] == true">
+            <h2>{{key}}</h2>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[key]">
+                    <td>{{endpointKey}}</td>
+                    <td>{{endpointValue}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
-
-
 
 </div>
 
@@ -671,7 +675,7 @@
                             Before EDExchange, there was no consistent way for colleges to request and exchange documents with each other. Service provider exchange networks operated in isolation from one another and any available legacy exchange platforms were built on old standards without delivery confirmation.
                         </p>
 
-                        <p>See who's using EDExchange now!  <a class="btn btn-lg btn-default btn-block" th:href="${directoryServer} + '#directory'">Directory</a></p>
+                        <p><a th:href="${directoryServer} + '#directory'">See who's using EDExchange now! </a></p>
 
                     </div>
                 </div>
@@ -683,8 +687,7 @@
                     </div>
                     <div class="panel-body">
                         <p>Because EDExchange is open source you can extend it to suit your specific needs.</p>
-
-                        <p>Learn more  <a class="btn btn-lg btn-default btn-block" th:href="${directoryServer} + 'documentation#faq'">FAQ</a></p>
+                        <p><a  th:href="${directoryServer} + '/documentation#network-server'">Learn more about the reference implementation of the network server.</a></p>
                     </div>
 
                 </div>
@@ -697,7 +700,9 @@
                     <div class="panel-body">
                         <p>Sending a transcript to a college in the EDExchange network is as easy as entering the receiving school information, uploading the transcript, and clicking Send.</p>
                         <p></p>
-                        <p>What you <u>won’t</u> have to do? Wonder whether or not the transcript was received or worry about file format or data security.</p>
+                        <p>What you won’t have to do? Wonder whether or not the transcript was received or worry about file format or data security.</p>
+
+                        <p><a th:href="${directoryServer} + '/documentation#faq'">Learn more by reading the frequently asked questions.</a></p>
                     </div>
                 </div>
             </div>
