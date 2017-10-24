@@ -55,6 +55,7 @@ public class UsageDataController {
         apiRequestService.getUsageRecords(pagedData);
 
         response.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()));
+        response.addHeader("Access-Control-Expose-Headers", "X-Total-Count");
         return pagedData.getData();
 
     }

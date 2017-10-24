@@ -79,6 +79,8 @@ public class MessageResource {
         messageService.search(orgID,topic,content,createdTime,actionRequired, pagedData);
 
         servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()) );
+        servletResponse.addHeader("Access-Control-Expose-Headers", "X-Total-Count");
+
         return pagedData.getData();
     }
 
