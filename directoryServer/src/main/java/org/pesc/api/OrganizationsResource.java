@@ -145,6 +145,7 @@ public class OrganizationsResource {
                 pagedData);
 
         servletResponse.addHeader("X-Total-Count", String.valueOf(pagedData.getTotal()) );
+        servletResponse.addHeader("Access-Control-Expose-Headers", "X-Total-Count");
         return pagedData.getData();
     }
 
