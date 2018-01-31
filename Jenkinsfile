@@ -12,7 +12,7 @@
 @Library('jenkinsLib') _
 
 def channel = "#ed-exchange" //slack notification channel
-def buildNode = "build-slave" //build on nodes matching label
+def buildNode = "jenkins-old-build-1" //build on nodes matching label
 def buildCommand = "mvn clean install"
 
 Properties props
@@ -31,7 +31,7 @@ stage "build"
 node(buildNode) {
     try {
         deleteDir()
-		checkout scm
+        checkout scm
         currentBuild.displayName = "#${env.BUILD_NUMBER}-${env.BRANCH_NAME}"
 
         if (env.BRANCH_NAME =~ /feature/) {
