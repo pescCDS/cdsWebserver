@@ -37,7 +37,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.pesc.cds.config.SwaggerConfig;
 import org.pesc.cds.domain.Transaction;
 import org.pesc.cds.model.EndpointMode;
 import org.pesc.cds.model.SchoolCodeType;
@@ -67,7 +66,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.util.LinkedMultiValueMap;
@@ -624,6 +622,7 @@ public class DocumentController {
     }
 
 
+
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public void receiveFile() throws SAXException, OperationNotSupportedException {
 
@@ -643,7 +642,6 @@ public class DocumentController {
      * @param ackURL        This is the url to the network server that we will send the response back to
      */
     @RequestMapping(value = "/inbox", method = RequestMethod.POST)
-
     @PreAuthorize("hasRole('ROLE_NETWORK_SERVER') OR hasRole('ROLE_SUPERUSER')")
     @ApiOperation(value = "Upload a document.",
     authorizations = {

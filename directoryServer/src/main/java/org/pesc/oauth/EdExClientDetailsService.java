@@ -64,7 +64,7 @@ public class EdExClientDetailsService implements ClientDetailsService {
                 error = String.format("An organization was found with directory id %s, but the organization is disabled.", clientId);
             }
             else if (StringUtils.isEmpty(org.getOauthSecret())) {
-                error = String.format("OAuth is not enabled for the organization %d", clientId);
+                error = String.format("OAuth is not enabled for the organization %s", clientId);
             }
 
             throw new IllegalArgumentException(error);

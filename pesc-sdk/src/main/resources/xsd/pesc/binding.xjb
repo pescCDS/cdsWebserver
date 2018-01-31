@@ -83,6 +83,12 @@
             </jxb:schemaBindings>
         </jxb:bindings>
 
+        <jxb:bindings schemaLocation="DocumentTransform_v1.0.0.xsd">
+            <jxb:schemaBindings>
+                <jxb:package name="org.pesc.sdk.message.documenttransform.v1_0"/>
+            </jxb:schemaBindings>
+        </jxb:bindings>
+
         <jxb:bindings schemaLocation="TranscriptRequest_v1.4.0.xsd">
             <jxb:schemaBindings>
                 <jxb:package name="org.pesc.sdk.message.transcriptrequest.v1_4"/>

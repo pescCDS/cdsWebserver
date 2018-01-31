@@ -48,7 +48,7 @@ class CredentialsService implements UserDetailsService {
 
         List<Credentials> credentials = credentialsRepository.findByUserName(username);
         if (credentials.isEmpty()) {
-            return null;
+            throw new IllegalArgumentException("No user found.");
         }
 
         if (credentials.size() != 1) {
