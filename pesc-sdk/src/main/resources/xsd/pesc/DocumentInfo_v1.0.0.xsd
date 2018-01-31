@@ -38,7 +38,7 @@
 			</xs:element>
 			<xs:element name="DocumentFormat" type="xs:string" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Document Type</xs:documentation>
+					<xs:documentation>Document Format</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>

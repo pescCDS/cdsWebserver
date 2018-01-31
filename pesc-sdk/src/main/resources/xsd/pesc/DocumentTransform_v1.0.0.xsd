@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:org:pesc:message:DocumentTransform:v1.0.0" targetNamespace="urn:org:pesc:message:DocumentTransform:v1.0.0" elementFormDefault="qualified">
+	<xs:element name="DocumentTransform">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="documentTransform" type="DocumentTransformType" minOccurs ="1" maxOccurs ="1"/>
+            </xs:sequence>
+        </xs:complexType>
+	</xs:element>
+	<xs:complexType name="DocumentTransformType">
+		<xs:sequence>
+			<xs:element name="RequestedFormat" type="FormatType" minOccurs="1" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Document Format</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="FormatType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="EDI"/>
+			<xs:enumeration value="ELMO"/>
+			<xs:enumeration value="XML"/>
+			<xs:enumeration value="JSON"/>
+			<xs:enumeration value="PDF"/>
+			<xs:enumeration value="HTML"/>
+			<xs:enumeration value="IMAGE"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

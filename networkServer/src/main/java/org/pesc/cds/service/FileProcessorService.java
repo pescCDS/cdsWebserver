@@ -156,7 +156,7 @@ public class FileProcessorService {
     }
 
     /**
-     * Implementors should develop logic here to hand the transcript request---obtain the requested student's
+     * Implementors should develop logic here to handle the transcript request---obtain the requested student's
      * transcript and send it to the source organization using the source's EDExchange endpoint for the
      * transcript.
      * @param transaction

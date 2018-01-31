@@ -51,6 +51,11 @@ public class JaxbConfig {
         return  JAXBContextFactory.createContext("org.pesc.sdk.message.documentinfo.v1_0.impl", null, null);
     }
 
+    @Bean(name="documentTransformJAXBContext")
+    public JAXBContext documentTransformJAXBContext() throws JAXBException {
+        return  JAXBContextFactory.createContext("org.pesc.sdk.message.documenttransform.v1_0.impl", null, null);
+    }
+
     @Bean(name="functionalAckJAXBContext")
     public JAXBContext functionalAckJAXBContext() throws JAXBException {
         return  JAXBContextFactory.createContext("org.pesc.sdk.message.functionalacknowledgement.v1_2.impl", null, null);
@@ -61,6 +66,7 @@ public class JaxbConfig {
         return  JAXBContextFactory.createContext("org.pesc.sdk.message.transcriptresponse.v1_4.impl", null, null);
     }
 
+
     @Bean(name="transcriptRequestMarshaller")
     public Jaxb2Marshaller transcriptRequestMarshaller(){
         Jaxb2Marshaller transcriptRequestMarshaller = new Jaxb2Marshaller();
@@ -70,11 +76,20 @@ public class JaxbConfig {
     }
 
     @Bean(name="documentInfoMarshaller")
-    public Jaxb2Marshaller DocumentInfoMarshaller(){
-        Jaxb2Marshaller DocumentInfoMarshaller = new Jaxb2Marshaller();
-        DocumentInfoMarshaller.setContextPath("org.pesc.sdk.message.documentinfo.v1_0.impl");
-        DocumentInfoMarshaller.setSchema(new ClassPathResource("xsd/pesc/DocumentInfo_v1.0.0.xsd"));
-        return DocumentInfoMarshaller;
+    public Jaxb2Marshaller documentInfoMarshaller(){
+        Jaxb2Marshaller documentInfoMarshaller = new Jaxb2Marshaller();
+        documentInfoMarshaller.setContextPath("org.pesc.sdk.message.documentinfo.v1_0.impl");
+        documentInfoMarshaller.setSchema(new ClassPathResource("xsd/pesc/DocumentInfo_v1.0.0.xsd"));
+        return documentInfoMarshaller;
+    }
+
+
+    @Bean(name="documentTransformMarshaller")
+    public Jaxb2Marshaller documentTransformMarshaller(){
+        Jaxb2Marshaller documentTransformMarshaller = new Jaxb2Marshaller();
+        documentTransformMarshaller.setContextPath("org.pesc.sdk.message.documenttransform.v1_0.impl");
+        documentTransformMarshaller.setSchema(new ClassPathResource("xsd/pesc/DocumentTransform_v1.0.0.xsd"));
+        return documentTransformMarshaller;
     }
 
     @Bean(name="functionalacknowledgementMarshaller")
