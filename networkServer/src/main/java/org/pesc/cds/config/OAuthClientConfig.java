@@ -16,6 +16,7 @@
 
 package org.pesc.cds.config;
 
+import org.pesc.cds.web.LoggingClientHttpRequestInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
@@ -96,4 +98,14 @@ public class OAuthClientConfig {
         resource.setScope(Arrays.asList("write_inbox", "read_inbox", "write_transactions", "read_transactions"));
         return resource;
     }
+
+    @Bean
+    @Qualifier("directoryServerClient")
+    public RestTemplate directoryServerClient() {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(getClientHttpRequestFactory());
+        restTemplate.getInterceptors().add(new LoggingClientHttpRequestInterceptor());
+        return restTemplate;
+    }
+
 }

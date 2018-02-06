@@ -175,7 +175,7 @@ public class FileProcessorService {
 
         tx.setRecipientId(recipientID);
         tx.setSenderId(senderID);
-        tx.setSignerId(senderID);
+        tx.setSignerId(localServerId);
         tx.setFileFormat(DocumentFormat.PESCXML.getFormatName());
         tx.setDocumentType(DocumentType.TRANSCRIPT_ACKNOWLEDGEMENT.getDocumentName());
         //tx.setDepartment("");

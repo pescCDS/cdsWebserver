@@ -27,14 +27,6 @@ import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.domain.Transaction;
@@ -63,6 +55,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.Marshaller;
@@ -71,6 +65,7 @@ import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
@@ -154,6 +149,10 @@ public class DocumentController {
     @Autowired
     private OrganizationService organizationService;
 
+
+    @Qualifier("directoryServerClient")
+    @Autowired
+    private RestTemplate directoryServerClient;
 
     @Autowired
     @Qualifier("myRestTemplate")
@@ -251,36 +250,22 @@ public class DocumentController {
     }
 
 
-    private String getPEMPublicKeyByOrgID(int orgID) {
+    private String getPEMPublicKeyByOrgID(Integer orgID) {
         StringBuilder uri = new StringBuilder(directoryServer + "/services/rest/v1/organizations/" + orgID + "/public-key");
-
-        CloseableHttpClient client = HttpClients.custom().build();
         String pemPublicKey = null;
-        try {
-            HttpGet get = new HttpGet(uri.toString());
-            get.setHeader(HttpHeaders.ACCEPT, "text/html");
-            CloseableHttpResponse response = client.execute(get);
-            try {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(org.springframework.http.MediaType.TEXT_HTML));
 
-                HttpEntity resEntity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
-                    pemPublicKey = EntityUtils.toString(resEntity);
-                }
-                EntityUtils.consume(resEntity);
-            } finally {
-                response.close();
-            }
-        } catch (ClientProtocolException e) {
-            log.error(e);
-        } catch (IOException e) {
-            log.error(e);
-        } finally {
-            try {
-                client.close();
-            } catch (IOException e) {
+        ResponseEntity<String> response = directoryServerClient.getForEntity(uri.toString(),
+                String.class, new HttpEntity<String>(headers));
 
+        if (response.getStatusCodeValue() == 200 ) {
+
+            if (response.getStatusCodeValue() == 200) {
+                pemPublicKey = response.getBody();
             }
         }
+
         return pemPublicKey;
     }
 

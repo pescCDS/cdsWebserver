@@ -27,6 +27,8 @@ import org.xml.sax.SAXException;
 import javax.annotation.Resource;
 import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by james on 5/22/17.
@@ -77,22 +79,42 @@ public class SerializationService {
     }
 
     public Unmarshaller json(Unmarshaller unmarshaller) throws PropertyException {
-
         unmarshaller.setProperty(UnmarshallerProperties.MEDIA_TYPE, "application/json");
         unmarshaller.setProperty(UnmarshallerProperties.JSON_INCLUDE_ROOT, Boolean.TRUE);
-        unmarshaller.setProperty(UnmarshallerProperties.JSON_USE_XSD_TYPES_WITH_PREFIX, Boolean.TRUE);
-        
+
+        unmarshaller.setProperty(UnmarshallerProperties.UNMARSHALLING_CASE_INSENSITIVE, Boolean.TRUE);
+
+        Map<String, String> namespacePrefixMapper = new HashMap<String, String>(4);
+        namespacePrefixMapper.put("urn:org:pesc:core:CoreMain:v1.14.0", "core");
+        namespacePrefixMapper.put("urn:org:pesc:sector:AcademicRecord:v1.9.0", "AcRec");
+        namespacePrefixMapper.put("urn:org:pesc:message:CollegeTranscript:v1.6.0", "ColTrn");
+        namespacePrefixMapper.put("http://www.xap.com/CCCTran", "CCC");
+
+        unmarshaller.setProperty(UnmarshallerProperties.JSON_NAMESPACE_PREFIX_MAPPER, namespacePrefixMapper);
+        unmarshaller.setProperty(UnmarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@");
+        unmarshaller.setProperty(UnmarshallerProperties.JSON_NAMESPACE_SEPARATOR, '.');
+
         return unmarshaller;
     }
 
     public Marshaller json(Marshaller marshaller) throws PropertyException {
- 
+
         marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");
-        marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, true);
-        marshaller.setProperty(MarshallerProperties.JSON_USE_XSD_TYPES_WITH_PREFIX, Boolean.TRUE);
-        
+        marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, Boolean.TRUE);
+
+        Map<String, String> namespacePrefixMapper = new HashMap<String, String>(4);
+        namespacePrefixMapper.put("urn:org:pesc:core:CoreMain:v1.14.0", "core");
+        namespacePrefixMapper.put("urn:org:pesc:sector:AcademicRecord:v1.9.0", "AcRec");
+        namespacePrefixMapper.put("urn:org:pesc:message:CollegeTranscript:v1.6.0", "ColTrn");
+        namespacePrefixMapper.put("http://www.xap.com/CCCTran", "CCC");
+
+        marshaller.setProperty(MarshallerProperties.NAMESPACE_PREFIX_MAPPER, namespacePrefixMapper);
+        marshaller.setProperty(MarshallerProperties.JSON_ATTRIBUTE_PREFIX, "@");
+        marshaller.setProperty(MarshallerProperties.JSON_NAMESPACE_SEPARATOR, '.');
+
         return marshaller;
     }
+    
     private Marshaller marshaller(JAXBContext context) throws JAXBException {
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

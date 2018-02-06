@@ -19,14 +19,6 @@ package org.pesc.cds.service;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pesc.cds.config.CacheConfig;
@@ -35,16 +27,19 @@ import org.pesc.cds.model.EndpointMode;
 import org.pesc.cds.model.IdList;
 import org.pesc.cds.model.SchoolCodeType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -64,6 +59,10 @@ public class OrganizationService {
 
     @Value("${api.endpoints}")
     private String endpointsApiPath;
+
+    @Qualifier("directoryServerClient")
+    @Autowired
+    private RestTemplate directoryServerClient;
 
     @Value("${networkServer.id}")
     private String orgID;
@@ -87,26 +86,20 @@ public class OrganizationService {
         if(schoolCode!=null && schoolCodeType!=null){
             uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
         }
-        try(CloseableHttpClient client = HttpClients.custom().build()) {
-            HttpGet get = new HttpGet(uri.toString());
-            get.setHeader(HttpHeaders.ACCEPT, "application/json");
 
-            try(CloseableHttpResponse response = client.execute(get)) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-                HttpEntity resEntity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
-                    JSONArray organizations = new JSONArray(EntityUtils.toString(resEntity));
-                    if (organizations.length() == 1) {
-                        organization = organizations.getJSONObject(0);
-                    }
-                }
-                EntityUtils.consume(resEntity);
+        ResponseEntity<String> response = directoryServerClient.getForEntity(uri.toString(),
+                String.class, new HttpEntity<String>(headers));
+
+        if (response.getStatusCodeValue() == 200 ) {
+            JSONArray organizations = new JSONArray(response.getBody());
+            if (organizations.length() == 1) {
+                organization = organizations.getJSONObject(0);
             }
-        } catch (ClientProtocolException e) {
-            log.error(e);
-        } catch (IOException e) {
-            log.error(e);
         }
+
         return organization;
     }
 
@@ -123,57 +116,40 @@ public class OrganizationService {
         return institution;
     }
 
-    public String getEndpointForOrg(int orgID, String documentFormat, String documentType, String department, EndpointMode mode) {
+    public String getEndpointForOrg(Integer orgID, String documentFormat, String documentType, String department, EndpointMode mode) {
 
-        CloseableHttpClient client = HttpClients.custom().build();
         String endpointURI = null;
-        try {
-            StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
-            uri.append("?organizationId=").append(orgID).append("&enabled=true").append("&mode=").append(mode.getMode()) ;
-            if (StringUtils.isNotBlank(documentFormat))
-                uri.append("&documentFormat=").append(documentFormat);
 
-            if (StringUtils.isNotBlank(documentType))
-                uri.append("&documentType=").append(URLEncoder.encode(documentType, "UTF-8"));
+        StringBuilder uri = new StringBuilder(directoryServer + endpointsApiPath);
+        uri.append("?organizationId=").append(orgID).append("&enabled=true").append("&mode=" + mode.getMode()) ;
+        if (StringUtils.isNotBlank(documentFormat))
+            uri.append("&documentFormat=").append(documentFormat);
 
-            if (StringUtils.isNotBlank(department))
-                uri.append("&department=").append(department);
+        if (StringUtils.isNotBlank(documentType))
+            uri.append("&documentType=").append(documentType);
+
+        if (StringUtils.isNotBlank(department))
+            uri.append("&department=").append(department);
 
 
-            HttpGet get = new HttpGet(uri.toString());
-            get.setHeader(HttpHeaders.ACCEPT, "application/json");
-            CloseableHttpResponse response = client.execute(get);
-            try {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-                HttpEntity resEntity = response.getEntity();
-                if (response.getStatusLine().getStatusCode() == 200 && resEntity != null) {
-                    JSONArray endpoints = new JSONArray(EntityUtils.toString(resEntity));
-                    if (endpoints.length() > 0) {
+        ResponseEntity<String> response = directoryServerClient.getForEntity(uri.toString(),
+                String.class, new HttpEntity<String>(headers));
 
-                        if (endpoints.length() != 1) {
-                            throw new RuntimeException("More than one endpoint was found that fits the given criteria.");
-                        }
-                        endpointURI = endpoints.getJSONObject(0).getString("address");
-                        log.debug(endpoints.toString(3));
-                    }
+        if (response.getStatusCodeValue() == 200 ) {
+            JSONArray endpoints = new JSONArray(response.getBody());
+            if (endpoints.length() > 0) {
+
+                if (endpoints.length() != 1) {
+                    throw new RuntimeException("More than one endpoint was found that fits the given criteria.");
                 }
-                EntityUtils.consume(resEntity);
-            }
-            finally {
-                response.close();
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                client.close();
-            }
-            catch (IOException e) {
-
+                endpointURI = endpoints.getJSONObject(0).getString("address");
+                log.debug(endpoints.toString(3));
             }
         }
+
         return endpointURI;
     }
 
