@@ -79,25 +79,32 @@ public class OrganizationService {
 
     private JSONObject getOrganization(Integer organizationId, String schoolCode, String schoolCodeType){
         JSONObject organization = null;
-        StringBuilder uri = new StringBuilder(directoryServer + organizationApiPath);
-        if(organizationId!=null) {
-            uri.append("?id=").append(organizationId);
-        }
-        if(schoolCode!=null && schoolCodeType!=null){
-            uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
-        }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-        ResponseEntity<String> response = directoryServerClient.getForEntity(uri.toString(),
-                String.class, new HttpEntity<String>(headers));
-
-        if (response.getStatusCodeValue() == 200 ) {
-            JSONArray organizations = new JSONArray(response.getBody());
-            if (organizations.length() == 1) {
-                organization = organizations.getJSONObject(0);
+        try {
+            StringBuilder uri = new StringBuilder(directoryServer + organizationApiPath);
+            if(organizationId!=null) {
+                uri.append("?id=").append(organizationId);
             }
+            if(schoolCode!=null && schoolCodeType!=null){
+                uri.append("?organizationCodeType=").append(schoolCodeType).append("&organizationCode=").append(schoolCode);
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+            ResponseEntity<String> response = directoryServerClient.getForEntity(uri.toString(),
+                    String.class, new HttpEntity<String>(headers));
+
+            if (response.getStatusCodeValue() == 200 ) {
+                JSONArray organizations = new JSONArray(response.getBody());
+                if (organizations.length() == 1) {
+                    organization = organizations.getJSONObject(0);
+                }
+            }
+
+        }
+        catch (Exception e) {
+            log.warn("Failed to retrieve organization entity from the directory server.", e);
         }
 
         return organization;

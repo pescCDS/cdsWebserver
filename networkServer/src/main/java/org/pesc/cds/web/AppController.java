@@ -235,22 +235,24 @@ public class AppController {
         return "fragments :: transactions";
     }
 
-
-    @RequestMapping("/upload")
-    public String getTransfersPage(Model model) {
-
-        buildCommonModel(model);
-        //If Institution, use OrgId.  Otherwise need to ask and look up Source Institution Info.
-        //OrgId known, Source Institution (if applicable) not known.
-
+    private JSONObject getOrganization() {
         if (organization == null) {
             organization = organizationService.getOrganization(Integer.valueOf(localServerId));
         }
 
         if (organization == null) {
             throw new IllegalStateException("Failed to retrieve organization info from directory for network server ID " + localServerId );
-
         }
+
+        return organization;
+    }
+
+    @RequestMapping("/upload")
+    public String getTransfersPage(Model model) {
+
+        buildCommonModel(model);
+
+        getOrganization();
 
         boolean institution = organizationService.isInstitution(organization);
         model.addAttribute("institution", institution);
