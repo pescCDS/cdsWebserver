@@ -138,7 +138,11 @@ public class MessageService {
             Predicate[] predicates = createPredicates(cb,
                     countRoot,orgID,topic,content,createdTime, actionRequired);
 
-            countQuery.orderBy(cb.desc(countRoot.get("createdTime")));
+            //countQuery.orderBy(cb.desc(countRoot.get("createdTime"))).groupBy(countRoot.get("createdTime"));
+
+            countQuery.orderBy(cb.desc(countRoot.get("createdTime").as(java.sql.Date.class)));
+            countQuery.groupBy(countRoot.get("createdTime").as(java.sql.Date.class));
+            countQuery.groupBy(countRoot.get("id"));
 
             countQuery.where(predicates);
 
@@ -174,7 +178,12 @@ public class MessageService {
             Predicate[] predicates = createPredicates(cb,
                     root, orgID,topic,content,createdTime,actionRequired);
 
-            cq.orderBy(cb.desc(root.get("createdTime")));
+            //cq.orderBy(cb.desc(root.get("createdTime"))).groupBy(root.get("createdTime"));
+
+            cq.orderBy(cb.desc(root.get("createdTime").as(java.sql.Date.class)));
+            cq.groupBy(root.get("createdTime").as(java.sql.Date.class));
+            cq.groupBy(root.get("id"));
+
 
             cq.where(predicates);
             TypedQuery<Message> q = entityManager.createQuery(cq);

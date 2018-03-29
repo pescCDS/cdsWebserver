@@ -72,6 +72,9 @@ public class OrganizationsResource {
     @Value("${api.base.uri}")
     private String baseURI;
 
+    @Value(("${pesc.org.id}"))
+    private Integer pescOrgId;
+
 
     @Autowired
     private EmailService emailService;
@@ -305,7 +308,7 @@ public class OrganizationsResource {
             info = organizationService.setSigningCertificate(id, pemCert);
            String message = String.format(SIGNING_CERTIFICATION_CHANGED_MESSAGE, emailService.getOrganizationURL() + id, id);
 
-            messageService.createMessage(MessageTopic.SIGNING_CERTIFICATE_CHANGED.name(), message, true,1, null );
+            messageService.createMessage(MessageTopic.SIGNING_CERTIFICATE_CHANGED.name(), message, true,pescOrgId, null );
 
             emailService.sendEmailToSysAdmins(MessageTopic.SIGNING_CERTIFICATE_CHANGED.name(), message);
 
@@ -330,7 +333,7 @@ public class OrganizationsResource {
             String message = String.format(NETWORK_CERTFICATE_CHANGED_MESSAGE, emailService.getOrganizationURL() + id, id);
 
             messageService.createMessage(MessageTopic.NETWORK_CERTIFICATE_CHANGED.name(),
-                    message, true,1, null );
+                    message, true,pescOrgId, null );
 
             emailService.sendEmailToSysAdmins(MessageTopic.NETWORK_CERTIFICATE_CHANGED.name(),message);
             return info;

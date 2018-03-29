@@ -53,6 +53,8 @@ public class AppController {
     @Value("${rest.api.host}")
     private String restAPIHost;
 
+    @Value(("${pesc.org.id}"))
+    private Integer pescOrgId;
 
     @Autowired
     private RegistrationService registrationService;
@@ -240,7 +242,7 @@ public class AppController {
 
         mailService.sendEmailToSysAdmins(MessageTopic.REGISTRATION.getFriendlyName(), content);
 
-        Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,1, null );
+        Message regMessage = messageService.createMessage(MessageTopic.REGISTRATION.name(), content, true,pescOrgId, null );
 
         return regMessage;
 
