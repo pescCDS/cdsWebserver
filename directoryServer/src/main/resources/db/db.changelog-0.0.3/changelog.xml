@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="James Whetstone" context="dev, ci, prod">
+        <comment>This changeset is to create the users, school codes and institutions tables</comment>
+
+        <createTable tableName="users">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="username" type="varchar(128)">
+                <constraints unique="true" nullable="false"
+                             uniqueConstraintName="users_usename_unique"/>
+            </column>
+            <column name="password" type="varchar(128)">
+                <constraints nullable="false" />
+            </column>
+            <column name="organization_id" type="INT" remarks="Foriegn key to the organization table">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_user_organization"/>
+            </column>
+            <column name="name" type="varchar(60)" remarks="First and last name.">
+                <constraints nullable="true"/>
+            </column>
+            <column name="title" type="varchar(32)" remarks="Professional title within the organization.">
+            </column>
+            <column name="address" type="varchar(255)" remarks="Full address.">
+            </column>
+            <column name="created_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Created Time.">
+                <constraints nullable="true" />
+            </column>
+            <column name="modified_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Last Updated Time.">
+                <constraints nullable="true" />
+            </column>
+            <column name="telephone" type="varchar(32)">
+            </column>
+            <column name="email" type="varchar(128)">
+            </column>
+            <column name="enabled" type="boolean" defaultValueBoolean="true" remarks="Indicates whether the the account is enabled.">
+                <constraints nullable="false" />
+            </column>
+
+        </createTable>
+
+
+        <createTable tableName="roles">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(45)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="users_roles">
+            <column name="users_id" type="INT">
+                <constraints nullable="false" references="users(id)" foreignKeyName="fk_users"/>
+            </column>
+            <column name="roles_id" type="INT">
+                <constraints nullable="false" references="roles(id)" foreignKeyName="fk_roles"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="users_id, roles_id"
+                       constraintName="pk_user_roles_ids"
+                       tableName="users_roles"/>
+
+        <createTable tableName="school_codes">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="code" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code_type" type="varchar(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="INT" remarks="Foriegn key to the organization table">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_school_codes_organization"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="unique_code_per_school_schoolcodes"
+                     tableName="school_codes"
+                     unique="true">
+            <column name="code_type" type="varchar(15)"/>
+            <column name="organization_id" type="INT"/>
+        </createIndex>
+
+        <createIndex indexName="unique_code_pair"
+                     tableName="school_codes"
+                     unique="true">
+            <column name="code_type" type="varchar(15)"/>
+            <column name="code" type="varchar(32)"/>
+        </createIndex>
+
+        <insert tableName="school_codes">
+            <column name="code" value="008073"/>
+            <column name="code_type" value="FICE"/>
+            <column name="organization_id" value="2"/>
+        </insert>
+
+        <insert tableName="school_codes">
+            <column name="code" value="004226"/>
+            <column name="code_type" value="ATP"/>
+            <column name="organization_id" value="2"/>
+        </insert>
+
+        <insert tableName="school_codes">
+            <column name="code" value="0165"/>
+            <column name="code_type" value="ACT"/>
+            <column name="organization_id" value="2"/>
+        </insert>
+
+        <insert tableName="school_codes">
+            <column name="code" value="110246"/>
+            <column name="code_type" value="IPEDS"/>
+            <column name="organization_id" value="2"/>
+        </insert>
+
+        <insert tableName="school_codes">
+            <column name="code" value="04614160451153"/>
+            <column name="code_type" value="CDS"/>
+            <column name="organization_id" value="2"/>
+        </insert>
+
+        <createTable tableName="institutions_service_providers">
+            <column name="institution_id" type="INT">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_institution_service_provider"/>
+            </column>
+            <column name="service_provider_id" type="INT">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_service_provider_institution"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="institution_id, service_provider_id"
+                       constraintName="pk_institution_service_providers_ids"
+                       tableName="institutions_service_providers"/>
+
+
+        <createTable tableName="messages">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="organization_id" type="INT" remarks="Foriegn key to the organization table">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_message_organization"/>
+            </column>
+            <column name="user_id" type="INT" remarks="Foreign key to the user table.  May be null if the message is not intended for a specific user.">
+                <constraints references="users (id)" foreignKeyName="fk_message_users"/>
+            </column>
+            <column name="content" type="varchar(4096)" remarks="The content of the message."/>
+            <column name="topic" type="varchar(32)" remarks="The topic of the message."/>
+            <column name="created_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Created Time.">
+                <constraints nullable="true" />
+            </column>
+            <column name="dismissed" type="boolean" defaultValueBoolean="true" remarks="Indicates whether the message has been dismissed by a user.">
+                <constraints nullable="false" />
+            </column>
+            <column name="action_required" type="boolean" defaultValueBoolean="true" remarks="Indicates whether the message indicates if some action must be performed by the user.">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="institution_uploads">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="organization_id" type="INT" remarks="Foriegn key to the organization table. The organization whose user uploaded the file">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_institution_uploads_organization"/>
+            </column>
+            <column name="user_id" type="INT" remarks="Foriegn key to the user table. The user that uploaded the file.">
+                <constraints nullable="false" references="users (id)" foreignKeyName="fk_institution_uploads_users"/>
+            </column>
+            <column name="created_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Created Time.">
+                <constraints nullable="true" />
+            </column>
+            <column name="start_time" type="TIMESTAMP" remarks="When the file processing started"/>
+            <column name="end_time" type="TIMESTAMP" remarks="When the file finished processing"/>
+            <column name="input_path" type="varchar(256)" remarks="The file path to the uploaded file."/>
+        </createTable>
+
+        <createTable tableName="institution_upload_results">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="organization_id" type="INT" remarks="Foriegn key to the organization table. The organization whose institution upload was processed.">
+                <constraints nullable="false" references="organization (id)" foreignKeyName="fk_institution_upload_results_organization"/>
+            </column>
+            <column name="institution_upload_id" type="INT" remarks="Foriegn key to the institution_uploads table.">
+                <constraints nullable="false" references="institution_uploads (id)" foreignKeyName="fk_institution_upload_results_institution_uploads"/>
+            </column>
+            <column name="created_time" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Created Time.">
+                <constraints nullable="true" />
+            </column>
+            <column name="line_number" type="INT" remarks="The line number from the CSV file used to create the institution."/>
+            <column name="outcome" type="varchar(15)" remarks="The content of the message.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="institution_id" type="INT" remarks="Foreign key to the organization table referenced the institution."/>
+            <column name="institution_name" type="varchar(128)" remarks="Denormalized name of the institution/organization for easy reference."/>
+            <column name="message" type="varchar(1024)" remarks="A short description of the result."/>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="2" author="prabhu">
+        <comment>
+            This change set adds a default super user to the users and roles..
+        </comment>
+        <sqlFile encoding="utf8" path="2-default-users.sql" relativeToChangelogFile="true" />
+    </changeSet>
+
+</databaseChangeLog>

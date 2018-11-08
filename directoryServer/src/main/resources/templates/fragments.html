@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>An Error Occurred</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div th:fragment="change-password">
+    <div>
+        <label><b>Password:</b></label>
+        <input type="password" placeholder="Password" ng-model="userCtrl.newPassword"
+               style="min-width: 375px;"> </input>
+
+        <label><b>Confirm Password:</b></label>
+        <input type="password" placeholder="Password" ng-model="userCtrl.confirmPassword"
+               style="min-width: 375px;"> </input>
+    </div>
+</div>
+
+<div th:fragment="user">
+
+    <form name="userForm" ng-submit="userForm.$valid && usersCtrl.save(user)" novalidate="novalidate" class="glow" aria-label="Create user form.">
+        <div class="sub-nav">
+            <div class="inner-margin7">
+                <div ng-show="!usersCtrl.showForm(user)">
+
+                    <h1><a ng-href="#user/{{user.id}}">{{user.name}}</a></h1>
+
+                    <div>
+                        <label><b>Title:</b></label>
+                        <span>{{user.title}}</span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                        <span>{{user.address}}</span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                        <span>{{user.phone}}</span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                        <span>{{user.email}}</span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                            <span ng-repeat="role in user.roles | orderBy:'name'">
+                                <span>{{role.name  | friendlyRoleName}}{{$last ? '' : ', '}}</span>
+                            </span>
+                    </div>
+
+                </div>
+
+                <div ng-show="usersCtrl.showForm(user)">
+                    <h1>
+                        <input type="text" placeholder="Name" required="required" ng-model="user.name"> </input>
+                    </h1>
+
+                    <div>
+                        <label><b>Title:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Title" ng-model="user.title"> </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Address" ng-model="user.address"
+                                        style="min-width: 375px;"> </input>
+                            </span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="user.phone"> </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                            <span>
+                                 <input type="email" placeholder="Email" ng-model="user.email"
+                                        style="min-width: 375px;"> </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                              <span ng-repeat="role in usersCtrl.roles">
+                           <span class="checkbox-inline"> <input
+                                   type="checkbox"
+                                   ng-checked="usersCtrl.hasRole(user, role)"
+                                   ng-disabled="usersCtrl.isRoleDisabled(role)"
+                                   name="roles"
+                                   ng-click="usersCtrl.updateRole($event, role, user)"> {{role.name | friendlyRoleName}} </span>
+                        </span>
+                    </div>
+                    <div ng-show="usersCtrl.isNewAccount(user)">
+                        <div>
+                            <label><b>Username:</b></label>
+                            <input type="text" placeholder="Username" ng-model="user.username"
+                                   style="min-width: 375px;"> </input>
+
+                        </div>
+                        <div>
+                            <label><b>Password:</b></label>
+                            <input type="password" placeholder="Password" ng-model="user.password"
+                                   style="min-width: 375px;"> </input>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${hasOrgAdminRole}" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!usersCtrl.showForm(user)" type="button" class="btn btn-default"
+                            ng-click="usersCtrl.edit(user)">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="usersCtrl.showForm(user)" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus"
+                            popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+<div th:fragment="contact">
+    <div class="well">
+
+        <form name="contactForm" ng-submit="contactForm.$valid && orgCtrl.saveContact(contact)" novalidate="novalidate"
+              class="glow" aria-label="Create contact form.">
+            <div class="sub-nav">
+                <div class="inner-margin7">
+                    <div ng-show="!orgCtrl.showContactForm(contact)">
+
+                        <h4>{{contact.name}}</h4>
+
+                        <div>
+                            <label><b>Title:</b></label>
+                            <span>{{contact.title}}</span>
+                        </div>
+                        <div>
+                            <label><b>Address:</b></label>
+                            <span>{{contact.address}}</span>
+                        </div>
+
+                        <div>
+                            <label><b>Phone:</b></label>
+                            <span>{{contact.phone1}}</span>
+                        </div>
+                        <div>
+                            <label><b>Alternate Phone:</b></label>
+                            <span>{{contact.phone2}}</span>
+                        </div>
+                        <div>
+                            <label><b>Email:</b></label>
+                            <span>{{contact.email}}</span>
+                        </div>
+                    </div>
+
+                    <div ng-show="orgCtrl.showContactForm(contact)">
+                        <h4>
+                            <input type="text" placeholder="Name" required="required" ng-model="contact.name"> </input>
+                        </h4>
+
+                        <div>
+                            <label><b>Title:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Title" ng-model="contact.title"> </input>
+                            </span>
+                        </div>
+                        <div>
+                            <label><b>Address:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Address" ng-model="contact.address"
+                                        style="min-width: 375px;"> </input>
+                            </span>
+                        </div>
+
+                        <div>
+                            <label><b>Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="contact.phone1"> </input>
+                            </span>
+                        </div>
+                        <div>
+                            <label><b>Alternate Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="contact.phone2"> </input>
+                            </span>
+                        </div>
+                        <div>
+                            <label><b>Email:</b></label>
+                            <span>
+                                 <input type="email" placeholder="Email" ng-model="contact.email"
+                                        style="min-width: 375px;"> </input>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${hasOrgAdminRole}" style="float: right;">
+                    <div class="btn-group">
+                        <button ng-show="!orgCtrl.showContactForm(contact)" type="button" class="btn btn-default"
+                                ng-click="orgCtrl.editContact(contact)">
+                            <span class="glyphicon glyphicon-pencil"></span> Edit
+                        </button>
+                        <button ng-show="orgCtrl.showContactForm(contact)" type="submit" class="btn btn-default">
+                            <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                        </button>
+                        <button type="button" uib-popover-template="'delete-contact.html'" popover-trigger="focus"
+                                popover-placement="right" class="btn btn-default">
+                            <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div th:fragment="user-details">
+    <form name="userForm" ng-submit="userForm.$valid && userCtrl.save()" novalidate="novalidate" class="glow">
+        <div class="sub-nav" aria-label="Update user form.">
+            <div class="inner-margin7">
+                <div ng-show="!userCtrl.showForm()">
+
+                    <h1>{{userCtrl.user.name}}</h1>
+
+                    <div>
+                        <label><b>Title:</b></label>
+                        <span>{{userCtrl.user.title}}</span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                        <span>{{userCtrl.user.address}}</span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                        <span>{{userCtrl.user.phone}}</span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                        <span>{{userCtrl.user.email}}</span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                            <span ng-repeat="role in userCtrl.user.roles | orderBy:'name'">
+                                <span>{{role.name  | friendlyRoleName}}{{$last ? '' : ', '}}</span>
+                            </span>
+                    </div>
+
+                </div>
+
+                <div ng-show="userCtrl.showForm()">
+                    <h1>
+                        <input type="text" placeholder="Name" required="required"
+                               ng-model="userCtrl.user.name"> </input>
+                    </h1>
+
+                    <div>
+                        <label><b>Title:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Title" ng-model="userCtrl.user.title"> </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Address:</b></label>
+                            <span>
+                                 <input type="text" placeholder="Address" ng-model="userCtrl.user.address"
+                                        style="min-width: 375px;"> </input>
+                            </span>
+                    </div>
+
+                    <div>
+                        <label><b>Phone:</b></label>
+                            <span>
+                                 <input type="tel" placeholder="Phone" ng-model="userCtrl.user.phone"> </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Email:</b></label>
+                            <span>
+                                 <input type="email" placeholder="Email" ng-model="userCtrl.user.email"
+                                        style="min-width: 375px;"> </input>
+                            </span>
+                    </div>
+                    <div>
+                        <label><b>Roles:</b></label>
+                              <span ng-repeat="role in userCtrl.roles">
+                           <span class="checkbox-inline"> <input
+                                   type="checkbox"
+                                   ng-checked="userCtrl.hasRole(role)"
+                                   ng-disabled="userCtrl.isRoleDisabled(role)"
+                                   name="roles"
+                                   ng-click="userCtrl.updateRole($event, role)"> {{role.name | friendlyRoleName}} </span>
+                        </span>
+                    </div>
+                    <div ng-show="userCtrl.isNewAccount()">
+                        <div>
+                            <label><b>Username:</b></label>
+                            <input type="text" placeholder="Username" ng-model="userCtrl.user.username"
+                                   style="min-width: 375px;"> </input>
+
+                        </div>
+                        <div>
+                            <label><b>Password:</b></label>
+                            <input type="password" placeholder="Password" ng-model="userCtrl.user.password"
+                                   style="min-width: 375px;"> </input>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${hasOrgAdminRole}" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!userCtrl.showForm()" type="button" class="btn btn-default"
+                            ng-click="userCtrl.edit()">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="userCtrl.showForm()" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-user.html'" popover-trigger="focus"
+                            popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="userCtrl.showPasswordForm = true">
+                        <span class="glyphicon glyphicon-edit"></span> Change Password
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+    <div ng-show="userCtrl.showPasswordForm == true" style="width: 300px; padding: 20px 0 20px 0;">
+        <label>
+            <b>Password:</b>
+            <input type="password" placeholder="Password" ng-model="userCtrl.newPassword" class="form-control"
+                   style="min-width: 375px;"> </input>
+        </label>
+        <label>
+            <b>Confirm Password:</b>
+            <input type="password" placeholder="Password" ng-model="userCtrl.confirmPassword" class="form-control"
+                   style="min-width: 375px;"> </input>
+        </label>
+
+        <button type="button" style="margin-top: 20px;" class="btn btn-primary" ng-click="userCtrl.updatePassword()">
+            Update
+        </button>
+
+    </div>
+
+
+</div>
+
+<div th:fragment="settings">
+    <div>
+        <uib-tabset active="active">
+            <uib-tab index="0" heading="Delivery Methods" select="settingsCtrl.getDeliveryMethods()">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('delivery-methods')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+
+                </div>
+
+                <div ng-repeat="obj in settingsCtrl.deliveryMethods | orderBy:'name'">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <form name="deliveryMethodForm"
+                                  ng-submit="deliveryMethodForm.$valid && settingsCtrl.save('delivery-methods', obj)"
+                                  novalidate="novalidate" class="glow" aria-label="Delivery method form.">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('delivery-methods', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default"
+                                            ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"
+                                               ng-class="{ 'error' : obj.name == '' }"/></h3>
+                                    <textarea ng-maxlength="1023" style="width: 80%; padding: 10px;"
+                                              ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+
+                                    <p>{{obj.description}}</p>
+                                </div>
+
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </uib-tab>
+            <uib-tab index="$index + 1" heading="Document Formats" select="settingsCtrl.getDocumentFormats()">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('document-formats')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+
+                </div>
+
+                <div ng-repeat="obj in settingsCtrl.documentFormats | orderBy:'name'">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <form name="documentFormatForm"
+                                  ng-submit="documentFormatForm.$valid && settingsCtrl.save('document-formats', obj)"
+                                  novalidate="novalidate" class="glow" aria-label="Document format form.">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('document-formats', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default"
+                                            ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"
+                                               ng-class="{ 'error' : obj.name == '' }"/></h3>
+                                    <textarea ng-maxlength="1023" style="width: 80%; padding: 10px;"
+                                              ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+
+                                    <p>{{obj.description}}</p>
+                                </div>
+                            </form>
+
+
+                        </li>
+                    </ul>
+                </div>
+            </uib-tab>
+            <uib-tab index="$index + 2" heading="Document Types" select="settingsCtrl.getDocumentTypes()">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('document-types')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+
+                </div>
+
+
+                <div ng-repeat="obj in settingsCtrl.documentTypes | orderBy:'name'">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <form name="departmentForm"
+                                  ng-submit="departmentForm.$valid && settingsCtrl.save('document-types', obj)"
+                                  novalidate="novalidate" class="glow" aria-label="Department form.">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('document-types', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default"
+                                            ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"
+                                               ng-class="{ 'error' : obj.name == '' }"/></h3>
+                                    <textarea ng-maxlength="1023" style="width: 80%; padding: 10px;"
+                                              ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+
+                                    <p>{{obj.description}}</p>
+                                </div>
+                            </form>
+
+
+                        </li>
+                    </ul>
+                </div>
+            </uib-tab>
+            <uib-tab index="$index + 3" heading="Departments" select="settingsCtrl.getDepartments()">
+
+                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 20px;">
+                    <button type="button" class="btn btn-primary" ng-click="settingsCtrl.create('departments')">
+                        <span class="glyphicon glyphicon-plus"></span> Create
+                    </button>
+
+                </div>
+
+                <div ng-repeat="obj in settingsCtrl.departments | orderBy:'name'">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <form name="departmentForm"
+                                  ng-submit="departmentForm.$valid && settingsCtrl.save('departments', obj)"
+                                  novalidate="novalidate" class="glow" aria-label="Department form.">
+                                <div th:if="${hasSystemAdminRole}" class="btn-group" style="padding-bottom: 10px;">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="settingsCtrl.deleteObject('departments', obj)">
+                                        <span class="glyphicon glyphicon-remove"></span> Remove
+                                    </button>
+                                    <button ng-show="!settingsCtrl.showForm(obj)" type="button" class="btn btn-default"
+                                            ng-click="obj.editing = true">
+                                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                                    </button>
+
+                                    <button ng-show="settingsCtrl.showForm(obj)" type="submit" class="btn btn-default">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                                    </button>
+
+                                </div>
+
+                                <div ng-show="settingsCtrl.showForm(obj) == true">
+                                    <h3><input required="required" type="text" ng-model="obj.name"
+                                               ng-class="{ 'error' : obj.name == '' }"/></h3>
+                                    <textarea ng-maxlength="1023" style="width: 80%; padding: 10px;"
+                                              ng-model="obj.description"></textarea>
+                                </div>
+                                <div ng-show="settingsCtrl.showForm(obj) == false">
+                                    <h3>{{obj.name}}</h3>
+
+                                    <p>{{obj.description}}</p>
+                                </div>
+
+                            </form>
+
+                        </li>
+                    </ul>
+                </div>
+            </uib-tab>
+
+        </uib-tabset>
+
+    </div>
+</div>
+
+<div th:fragment="about">
+    <div>
+
+        <!-- Marketing Icons Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">
+                    <a href="http://www.pesc.org/interior.php?page_id=217">EdExchange by the Common Data Services (CDS)
+                        Task Force</a>
+                </h1>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b><i class="fa fa-fw fa-check"></i>What is EdExchange?</b>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            EdExchange is a way for your college to exchange transcripts in a secure, standardized way
+                            with any other college in the EdExchange network.
+                        </p>
+
+                        <p></p>
+
+                        <p>
+                            Before EdExchange, there was no consistent way for colleges to request and exchange
+                            documents with each other. Service provider exchange networks operated in isolation from one
+                            another and any available legacy exchange platforms were built on old standards without
+                            delivery confirmation.
+                        </p>
+
+                        <p><a href="#directory">See who's using EdExchange now. </a></p>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b><i class="fa fa-fw fa-gift"></i> Free &amp; Open Source</b>
+                    </div>
+                    <div class="panel-body">
+                        <p>The EdExchange software is open source so you can extend and configure it as needed. Using
+                            our reference directory and network server code as a base, you can send and receive
+                            documents for free. To receive documents you'll also need to host a network server. Use the
+                            reference network server app, create your own custom app, or integrate EdExchange with an
+                            existing app at your institution.</p>
+
+                        <p><a href="documentation#network-server">Learn more about the reference implementation of the network server.</a></p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b><i class="fa fa-fw fa-compass"></i> Easy to Use</b>
+                    </div>
+                    <div class="panel-body">
+                        <p>After your developer staff implements your EdExchange interface, sending a transcript to a
+                            college in the EdExchange network is as easy as entering the receiving school information,
+                            uploading the transcript, and clicking Send.</p>
+
+                        <p></p>
+
+                        <p>What you won’t have to do? Wonder whether or not the transcript was received or worry
+                            about file format or data security.</p>
+
+                        <p><a href="documentation#faq">Read the frequently asked questions here.</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-header">How it Works</h2>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>1. Register</b>
+                    </div>
+                    <div class="panel-body">
+                        Only members of the EdExchange network can send and receive documents over the network. To
+                        become
+                        a member, fill out the <a href="home#/registration-form">registration form</a> choosing
+                        "Institution" or "Service Provider".
+
+                        <p>After completing your registration form you can: login, configure your organization's
+                            details, set up users, and get your developer started testing and customizing the code for
+                            sending and/or receiving documents. Once PESC reviews and approves your organization you can
+                            begin sending and receiving documents on the EdExchange network.</p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>2. Configure & Develop</b>
+                    </div>
+                    <div class="panel-body">
+                        <p>EdExchange member organizations can be configured to send documents, receive documents, or
+                            both. In either case, a developer at your organization can use the <a
+                                    href="/documentation#network-server">free reference implementation</a> of the
+                            Network Server in the <a href="https://github.com/owenwe/cdsWebserver/tree/master">open
+                                source project</a> (includes a reference directory server for testing) to get you
+                            started. If you choose to only send documents, you will <a
+                                    href="/documentation#certificate">publish an SSL signing certificate</a> to the
+                            Directory Server and use an EdExchange service provider to receive documents on your behalf.
+                        </p>
+
+                        <p><span style="font-weight: bolder;"></p>
+
+                        <p><span style="font-weight: bolder;">To receive documents</span>, your organization must deploy
+                            an EdExchange Network Server on the internet using a domain name of your choice and secure
+                            it using a valid SSL certificate. On the Directory Server, you will publish the network SSL
+                            certificate and the <a href="/documentation#endpoints">endpoint</a> (the URL used to receive
+                            documents). HTTPS is required for URLs that are used to receive documents.</p>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>3. Send a Document</b>
+                    </div>
+                    <div class="panel-body">
+
+                        <p>The code for sending a document is implemented in the free <a
+                                href="/documentation#network-server">reference implementation</a> of the Network Server
+                            in the <a href="https://github.com/owenwe/cdsWebserver/tree/master">open source project</a>.
+                            Your developer will use this code to set your organization up for sending documents.</p>
+
+                        <p>First, the sender obtains the published URL for the receiver, based on attributes of the
+                            document and the intended recipient, from the EdExchange directory server.</p>
+
+                        <p>Next, the sender must <a href="/documentation#sign-document">generate a digital signature</a>
+                            for the document.</p>
+
+                        <p>Next, create a transaction about the document for reporting purposes.</p>
+
+                        <p><a href="/documentation#send-document">Send the document</a> and digital signature to the
+                            receiving URL along with the directory ID of the sender and the recipient, and optionally
+                            with a transaction ID and acknowledgment URL.</p>
+
+                        <p>Update the transaction with information about the delivery provided by the receiving
+                            Network Server.</p>
+
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>4. Receive a Document</b>
+                    </div>
+                    <div class="panel-body">
+                        <p>The code for receiving a document is implemented in the free <a
+                                href="/documentation#network-server">reference implementation</a> of the Network Server
+                            in the <a href="https://github.com/owenwe/cdsWebserver/tree/master">open source project</a>.
+                            Your developer will use this code to set your organization up for receiving documents.</p>
+
+                        <p>When a document and it's digital signature are received by the the receiver's hosted Network
+                            Server over the published <a href="/documentation#endpoints">endpoint</a>, the Network
+                            Server creates a transaction about the document for reporting purposes.</p>
+
+                        <p>The Network Server then <a href="/documentation#verify-signature">verifies the document's
+                            digital signature</a> by obtaining the sender's published SSL certificate from the
+                            EdExchange Directory Server.</p>
+
+                        <p>Once the document's signature is verified, the Network Server delivers the document to the
+                            recipient and sends an acknowledgement back to the sender, with the sender's transaction ID,
+                            to indicate that the document has been delivered.</p>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-header">EdExchange Features</h2>
+            </div>
+            <div class="col-md-6">
+                <p>EdExchange project features:</p>
+                <ul class="list-unstyled">
+                    <li>
+                        <strong>Open Source</strong>
+                    </li>
+                    <li>Directory Server</li>
+                    <li>Network Server</li>
+                    <li>Exchange any type of document with member organizations.</li>
+                </ul>
+                <p>Both SOAP web services and REST can be used to access the EdExchange API.</p>
+            </div>
+        </div>
+        <!-- /.row -->
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>EdExchange by the Common Data Services (CDS) Task Force</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+</div>
+<div th:fragment="endpoint">
+    <div class="well" ng-controller="EndpointController as endpointCtrl">
+
+        <form name="endpointForm" ng-submit="endpointForm.$valid && endpointCtrl.save(endpoint)" novalidate="novalidate"
+              class="glow" aria-label="Endpoint form.">
+
+            <div ng-show="orgCtrl.isEditableByUser() && orgCtrl.hostedBy(endpoint)" style="float: right;">
+                <div class="btn-group">
+                    <button ng-show="!endpointCtrl.showForm(endpoint)" type="button" class="btn btn-default"
+                            ng-click="endpointCtrl.edit(endpoint)">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="endpointCtrl.showForm(endpoint)" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-endpoint.html'" popover-trigger="focus"
+                            popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+            <div ng-show="endpointCtrl.showForm(endpoint)">
+                <div style="width: 80%;">
+                    <b>
+                        <input class="form-control" type="text" placeholder="Address" required="required"
+                               ng-model="endpoint.address"> </input>
+                    </b>
+
+                    <p class="help-block">multipart/form-data</p>
+
+                    <p>
+                        <textarea class="form-control" type="text" placeholder="Description" required="required"
+                                  ng-minlength="10" ng-maxlength="1023" style="width: 80%; padding: 10px;"
+                                  ng-model="endpoint.instructions"> </textarea>
+                    </p>
+
+                    <div>
+                        <strong>Document Format</strong>
+
+                        <div>
+
+                            <select class="form-control" style="width: 160px;" required="required"
+                                    ng-model="endpoint.documentFormat"
+                                    ng-options="documentFormat.name for documentFormat in endpointCtrl.documentFormats track by documentFormat.id">
+
+                            </select>
+
+                            <p>
+                                {{endpoint.documentFormat.description}}
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Delivery Methods</strong>
+
+                        <div>
+                            <select class="form-control" style="width: 160px;" required="required"
+                                    ng-model="endpoint.deliveryMethod"
+                                    ng-options="deliveryMethod.name for deliveryMethod in endpointCtrl.deliveryMethods track by deliveryMethod.id">
+
+                            </select>
+
+                            <p>
+                                {{endpoint.deliveryMethod.description}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <strong>Document Types</strong>
+
+                        <div>
+                            <select class="form-control" style="width: 160px;" required="required"
+                                    ng-model="endpoint.documentType"
+                                    ng-options="documentType.name for documentType in endpointCtrl.documentTypes track by documentType.id">
+
+                            </select>
+
+                            <p>
+                                {{endpoint.documentType.description}}
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div>
+                        <strong>Departments</strong>
+
+                        <div>
+                            <select class="form-control" style="width: 160px;" required="required"
+                                    ng-model="endpoint.department"
+                                    ng-options="department.name for department in endpointCtrl.departments track by department.id">
+
+                            </select>
+
+                            <p>
+                                {{endpoint.department.description}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <strong>Mode</strong>
+
+                        <div>
+                            <select class="form-control" style="width: 160px;" required="required"
+                                    ng-model="endpoint.mode"
+                                    ng-options="mode for mode in endpointCtrl.modes">
+
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div style="margin-top: 15px;">
+                        <strong>Hosted By</strong>
+
+                        <p>
+                            <a ng-href="#organization/{{endpoint.organization.id}}">{{endpoint.organization.name}}</a>
+
+                        </p>
+                    </div>
+                    <div ng-show="orgCtrl.hostedBy(endpoint) == true">
+                        <strong>Used By</strong>
+
+                        <div ng-repeat="institution in endpoint.organizations">
+                            <a ng-show="institution.id != endpoint.organization.id"
+                               ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div ng-show="!endpointCtrl.showForm(endpoint)">
+                <b>{{endpoint.address}}</b>
+
+                <p class="help-block">multipart/form-data</p>
+
+                <p>{{endpoint.instructions}}</p>
+
+                <div><strong>Document Format</strong></div>
+
+
+                <h5>{{endpoint.documentFormat.name}}</h5>
+
+                <p>{{endpoint.documentFormat.description}}</p>
+
+
+                <div><strong>Delivery Method</strong></div>
+
+                <h5>{{endpoint.deliveryMethod.name}}</h5>
+
+                <p>{{endpoint.deliveryMethod.description}}</p>
+
+
+                <div><strong>Document Type</strong></div>
+
+                <h5>{{endpoint.documentType.name}}</h5>
+
+                <p>{{endpoint.documentType.description}}</p>
+
+
+                <div><strong>Department</strong></div>
+
+                <h5>{{endpoint.department.name}}</h5>
+
+                <p>{{endpoint.department.description}}</p>
+
+                <div><strong>Mode</strong></div>
+
+                <h5>{{endpoint.mode}}</h5>
+
+                <div>
+                    <strong>Hosted By</strong>
+
+                    <p>
+                        <a ng-href="#organization/{{endpoint.organization.id}}">{{endpoint.organization.name}}</a>
+
+                    </p>
+                </div>
+                <div ng-show="orgCtrl.hostedBy(endpoint) == true">
+                    <strong>Used By</strong>
+
+                    <div ng-repeat="institution in endpoint.organizations">
+                        <a ng-if="institution.id != endpoint.organization.id"
+                           ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<div th:fragment="endpoint-selector">
+    <div>
+        <h1 ng-show="!orgCtrl.showOrgForm()">{{endpointCtrl.institution.name}}</h1>
+
+        <p>Endpoints available from service providers.</p>
+
+        <div ng-repeat="endpoint in endpointCtrl.selectableEndpoints">
+            <div class="well">
+
+                <div style="float:right;">
+                    <button type="button" class="btn btn-default"
+                            ng-show="endpointCtrl.isAssignedToInstitution(endpoint) == false"
+                            ng-click="endpointCtrl.addEndpointToInstitution(endpoint)">
+                        <span class="glyphicon glyphicon-plus"></span> Add
+                    </button>
+
+                    <button type="button" class="btn btn-default"
+                            ng-show="endpointCtrl.isAssignedToInstitution(endpoint) == true"
+                            ng-click="endpointCtrl.removeEndpointToInstitution(endpoint)">
+                        <span class="glyphicon glyphicon-remove"></span> Remove
+                    </button>
+
+                </div>
+
+                <div>
+                    <b>{{endpoint.address}}</b>
+
+                    <p>{{endpoint.instructions}}</p>
+
+                    <div><strong>Document Format</strong></div>
+
+                    <h5>{{endpoint.documentFormat.name}}</h5>
+
+                    <p>{{endpoint.documentFormat.description}}</p>
+
+                    <div><strong>Document Type</strong></div>
+
+                    <h5>{{endpoint.documentType.name}}</h5>
+
+                    <p>{{endpoint.documentType.description}}</p>
+
+                    <div><strong>Delivery Method</strong></div>
+
+                    <h5>{{endpoint.deliveryMethod.name}}</h5>
+
+                    <p>{{endpoint.deliveryMethod.description}}</p>
+
+                    <div>
+                        <strong>Hosted By</strong>
+
+                        <p>
+                            <a ng-href="#organization/{{endpoint.organization.id}}">{{endpoint.organization.name}}</a>
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="school-code">
+    <div class="row">
+        <div ng-show="orgCtrl.editingSchoolCode(schoolCode) == false">
+            <div class="col-md-2">{{schoolCode.codeType}}</div>
+            <div class="col-md-2">{{schoolCode.code}}</div>
+
+            <div class="col-md-2" ng-show="orgCtrl.isEditableByUser()">
+                <button type="button" class="btn btn-default" ng-click="orgCtrl.editSchoolCode(schoolCode)">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-click="orgCtrl.removeSchoolCode(schoolCode, orgCtrl.org)">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                </button>
+            </div>
+        </div>
+        <div ng-show="orgCtrl.editingSchoolCode(schoolCode) == true">
+            <div class="col-md-2">
+                <select class="form-control" style="width: 110px;" required="required"
+                        ng-model="schoolCode.codeType">
+                    <option value=""></option>
+                    <option value="ACT">ACT</option>
+                    <option value="ATP">ATP</option>
+                    <option value="FICE">FICE</option>
+                    <option value="IPEDS">IPEDS</option>
+                    <option value="OPEID">OPEID</option>
+                    <option value="CEEB">CEEB</option>
+                    <option value="CDS">CDS</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input class="form-control" type="text" ng-model="schoolCode.code"/>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-default" ng-click="orgCtrl.saveSchoolCode(schoolCode)">
+                    <span class="glyphicon glyphicon-floppy-disk"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-click="orgCtrl.removeSchoolCode(schoolCode, orgCtrl.org)">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="organization-details">
+    <div>
+        <form name="orgForm" ng-submit="orgForm.$valid && orgCtrl.saveOrg()" novalidate="novalidate" class="glow" aria-label="Update or create organization form.">
+            <div ng-show="orgCtrl.isEditableByUser()" style="float: right;" aria-label="Update organization form.">
+                <div class="btn-group">
+                    <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default"
+                            ng-show="orgCtrl.org.enabled == false"
+                            ng-click="orgCtrl.setEnabled(true)">
+                        <span class="glyphicon glyphicon-plus"></span> Enable
+                    </button>
+
+                    <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default"
+                            ng-show="orgCtrl.org.enabled == true"
+                            ng-click="orgCtrl.setEnabled(false)">
+                        <span class="glyphicon glyphicon-remove"></span> Disable
+                    </button>
+
+                    <button ng-show="!orgCtrl.showOrgForm()" type="button" class="btn btn-default"
+                            ng-click="orgCtrl.editOrg()">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="orgCtrl.showOrgForm()" type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-org.html'" popover-trigger="focus"
+                            popover-placement="right" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+            <div class="inner-margin7">
+                <h1 ng-show="!orgCtrl.showOrgForm()">{{orgCtrl.org.name}}</h1>
+
+                <div ng-show="orgCtrl.showOrgForm()">
+                    <h1>
+                        <input type="text" placeholder="Name" required="required" ng-model="orgCtrl.org.name"> </input>
+                    </h1>
+                </div>
+
+                <div ng-show="!orgCtrl.showOrgForm()">
+                    <a ng-href="{{orgCtrl.org.website}}" target="_blank">Website</a>
+                </div>
+
+                <div ng-show="orgCtrl.showOrgForm()">
+                    <input type="url" placeholder="http://" required="required" ng-model="orgCtrl.org.website"> </input>
+                </div>
+                <div><strong>Address: </strong>
+                                            <span ng-show="!orgCtrl.showOrgForm()">
+                                                <span>{{orgCtrl.org.street}} </span>
+                                                <span>{{orgCtrl.org.city}} </span>
+                                                <span>{{orgCtrl.org.state}} </span>
+                                                <span>{{orgCtrl.org.zip}}</span>
+                                            </span>
+                                            <span ng-show="orgCtrl.showOrgForm()">
+
+                                                <span><input type="text" placeholder="Street" required="required"
+                                                             ng-model="orgCtrl.org.street"> </input> </span>
+                                                <span><input type="text" placeholder="City" required="required"
+                                                             ng-model="orgCtrl.org.city"> </input> </span>
+                                                <span>
+
+                                                <select ng-model="orgCtrl.org.state">
+                                                    <option value="AL">Alabama</option>
+                                                    <option value="AK">Alaska</option>
+                                                    <option value="AZ">Arizona</option>
+                                                    <option value="AR">Arkansas</option>
+                                                    <option value="CA">California</option>
+                                                    <option value="CO">Colorado</option>
+                                                    <option value="CT">Connecticut</option>
+                                                    <option value="DE">Delaware</option>
+                                                    <option value="DC">District Of Columbia</option>
+                                                    <option value="FL">Florida</option>
+                                                    <option value="GA">Georgia</option>
+                                                    <option value="HI">Hawaii</option>
+                                                    <option value="ID">Idaho</option>
+                                                    <option value="IL">Illinois</option>
+                                                    <option value="IN">Indiana</option>
+                                                    <option value="IA">Iowa</option>
+                                                    <option value="KS">Kansas</option>
+                                                    <option value="KY">Kentucky</option>
+                                                    <option value="LA">Louisiana</option>
+                                                    <option value="ME">Maine</option>
+                                                    <option value="MD">Maryland</option>
+                                                    <option value="MA">Massachusetts</option>
+                                                    <option value="MI">Michigan</option>
+                                                    <option value="MN">Minnesota</option>
+                                                    <option value="MS">Mississippi</option>
+                                                    <option value="MO">Missouri</option>
+                                                    <option value="MT">Montana</option>
+                                                    <option value="NE">Nebraska</option>
+                                                    <option value="NV">Nevada</option>
+                                                    <option value="NH">New Hampshire</option>
+                                                    <option value="NJ">New Jersey</option>
+                                                    <option value="NM">New Mexico</option>
+                                                    <option value="NY">New York</option>
+                                                    <option value="NC">North Carolina</option>
+                                                    <option value="ND">North Dakota</option>
+                                                    <option value="OH">Ohio</option>
+                                                    <option value="OK">Oklahoma</option>
+                                                    <option value="OR">Oregon</option>
+                                                    <option value="PA">Pennsylvania</option>
+                                                    <option value="RI">Rhode Island</option>
+                                                    <option value="SC">South Carolina</option>
+                                                    <option value="SD">South Dakota</option>
+                                                    <option value="TN">Tennessee</option>
+                                                    <option value="TX">Texas</option>
+                                                    <option value="UT">Utah</option>
+                                                    <option value="VT">Vermont</option>
+                                                    <option value="VA">Virginia</option>
+                                                    <option value="WA">Washington</option>
+                                                    <option value="WV">West Virginia</option>
+                                                    <option value="WI">Wisconsin</option>
+                                                    <option value="WY">Wyoming</option>
+                                                </select>
+
+                                                </span>
+                                                <span><input type="text" placeholder="Zip Code" required="required"
+                                                             ng-model="orgCtrl.org.zip"
+                                                             style="max-width: 80px;"> </input></span>
+
+                                            </span>
+                </div>
+
+                <div><strong>Phone: </strong>
+                    <span ng-show="!orgCtrl.showOrgForm()">{{orgCtrl.org.telephone}}</span>
+                                            <span ng-show="orgCtrl.showOrgForm()">
+                                                <input type="tel" placeholder="Telephone" required="required"
+                                                       ng-model="orgCtrl.org.telephone">
+                                            </span>
+                </div>
+
+                <div><strong>Type: </strong>
+                    <span ng-show="!orgCtrl.showOrgForm()">
+                        <span ng-repeat="type in orgCtrl.org.organizationTypes" class="ed-inline-box"><span>{{type.name}}{{$last ? '' : ', '}}</span></span>
+                     </span>
+
+                     <span ng-show="orgCtrl.showOrgForm()">
+
+                            <span ng-repeat="type in orgCtrl.organizationTypes">
+                                <span class="checkbox-inline"> <input
+                                        type="checkbox"
+                                        ng-checked="orgCtrl.hasOrgType(type)"
+                                        name="orgTypes"
+                                        ng-disabled="type.id == 1"
+                                        ng-click="orgCtrl.updateOrgType($event, type)"> {{type.name}} </span>
+                            </span>
+                     </span>
+                </div>
+                <div><strong>Enabled: </strong>{{orgCtrl.org.enabled | trueFalse}}</div>
+                <div><strong>Member Since: </strong>{{orgCtrl.org.createdTime | date:'MM/dd/yyyy'}}</div>
+                <div><strong>Directory ID: </strong>{{orgCtrl.org.id}}</div>
+
+            </div>
+        </form>
+
+        <div>
+
+            <div style="float:right;">
+                         <span ng-show="orgCtrl.isEditableByUser()">
+                                <span class="glyphicon glyphicon-plus ed-icon-btn"
+                                      ng-click="orgCtrl.createContact()"></span>
+                         </span>
+            </div>
+
+            <div class="ed-title">Contacts</div>
+
+                <span ng-repeat="contact in orgCtrl.org.contacts">
+                       <div th:include="::contact"></div>
+                </span>
+
+        </div>
+    </div>
+
+    <div ng-show="orgCtrl.isInstitution()==true">
+        <div ng-show="orgCtrl.isEditableByUser()" style="float: right;">
+
+            <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.addSchoolCode()"></span>
+
+        </div>
+
+        <div class="ed-title">School Codes</div>
+
+            <span ng-repeat="schoolCode in orgCtrl.org.schoolCodes" class="ed-inline-box">
+                   <div th:include="::school-code"></div>
+            </span>
+
+        <div>
+            <div style="float:right;" ng-show="orgCtrl.isEditableByUser()">
+
+                     <span ng-show="orgCtrl.showServiceProviderForm == false">
+                         <span class="glyphicon glyphicon-pencil ed-icon-btn" ng-click="orgCtrl.setShowServiceProviderForm(true)"></span>
+                     </span>
+                     <span ng-show="orgCtrl.showServiceProviderForm == true">
+                         <span class="glyphicon glyphicon-floppy-disk ed-icon-btn" ng-click="orgCtrl.setShowServiceProviderForm(false)"></span>
+                     </span>
+
+            </div>
+            <div class="ed-title">Service Providers</div>
+
+
+            <div ng-show="orgCtrl.showServiceProviderForm==false">
+                <div ng-repeat="provider in orgCtrl.selectedServiceProviders">
+
+                    <div>
+                        <a ng-href="#organization/{{provider.id}}">{{provider.name}}</a>
+                    </div>
+
+                </div>
+            </div>
+
+            <div ng-show="orgCtrl.showServiceProviderForm==true">
+                <div ng-repeat="provider in orgCtrl.serviceProviders" style="margin-top: 10px;">
+                    <div>
+                                <span class="checkbox-inline"> <input
+                                        type="checkbox"
+                                        ng-checked="orgCtrl.hasServiceProvider(provider)"
+                                        name="school"
+                                        ng-click="orgCtrl.updateSelectedServiceProviders($event, provider)"> <b>{{provider.name}}</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="orgCtrl.isEditableByUser()" id="oauthForm">
+        <form name="oauthSecretForm" ng-submit="oauthSecretForm.$valid && orgCtrl.setOAuthSecret()"
+              novalidate="novalidate" aria-label="Update OAuth secret form.">
+            <div style="float:right;">
+
+
+
+                    <span ng-show="orgCtrl.showOAuthForm == false" class="glyphicon glyphicon-pencil ed-icon-btn"
+                          ng-click="orgCtrl.toggleOAuthForm()"></span>
+
+
+                <button ng-show="orgCtrl.showOAuthForm == true" class="glyphicon glyphicon-floppy-disk ed-icon-btn"
+                        type="submit"></button>
+            </div>
+            <div class="ed-title">OAuth</div>
+
+
+            <div><label style="width: 70px;">Client ID: </label>{{orgCtrl.org.id}}</div>
+
+            <div class="form-inline" ng-show="orgCtrl.showOAuthForm == true">
+                <div class="form-group">
+                    <label style="width: 70px;">Secret: </label><input type="text"
+                                                                       ng-model="orgCtrl.oauthSecretReplacement"
+                                                                       placeholder="OAuth Secret" aria-label="OAuth secret"> </input>
+                </div>
+
+            </div>
+        </form>
+
+        <div ng-show="orgCtrl.showOAuthForm == false">
+            <div class="form-inline">
+                <div class="form-group">
+                    <label style="width: 70px;">Secret: </label>
+                    <input ng-show="orgCtrl.oauthSecret.length > 0" readonly type="password" value="***************" aria-label="OAuth secret"/>
+                    <input ng-show="orgCtrl.oauthSecret.length == 0" readonly type="password"
+                           placeholder="No OAuth Secret" aria-label="Oauth secret"/>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div>
+        <form name="certificateForm" ng-submit="certificateForm.$valid && orgCtrl.setCertificate()"
+              novalidate="novalidate" aria-label="Upload signing certificate form.">
+            <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
+
+
+                    <span ng-show="orgCtrl.showCertificateForm == false" class="glyphicon glyphicon-pencil ed-icon-btn"
+                          ng-click="orgCtrl.toggleCertificateForm()"></span>
+
+
+                <button ng-show="orgCtrl.showCertificateForm == true"
+                        class="glyphicon glyphicon-floppy-disk ed-icon-btn" type="submit"></button>
+            </div>
+
+            <div class="ed-title">Signing Certificate</div>
+
+            <div ng-show="orgCtrl.showCertificateForm == true">
+
+                <div>
+                    <div class="form-group">
+                        <textarea type="text" required="required" ng-minlength="100"
+                                  style="width: 100%; height: 250px; padding: 10px;" ng-maxlength="4096"
+                                  ng-model="orgCtrl.pemCertificate" placeholder="PEM Certificate"> </textarea>
+                    </div>
+                </div>
+
+            </div>
+            <div ng-show="orgCtrl.showCertificateForm == false">
+                <div>
+                    <label><b>Subject Distinguished Name (DN):</b></label>
+                    <span>{{orgCtrl.certificateInfo.subjectDN}}</span>
+                </div>
+                <div>
+                    <label><b>Issuer Distinguished Name (DN):</b></label>
+                    <span>{{orgCtrl.certificateInfo.issuerDN}}</span>
+                </div>
+                <div>
+                    <label><b>Invalid Before:</b></label>
+                    <span>{{orgCtrl.certificateInfo.notBefore | date:'MM/dd/yyyy'}}</span>
+                </div>
+                <div>
+                    <label><b>Invalid After:</b></label>
+                    <span>{{orgCtrl.certificateInfo.notAfter | date:'MM/dd/yyyy'}}</span>
+                </div>
+                <div>
+                    <label><b>Serial Number:</b></label>
+                    <span>{{orgCtrl.certificateInfo.serialNumber}}</span>
+                </div>
+                <div>
+                    <label><b>Version:</b></label>
+                    <span>{{orgCtrl.certificateInfo.version}}</span>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+
+
+    <div ng-show="orgCtrl.isServiceProvider()==true ">
+        <form name="networkCertificateForm" ng-submit="networkCertificateForm.$valid && orgCtrl.setNetworkCertificate()"
+              novalidate="novalidate" aria-label="Upload SSL certificate form.">
+            <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
+
+
+                        <span ng-show="orgCtrl.showNetworkCertificateForm == false"
+                              class="glyphicon glyphicon-pencil ed-icon-btn"
+                              ng-click="orgCtrl.toggleNetworkCertificateForm()"></span>
+
+
+                <button ng-show="orgCtrl.showNetworkCertificateForm == true"
+                        class="glyphicon glyphicon-floppy-disk ed-icon-btn" type="submit"></button>
+
+
+            </div>
+
+            <div class="ed-title">Network Certificate</div>
+
+            <div ng-show="orgCtrl.showNetworkCertificateForm == true">
+
+                <div>
+                    <div class="form-group">
+                        <textarea type="text" required="required" ng-minlength="100"
+                                  style="width: 100%; height: 250px; padding: 10px;" ng-maxlength="4096"
+                                  ng-model="orgCtrl.pemNetworkCertificate" placeholder="PEM Certificate"> </textarea>
+                    </div>
+                </div>
+
+            </div>
+            <div ng-show="orgCtrl.showNetworkCertificateForm == false">
+                <div>
+                    <label><b>Subject Distinguished Name (DN):</b></label>
+                    <span>{{orgCtrl.networkCertificateInfo.subjectDN}}</span>
+                </div>
+                <div>
+                    <label><b>Issuer Distinguished Name (DN):</b></label>
+                    <span>{{orgCtrl.networkCertificateInfo.issuerDN}}</span>
+                </div>
+                <div>
+                    <label><b>Invalid Before:</b></label>
+                    <span>{{orgCtrl.networkCertificateInfo.notBefore | date:'MM/dd/yyyy'}}</span>
+                </div>
+                <div>
+                    <label><b>Invalid After:</b></label>
+                    <span>{{orgCtrl.networkCertificateInfo.notAfter | date:'MM/dd/yyyy'}}</span>
+                </div>
+                <div>
+                    <label><b>Serial Number:</b></label>
+                    <span>{{orgCtrl.networkCertificateInfo.serialNumber}}</span>
+                </div>
+                <div>
+                    <label><b>Version:</b></label>
+                    <span>{{orgCtrl.networkCertificateInfo.version}}</span>
+                </div>
+                <div>
+                    <label><b>Network Domain Name:</b></label>
+                    <span>{{orgCtrl.networkCertificateInfo.commonName}}</span>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+
+
+    <div ng-show="orgCtrl.isServiceProvider()==true ">
+        <div ng-show="orgCtrl.isEditableByUser()" style="float:right;">
+
+            <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.createInstitution()"></span>
+
+            <span class="glyphicon glyphicon-upload ed-icon-btn" ng-click="orgCtrl.showUploadForm()"></span>
+
+        </div>
+
+        <div class="ed-title">Serviced Schools</div>
+
+        <div ng-show="orgCtrl.showInstitutionForm == true">
+            <div th:include="::institution"></div>
+        </div>
+
+
+        <div><b>{{orgCtrl.totalServicedSchools}} Serviced Schools</b></div>
+
+        <uib-pagination
+                total-items="orgCtrl.totalServicedSchools"
+                ng-model="orgCtrl.servicedSchoolsOffset"
+                max-size="5"
+                class="pagination-sm"
+                items-per-page="orgCtrl.limit"
+                boundary-link-numbers="true"
+                rotate="false" ng-change="orgCtrl.getInstitutionsForServiceProvider()"></uib-pagination>
+
+
+        <div class="row">
+            <div ng-repeat="institution in orgCtrl.institutions" style="margin-top: 10px;">
+
+                <div class="col-sm-4 col-xs-4">
+                    <a ng-href="#organization/{{institution.id}}">{{institution.name}}</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <div style="margin-bottom: 100px;">
+        <div style="float:right;">
+                     <span ng-show="orgCtrl.isEditableByUser() && orgCtrl.isServiceProvider()">
+                            <span class="glyphicon glyphicon-plus ed-icon-btn"
+                                  ng-click="orgCtrl.createEndpoint()"></span>
+                     </span>
+        </div>
+
+
+        <div class="ed-title">Endpoints</div>
+
+        <div ng-show="orgCtrl.isMyOrgServiceProviderForInstitution()==true && orgCtrl.selectedServiceProviders.length > 0">
+            <a ng-href="#endpoint-selector/{{orgCtrl.org.id}}">Select Endpoints</a>
+        </div>
+
+
+        <div ng-repeat="endpoint in orgCtrl.endpoints">
+
+            <div class="ed-endpoint">
+                <div th:include="::endpoint"></div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+</div>
+</div>
+
+
+<div th:fragment="users">
+
+    <div>
+
+        <h1>{{usersCtrl.org.name}} Users</h1>
+
+        <div class="sub-nav" style="margin-top: 20px;">
+            <button th:if="${hasOrgAdminRole}" type="button" class="btn btn-default" ng-click="usersCtrl.create()">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> User
+            </button>
+
+            <div class="form-inline">
+                <div class="form-group">
+                    <input class="form-control" type="text" ng-model="usersCtrl.searchInput"
+                           placeholder="Name" aria-label="Organization name"> </input>
+                    <button class="btn btn-default" ng-click="usersCtrl.find()">
+                        <i class="glyphicon glyphicon-search"></i> Search
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div ng-repeat="user in usersCtrl.users | orderBy:'name'">
+        <ul class="list-group">
+            <li class="list-group-item">
+
+                <div th:include="::user"></div>
+
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<div th:fragment="institution">
+    <div class="well">
+        <form name="institutionForm" ng-submit="institutionForm.$valid && orgCtrl.saveInstitution()" novalidate="novalidate" class="glow" style="position: relative;">
+            <div class="sub-nav" aria-label="Create institution form.">
+                <div class="inner-margin7">
+
+                    <div>
+                        <strong>Name: </strong>
+                    <span>
+                            <input type="text" placeholder="Name" required="required" ng-model="orgCtrl.institution.name" style="width: 300px;"> </input>
+                    </span>
+
+                    </div>
+
+                    <div>
+                        <strong>Website: </strong>
+                    <span>
+                        <input type="url" placeholder="http://" required="required" ng-model="orgCtrl.institution.website" style="width: 300px;"> </input>
+                    </span>
+                    </div>
+                    <div>
+                        <strong>Address: </strong>
+                        <span><input type="text" placeholder="Street" required="required" ng-model="orgCtrl.institution.street"> </input> </span>
+                        <span><input type="text" placeholder="City" required="required" ng-model="orgCtrl.institution.city"> </input> </span>
+                    <span>
+                        <select ng-model="orgCtrl.institution.state">
+                            <option value="AL">Alabama</option>
+                            <option value="AK">Alaska</option>
+                            <option value="AZ">Arizona</option>
+                            <option value="AR">Arkansas</option>
+                            <option value="CA">California</option>
+                            <option value="CO">Colorado</option>
+                            <option value="CT">Connecticut</option>
+                            <option value="DE">Delaware</option>
+                            <option value="DC">District Of Columbia</option>
+                            <option value="FL">Florida</option>
+                            <option value="GA">Georgia</option>
+                            <option value="HI">Hawaii</option>
+                            <option value="ID">Idaho</option>
+                            <option value="IL">Illinois</option>
+                            <option value="IN">Indiana</option>
+                            <option value="IA">Iowa</option>
+                            <option value="KS">Kansas</option>
+                            <option value="KY">Kentucky</option>
+                            <option value="LA">Louisiana</option>
+                            <option value="ME">Maine</option>
+                            <option value="MD">Maryland</option>
+                            <option value="MA">Massachusetts</option>
+                            <option value="MI">Michigan</option>
+                            <option value="MN">Minnesota</option>
+                            <option value="MS">Mississippi</option>
+                            <option value="MO">Missouri</option>
+                            <option value="MT">Montana</option>
+                            <option value="NE">Nebraska</option>
+                            <option value="NV">Nevada</option>
+                            <option value="NH">New Hampshire</option>
+                            <option value="NJ">New Jersey</option>
+                            <option value="NM">New Mexico</option>
+                            <option value="NY">New York</option>
+                            <option value="NC">North Carolina</option>
+                            <option value="ND">North Dakota</option>
+                            <option value="OH">Ohio</option>
+                            <option value="OK">Oklahoma</option>
+                            <option value="OR">Oregon</option>
+                            <option value="PA">Pennsylvania</option>
+                            <option value="RI">Rhode Island</option>
+                            <option value="SC">South Carolina</option>
+                            <option value="SD">South Dakota</option>
+                            <option value="TN">Tennessee</option>
+                            <option value="TX">Texas</option>
+                            <option value="UT">Utah</option>
+                            <option value="VT">Vermont</option>
+                            <option value="VA">Virginia</option>
+                            <option value="WA">Washington</option>
+                            <option value="WV">West Virginia</option>
+                            <option value="WI">Wisconsin</option>
+                            <option value="WY">Wyoming</option>
+                        </select>
+                    </span>
+                    <span>
+                        <input type="text" placeholder="Zip Code" required="required"  ng-model="orgCtrl.institution.zip" style="max-width: 80px;"> </input>
+                    </span>
+
+                    </div>
+
+                    <div>
+                        <strong>Phone: </strong>
+
+                        <input type="tel" placeholder="Telephone" required="required"  ng-model="orgCtrl.institution.telephone">
+
+                    </div>
+
+                    <div class="ed-title">School Codes  <span class="glyphicon glyphicon-plus ed-icon-btn" ng-click="orgCtrl.addSchoolCodeToInstitution()" style="float:right;"></span> </div>
+
+                    <span ng-repeat="schoolCode in orgCtrl.institution.schoolCodes" class="ed-inline-box">
+
+                         <div class="row">
+                             <div ng-show="orgCtrl.editingSchoolCode(schoolCode) == false">
+                                 <div class="col-md-4">{{schoolCode.codeType}}</div>
+                                 <div class="col-md-4">{{schoolCode.code}}</div>
+
+                                 <div class="col-md-4">
+                                     <button type="button" class="btn btn-default" ng-click="orgCtrl.editSchoolCode(schoolCode)">
+                                         <span class="glyphicon glyphicon-pencil"></span>
+                                     </button>
+                                     <button type="button" class="btn btn-default" ng-click="orgCtrl.removeSchoolCode(schoolCode, orgCtrl.institution)">
+                                         <span class="glyphicon glyphicon-remove-circle"></span>
+                                     </button>
+                                 </div>
+                             </div>
+                             <div ng-show="orgCtrl.editingSchoolCode(schoolCode) == true">
+                                 <div class="col-md-4">
+                                     <select class="form-control" required="required"  ng-model="schoolCode.codeType">
+                                         <option value=""></option>
+                                         <option value="ACT">ACT</option>
+                                         <option value="ATP">ATP</option>
+                                         <option value="FICE">FICE</option>
+                                         <option value="IPEDS">IPEDS</option>
+                                         <option value="OPEID">OPEID</option>
+                                         <option value="CEEB">CEEB</option>
+                                         <option value="CDS">CDS</option>
+                                     </select>
+                                 </div>
+                                 <div class="col-md-4">
+                                     <input class="form-control" type="text" ng-model="schoolCode.code" required="required"/>
+                                 </div>
+                                 <div class="col-md-4">
+                                     <button type="button" class="btn btn-default" ng-click="orgCtrl.saveSchoolCodeForInstitution(schoolCode)">
+                                         <span class="glyphicon glyphicon-floppy-disk"></span>
+                                     </button>
+                                     <button type="button" class="btn btn-default" ng-click="orgCtrl.removeSchoolCode(schoolCode, orgCtrl.institution)">
+                                         <span class="glyphicon glyphicon-remove-circle"></span>
+                                     </button>
+                                 </div>
+                             </div>
+                         </div>
+
+                    </span>
+
+                </div>
+
+                <div style="position: absolute; top: 0; right: 0;">
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-default btn-sm">
+                            <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                        </button>
+                        <button type="button" ng-click="orgCtrl.showInstitutionForm = false" class="btn btn-default btn-sm">
+                            <span class="glyphicon glyphicon-remove-circle"></span> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<div th:fragment="actuator-view">
+    <h1>Server Info</h1>
+
+    <div ng-repeat="endpoint in actCtrl.serverInfo.links">
+        <div style="margin-bottom: 10px;"><button type="button" class="btn btn-default" ng-click="actCtrl.getEndpoint(endpoint.rel)">
+            <span ng-show="actCtrl.view[endpoint.rel]">Hide </span><span ng-show="actCtrl.view[endpoint.rel] != true">Show </span>{{endpoint.rel}}</button>
+        </div>
+
+        <div ng-show="actCtrl.view[endpoint.rel] == true">
+            <h2>{{endpoint.rel}}</h2>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(endpointKey, endpointValue) in actCtrl.serverInfo[endpoint.rel]">
+                    <td>{{endpointKey}}</td>
+                    <td>{{endpointValue}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+</div>
+
+
+<div th:fragment="usage-record">
+    <div class="row">
+        <div class="col-sm-3">{{usageRecord.resource}}</div>
+        <div class="col-sm-3">
+            <div style="position:relative;">
+                <a ng-click="usageCtrl.toggleParameters(usageRecord)">{{usageRecord.url}}</a>
+                <div ng-show="usageRecord.showParameters == true" class="popup-table">
+                    <button type="button" class="close" aria-label="Close" ng-click="usageCtrl.toggleParameters(usageRecord)" style="padding-right: 5px;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="parameter in usageRecord.parameters">
+                            <td>{{parameter.name}}</td>
+                            <td>{{parameter.value}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="col-sm-3">{{usageRecord.occurredAt | date:'MM/dd/yyyy h:mm a'}}</div>
+        <div class="col-sm-3">{{usageRecord.resultCount}}</div>
+     </div>
+</div>
+
+<div th:fragment="api-usage" style="margin-bottom:50px;">
+
+    <h1 style="display: inline-block;">API Usage</h1>
+    <button class="btn btn-default" ng-click="usageCtrl.refreshData()" style="vertical-align: text-bottom; margin-left: 10px;">
+        <i class="glyphicon glyphicon-refresh"></i> Refresh
+    </button>
+           
+        
+    
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Total Endpoint Queries
+                    <div>{{usageCtrl.dashboardData.totalendpointqueries}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Empty Result Endpoint Queries
+                    <div>{{usageCtrl.dashboardData.emptyresultendpointqueries}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Total Public Key Queries
+                    <div>
+                        {{usageCtrl.dashboardData.totalpublickeyqueries}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div style="display: inline-block">
+                <div class="dashboard-data">
+                    Empty Result Public Key Queries
+                    <div>{{usageCtrl.dashboardData.emptyresultpublickeyqueries}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ed-title">Document Type Distribution</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.documentTypeCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div class="ed-title">Document Format Distribution</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.documentFormatCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ed-title">Department Distribution</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.departmentCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div class="ed-title">Organization Distribution for Endpoint Queries</div>
+            <table class="table table-sm table-striped" >
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="record in usageCtrl.organizationCount">
+                    <td>{{record.name}}</td>
+                    <td>{{record.count}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="ed-title">API Requests</div>
+    <uib-pagination
+            total-items="usageCtrl.totalRecords"
+            ng-model="usageCtrl.offset"
+            max-size="5"
+            class="pagination-sm"
+            items-per-page="usageCtrl.limit"
+            boundary-link-numbers="true"
+            rotate="false" ng-change="usageCtrl.getUsageData()"></uib-pagination>
+
+
+    <div class="row">
+        <b class="col-sm-3">Resource</b>
+        <b class="col-sm-3">URL</b>
+        <b class="col-sm-3">Occurred At</b>
+        <b class="col-sm-3">Result Count</b>
+    </div>
+
+    <div ng-repeat="usageRecord in usageCtrl.records">
+        <div th:include="::usage-record"></div>
+    </div>
+</div>
+
+<div th:fragment="organization">
+    <form name="orgForm" ng-submit="orgForm.$valid && orgCtrl.saveOrg(org)" novalidate="novalidate" class="glow"
+          style="position: relative;" aria-label="Create organization form.">
+        <div class="sub-nav">
+            <div class="inner-margin7">
+                <h1 ng-show="!orgCtrl.showOrgForm(org)"><a ng-href="#organization/{{org.id}}">{{org.name}}</a></h1>
+
+                <div ng-show="orgCtrl.showOrgForm(org)">
+                    <h1>
+                        <input type="text" placeholder="Name" required="required" ng-model="org.name" aria-label="Name"> </input>
+                    </h1>
+                </div>
+
+                <div ng-show="!orgCtrl.showOrgForm(org)">
+                    <a ng-href="{{org.website}}" target="_blank">Website</a>
+                </div>
+
+                <div ng-show="orgCtrl.showOrgForm(org)">
+                    <input type="url" placeholder="http://" required="required" ng-model="org.website" aria-label="Website URL"> </input>
+                </div>
+                <div><strong>Address: </strong>
+                                            <span ng-show="!orgCtrl.showOrgForm(org)">
+                                                <span>{{org.street}} </span>
+                                                <span>{{org.city}} </span>
+                                                <span>{{org.state}} </span>
+                                                <span>{{org.zip}}</span>
+                                            </span>
+                                            <span ng-show="orgCtrl.showOrgForm(org)">
+
+                                                <span><input type="text" placeholder="Street" required="required"
+                                                             ng-model="org.street" aria-label="Street"> </input> </span>
+                                                <span><input type="text" placeholder="City" required="required"
+                                                             ng-model="org.city" aria-label="City"> </input> </span>
+                                                <span>
+
+                                                <select ng-model="org.state" aria-label="State">
+                                                    <option value="AL">Alabama</option>
+                                                    <option value="AK">Alaska</option>
+                                                    <option value="AZ">Arizona</option>
+                                                    <option value="AR">Arkansas</option>
+                                                    <option value="CA">California</option>
+                                                    <option value="CO">Colorado</option>
+                                                    <option value="CT">Connecticut</option>
+                                                    <option value="DE">Delaware</option>
+                                                    <option value="DC">District Of Columbia</option>
+                                                    <option value="FL">Florida</option>
+                                                    <option value="GA">Georgia</option>
+                                                    <option value="HI">Hawaii</option>
+                                                    <option value="ID">Idaho</option>
+                                                    <option value="IL">Illinois</option>
+                                                    <option value="IN">Indiana</option>
+                                                    <option value="IA">Iowa</option>
+                                                    <option value="KS">Kansas</option>
+                                                    <option value="KY">Kentucky</option>
+                                                    <option value="LA">Louisiana</option>
+                                                    <option value="ME">Maine</option>
+                                                    <option value="MD">Maryland</option>
+                                                    <option value="MA">Massachusetts</option>
+                                                    <option value="MI">Michigan</option>
+                                                    <option value="MN">Minnesota</option>
+                                                    <option value="MS">Mississippi</option>
+                                                    <option value="MO">Missouri</option>
+                                                    <option value="MT">Montana</option>
+                                                    <option value="NE">Nebraska</option>
+                                                    <option value="NV">Nevada</option>
+                                                    <option value="NH">New Hampshire</option>
+                                                    <option value="NJ">New Jersey</option>
+                                                    <option value="NM">New Mexico</option>
+                                                    <option value="NY">New York</option>
+                                                    <option value="NC">North Carolina</option>
+                                                    <option value="ND">North Dakota</option>
+                                                    <option value="OH">Ohio</option>
+                                                    <option value="OK">Oklahoma</option>
+                                                    <option value="OR">Oregon</option>
+                                                    <option value="PA">Pennsylvania</option>
+                                                    <option value="RI">Rhode Island</option>
+                                                    <option value="SC">South Carolina</option>
+                                                    <option value="SD">South Dakota</option>
+                                                    <option value="TN">Tennessee</option>
+                                                    <option value="TX">Texas</option>
+                                                    <option value="UT">Utah</option>
+                                                    <option value="VT">Vermont</option>
+                                                    <option value="VA">Virginia</option>
+                                                    <option value="WA">Washington</option>
+                                                    <option value="WV">West Virginia</option>
+                                                    <option value="WI">Wisconsin</option>
+                                                    <option value="WY">Wyoming</option>
+                                                </select>
+
+                                                </span>
+                                                <span><input type="text" placeholder="Zip Code" required="required"
+                                                             ng-model="org.zip"
+                                                             style="max-width: 80px;" aria-label="Zip code"> </input></span>
+
+                                            </span>
+                </div>
+
+                <div><strong>Phone: </strong>
+                    <span ng-show="!orgCtrl.showOrgForm(org)">{{org.telephone}}</span>
+                                            <span ng-show="orgCtrl.showOrgForm(org)">
+                                                <input type="tel" placeholder="Telephone" required="required"
+                                                       ng-model="org.telephone">
+                                            </span>
+                </div>
+
+                <div><strong>Type: </strong>
+                    <span ng-show="!orgCtrl.showOrgForm(org)">
+                        <span ng-repeat="type in org.organizationTypes" class="ed-inline-box"><span>{{type.name}}{{$last ? '' : ', '}}</span></span>
+                    </span>
+
+                     <span ng-show="orgCtrl.showOrgForm(org)">
+
+                            <span ng-repeat="type in orgCtrl.organizationTypes">
+                                <span class="checkbox-inline"> <input
+                                        type="checkbox"
+                                        ng-checked="orgCtrl.hasOrgType(type,org)"
+                                        name="orgTypes"
+                                        ng-disabled="type.id == 1"
+                                        ng-click="orgCtrl.updateOrgType($event, type,org)"> {{type.name}} </span>
+                            </span>
+                     </span>
+                </div>
+                <div><strong>Enabled: </strong>{{org.enabled | trueFalse}}</div>
+                <div><strong>Member Since: </strong>{{org.createdTime | date:'MM/dd/yyyy'}}</div>
+                <div><strong>Directory ID: </strong>{{org.id}}</div>
+            </div>
+
+            <div th:if="${hasSystemAdminRole}" style="position: absolute; top: 0; right: 0;">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default btn-sm" ng-show="org.enabled == false"
+                            ng-click="orgCtrl.setEnabled(org,true)">
+                        <span class="glyphicon glyphicon-plus"></span> Enable
+                    </button>
+
+                    <button type="button" class="btn btn-default btn-sm" ng-show="org.enabled == true"
+                            ng-click="orgCtrl.setEnabled(org,false)">
+                        <span class="glyphicon glyphicon-remove"></span> Disable
+                    </button>
+
+                    <button type="button" class="btn btn-default btn-sm" ng-click="orgCtrl.createUser(org)">
+                        <span class="glyphicon glyphicon-user"></span> Manage Users
+                    </button>
+                    <button ng-show="!orgCtrl.showOrgForm(org)" type="button" class="btn btn-default btn-sm"
+                            ng-click="orgCtrl.editOrg(org)">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </button>
+                    <button ng-show="orgCtrl.showOrgForm(org)" type="submit" class="btn btn-default btn-sm">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                    </button>
+                    <button type="button" uib-popover-template="'delete-org.html'" popover-trigger="focus"
+                            popover-placement="right" class="btn btn-default btn-sm">
+                        <span class="glyphicon glyphicon-remove-circle"></span> Delete
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div th:fragment="message">
+    <div class="well">
+        <div th:if="${hasOrgAdminRole}" style="float: right;">
+            <div class="btn-group">
+                <button ng-show="msg.dismissed==false" type="button" class="btn btn-default"
+                        ng-click="messageCtrl.dismiss(msg)">
+                    <span class="glyphicon glyphicon-ok"></span> Dismiss
+                </button>
+            </div>
+        </div>
+        <div>Topic: <b>{{msg.topic}}</b></div>
+        <div>Action Required: <b>{{msg.actionRequired | trueFalse}}</b></div>
+        <div>Message Date: <b>{{msg.createdTime | date: 'medium'}}</b></div>
+        <div>Dismissed: <b>{{msg.dismissed | trueFalse}}</b></div>
+        <p ng-bind-html="msg.content"></p>
+
+
+    </div>
+
+</div>
+
+
+<div th:fragment="messages">
+
+    <div>
+        <h1>{{messageCtrl.org.name}} Messages</h1>
+
+        <uib-pagination
+                total-items="messageCtrl.totalRecords"
+                ng-model="messageCtrl.offset"
+                max-size="5"
+                class="pagination-sm"
+                items-per-page="messageCtrl.limit"
+                boundary-link-numbers="true"
+                rotate="false" ng-change="messageCtrl.getMessages()"></uib-pagination>
+
+
+        <div ng-repeat="msg in messageCtrl.messageList">
+            <div th:include="::message"></div>
+        </div>
+
+    </div>
+</div>
+
+<div th:fragment="registration-email">
+    <div>Dear <span th:text="${user.name}"></span>,</div>
+
+    <p>
+        Thank you for registering <span th:text="${organization.name}"></span> with EdExchange. Your application is
+        currently being reviewed. When the review process is complete, your organization will be added to the EdExchange
+        directory.
+    </p>
+
+    <p>
+        A user account has been created for you with the username and password that you provided in registration form.
+        You may login <a href="http://www.edexchange.net/login">here.</a> While your application is being reviewed, all
+        EdExchange features are available, but your organization will not be included in the directory until the
+        application
+        is approved.
+    </p>
+
+    <p>
+        When the status of your application changes, you will receive another email. Messages can also be viewed in the
+        EdExchange application by selecting "Messages" from the menu.
+    </p>
+
+    <p>
+        Thank you from the EdExchange team.
+    </p>
+</div>
+
+<div th:fragment="registration-admin-email">
+    <p>
+        An application for EdExchange membership has been received for <a
+            th:href="@{'#organization/' + ${organization.id}}"><span th:text="${organization.name}"></span></a>
+        You are required to review the application and organization information and enable the organization to accept
+        the application. If additional actions are required by the applicant, you may send the application a message
+        <a ng-href="#message-form">here</a>.
+    </p>
+
+    <p>
+        The application was submitted by the primary contact for the organization, <a
+            th:href="@{'#user/' + ${user.id}}"><span th:text="${user.name}"></span></a>.
+    </p>
+</div>
+
+<div th:fragment="registration-thank-you">
+    <h1>Thank you!</h1>
+
+    <p>
+        Thank you for registering with EdExchange. Your application is
+        currently being reviewed. While your application is being reviewed, all
+        EdExchange features are available, but your organization will not be included in the directory until the
+        application
+        is approved.
+    </p>
+
+    <p>
+        A user account has been created for you with the username and password that you provided during the registration
+        process.
+        You may login <a href="/login">here</a> and begin configuring you organization to send and/or receive documents.
+    </p>
+
+    <p>
+        When the status of your application changes, you will receive another email. Messages can also be viewed in the
+        EdExchange application by selecting "Messages" from the menu.
+    </p>
+
+    <p>
+        Thank you from the EdExchange team.
+    </p>
+</div>
+
+<div th:fragment="registration-form">
+    <form name="regForm" ng-submit="regForm.$valid && regCtrl.register()" novalidate="novalidate" aria-label="Registration form.">
+        <div class="row">
+
+            <div class="col-sm-4">
+                <h2>Organization</h2>
+                <fieldset class="form-group">
+                    <label>Organization Name</label>
+                    <input type="text" class="form-control" placeholder="Name" required="required"
+                           ng-model="regCtrl.org.name" aria-label="Organization name"> </input>
+                </fieldset>
+
+                <fieldset class="form-group">
+                    <label>Website URL</label>
+                    <input class="form-control" type="url" placeholder="http://" required="required"
+                           ng-model="regCtrl.org.website" aria-label="Website URL"> </input>
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Street</label>
+                    <input class="form-control" type="text" placeholder="Street" required="required"
+                           ng-model="regCtrl.org.street" aria-label="State"> </input>
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>City</label>
+
+                    <input class="form-control" type="text" placeholder="City" required="required"
+                           ng-model="regCtrl.org.city" aria-label="City"> </input>
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>State</label>
+
+                    <select class="form-control" ng-model="regCtrl.org.state" required="required" aria-label="State">
+                        <option value="AL">Alabama</option>
+                        <option value="AK">Alaska</option>
+                        <option value="AZ">Arizona</option>
+                        <option value="AR">Arkansas</option>
+                        <option value="CA">California</option>
+                        <option value="CO">Colorado</option>
+                        <option value="CT">Connecticut</option>
+                        <option value="DE">Delaware</option>
+                        <option value="DC">District Of Columbia</option>
+                        <option value="FL">Florida</option>
+                        <option value="GA">Georgia</option>
+                        <option value="HI">Hawaii</option>
+                        <option value="ID">Idaho</option>
+                        <option value="IL">Illinois</option>
+                        <option value="IN">Indiana</option>
+                        <option value="IA">Iowa</option>
+                        <option value="KS">Kansas</option>
+                        <option value="KY">Kentucky</option>
+                        <option value="LA">Louisiana</option>
+                        <option value="ME">Maine</option>
+                        <option value="MD">Maryland</option>
+                        <option value="MA">Massachusetts</option>
+                        <option value="MI">Michigan</option>
+                        <option value="MN">Minnesota</option>
+                        <option value="MS">Mississippi</option>
+                        <option value="MO">Missouri</option>
+                        <option value="MT">Montana</option>
+                        <option value="NE">Nebraska</option>
+                        <option value="NV">Nevada</option>
+                        <option value="NH">New Hampshire</option>
+                        <option value="NJ">New Jersey</option>
+                        <option value="NM">New Mexico</option>
+                        <option value="NY">New York</option>
+                        <option value="NC">North Carolina</option>
+                        <option value="ND">North Dakota</option>
+                        <option value="OH">Ohio</option>
+                        <option value="OK">Oklahoma</option>
+                        <option value="OR">Oregon</option>
+                        <option value="PA">Pennsylvania</option>
+                        <option value="RI">Rhode Island</option>
+                        <option value="SC">South Carolina</option>
+                        <option value="SD">South Dakota</option>
+                        <option value="TN">Tennessee</option>
+                        <option value="TX">Texas</option>
+                        <option value="UT">Utah</option>
+                        <option value="VT">Vermont</option>
+                        <option value="VA">Virginia</option>
+                        <option value="WA">Washington</option>
+                        <option value="WV">West Virginia</option>
+                        <option value="WI">Wisconsin</option>
+                        <option value="WY">Wyoming</option>
+                    </select>
+
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Zip Code</label>
+                    <input class="form-control" type="text" placeholder="Zip Code" required="required"
+                           ng-model="regCtrl.org.zip" style="max-width: 100px;" aria-label="Zip Code"> </input>
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" class="form-control" placeholder="Telephone" required="required"
+                           ng-model="regCtrl.org.telephone" style="width:150px;" aria-label="Phone number">
+
+                </fieldset>
+
+                <fieldset class="form-group" id="org-types">
+                    <label>Type</label>
+
+
+                    <div ng-repeat="type in regCtrl.organizationTypes">
+                        <div class="well" ng-show="type.id != 1">
+                            <input required="required"
+                                   type="checkbox"
+                                   ng-checked="regCtrl.hasOrgType(type)"
+                                   name="orgTypes"
+                                   ng-click="regCtrl.updateOrgType($event, type)" aria-label="Organization type" aria-labelledby="org-types"/>
+                            <b>{{type.name}}</b>
+
+                            <p>{{type.description}}</p>
+                        </div>
+                    </div>
+
+                </fieldset>
+
+                <fieldset class="form-group">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </fieldset>
+            </div>
+
+            <div class="col-sm-4 col-sm-offset-2">
+                <h2>Contact/Administrator</h2>
+                <fieldset class="form-group">
+                    <label>Contact Name</label>
+                    <input class="form-control" type="text" placeholder="Name" required="required"
+                           ng-model="regCtrl.user.name" aria-label="Contact name"> </input>
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Title</label>
+
+                    <input class="form-control" type="text" placeholder="Title" ng-model="regCtrl.user.title"
+                           required="required" aria-label="Contact title"> </input>
+
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Phone</label>
+                    <input class="form-control" type="tel" placeholder="Phone" ng-model="regCtrl.user.phone"
+                           required="required" aria-label="Phone number"> </input>
+
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Email</label>
+                    <input class="form-control" type="email" placeholder="Email" ng-model="regCtrl.user.email"
+                           required="required" aria-label="Email address"> </input>
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Username</label>
+                    <input class="form-control" type="text" placeholder="Username" ng-model="regCtrl.user.username"
+                           required="required" aria-label="Username"> </input>
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Password</label>
+                    <input class="form-control" type="password" placeholder="Password" ng-model="regCtrl.user.password"
+                           required="required" aria-label="password"> </input>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div th:fragment="organizations">
+
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-sm-5">
+
+            <button th:if="${hasSystemAdminRole}" type="button" class="btn btn-default" ng-click="orgCtrl.createOrg()">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Organization
+            </button>
+
+            <button type="button" class="btn btn-default"
+                    ng-model="orgCtrl.isEnabled"
+                    uib-btn-checkbox btn-checkbox-true="true"
+                    btn-checkbox-false="false" ng-click="orgCtrl.findOrganizations()">
+                Enabled
+            </button>
+
+            <button type="button" class="btn btn-default"
+                    ng-model="orgCtrl.isServiceProvider"
+                    uib-btn-checkbox btn-checkbox-true="true"
+                    btn-checkbox-false="false" ng-click="orgCtrl.findOrganizations()">
+                Service Provider
+            </button>
+
+            <button type="button" class="btn btn-default"
+                    ng-model="orgCtrl.isInstitution"
+                    uib-btn-checkbox btn-checkbox-true="true"
+                    btn-checkbox-false="false" ng-click="orgCtrl.findOrganizations()">
+                Institution
+            </button>
+        </div>
+
+        <div class="col-sm-7">
+            <div class="form-inline">
+                <div class="form-group">
+                    <input class="form-control" style="width: 60px;" type="text" ng-model="orgCtrl.directoryID"
+                           placeholder="ID" empty-to-null aria-label="EdExchange directory ID"> </input>
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" type="text" ng-model="orgCtrl.orgName"
+                           placeholder="Organization Name" aria-label="Organization name."> </input>
+                </div>
+
+                <div class="form-group" style="border: dotted 1px #eeeeee;">
+                    <input class="form-control" type="text" ng-model="orgCtrl.schoolCode" placeholder="Code"
+                           style="width: 100px;" aria-label="School code."> </input>
+
+
+                    <select class="form-control" style="width: 110px;" required="required"
+                            ng-model="orgCtrl.schoolCodeType" aria-label="School code type.">
+                        <option value="">Code Type</option>
+                        <option value="ACT">ACT</option>
+                        <option value="ATP">ATP</option>
+                        <option value="FICE">FICE</option>
+                        <option value="IPEDS">IPEDS</option>
+                        <option value="OPEID">OPEID</option>
+                        <option value="CEEB">CEEB</option>
+                        <option value="CDS">CDS</option>
+                    </select>
+
+                </div>
+
+                <button class="btn btn-default" ng-click="orgCtrl.resetSearch()">
+                    <i class="glyphicon glyphicon-refresh"></i> Reset
+                </button>
+
+                <button class="btn btn-default" ng-click="orgCtrl.findOrganizations()">
+                    <i class="glyphicon glyphicon-search"></i> Search
+                </button>
+
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <uib-pagination
+            total-items="orgCtrl.totalRecords"
+            ng-model="orgCtrl.offset"
+            max-size="5"
+            class="pagination-sm"
+            items-per-page="orgCtrl.limit"
+            boundary-link-numbers="true"
+            rotate="false" ng-change="orgCtrl.findOrganizations()"></uib-pagination>
+
+
+    <div ng-repeat="org in orgCtrl.organizations | orderBy:'name'">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <div th:include="::organization"></div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

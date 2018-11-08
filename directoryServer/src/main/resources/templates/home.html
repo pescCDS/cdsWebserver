@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
+      ng-app="directoryServer">
+<head>
+    <title>Education Exchange - a standards based system for exchanging documents.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <meta name="description" content="EdExchange is a system for exchanging academic records." />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-16.png" th:href="@{assets/images/edex-favicon-16.png}" sizes="16x16" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-24.png" th:href="@{assets/images/edex-favicon-24.png}" sizes="24x24" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-32.png" th:href="@{assets/images/edex-favicon-32.png}" sizes="32x32" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-48.png" th:href="@{assets/images/edex-favicon-48.png}" sizes="48x48" />
+    <link rel="shortcut icon" type="image/png" href="edex-favicon-64.png" th:href="@{assets/images/edex-favicon-64.png}" sizes="64x64" />
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <link rel="stylesheet" type="text/css" href="css/toaster.min.css" />
+
+</head>
+<body>
+
+
+<toaster-container toaster-options="{'close-button': true}" aria-live="polite"></toaster-container>
+
+<div ng-controller="NavController as nav">
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+        <div class="navbar-header">
+
+            <!-- note the ng-init and ng-click here: -->
+            <button type="button" class="navbar-toggle" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#about" >Ed Exchange</a>
+        </div>
+
+        <div class="collapse navbar-collapse" uib-collapse="navCollapsed">
+            <ul class="nav navbar-nav">
+                <li ng-class="{ active: nav.isActive('/directory')}">
+                    <a href="#directory" class="item">Directory</a>
+                </li>
+                <li>
+                    <a class="item" href="documentation" target="_blank">Docs</a>
+                </li>
+                <li th:if="${hasSystemAdminRole}" ng-class="{ active: nav.isActive('/actuator-view')}">
+                    <a class="item" href="#actuator-view">Server Info</a>
+                </li>
+                <li th:if="${hasSystemAdminRole}" ng-class="{ active: nav.isActive('/api-usage')}">
+                    <a class="item" href="#api-usage">API Usage</a>
+                </li>
+                <li th:if="${isAuthenticated}" ng-class="{ active: nav.isActive('/settings')}">
+                    <a class="item" href="#settings">Settings</a>
+                </li>
+                <li th:if="${isAuthenticated}==true"  ng-class="{ active: nav.isActive('/myorg')}">
+                    <a class="item" href="#myorg">My Organization</a>
+                </li>
+                <li th:if="${isAuthenticated}==true" ng-class="{ active: nav.isActive('/users')}">
+                    <a class="item" href="#users">Users</a>
+                </li>
+
+                <li th:if="${isAuthenticated}==true" ng-class="{ active: nav.isActive('/messages')}">
+                    <a class="item" href="#messages">Messages</a>
+                </li>
+
+            </ul>
+            <ul th:if="${isAuthenticated}==false" class="nav navbar-nav navbar-right">
+                <ul class="nav navbar-nav">
+                    <li><a href="#registration-form">Sign Up</a></li>
+                    <li><a href="admin">Sign In</a></li>
+                </ul>
+            </ul>
+            <ul th:if="${isAuthenticated}==true" class="nav navbar-nav navbar-right">
+                <li uib-dropdown>
+
+                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle="" aria-haspopup="true" aria-expanded="false">
+                        <span th:text="${activeUser.name}">Name</span>
+                        <span class="caret"></span>
+                    </a>
+
+                    <ul uib-dropdown-menu>
+                        <li>
+                            <div style="width: 60%;margin: auto; padding: 5px;">
+                                <a class="btn btn-primary" th:href="@{'#user/' + ${activeUser.id}}">Account</a>
+                            </div>
+                        </li>
+
+                        <li>
+                            <div style="width: 60%;margin: auto; padding: 5px;">
+                                <form th:action="@{logout}" method="post">
+                                    <input type="submit" value="Sign Out" class="btn btn-default" />
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        </div>
+    </nav>
+
+</div>
+
+
+<div class="container" style="margin-top: 5em">
+    <div ng-view>
+</div>
+
+
+</div>
+
+<script type="application/javascript" src="js/angular.js"></script>
+<script type="application/javascript" src="js/angular-route.min.js"></script>
+<script type="application/javascript" src="js/angular-animate.min.js"></script>
+<script type="application/javascript" src="js/angular-sanitize.min.js"></script>
+<script type="application/javascript" src="js/toaster.min.js"></script>
+<script type="application/javascript" src="js/ui-bootstrap-tpls-1.2.5.min.js"></script>
+
+<script type="application/javascript" src="js/app.js"></script>
+
+<script type="text/ng-template" id="delete-org.html">
+    <div>
+        <p>Delete?</p>
+        <button type="button" class="btn btn-sm btn-success" ng-click="orgCtrl.deleteOrg(org)">Yes</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="delete-user.html">
+    <div>
+        <p>Delete?</p>
+        <button type="button" class="btn btn-sm btn-success" ng-click="usersCtrl.delete(user)">Yes</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="delete-contact.html">
+    <div>
+        <p>Delete?</p>
+        <button type="button" class="btn btn-sm btn-success" ng-click="orgCtrl.deleteContact(contact)">Yes</button>
+    </div>
+</script>
+
+
+<script type="text/ng-template" id="delete-endpoint.html">
+    <div>
+        <p>Delete?</p>
+        <button type="button" class="btn btn-sm btn-success" ng-click="orgCtrl.deleteEndpoint(endpoint)">Yes</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="upload-institutions.html">
+
+        <div class="modal-header">
+            <h3 class="modal-title">Institutions Upload</h3>
+        </div>
+        <div class="modal-body">
+            <form name="uploadForm" ng-submit="uploadForm.$valid && uploadCtrl.uploadFile()" novalidate="novalidate">
+            <div>
+                <div class="form-group">
+                    <div  class="btn btn-default btn-file">
+                        Browse <input type="file" file-model="uploadCtrl.fileToUpload"/>
+                    </div>
+                    <span>{{uploadCtrl.fileToUpload.name}}</span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-default">
+                    <span class="glyphicon glyphicon-send"></span> Upload
+                </button>
+            </div>
+
+
+            <div style="margin-top:10px;">
+                <button type="button" class="btn btn-default" ng-click="uploadCtrl.toggleHistory()">Show history</button>
+
+                <div ng-show="uploadCtrl.showHistory == true">
+
+                    <div style="margin-top:10px;">
+                        <span><input name="resultFilter" type="checkbox" ng-checked="uploadCtrl.hasFilter('SUCCESS')" ng-click="uploadCtrl.updateFilter('SUCCESS')"/> Success </span>
+                        <span><input name="resultFilter" type="checkbox" ng-checked="uploadCtrl.hasFilter('ERROR')" ng-click="uploadCtrl.updateFilter('ERROR')"/> Errors </span>
+
+                    </div>
+
+
+                    <div style="margin-top: 10px">
+                        <uib-accordion close-others="true">
+
+                            <uib-accordion-group ng-repeat="upload in uploadCtrl.uploads" heading="{{upload.createdTime | date:'short'}} {{upload.status}}">
+                                <div><span>Start Time: </span><b>{{upload.startTime | date:'short'}}</b></div>
+                                <div><span>End Time: </span><b>{{upload.endTime | date:'short'}}</b></div>
+                                <div><a ng-href="#user/{{upload.userId}}">Uploader</a></div>
+                                <div><span>Uploaded File: </span><a ng-href="/services/rest/v1/institutions/csv?upload_id={{upload.id}}">{{upload.inputPath}}</a></div>
+                                <div style="margin-top: 10px;"><button type="button" class="btn btn-default" ng-click="uploadCtrl.showResults(upload)">Show Results</button></div>
+
+                                    <div style="margin-top: 10px">
+
+                                        <ul class="list-group">
+                                            <li ng-repeat="result in upload.results | filter:uploadCtrl.filterResults" class="list-group-item" ng-class="{'list-group-item-success': result.outcome == 'SUCCESS',  'list-group-item-warning': result.outcome == 'WARNING',  'list-group-item-danger': result.outcome == 'ERROR'  }">
+                                                <div ng-show="result.outcome == 'SUCCESS'">
+                                                    <div ng-bind-html="result.message"></div>
+                                                    <div>Line Number: <b>{{result.lineNumber}}</b></div>
+                                                    <div>Name: <b>{{result.institutionName}}</b></div>
+                                                    <div>Directory ID: <b>{{result.institutionID}}</b></div>
+                                                </div>
+                                                <div ng-show="result.outcome == 'WARNING'">
+                                                    <div ng-bind-html="result.message"></div>
+                                                    <div>Line Number: <b>{{result.lineNumber}}</b></div>
+                                                    <div>Name: <b>{{result.institutionName}}</b></div>
+                                                    <div>Directory ID: <b>{{result.institutionID}}</b></div>
+
+                                                </div>
+                                                <div ng-show="result.outcome == 'ERROR'">
+                                                    <div ng-bind-html="result.message"></div>
+                                                    <div>Line Number: <b>{{result.lineNumber}}</b></div>
+                                                </div>
+
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                            </uib-accordion-group>
+
+                        </uib-accordion>
+
+                    </div>
+
+
+                </div>
+            </div>
+
+        </form>
+
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="uploadCtrl.ok()">OK</button>
+            <!--<button class="btn btn-warning" type="button" ng-click="uploadCtrl.cancel()">Cancel</button>-->
+        </div>
+</script>
+
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var activeUser = /*[[${activeUser}]]*/ null;
+
+    var roles = /*[[${roles}]]*/ null;
+
+    var organizationTypes = /*[[${organizationTypes}]]*/ null;
+
+    /*]]>*/
+</script>
+
+
+</body>
+</html>

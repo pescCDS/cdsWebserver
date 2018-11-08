@@ -1,0 +1,15 @@
+network-db:
+  build: ./target/docker/database
+  ports:
+   - "5432:5432"
+
+network-server:
+  image: edex/network-server
+  ports:
+   - "9000:9000"
+   - "9449:9443"
+  extra_hosts:
+   - network-db:172.17.0.1
+  environment:
+   - SPRING_PROFILES_ACTIVE=qa
+   - DB_SERVER=network-db

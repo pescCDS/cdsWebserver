@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet id="1" author="owenwe" context="dev, ci, prod">
+		<comment>This changeSet is the initial creation of the required base tables for the Network Server.</comment>
+
+		<createTable tableName="transactions">
+			<column name="id" type="INT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="sender_transaction_id" type="INT" defaultValueNumeric="0">
+				<constraints nullable="true" />
+			</column>
+			<column name="recipient_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="sender_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="signer_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="file_format" type="varchar(32)">
+				<constraints nullable="true" />
+			</column>
+			<column name="document_type" type="varchar(32)">
+				<constraints nullable="true" />
+			</column>
+			<column name="department" type="varchar(32)">
+				<constraints nullable="true" />
+			</column>
+			<column name="file_size" type="BIGINT"
+				defaultValueNumeric="0">
+				<constraints nullable="false" />
+			</column>
+			<column name="file_path" type="varchar(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="request_file_path" type="varchar(256)" defaultValue="null">
+				<constraints nullable="true" />
+			</column>
+			<column name="ack_file_path" type="varchar(256)">
+				<constraints nullable="true" />
+			</column>
+			<column name="operation" type="varchar(32)">
+				<constraints nullable="true" />
+			</column>
+			<column name="occurred_at" type="TIMESTAMP">
+				<constraints nullable="true" />
+			</column>
+			<column name="acknowledged_at" type="TIMESTAMP">
+				<constraints nullable="true" />
+			</column>
+			<column name="error" type="TEXT">
+				<constraints nullable="true" />
+			</column>
+			<column name="acknowledged" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="ack_url" type="varchar(256)">
+				<constraints nullable="true" />
+			</column>
+			<column name="delivery_message" type="varchar(512)">
+				<constraints nullable="true" />
+			</column>
+			<column name="delivery_status" type="varchar(32)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
+	</changeSet>
+
+
+</databaseChangeLog>

@@ -1,0 +1,15 @@
+directoryserver_app_image:
+  image: ccctechcenter/cccnext-directory-server:${IMAGE_TAG}
+  volumes:
+     - ./directoryServer/target:/opt/edexchange
+  ports:
+   - 8080:8080
+  environment:
+   - SPRING_PROFILES_ACTIVE=${profile}
+   - DB_SERVER=${DIRECTORY_DB_HOST}
+   - DB_USERNAME=${DIRECTORY_DB_USERNAME}
+   - DB_PASSWORD=${DIRECTORY_DB_PASSWORD}
+   - MAIL_SMTP_HOST=${MAIL_SMTP_HOST}
+   - MAIL_SMTP_USERNAME=${MAIL_SMTP_USERNAME}
+   - MAIL_SMTP_PASSWORD=${MAIL_SMTP_PASSWORD}
+  container_name: directory-app

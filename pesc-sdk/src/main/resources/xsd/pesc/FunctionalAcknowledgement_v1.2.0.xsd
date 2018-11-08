@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- edited with XMLSpy v2007 (http://www.altova.com) by PHEAA (STATE OF PA PHEAA) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:FuncAck="urn:org:pesc:message:functionalacknowledgement:v1.2.0" xmlns:core="urn:org:pesc:core:CoreMain:v1.14.0" xmlns:AcRec="urn:org:pesc:sector:AcademicRecord:v1.9.0" targetNamespace="urn:org:pesc:message:functionalacknowledgement:v1.2.0" version="v1.2.0">
+    <xs:import namespace="urn:org:pesc:core:CoreMain:v1.14.0" schemaLocation="CoreMain_v1.14.0.xsd"/>
+    <xs:import namespace="urn:org:pesc:sector:AcademicRecord:v1.9.0" schemaLocation="AcademicRecord_v1.9.0.xsd"/>
+    <!--============================================================================-->
+    <!--Name:      functionalacknowledgement.xsd  -->
+    <!--Version:  1.1.0-->
+    <!--Date:       16-October-2013-->
+    <!---->
+    <!--Change Log:-->
+    <!--v1.0.0 26-April-2010 Jeffrey Funck  -  -->
+    <!--Creation of Functional Acknowledgment schema-->
+    <!--   Change #   RKM20090330032900 -->
+    <!--v1.5.0 15-October-2013 Jeffrey Funck  -  -->
+    <!--Modified to use the newest version of CoreMain (v1.13.0)-->
+    <!--   Change #   TS20130624000001 -->
+    <!--v1.5.0 17-December-2014 Jeffrey Funck  -  -->
+    <!--Modified to use the newest version of CoreMain (v1.14.0)-->
+    <!--   Change #   MB20140606000001 -->
+    <!--============================================================================-->
+    <xs:element name="Acknowledgment">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="TransmissionData" type="AcRec:TransmissionDataType"/>
+                <xs:element name="AcknowledgmentData" type="FuncAck:AcknowledgmentDataType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="AcknowledgmentDataType">
+        <xs:sequence>
+            <xs:element name="BatchID" type="core:BatchIDType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>The ID of the batch document containing the acknowledged
+                        document (if applicable)</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="DocumentID" type="core:DocumentIDType">
+                <xs:annotation>
+                    <xs:documentation>The ID of the acknowledged document</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="AcknowledgmentCode" type="core:AcknowledgmentCodeType">
+                <xs:annotation>
+                    <xs:documentation>Indicates if the document will be processed</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="SyntaxError" type="FuncAck:SyntaxErrorType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Provides details of any syntax issues
+                        encountered</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="NoteMessage" type="core:NoteMessageType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Provides details of any non-syntax related
+                        issues</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="SyntaxErrorType">
+        <xs:sequence>
+            <xs:element name="ErrorMessage" type="xs:string"/>
+            <!-- Allows for specific validation error messages to aid the sender in diagnosing issues -->
+            <xs:element name="Locator" type="FuncAck:SyntaxErrorLocatorType" minOccurs="0"/>
+            <xs:element name="SeverityCode" type="core:SeverityCodeType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="SyntaxErrorLocatorType">
+        <xs:sequence>
+            <xs:element name="LineNumber" type="xs:nonNegativeInteger"/>
+            <xs:element name="ColumnNumber" type="xs:nonNegativeInteger" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

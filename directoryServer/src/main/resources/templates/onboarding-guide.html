@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (c) 2017. California Community Colleges Technology Center
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>EdExchange Onboarding Guide for Service Providers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css" media="screen"/>
+</head>
+<style>
+    .sub-step {
+        margin-left: 2em;
+    }
+
+    #sidebar {
+        padding: 40px 0 0 40px;
+    }
+</style>
+<body>
+
+<div class="container">
+    <div class="row" style="margin-bottom: 50em;">
+        <div class="col-sm-3" id="sidebar">
+            <div><a href="#about-this-guide">About this Guide</a></div>
+            <div><a href="#join">Step 1: Join the EdExchange Network</a></div>
+            <div><a href="#deploy-server">Step 2: Deploy a Server</a></div>
+            <div class="sub-step"><a href="#aws-console">Step 2a: Sign In to the AWS Console</a></div>
+            <div class="sub-step"><a href="#open-ec2-dashboard">Step 2b: Open EC2 Dashboard</a></div>
+            <div class="sub-step"><a href="#create-instance">Step 2c: Create a Server Instance</a></div>
+            <div class="sub-step"><a href="#start-server">Step 2d: Start the Server</a></div>
+            <div class="sub-step"><a href="#assign-static-ip">Step 2e: Assign a Static IP Address</a></div>
+            <div><a href="#provision-server">Step 3: Provision the Server</a></div>
+            <div class="sub-step"><a href="#connect-to-server">Step 3a: Connect to the AWS Server</a></div>
+            <div class="sub-step"><a href="#get-software">Step 3b: Get the Network Server Software</a></div>
+            <div class="sub-step"><a href="#build-software">Step 3c: Build the Network Server Software</a></div>
+            <div class="sub-step"><a href="#create-database">Step 3d: Create the Database</a></div>
+            <div><a href="#associate-domain-name">Step 4: Associate a Domain Name</a></div>
+            <div><a href="#configure-server">Step 5: Configure the EdExchange Network Server</a></div>
+
+            <div class="sub-step"><a href="#create-network-certificate">Step 5a: Create an SSL Certificate for the Network Server</a></div>
+            <div class="sub-step"><a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents</a></div>
+            <div class="sub-step"><a href="#upload-network-certificate">Step 5c: Upload the Network Server SSL Certificate</a></div>
+            <div class="sub-step"><a href="#upload-signing-certificate">Step 5d: Upload the Signing Certificate</a></div>
+            <div class="sub-step"><a href="#create-oauth-secret">Step 5e: Set the OAuth Secret</a></div>
+            <div class="sub-step"><a href="#create-college-transcript-endpoint">Step 5f: Define an Endpoint for Handling PESC College Transcripts.</a></div>
+            <div><a href="#start-network-server">Step 6: Start the EdExchange Network Server</a></div>
+            <div><a href="#request-transcript">Step 7: Request a Transcript</a></div>
+
+
+        </div>
+        <div class="col-sm-9" id="main-window">
+            <h1>EdExchange Onboarding Guide for Service Providers</h1>
+            <h2 id="about-this-guide">About this Guide</h2>
+            <p>
+                This guide provides detailed, step-by-step instructions on how to deploy the reference implementation
+                of the network server to send and receive documents using EdExchange.  Upon completion of this guide, your organization
+                will have become an active member of the EdExchange network and have
+                successfully requested and received a PESC college transcript with Butte College based on test data and
+                test student "John Doe".
+            </p>
+
+            <h2 id="join">Step 1: Join the EdExchange Network</h2>
+            <p>
+                To add your organization to the EdExchange directory, complete <a target="_blank" href="home#/registration-form">registration form</a>.
+                Make sure to check the "Service Provider" checkbox to indicate your organization is a service provider. If your
+                organization is also an institution, check the "Institution" checkbox too.
+            </p>
+
+            <h2 id="deploy-server">Step 2: Deploy a Server</h2>
+            <p>
+                The purpose of this section is to deploy an Ubuntu based Linux server that will be used to host the reference implementation
+                of the EdExchange network server on the internet.   For the purpose of this guide, Amazon Web Services (AWS) will be used
+                to create and deploy the server.  However,  you may optionally choose to host the server any way you like and still use this
+                guide, provided the operating system is Ubuntu 16.04 LTS.
+            </p>
+            <p>
+                Upon completion of this section, you will have a an Ubuntu 16.04 LTS server that is ready
+                to be provisioned with the reference implementation of the EdExchange network server.
+            </p>
+
+            <h3 id="aws-console">Step 2a: Sign In to the AWS console</h3>
+            <p>
+                Log into the AWS console located at <a target="_blank" href="https://aws.amazon.com/console/">https://aws.amazon.com/console/</a>.  If this link no
+                longer works, do a Google search on "Amazon Web Services console" and use the search results to find the
+                AWS console. Select the "Sign In To the Console" button and login.  If you don't have an Amazon account that
+                is appropriate for hosting the EdExchange network server, you'll need to create an Amazon account.
+            </p>
+            <h3 id="open-ec2-dashboard">Step 2b: Open EC2 Dashboard</h3>
+            <p>
+                The server will be deployed as an EC2 instance.  There are various ways to load the EC2 console, one of which
+                is to select "Services/EC2" from the main AWS dashboard (the landing page that is presented after you've logged
+                into the AWS console.
+            </p>
+            <h3 id="create-instance">Step 2c: Create a Server Instance</h3>
+            <p>
+                If you've followed the instructions so far, the EC2 dashboard should be presented and you should see an option
+                called "Lanuch Instance" in the "Create Instance" area of the dashboard. Select "Launch Instance" and you will
+                be prompted for the required information as shown in the steps below.
+            </p>
+            <ol>
+                <li>
+
+
+                    <b>Choose an Amazon Machine Image (AMI)</b>
+                    You will be presented with several operating system choices during this part of the process.
+
+                    You should choose the Ubuntu instance which is currently shown as "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type - ami-7c803d1c.
+
+                </li>
+                <li>
+
+
+                    <b>Choose an Instance Type</b>
+                    You will be presented with several hardware options during this part of the process.
+                    Select an instance type that makes sense for the amount of network traffic you
+                    expect to have.  Initially, you many choose to use the free tier just to establish your
+                    presence on the EdExchange network.  Later, you can change the instance type to something more
+                    appropriate.
+
+                </li>
+            </ol>
+            <h3 id="start-server">Step 2d: Start the Server</h3>
+            <p>
+                After you've selected the operating system and instance type, select select "Review and Launch".  Review the
+                information that's provided about the server instance and then select "Launch".
+
+                Once the server is started, you'll need some way to connect to the server so that you can provision the server
+                with the EdExchange software and start the network server.  AWS allows remote connections to the running server
+                by use of a public/private key pair.  At this point in the process, you
+                should be presented with an option to use an existing key pair (if you have already created one during a similar
+                process with a different server) or to create a new pair.
+            </p>
+            <p>
+                You may use an existing key pair if you already have one.  If you don't want
+                to using existing key pair or you don't have one, select "Create a new key pair" and
+                give it a name that makes sense, such as "EdExchange".
+
+                Select "Download key pair" and save it somewhere safe and where you can easily
+                access it. Note where you save it.  If you lose this file, you won't be able
+                to remotely access the server.
+            </p>
+            <p>
+                After you've downloaded your public/private key pair to your local system, select "Launch Instance".
+                You will be presented with a page that shows the name of the new EC2 instance. For example:
+
+            <pre>
+                Your instances are now launching.
+                The following instance launches have been initiated: i-0fe3dc9b47b98fb63
+            </pre>
+
+            Note the name of your new server instance, for example "i-0fe3dc9b47b98fb63" as shown above.  The
+            "i-0fe3dc9b47b98fb63" should be a link, that when selected, will present the status of the instance.
+
+            </p>
+            <p>
+                In the future, you can also find your running instances by selecting "Services/EC2" from the main AWS
+                dashboard and then selecting "Running instances"
+            </p>
+            <p>
+                Wait until the server instance is in the "Running" state before continuing to the next step.
+            </p>
+
+            <h3 id="assign-static-ip">Step 2e: Assign a Static IP Address</h3>
+            <p>
+                The purpose of this step is to allocate an static IP address that will not change whenever
+                the AWS server instance is restarted.  Without this step, the AWS server instance is not
+                guaranteed to have the same IP address if it's ever restarted.
+            </p>
+            <p>
+                From the EC2 Dashboard (where you can see your running server instance under "Instance" menu item), select the
+                "Elastic IPs" menu item and then select "Allocate new address" and then "Allocate".  You should be presented with
+                a dialog that shows the IP address, similar to the one here:
+            </p>
+            <img src="assets/images/elastic-ip.png" alt="Elastic IP dialog box." />
+            <p>Note the IP address and close the dialog.  Next, select the IP address you just created from the list of Elastic
+                IP Addresses and from the Actions dropdown, select "Associate address".  Using the dialog, associate the IP address
+            with your newly created server instance using the server name you noted earlier in the process. E.g. i-0fe3dc9b47b98fb63</p>
+
+            <img src="assets/images/associate-address.png" alt="Assocate IP address."/>
+
+
+            <h1 id="provision-server">Step 3: Provision the Server</h1>
+            <p>
+                In this section, you will provision the server with the latest EdExchange software---the reference
+                implementation of the network server.  This step includes downloading the software to the AWS server
+                instance and building the network server.
+            </p>
+            <h2 id="connect-to-server">Step 3a: Connect to the AWS Server</h2>
+            <p>
+                At this point in the process, you should have a running AWS server instance.  This section describes
+                how to remotely connect to the running server so that you can download and build the EdExchange Network
+                Server software.
+            </p>
+            <p>
+                The method you use to connect to the running server depends on what operating system you use on your
+                local host.  This is the same computer on which you saved your public/private key pair.  Amazon has
+                provided instructions for each operating system...
+            <table class="table">
+                <thead>
+                <th>Your Computer</th>
+                <th>How to Connect</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Linux</td>
+                    <td><a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html">Connecting to Your Linux Instance Using SSH</a></td>
+                </tr>
+                <tr>
+                    <td>Windows</td>
+                    <td><a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html">Connecting to Your Linux Instance from Windows Using PuTTY</a> </td>
+                </tr>
+                <tr>
+                    <td>All</td>
+                    <td>
+                        <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mindterm.html">Connecting to Your Linux Instance Using MindTerm</a>
+                    </td>
+                </tr>
+                </tbody>
+
+            </table>
+            </p>
+            <p>
+                The remainder of this section provides abbreviated instructions on how to connect to the server using SSH on Linux.  It assumes you used the suggested name "EdExchange" for your private key.
+                If you saved the private key using a different name, substitute "EdExchange" with whatever name you used.  If the instructions here don't work for you, consult the documentation
+                from Amazon in the table above.
+            </p>
+
+            <p>
+            <div class="ed-title">Step 1</div>
+            Using a terminal, change to the directory where you saved the private key you downloaded during the server creation process.  The file suffix should be ".pem".  If you used
+            the suggested name "EdExchange" for the private key, the file will be named "EdExchange.pem".
+            </p>
+            <p>
+            <div class="ed-title">Step 2</div>
+            Use the chmod command to make sure that your private key file isn't publicly viewable. For example, if the name of your private key file is EdExchange.pem, use the following command:
+            <div>
+                <kbd>$ chmod 400 EdExchange.pem</kbd>
+            </div>
+
+            </p>
+            <p>
+            <div class="ed-title">Step 3</div>
+            Obtain the public hostname of the running server.  You can get the public DNS for your instance using the Amazon
+            EC2 console (check the Public DNS (IPv4) column; if this column is hidden, choose the Show/Hide icon and select Public DNS (IPv4)). An example of a typical hostname
+            for a service instance in EC2 is ec2-52-32-59-26.us-west-2.compute.amazonaws.com
+            </p>
+            <p>
+            <div class="ed-title">Step 4</div>
+            <div>
+                Invoke SSH. If you saved the private key using the suggested file name "EdExchange", you can use the following command, using the public hostname of the running server:
+                <div>
+                    $ ssh -i EdExchange.pem ubuntu@ec2-52-32-59-26.us-west-2.compute.amazonaws.com</kbd>
+                </div>
+
+
+                <div>If the SSH command is successful, the first time you connect, you should see output similar to the following:
+                    <pre>
+                        The authenticity of host 'ec2-52-32-59-26.us-west-2.compute.amazonaws.com (52.32.59.26)' can't be established.
+                        ECDSA key fingerprint is a9:f9:a6:80:69:95:98:6c:d5:38:a1:dc:8b:79:2b:eb.
+                        Are you sure you want to continue connecting (yes/no)?
+                    </pre>
+                </div>
+                <div>You should respond with "yes".  If successful, you should now be logged into the server and the command prompt to should look similar to
+                    <div><kbd>ubuntu@ip-172-31-42-43:~$</kbd></div>
+
+                    Where the IP address with be the IP address of you server.
+                </div>
+
+            </div>
+            </p>
+
+            <h2 id="get-software">Step 3b: Get the Network Server Software</h2>
+
+
+            <div>Download the source code from Github with the following command:</div>
+            <div>
+                <kbd>$ git clone https://github.com/jhwhetstone/cdsWebserver.git</kbd>
+            </div>
+            <div>When the command completes, you will have a new directory called "cdsWebserver" (Common Data Services Web Server).
+                <div><kbd>$ cd cdsWebserver</kbd></div>
+            </div>
+
+            <h2 id="build-software">Step 3c: Build the Network Server Software</h2>
+
+            <div class="ed-title">Step 1: Install Maven</div>
+            <div>Maven is a software tool used to compile Java. Install it with the following command</div>
+            <div><kbd>$ sudo apt-get install maven</kbd></div>
+            <div>The command will indicate what packages will be installed and how much disk space is required and prompt
+                you to accept with a "Y".</div>
+            <div>When prompted with</div>
+            <div><kbd>Do you want to continue? [Y/n]</kbd></div>
+            <div>Respond by typing "Y".</div>
+            <div>When the installation is complete, invoke</div>
+            <div><kbd>mvn -v</kbd></div>
+            <div>The resulting output should look like the following:
+            <pre>
+Warning: JAVA_HOME environment variable is not set.
+Apache Maven 3.3.9
+Maven home: /usr/share/maven
+Java version: 1.8.0_121, vendor: Oracle Corporation
+Java home: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.4.0-59-generic", arch: "amd64", family: "unix"
+            </pre>
+                You'll notice the warning: <pre>Warning: JAVA_HOME environment variable is not set.</pre> This will
+                be addressed in the next step.
+            </div>
+            <div class="ed-title">Step 2: Install Oracle Java JDK</div>
+            <div><kbd>$ sudo add-apt-repository ppa:webupd8team/java</kbd></div>
+            <div><kbd>$ sudo apt-get update</kbd></div>
+            <div><kbd>$ sudo apt-get install oracle-java8-installer</kbd></div>
+            <div>When prompted, respond with "Y".  You will also be presented with the Oracle license agreement during this process
+                at which time you will be prompted to accept the terms of the license.</div>
+            <div>You may verify the Java installation with the following command:</div>
+            <div><kbd>$ java -version</kbd></div>
+            <p>
+                The output should be similar to the following:
+                <pre>
+                    java version "1.8.0_121"
+                    Java(TM) SE Runtime Environment (build 1.8.0_121-b13)
+                    Java HotSpot(TM) 64-Bit Server VM (build 25.121-b13, mixed mode)
+                </pre>
+            </p>
+
+            <div class="ed-title">Step 3: Compile the Software</div>
+            <div>Change to the cdsWebserver directory if you haven't already done so, and compile the software with maven:</div>
+            <div><kbd>mvn clean package</kbd></div>
+            <div>You should expect the software compiling process to take several minutes. When the command completes, you should see the following near the end of
+                the program output:
+                <div>
+                <pre>
+                     Reactor Summary:
+                    [INFO]
+                    [INFO] Directory Server ................................... SUCCESS [01:52 min]
+                    [INFO] pesc-sdk ........................................... SUCCESS [ 44.928 s]
+                    [INFO] network-server ..................................... SUCCESS [ 51.302 s]
+                    [INFO] PESC CDS EdExchange ................................ SUCCESS [  0.017 s]
+                    [INFO] ------------------------------------------------------------------------
+                    [INFO] BUILD SUCCESS
+                </pre>
+                </div>
+            </div>
+            <h2 id="create-database">Step 3d: Create the Database</h2>
+            <div>The recommended way to host a database for the EdExchange network server using Amazon is to use an Amazon RDS
+                (Relational Database Service) Postgres instance.  For the purpose of this guide though, you're going to
+                use a docker container that will run on the same host as the application server (the reference implementation
+                of the network server). In other words, the network server and the network server's database will both be
+                running on the same AWS server instance.  This is not the recommended way to configure the system in production.
+                Later, you can create an RDS instance and replace the docker container with
+                the RDS instance if you choose to use RDS.
+            </div>
+            <div class="ed-title">Step 1: Install docker</div>
+            <p>You should still be connected to your AWS server instance.  From the command prompt, run the following command:</p>
+            <p><kbd>$ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D</kbd></p>
+            <p>The output should be similar to the following:</p>
+        <pre>
+Executing: /tmp/tmp.DaSy8lV3dd/gpg.1.sh --keyserver
+hkp://p80.pool.sks-keyservers.net:80
+--recv-keys
+58118E89F3A912897C070ADBF76221572C52609D
+gpg: requesting key 2C52609D from hkp server p80.pool.sks-keyservers.net
+gpg: key 2C52609D: public key "Docker Release Tool (releasedocker) <docker@docker.com>" imported
+gpg: Total number processed: 1
+gpg:               imported: 1  (RSA: 1)
+
+        </pre>
+
+            <p>
+            <div><kbd>$ sudo apt-add-repository 'deb https://apt.dockerproject.org/repo ubuntu-xenial main'</kbd></div>
+            <div><kbd>$ sudo apt-get update</kbd></div>
+            <div><kbd>$ apt-cache policy docker-engine</kbd></div>
+            </p>
+
+            <p>You should see output similar to following:</p>
+        <pre>
+docker-engine:
+  Installed: (none)
+  Candidate: 1.13.0-0~ubuntu-xenial
+  Version table:
+     1.13.0-0~ubuntu-xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.12.6-0~ubuntu-xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.12.5-0~ubuntu-xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.12.4-0~ubuntu-xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.12.3-0~xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.12.2-0~xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.12.1-0~xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.12.0-0~xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.11.2-0~xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.11.1-0~xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+     1.11.0-0~xenial 500
+        500 https://apt.dockerproject.org/repo ubuntu-xenial/main amd64 Packages
+        </pre>
+            <p><kbd>$ sudo apt-get install -y docker-engine</kbd></p>
+            <p>Docker should now be installed. Verify the installation by checking if the docker daemon is running:</p>
+            <p><kdb>$ sudo systemctl status docker</kdb></p>
+            <p>The outpout should be similar to the following:</p>
+        <pre>
+docker.service - Docker Application Container Engine
+   Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+   Active: active (running) since Tue 2017-02-07 21:13:41 UTC; 1min 38s ago
+     Docs: https://docs.docker.com
+ Main PID: 2286 (dockerd)
+        </pre>
+            <div>Make the docker command usable by the the current user:</div>
+            <div><kbd>$ sudo usermod -aG docker $(whoami)</kbd></div>
+            <div>For the changes to take effect, you'll need to log out and reconnect:</div>
+            <div><kbd>$ exit</kbd></div>
+            <div>Now reconnect with  SSH (replace the hostname with your server's public hostname):</div>
+            <div><kbd>$ ssh -i EdExchange.pem ubuntu@ec2-52-32-59-26.us-west-2.compute.amazonaws.com</kbd></div>
+            <div>Verify the docker installation:</div>
+            <div><kbd>$ docker version</kbd></div>
+            <div>The output should be similar to the following:</div>
+        <pre>
+Client:
+ Version:      1.13.0
+ API version:  1.25
+ Go version:   go1.7.3
+ Git commit:   49bf474
+ Built:        Tue Jan 17 09:58:26 2017
+ OS/Arch:      linux/amd64
+
+Server:
+ Version:      1.13.0
+ API version:  1.25 (minimum version 1.12)
+ Go version:   go1.7.3
+ Git commit:   49bf474
+ Built:        Tue Jan 17 09:58:26 2017
+ OS/Arch:      linux/amd64
+ Experimental: false
+
+        </pre>
+            <div>Change to the /cdsWebserver/networkServer directory:</div>
+            <div><kbd>$ cd ~/cdsWebserver/networkServer/</kbd></div>
+            <div>Create the docker container for the Postgres database:</div>
+            <div><kbd>$ ./dev-setup.sh</kbd></div>
+            <div>When dev-setup.sh completed, you should see output similar to the following:</div>
+            <p>
+        <pre>
+OK - network-db is running. IP: 172.17.0.2, StartedAt: 2017-02-07T21:28:33.087848567Z
+You can start the network server app using the following command:
+java -Dspring.profiles.active=dev -Ddb.server=172.17.0.2 -jar ./target/network-server.jar
+or use your favorite IDE to develop and run
+        </pre>
+            </p>
+
+
+            <h1 id="associate-domain-name">Step 4: Associate a Domain Name with the AWS Server</h1>
+
+            <p>In this section, you will associate a domain name, through the Domain Name System (DNS), to a currently running EC2 instance.
+                You must be the legal owner of the domain name you
+                intend to use for the network server and have access to the registrar so that you can update the domain record
+                to point to the new AWS server instance.  The domain name is used in web browser's to locate a particular resource.
+                For example, a domain name "edex.phoenix.edu" would allow users
+                to access the EdExchange network server on the internet using https://edex.phoenix.edu.  The remainder of this
+                section provides instructions on how to configure the domain name to point to the new AWS server using
+                Amazon's Route 53 registrar.  In case you haven't registered a domain name yet, the first step covers the registration process.
+                If you choose to use Amazon's Route 53 registrar, you can check for domain name availablility on the
+                Route 53 dashboard.  You can optionally use any other registrar of your choice. For a list of accredited registrars,
+                go to the <a href="https://www.internic.net/alpha.html">Registrar Directory</a>. If you choose a different
+                registrar for your domain name, the steps to associate the domain name with the AWS server will be dependent
+                on the registrars process. You can optionally transfer the domain name from your registrar to Amazon's Route 53.
+                You can access the Route 53 dashboard by selecting "Services/Route 53" from the main AWS dashboard.
+
+                <!--The official Amazon documentation on this process can be found <a target="_blank" href="https://aws.amazon.com/getting-started/tutorials/get-a-domain/">here</a>.-->
+            </p>
+
+            <div class="ed-title">Register a Domain Name</div>
+
+            <p>
+                If you own a domain name registered through a registrar other than Amazon's Route 53, you'll have to follow the instructions specific
+                to the registrar for associating the domain name with your AWS server instance.  You can optionally choose to transfer the domain
+                name from your current registrar to Amazon's Route 53 registrar and continue following this guide. At a minimum, you will
+                need to <a href="#find-ip-address">get the IP address for the Amazon EC2 instance</a>.
+                This is the same IP address that was created in the <a href="#assign-static-ip">Assign a Static IP Address</a>.
+            </p>
+
+
+            <p>
+                If you don't own a domain name yet for use with EdExchange, you may purchase the domain name through Amazon's
+                domain name service, Route 53.
+            </p>
+            <p>
+                To use Route 53, make sure you are currently logged into Amazon and then click <a target="_blank" href="https://console.aws.amazon.com/route53/home?region=us-east-1#DomainListing:">here</a>
+                to open the Route 53 console in a new window (Route 53 is AWS’s DNS service).
+                You can register new domain names with Route 53 as well as manage DNS records for your domain.
+            </p>
+            <p>
+                Enter the desired domain name into the input box and select "Check".  If the domain is available, you
+                can add the domain name to your Amazon cart.  In the next step, fill out the required information and purchase the domain name.
+                Once you purchase the domain, it will take
+                a few minutes for the domain name to become active.  When it becomes active, you should receive an alert on the
+                Route 53 Dashboard that indicates the domain registration was successful.  You should also receive an email
+                with the same information, sent to the email address you provided during the domain name registration process.
+            </p>
+
+
+            <div class="ed-title" id="find-ip-address">Get the IP address for the Amazon EC2 instance</div>
+
+            <ol>
+                <li>Sign in to the AWS Management Console and open the Amazon EC2 console at <a class="ulink" href="https://console.aws.amazon.com/ec2/" target="_blank">https://console.aws.amazon.com/ec2/</a>.</li>
+                <li>In the regions list in the upper right corner of the console, choose the region that you launched the instance in.</li>
+                <li>In the navigation pane, choose <span>Instances</span>.</li>
+                <li>In the table, choose the instance that you want to route traffic to.</li>
+                <li>In the bottom pane, on the <span>Description</span> tab, get the value of <span>Elastic IPs</span>. If you didn't associate an Elastic IP with the instance, get the value of <span>Public IP</span>.</li>
+            </ol>
+
+            <div class="ed-title">Associate Domain Name</div>
+
+            <p>
+                The official Amazon documentation for associating your domain name with your running server instance can be
+                found <a href="http://docs.aws.amazon.com/gettingstarted/latest/swh/getting-started-configure-route53.html" target="_blank">here</a>.
+                The remainder of this section describes how to associate the IP address with your instance.
+            </p>
+
+
+            <ol>
+
+
+                <li>Open the Amazon Route&nbsp;53 console at <a href="https://console.aws.amazon.com/route53/" target="_blank">https://console.aws.amazon.com/route53/</a>. In the navigation pane, choose <span>Hosted Zones</span>.</li>
+                <li>Choose the name of the hosted zone for the domain name that you want to use to route traffic to your EC2 instance.</li>
+                <li>Choose <span>Create Record Set</span>.</li>
+                <li>Specify the following values:
+
+                    <dl style="padding: 10px 0 0 20px">
+                        <dt>
+                            <b><span>Name</span></b>
+                        </dt>
+                        <dd>
+
+                        Type the domain name that you want to use to route traffic to your EC2 instance. The default value is the name of the hosted zone. For example, if the name of the hosted zone is example.com and you want to use acme.example.com
+                        to route traffic to your EC2 instance, type <span>acme</span>.
+
+                        </dd>
+                        <dt>
+                            <b><span>Type</span></b>
+                        </dt>
+                        <dd>
+                            Choose <span>A – IPv4 address</span>.
+                        </dd>
+                        <dt>
+                            <b><span>Alias</span></b>
+                        </dt>
+                        <dd>
+                            Choose <span>No</span>.
+                        </dd>
+                        <dt>
+                            <b><span>TTL (Seconds)</span></b>
+                        </dt>
+                        <dd>
+                            Accept the default value of <span>300</span>.
+                        </dd>
+                        <dt>
+                            <b><span>Value</span></b>
+                        </dt>
+                        <dd>
+                            Type the IP address that you got in <a href="#find-ip-address">Get the IP address for the Amazon EC2 instance</a>.
+                        </dd>
+                        <dt>
+                            <b><span>Routing Policy</span></b>
+                        </dt>
+                        <dd>
+                            Accept the default value, <span>Simple</span>.
+                        </dd>
+                    </dl>
+                </li>
+
+                <li>
+
+                    Choose <span>Create</span>.
+
+
+                    Changes generally propagate to all Amazon Route&nbsp;53 servers in a couple of minutes.
+                    In rare circumstances, propagation
+                    can take up to 30 minutes. When propagation is done, you'll be able to route traffic to your EC2 instance
+                    by using the name of the resource record set that you created in this procedure.
+
+                </li>
+            </ol>
+
+
+
+            <h1 id="configure-server">Step 5: Configure the EdExchange Network Server</h1>
+            <div class="ed-title" id="open-ports">Open port 443 for the Amazon EC2 instance</div>
+
+            <ol>
+                <li>Sign in to the AWS Management Console and open the Amazon EC2 console at <a class="ulink" href="https://console.aws.amazon.com/ec2/" target="_blank">https://console.aws.amazon.com/ec2/</a>.</li>
+                <li>In the regions list in the upper right corner of the console, choose the region that you launched the instance in.</li>
+                <li>In the navigation pane, choose <span>Running Instances</span>.</li>
+                <li>In the table, choose the instance that you created for EdExchange.</li>
+                <li>In the bottom pane, on the <span>Description</span> tab, select/click the link for the security group next to <span>Security groups</span>.  The security group configuration options will be in the bottom pane.</li>
+                <li>Select the <span>Inbound</span> tab and then <span>Edit</span> and then <span>Add Rule</span> from the popup dialog.</li>
+                <li>Select <span>HTTPS</span> from the drop down list and then <span>Save</span></li>
+            </ol>
+
+            <h2 id="create-network-certificate">Step 5a: Create an SSL Certificate for the Network Server</h2>
+            <p>
+                In this section, you'll be using the letsencrypt client to create an SSL certicate that will be used to secure HTTPS traffic for your
+                EdExchange network server.  If you already have an SSL certificate for your domain, or you wish to purchase one through a certificate authority,
+                you may skip this section.  To begin, make sure you're logged into the AWS server instance.  From the command line, invoke the following commands:
+            </p>
+            <p>
+                <div><kbd>$ sudo apt-get update</kbd></div>
+                <div><kbd>$ apt-get install letsencrypt</kbd></div>
+            </p>
+            <p>
+                The letsencrypt client should now be ready to use.
+            </p>
+            <p>
+                Next, run letsencrypt and pass in your domain name, and an email address.  If you lose your account credentials, you can recover through
+                e-mails sent to the provided email address.  In the example command below, the domain name is "www.example.com"
+            </p>
+            <p>
+                <kbd>$ sudo letsencrypt -d www.example.com --email jwhetstone@ccctechcenter.org</kbd>
+            </p>
+            <p>In the dialog that is presented, select <span>Secure  Make all requests redirect to secure HTTPS access.</span> and then <span>OK</span>.</p>
+
+            <p>
+                Upon completion, you should be presented with a popup dialog similar to the one below:
+                <div>
+                    <img src="assets/images/letsencrypt-success.png" alt="Successful letsencrypt dialog."/>
+                </div>
+
+                Select <span>OK</span>.
+            </p>
+            <p>You should see output from letsencrypt similar to the following:</p>
+            <p>
+                <pre>
+IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at
+   /etc/letsencrypt/live/www.example.com/fullchain.pem. Your cert
+   will expire on 2017-05-10. To obtain a new version of the
+   certificate in the future, simply run Let's Encrypt again.
+ - If you like Let's Encrypt, please consider supporting our work by:
+
+   Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+   Donating to EFF:                    https://eff.org/donate-le
+
+        </pre>
+            </p>
+            <div class="ed-title">Create a Keystore Usable by the EdExchange Network Server</div>
+            <p>Invoke the commands below and when prompted, input a password.  Note the password you use for future use.  When the command completes, a new file <span>keystore.p12</span> will
+            exist in the current directory.  Note that in the example command below, you'll need to replace "www.example.com" with your actual domain name.</p>
+            <p>
+                <div><kbd>$ cd ~</kbd></div>
+                <div><kbd>$  sudo openssl pkcs12 -export -in /etc/letsencrypt/live/www.example.com/fullchain.pem -inkey /etc/letsencrypt/live/www.example.com/privkey.pem -out keystore.p12</kbd></div>
+            </p>
+
+
+            <h2 id="create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents</h2>
+            <p>
+
+            </p>
+            <p>
+                <div><kbd>$ sudo sed -i 's/#keyUsage/keyUsage/g' /etc/ssl/openssl.cnf</kbd></div>
+                <div><kbd>$ openssl req -x509 -newkey rsa:2048 -keyout signing_key.pem -out signing_certificate.pem -days 3650 -extensions v3_req</kbd></div>
+                <div><kbd>$ openssl pkcs12 -export -in signing_certificate.pem -inkey signing_key.pem -out temp.p12 -name EdExchange</kbd></div>
+                <div><kbd>$ keytool -importkeystore -destkeystore keystore.jks -srckeystore temp.p12 -srcstoretype pkcs12 -alias EdExchange</kbd></div>
+            </p>
+
+
+            <h2 id="upload-network-certificate">Step 5c: Upload the Network Server SSL Certificate</h2>
+            <p>One of the requirements to receive documents throught the EdExchange network, is that the EdExchange directory server must have the network servers SSL certificate.  The directory server
+            uses the certificate to verify that endpoint URLs are hosted by the server specified in the SSL certificate.  So in the step, you will be uploading your PEM encoded network certificate to the
+            directory server.</p>
+            <ol>
+                <li>From the /home/ubuntu directory of your AWS server instance, extract the PEM encoded certificate from the keystore created earlier:
+                    <p>
+                        <kbd>$ openssl pkcs12 -in keystore.p12 -clcerts -nokeys -out network_certificate.pem</kbd>
+                    </p>
+                </li>
+                <li>Open a web browser on your computer and login to the directory server at https:/edex-directory-open-pilot.ccctechcenter.org and select "My Organization" from the menu.</li>
+                <li>
+                    Copy and paste the contents of the network_certificate.pem (found in /home/ubuntu on the AWS server instance) to the "Network Certificate" input field in the "My Organizatation" page of the
+                    directory server application.
+                    <ol>
+                        <li>From the /home/ubuntu directory of the AWS server instance: <p><kbd>$ cat network_certificate.pem</kbd></p></li>
+                        <li>
+                            The output should be similar to following which you should cut and paste into the "Network Certificate" field including the ----BEGIN CERTIFICATE---- and ----END CERTIFICATE-----:
+                            <pre>
+-----BEGIN CERTIFICATE-----
+MIIFDDCCA/SgAwIBAgISA6JlLdJYmZ9++zUxaKBjyKdfMA0GCSqGSIb3DQEBCwUA
+MEoxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MSMwIQYDVQQD
+ExpMZXQncyBFbmNyeXB0IEF1dGhvcml0eSBYMzAeFw0xNzAyMDkwMjA0MDBaFw0x
+NzA1MTAwMjA0MDBaMB8xHTAbBgNVBAMTFHd3dy5pbmZpbmlzaW50aGUuY29tMIIB
+IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArEBKo0jsHvA96TKhJdkosVbn
+NQ1oZl3OX32geI7ooDVL6y+NmlMHwTJCB8Dd/hF/9DHTTBn0D+macfbT1RAtbVts
+1l583pdS4ido5G8cP4escnXdllCm0OmsgJA98nPDBl6uJAb4Og51Fnz6fMe9YZst
+x8QX/SlRiDQ9IjrPN1JL3l5lbwA23Vunu9E+mC3nuAV4fWNhoCK5pgBqlPaKnz+S
+g+h14iJuygkuSq6KA/onZX8I8J6PX8iZ0ItXUti15RuakIKNRCzToA/d5ovpXRmg
+WHNmOkVaUr2baCwQ6xStPCBt1T3Sfq2N3iaf55lU4sThw8dj6t6Kz3h/JOR0JwID
+AQABo4ICFTCCAhEwDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMB
+BggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBSJruVS5/bY3JsOD4Of
+3zvXsX6n9TAfBgNVHSMEGDAWgBSoSmpjBH3duubRObemRWXv86jsoTBwBggrBgEF
+BQcBAQRkMGIwLwYIKwYBBQUHMAGGI2h0dHA6Ly9vY3NwLmludC14My5sZXRzZW5j
+cnlwdC5vcmcvMC8GCCsGAQUFBzAChiNodHRwOi8vY2VydC5pbnQteDMubGV0c2Vu
+Y3J5cHQub3JnLzAfBgNVHREEGDAWghR3d3cuaW5maW5pc2ludGhlLmNvbTCB/gYD
+VR0gBIH2MIHzMAgGBmeBDAECATCB5gYLKwYBBAGC3xMBAQEwgdYwJgYIKwYBBQUH
+AgEWGmh0dHA6Ly9jcHMubGV0c2VuY3J5cHQub3JnMIGrBggrBgEFBQcCAjCBngyB
+m1RoaXMgQ2VydGlmaWNhdGUgbWF5IG9ubHkgYmUgcmVsaWVkIHVwb24gYnkgUmVs
+eWluZyBQYXJ0aWVzIGFuZCBvbmx5IGluIGFjY29yZGFuY2Ugd2l0aCB0aGUgQ2Vy
+dGlmaWNhdGUgUG9saWN5IGZvdW5kIGF0IGh0dHBzOi8vbGV0c2VuY3J5cHQub3Jn
+L3JlcG9zaXRvcnkvMA0GCSqGSIb3DQEBCwUAA4IBAQCNQoPxmWCTIi0u2qnSBEbr
+yFgYaynmPrXB+g0bRCVRrAXPgic8VliS5cYOXSK454Rm060HWPtn8jmnki3RGwLc
+sQrqMTmRU/wW0pWoMxUArbHbqscyFYQIOiLhrrvwej6wSARidif1Iz1RplnGe/+F
+yPyQKczPTah1UQhozt9aXI+u6JD5MMBYJWIYHQYqL4ZZnyYKrx97BNfsJhiuC9tc
+cPUNMwgESu4PU+3M9n3mwq0poGHmhXuH0v6aY9tJKTO1xIupHaPjTz5GlqEF2+Vc
+uOsK1KC+somcZPjBg3T9Nnf6esa6AXAb5GfjXujHim+SM3TaAwEr/JNMW2wc9J7M
+-----END CERTIFICATE-----
+                            </pre>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+
+            <h2 id="upload-signing-certificate">Step 5d: Upload the Signing Certificate</h2>
+            <p>One of the requirements to receive documents throught the EdExchange network, is that the EdExchange directory server must have the SSL certificate used to verify the digital signature of a received document.
+                When a network server receives a document from a member, the signing certificate is retrieved from the directory server and the digital sigature is verified using the public key portion of the certificate.
+                </p>
+            <ol>
+                <li>Open a web browser on your computer and login to the directory server at https:/edex-directory-open-pilot.ccctechcenter.org and select "My Organization" from the menu.</li>
+                <li>
+                    Copy and paste the contents of the signing_certificate.pem (found in /home/ubuntu on the AWS server instance) to the "Signing Certificate" input field in the "My Organizatation" page of the
+                    directory server application.
+                    <ol>
+                        <li>From the /home/ubuntu directory of the AWS server instance: <p><kbd>$ cat signing_certificate.pem</kbd></p></li>
+                        <li>
+                            The output should be similar to following which you should cut and paste into the "Signing Certificate" field including the ----BEGIN CERTIFICATE---- and ----END CERTIFICATE-----:
+                            <pre>
+-----BEGIN CERTIFICATE-----
+MIIENzCCAx+gAwIBAgIJAIxcHY01lbEuMA0GCSqGSIb3DQEBCwUAMIGxMQswCQYD
+VQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTETMBEGA1UEBwwKU2FjcmFtZW50
+bzEcMBoGA1UECgwTRGF0YSBieSBUb3VjaCwgSW5jLjETMBEGA1UECwwKRWRFeGNo
+YW5nZTEYMBYGA1UEAwwPSmFtZXMgV2hldHN0b25lMSswKQYJKoZIhvcNAQkBFhxq
+d2hldHN0b25lQGNjY3RlY2hjZW50ZXIub3JnMB4XDTE3MDIwOTE2NTU1NVoXDTI3
+MDIwNzE2NTU1NVowgbExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlh
+MRMwEQYDVQQHDApTYWNyYW1lbnRvMRwwGgYDVQQKDBNEYXRhIGJ5IFRvdWNoLCBJ
+bmMuMRMwEQYDVQQLDApFZEV4Y2hhbmdlMRgwFgYDVQQDDA9KYW1lcyBXaGV0c3Rv
+bmUxKzApBgkqhkiG9w0BCQEWHGp3aGV0c3RvbmVAY2NjdGVjaGNlbnRlci5vcmcw
+ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDOncxgFiM8mqDqtwgg5dan
+VOnOlCDbHYHNryFtKUeMkwK2wk0SBKAJBneltOUr+Te3lXxaqP6pLJenAMhufwar
+PFEb3POB+wZGBO4x+gzB6u0dHXe+R9gk1Pj+Bfro8da0S4StmgN+BkPbxSwDRYf1
+10AD1viH6ozWmEMcf3KMTIYMjZq1GbmRrigl+UvAvkkHbMgeKSKMObXRL20lpniR
+kpyKNEWJalMwlL64obP6FfqgqOqsxNCCiva2cRrEYQS7I5N78QcJga7oDSsMjlRf
+8SqkeOJU0T3Pk/IwDIGVu5tFFHLyplb3OY6Pxjk71jMekNA/3QCk4TDjHUa3N/7H
+AgMBAAGjUDBOMB0GA1UdDgQWBBQHLyuqZ8Aw2KNEWIxSlpCmn5uerTAfBgNVHSME
+GDAWgBQHLyuqZ8Aw2KNEWIxSlpCmn5uerTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3
+DQEBCwUAA4IBAQAFxRyUNBAdFxI76sg0OLOgg41NrQsH6wqZ7Y4j4FrDeNEiOy0R
+lTj14+fXz3qIxv3NUTmIsNMW+Y3rmbLZLQzdRstd4rsucz1hPM85HYU/h8Sl8TAh
+9oKUjDgbNvmmDcQKCs1VaPWVFz36HXPLnOzrJwgrSMdBxa0Rd3U1h1J2P2d9NTYB
+4wcBLyXb4tnJzWZVxIuoOqS2wEJgR17pekpNwzvHV8aae3deDqrGFEgoQrbKtGI6
+4KHN+GaZccfSPWobmj6lOrzs23vzsZLBgjx+bqWK4k2nOSB7OuDlTsZz2/Gj37uJ
+UefzAZM0VN/hj/4DZUwELgqNxDHlSeKKEOyc
+-----END CERTIFICATE-----
+                            </pre>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+
+            <h2 id="create-oauth-secret">Step 5e: Set the OAuth Secret</h2>
+            <p>OAuth 2.0 is used by the reference implementation of the network server to authenticate and authorize HTTP
+            requests related to document upload and acknowledgements.  This section describes how to configure OAuth 2.0</p>
+            <ol>
+                <li>Open a web browser on your computer and login to the directory server at https:/edex-directory-open-pilot.ccctechcenter.org and select "My Organization" from the menu.</li>
+                <li>In the section titled "OAUTH", select/click the pencil icon.</li>
+                <li>In the "Secret" field, enter a passphrase.  Note the passphrase and keep it secure.  You will need to
+                    provide this passphrase to your network server as one of the configuration parameters when start the network server on your AWS instance.</li>
+
+             </ol>
+
+            <h2 id="create-college-transcript-endpoint">Step 5f: Define an Endpoint for Handling PESC College Transcripts.</h2>
+            <p>By default, the reference implementation of the network server accepts documents at /api/v1/documents/inbox. If your server name
+                is www.example.com, then your fully qualified endpoint URL would be https://www.example.com/api/v1/documents/inbox.  To make
+                this endpoint discoverable by entities that wish to send you a document, you must add the URL  to your list of endpoints on the directory server. This
+                section describes how to add the necesssary endpoint to the directory server so you can receive a PESC college transcripts.
+            </p>
+            <ol>
+                <li>Open a web browser on your computer and login to the directory server at https:/edex-directory-open-pilot.ccctechcenter.org and select "My Organization" from the menu.</li>
+                <li>In the section titled "Endpoints", select/click the "plus" icon. This should present a web form for inputing information about the endpoint.</li>
+                <li>Fill in the entire web form:
+                    <ol>
+                        <li>The URL: the server/domain name must match the domain name contained in the network certificate you uploaded earlier in the process.  This
+                        will be automatically populated. if your domain name is "www.example.com", then the URL should be "https://www.example.com/api/v1/documents/inbox".</li>
+                        <li>A description of the endpoint. E.g.  "PESC College Transcripts" </li>
+                        <li>Document Format:  choose "PESCCML" from the list.</li>
+                        <li>Document Types: choose "College Transcript" from the list.</li>
+                        <li>Departments: choose "Administration" from the list.</li>
+                        <li>Mode: choose "LIVE" from the list.</li>
+                    </ol>
+
+                </li>
+            </ol>
+
+            <h2 id="start-network-server">Step 6: Start the EdExchange Network Server</h2>
+            <p>This section describes how to start the network server hosted on your AWS ubuntu instance.</p>
+
+            <ol>
+                <li><a href="#connect-to-server">Connect to your AWS server instance.</a></li>
+                <li>Verify that you have the following files in the /home/ubuntu (the current users's home directory) directory after you're logged in to the AWS server:
+                    <ul style="margin-left: 60px;">
+                        <li>
+                            <b>keystore.p12</b> You should have created the keystore in <a href="#create-network-certificate">Step 5a: Create an SSL Certificate for the Network Server</a>
+                        </li>
+                        <li>
+                            <b>keystore.jks</b> You should have created the keystore in <a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents.</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>Verify that you have a directory "cdsWebserver" in the /home/ubuntu (the current user's home directory) directory.  This is the GIT repository and location of the
+                network server software that was built in <a href="#get-software">Step 3b: Get the Network Server Software</a></li>
+                <li>Verify that ./cdsWebserver/networkServer/target/network-server.jar exists.  This is the compiled network server software that you should have build in
+                    <a href="#build-software">Step 3c: Build the Network Server Software</a></li>
+                <li>Create a shell script to start the network server (you can optionally update the appropriate application.properties profile in the source code and rebuild your application):
+                    <ol>
+                        <li><kbd>nano start-network-server.sh</kbd></li>
+                        <li>Copy and paste the following code into the editor, after providing the properites, providing missing values for the following properties:
+
+                            <ul style="margin-left:20px;">
+                                <li><b>networkServer.id</b> : <span>This is your organization's EdExchange directory ID. Obtain it from the directory server.</span></li>
+                                <li><b>networkServer.name</b> : <span>This is your organization's name. It should be the same as what's on the directory server.</span></li>
+                                <li><b>networkServer.keystore.password</b> : This is the password you used in <a href="#create-signing-certificate">Step 5b: Create an SSL Certificate for Signing Documents</a></li>
+                                <li><b>networkServer.admin.username</b> : This is the username of the super user account that is used to sign into the network server.  Make sure to select a unpredictable username.</li>
+                                <li><b>networkServer.admin.password</b> : This is the password of the super user account that is used to sign into the network server.  Make sure this is a highly secure password.</li>
+                                <li><b>server.ssl.key-store-password</b> : This is the password you used in <a href="#create-network-certificate">Step 5a: Create an SSL Certificate for the Network Server</a></li>
+                                <li><b>authentication.oauth.secret</b> : This is the OAuth 2.0 secrete you used in <a href="#create-oauth-secret">Step 5e: Set the OAuth Secret</a></li>
+                            </ul>
+
+                            <pre>
+                                <code>
+#!/bin/bash
+
+docker start network-db
+
+/home/ubuntu/cdsWebserver/networkServer/target/network-server.jar \
+--spring.profiles.active=pilot \
+--logging.file="/home/ubuntu/network-server.log" \
+--db.server=172.17.0.2 \
+--networkServer.id= \
+--networkServer.name= \
+--networkServer.keystore=/home/ubuntu/keystore.jks \
+--networkServer.keystore.password= \
+--networkServer.keystore.signing_key_alias=EdExchange \
+--networkServer.file.path=/home/ubuntu/documents \
+--networkServer.admin.username= \
+--networkServer.admin.password= \
+--server.ssl.key-store=/home/ubuntu/keystore.p12 \
+--server.ssl.key-store-password=  \
+--authentication.oauth.secret= \
+                                </code>
+
+                            </pre>
+                        </li>
+                        <li>Close the editor and save the changes. (Ctrl-X) then type 'Y' when prompted.</li>
+                        <li><kbd>chmod +x start-network-server.sh</kbd></li>
+                        <li><kbd>sudo chown ubuntu:ubuntu keystore.p12</kbd></li>
+                        <li><kbd>mkdir documents</kbd> This is where documents will be saved.</li>
+                        <li><kbd>sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 9000</kbd></li>
+                        <li><kbd>sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 9443</kbd></li>
+                        <li><kbd>sudo apt-get install iptables-persistent</kbd> Respond with "Y" to question prompts.  This step makes it so the iptables are persisted across reboots.</li>
+
+                        <li><kbd>sudo nano /etc/systemd/system/edexchange.service</kbd></li>
+                        <li>Copy and paste the following into the editor.
+                        <pre>
+                            <code>
+[Unit]
+Description = Start the EdExchange network server
+After = network.target
+[Service]
+ExecStart = /home/ubuntu/start-network-server.sh
+[Install]
+WantedBy = multi-user.target
+                            </code>
+                        </pre>
+                        </li>
+                        <li>Close the editor and save the changes. (Ctrl-X) then type 'Y' when prompted.</li>
+                        <li><kbd>sudo chmod 644 /etc/systemd/system/edexchange.service</kbd></li>
+                        <li><kbd>sudo  systemctl enable connection.service</kbd></li>
+                        <li><kbd>sudo service edexchange start</kbd></li>
+
+                    </ol>
+                </li>
+            </ol>
+            <p>The network server should now be running.  You may test it by opening a browser and navigating to your domain name. E.g. https://www.example.com, where you shoud be presented
+            with the default home page.  If for some reason, the home page does not load, you should take a look at the server log, located at /home/ubuntu/network-server.log for any errors
+            that may have occurred.</p>
+
+
+            <h2 id="request-transcript">Step 7: Request a Transcript</h2>
+
+            <p>This section describes how to request a transcript for a test student named "John Doe" from Butte College.  All of the student identifying information is test data,
+                and the generated transcript is test data.
+            </p>
+            <p>
+                Upon completion of this section, you will have sent a PESC transcript request document to Butte College through the CCC Tech Center, which is the service provider
+                for Butte College.  In response, a PESC college transcript for the test student will be sent back, and you will have the opportunity to
+                view the transcript and information about the transaction.
+            </p>
+
+            <ol>
+                <li>Sign into your network server using the admin username and password you configured in <a href="#start-network-server">Step 6: Start the EdExchange Network Server</a></li>
+                <li>Select "Request Transcript" from the top level menu.</li>
+                <li>Fill in all of the form fields as follows:</li>
+            </ol>
+
+            <div class="well">
+                <div>
+                    <b>Record Holding Institution(s)</b> :
+                            <span>Select/click the plus symbol icon next to the field name.
+                                In the web form that is presented, enter 008073 in the code field and select
+                                the FICE code type from the list.   This is the FICE code that identifies Butte College
+                                which is the institution to which the transcript request is being sent.
+                            </span>
+                </div>
+                <div>
+                    <b>Requesting Institution(s)</b> :
+                             <span>Select/click the plus symbol icon next to the field name.
+                                In the web form that is presented, select the code type from the
+                                list and then the code that identifies an institution. TODO: add ability
+                                 to use "MutuallDefined" and the directory ID of the service provider.
+                            </span>
+                </div>
+                <div>
+                    <b>File format</b> : <span>PESCXML</span>
+                </div>
+                <div>
+                    <b>Student Release Authorized Indicator</b> : <span>Put a check in the checkbox.</span>
+                </div>
+                <div>
+                    <b>Student Release Authorized Method</b> :
+                            <span>Select SIGNATURE from the list, but in this test
+                                  case, any method could be selected.
+                            </span>
+                </div>
+
+                <div>
+                    <b>Student Date of Birth</b> : <span>Enter the birth date of the student as '01/01/1995'.</span>
+                </div>
+
+                <div>
+                    <b>Student First Name</b> : <span>Enter 'John'.</span>
+                </div>
+
+                <div>
+                    <b>Student Middle Name</b> : <span>Leave the middle name blank.</span>
+                </div>
+
+                <div>
+                    <b>Student Last Name</b> : <span>Enter 'Doe'.</span>
+                </div>
+
+                <div>
+                    <b>Student Email</b> : <span>Enter 'john.doe@edexchange.org'.</span>
+                </div>
+
+                <div>
+                    <b>Student Last 4 SSN</b> : <span>Enter '0000'</span>
+                </div>
+
+                <div>
+                    <b>Mode</b> : <span>TEST</span>
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+
+</div>
+</body>
+</html>
